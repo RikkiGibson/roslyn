@@ -2137,8 +2137,47 @@ class C
                 Diagnostic(ErrorCode.ERR_UseDefViolation, "x").WithArguments("x").WithLocation(16, 15));
         }
 
-        // TODO: add tests where cond accesses assign in method arguments.
-        // e.g. if (c1?.M(x = 1) ?? false) { x.ToString(); }
+        [Fact]
+        public void CondAccess_NullCoalescing_04()
+        {
+            var source = @"
+class C
+{
+    void M1(C c1)
+    {
+        int x;
+        _ = c1?.M(x = 0) ?? true
+            ? x.ToString() // 1
+            : x.ToString();
+    }
+
+    void M2(C c1)
+    {
+        int x;
+        _ = c1?.M(x = 0) ?? true
+            ? x.ToString() // 2
+            : x.ToString();
+    }
+
+    void M2(C c1)
+    {
+        int x;
+        _ = c1?.M(0) ?? true
+            ? x.ToString() // 3
+            : x.ToString(); // 4
+    }
+
+    bool M(object obj) { return true; }
+}
+";
+            CreateCompilation(source).VerifyDiagnostics(
+                // (8,15): error CS0165: Use of unassigned local variable 'x'
+                //             ? x.ToString() // 1
+                Diagnostic(ErrorCode.ERR_UseDefViolation, "x").WithArguments("x").WithLocation(8, 15),
+                // (16,15): error CS0165: Use of unassigned local variable 'x'
+                //             ? x.ToString() // 2
+                Diagnostic(ErrorCode.ERR_UseDefViolation, "x").WithArguments("x").WithLocation(16, 15));
+        }
 
         [WorkItem(529603, "http://vstfdevdiv:8080/DevDiv2/DevDiv/_workitems/edit/529603")]
         [Theory]

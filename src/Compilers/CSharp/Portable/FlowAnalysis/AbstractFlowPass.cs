@@ -2455,44 +2455,17 @@ namespace Microsoft.CodeAnalysis.CSharp
             return null;
         }
 
-        private void VisitConditionalAccess(BoundConditionalAccess node, out TLocalState stateWhenNotNull)
-        {
-            VisitRvalue(node.Receiver);
-            var savedState = this.State.Clone();
-
-            // We want to preserve state from visiting the "WhenNotNull" of accesses in the same "chain":
-            // a?.b[1].c?[0];
-            // but not accesses within nested expressions:
-            // a?.b(c?.d)
-
-            // TODO: this change breaks "extract method" baselines. Need to add a test to the public data flow APIs.
-            // Perhaps we are not correctly propagating out the set of used variables.
-            // https://github.com/dotnet/roslyn/blob/ef47b52d3a5147a3ad43f3c07a68cc0fad13e189/src/EditorFeatures/CSharpTest/CodeActions/ExtractMethod/ExtractLocalFunctionTests.cs#L2304
-            BoundExpression cursor = node.AccessExpression;
-            while (cursor is BoundConditionalAccess innerCondAccess)
-            {
-                // we assume that non-conditional accesses can never contain conditional accesses within a "chain".
-                // that is, we never have to dig through non-conditional accesses to find and handle conditional accesses.
-                VisitRvalue(innerCondAccess.Receiver);
-                cursor = innerCondAccess.AccessExpression;
-            }
-
-            Debug.Assert(cursor is BoundExpression);
-            VisitRvalue(cursor);
-
-            stateWhenNotNull = State;
-            State = savedState;
-            Join(ref State, ref stateWhenNotNull);
-        }
-
         public override BoundNode VisitNullCoalescingOperator(BoundNullCoalescingOperator node)
         {
-            var leftIsConditionalAccess = node.LeftOperand is BoundConditionalAccess;
-            if (node.LeftOperand is BoundConditionalAccess conditionalAccess)
+            var left = node.LeftOperand;
+            if (left is BoundConditionalAccess)
             {
-                Debug.Assert(conditionalAccess.ConstantValue is null);
-                VisitConditionalAccess(conditionalAccess, out var stateWhenNotNull);
+                Debug.Assert(left.ConstantValue is null);
+                VisitRvalue(left);
+                var stateWhenNotNull = StateWhenNotNull;
                 Visit(node.RightOperand);
+                // note that when we're *not* in a conditional state, we don't need to do this join,
+                // because 'VisitConditionalAccess' already joins the StateWhenNotNull into the "after receiver" state.
                 if (IsConditionalState)
                 {
                     Join(ref StateWhenTrue, ref stateWhenNotNull);
@@ -2501,24 +2474,29 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
             else
             {
-                VisitRvalue(node.LeftOperand);
-                if (IsConstantNull(node.LeftOperand))
+                VisitRvalue(left);
+                if (IsConstantNull(left))
                 {
                     VisitRvalue(node.RightOperand);
                 }
                 else
                 {
                     var savedState = this.State.Clone();
-                    if (node.LeftOperand.ConstantValue != null)
+                    if (left.ConstantValue != null)
                     {
                         SetUnreachable();
                     }
-                    Visit(node.RightOperand);
+                    VisitRvalue(node.RightOperand);
                     Join(ref this.State, ref savedState);
                 }
             }
             return null;
         }
+
+        /// <summary>
+        /// The state after a conditional access, if the conditional access's return value is non-null.
+        /// </summary>
+        private TLocalState StateWhenNotNull;
 
         public override BoundNode VisitConditionalAccess(BoundConditionalAccess node)
         {
@@ -2536,8 +2514,25 @@ namespace Microsoft.CodeAnalysis.CSharp
                     SetUnreachable();
                 }
 
-                VisitRvalue(node.AccessExpression);
-                Join(ref this.State, ref savedState);
+                // We want to preserve conditional state from visiting the "WhenNotNull" of accesses in the same "chain":
+                // a?.b[1].c?[0];
+                // but not accesses in nested expressions:
+                // a?.b(c?.d);
+                BoundExpression cursor = node.AccessExpression;
+                while (cursor is BoundConditionalAccess innerCondAccess)
+                {
+                    // we assume that non-conditional accesses can never contain conditional accesses within the same "chain".
+                    // that is, we never have to dig through non-conditional accesses to find and handle conditional accesses.
+                    VisitRvalue(innerCondAccess.Receiver);
+                    cursor = innerCondAccess.AccessExpression;
+                }
+
+                Debug.Assert(cursor is BoundExpression);
+                VisitRvalue(cursor);
+
+                StateWhenNotNull = State;
+                State = savedState;
+                Join(ref State, ref StateWhenNotNull);
             }
             return null;
         }
