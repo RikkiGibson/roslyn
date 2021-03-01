@@ -108,6 +108,11 @@ namespace Microsoft.CodeAnalysis.CSharp
         protected bool IsConditionalState;
 
         /// <summary>
+        /// The state after a conditional access when the conditional access's value is non-null.
+        /// </summary>
+        protected TLocalState StateWhenNotNull;
+
+        /// <summary>
         /// Indicates that the transfer function for a particular node (the function mapping the
         /// state before the node to the state after the node) is not monotonic, in the sense that
         /// it can change the state in either direction in the lattice. If the transfer function is
@@ -2457,46 +2462,33 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         public override BoundNode VisitNullCoalescingOperator(BoundNullCoalescingOperator node)
         {
-            var left = node.LeftOperand;
-            if (left is BoundConditionalAccess)
+            VisitRvalue(node.LeftOperand);
+            if (IsConstantNull(node.LeftOperand))
             {
-                Debug.Assert(left.ConstantValue is null);
-                VisitRvalue(left);
-                var stateWhenNotNull = StateWhenNotNull;
                 Visit(node.RightOperand);
-                // note that when we're *not* in a conditional state, we don't need to do this join,
-                // because 'VisitConditionalAccess' already joins the StateWhenNotNull into the "after receiver" state.
-                if (IsConditionalState)
-                {
-                    Join(ref StateWhenTrue, ref stateWhenNotNull);
-                    Join(ref StateWhenFalse, ref stateWhenNotNull);
-                }
             }
             else
             {
-                VisitRvalue(left);
-                if (IsConstantNull(left))
+                var savedState = node.LeftOperand is BoundConditionalAccess
+                    ? StateWhenNotNull
+                    : State.Clone();
+                if (node.LeftOperand.ConstantValue != null)
                 {
-                    VisitRvalue(node.RightOperand);
+                    SetUnreachable();
+                }
+                Visit(node.RightOperand);
+                if (IsConditionalState)
+                {
+                    Join(ref StateWhenTrue, ref savedState);
+                    Join(ref StateWhenFalse, ref savedState);
                 }
                 else
                 {
-                    var savedState = this.State.Clone();
-                    if (left.ConstantValue != null)
-                    {
-                        SetUnreachable();
-                    }
-                    VisitRvalue(node.RightOperand);
                     Join(ref this.State, ref savedState);
                 }
             }
             return null;
         }
-
-        /// <summary>
-        /// The state after a conditional access, if the conditional access's return value is non-null.
-        /// </summary>
-        private TLocalState StateWhenNotNull;
 
         public override BoundNode VisitConditionalAccess(BoundConditionalAccess node)
         {
