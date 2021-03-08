@@ -2261,19 +2261,57 @@ namespace Microsoft.CodeAnalysis.CSharp
         protected virtual void VisitBinaryOperatorChildren(ArrayBuilder<BoundBinaryOperator> stack)
         {
             var binary = stack.Pop();
-            VisitRvalue(binary.Left);
+            Visit(binary.Left);
 
             while (true)
             {
-                VisitRvalue(binary.Right);
+                if (!learnFromBooleanConstantTest())
+                {
+                    Unsplit();
+                    Visit(binary.Right);
+                }
 
                 if (stack.Count == 0)
                 {
                     break;
                 }
 
-                Unsplit(); // VisitRvalue does this
                 binary = stack.Pop();
+            }
+
+            bool learnFromBooleanConstantTest()
+            {
+                if (IsConditionalState && binary.OperatorKind is var op and (BinaryOperatorKind.BoolEqual or BinaryOperatorKind.BoolNotEqual))
+                {
+                    bool sense;
+                    if (binary.Right.ConstantValue?.IsBoolean == true)
+                    {
+                        var (stateWhenTrue, stateWhenFalse) = (StateWhenTrue.Clone(), StateWhenFalse.Clone());
+                        Unsplit();
+                        VisitRvalue(binary.Right);
+                        SetConditionalState(stateWhenTrue, stateWhenFalse);
+                        sense = (op == BinaryOperatorKind.BoolEqual) == binary.Right.ConstantValue.BooleanValue;
+                    }
+                    else if (binary.Left.ConstantValue?.IsBoolean == true)
+                    {
+                        Unsplit();
+                        Visit(binary.Right);
+                        sense = (op == BinaryOperatorKind.BoolEqual) == binary.Left.ConstantValue.BooleanValue;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+
+                    if (!sense && IsConditionalState)
+                    {
+                        SetConditionalState(StateWhenFalse, StateWhenTrue);
+                    }
+
+                    return true;
+                }
+
+                return false;
             }
         }
 
