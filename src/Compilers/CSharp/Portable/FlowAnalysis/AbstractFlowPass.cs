@@ -2265,7 +2265,9 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             while (true)
             {
-                if (!learnFromBooleanConstantTest())
+                if (cannotLearnFromOperand()
+                    || (!learnFromNullConditionalOperand()
+                        && !learnFromBooleanConstantTest()))
                 {
                     Unsplit();
                     Visit(binary.Right);
@@ -2279,39 +2281,91 @@ namespace Microsoft.CodeAnalysis.CSharp
                 binary = stack.Pop();
             }
 
-            bool learnFromBooleanConstantTest()
+            bool cannotLearnFromOperand()
             {
-                if (IsConditionalState && binary.OperatorKind is var op and (BinaryOperatorKind.BoolEqual or BinaryOperatorKind.BoolNotEqual))
+                var kind = binary.OperatorKind;
+                var op = kind.Operator();
+                return (op is not (BinaryOperatorKind.Equal or BinaryOperatorKind.NotEqual) || kind.IsUserDefined());
+            }
+
+            bool learnFromNullConditionalOperand()
+            {
+                var op = binary.OperatorKind.Operator();
+                if (binary.Right is BoundConditionalAccess && (isNullableValueTypeConversion(binary.Left) || binary.Left.ConstantValue is object))
                 {
-                    bool sense;
-                    if (binary.Right.ConstantValue?.IsBoolean == true)
+                    Unsplit();
+                    Visit(binary.Right);
+                    Split();
+                    bool isNotNullWhenTrue = (op == BinaryOperatorKind.Equal) == (isNullableValueTypeConversion(binary.Left) || binary.Left.ConstantValue?.IsNull == false);
+                    (isNotNullWhenTrue ? ref StateWhenTrue : ref StateWhenFalse) = StateWhenNotNull;
+                    return true;
+                }
+                else if (binary.Left is BoundConditionalAccess && (isNullableValueTypeConversion(binary.Right) || binary.Right.ConstantValue is object))
+                {
+                    Debug.Assert(!IsConditionalState);
+                    VisitRvalue(binary.Right);
+                    // unconditional state changes in the other operand should always be visible after visiting the containing operator
+                    Meet(ref StateWhenNotNull, ref State);
+                    bool isNotNullWhenTrue = (op == BinaryOperatorKind.Equal) == (isNullableValueTypeConversion(binary.Right) || binary.Right.ConstantValue?.IsNull == false);
+                    if (isNotNullWhenTrue)
                     {
-                        var (stateWhenTrue, stateWhenFalse) = (StateWhenTrue.Clone(), StateWhenFalse.Clone());
-                        Unsplit();
-                        VisitRvalue(binary.Right);
-                        SetConditionalState(stateWhenTrue, stateWhenFalse);
-                        sense = (op == BinaryOperatorKind.BoolEqual) == binary.Right.ConstantValue.BooleanValue;
-                    }
-                    else if (binary.Left.ConstantValue?.IsBoolean == true)
-                    {
-                        Unsplit();
-                        Visit(binary.Right);
-                        sense = (op == BinaryOperatorKind.BoolEqual) == binary.Left.ConstantValue.BooleanValue;
+                        SetConditionalState(StateWhenNotNull, State);
                     }
                     else
                     {
-                        return false;
+                        SetConditionalState(State, StateWhenNotNull);
                     }
-
-                    if (!sense && IsConditionalState)
-                    {
-                        SetConditionalState(StateWhenFalse, StateWhenTrue);
-                    }
-
                     return true;
                 }
+                else
+                {
+                    return false;
+                }
+            }
 
-                return false;
+            static bool isNullableValueTypeConversion(BoundExpression expr)
+            {
+                return expr is BoundConversion
+                {
+                    ConversionKind: ConversionKind.ExplicitNullable
+                        or ConversionKind.ImplicitNullable
+                };
+            }
+
+            bool learnFromBooleanConstantTest()
+            {
+                var op = binary.OperatorKind.Operator();
+                if (!IsConditionalState)
+                {
+                    return false;
+                }
+
+                bool sense;
+                if (binary.Right.ConstantValue?.IsBoolean == true)
+                {
+                    var (stateWhenTrue, stateWhenFalse) = (StateWhenTrue.Clone(), StateWhenFalse.Clone());
+                    Unsplit();
+                    VisitRvalue(binary.Right);
+                    SetConditionalState(stateWhenTrue, stateWhenFalse);
+                    sense = (op == BinaryOperatorKind.Equal) == binary.Right.ConstantValue.BooleanValue;
+                }
+                else if (binary.Left.ConstantValue?.IsBoolean == true)
+                {
+                    Unsplit();
+                    Visit(binary.Right);
+                    sense = (op == BinaryOperatorKind.Equal) == binary.Left.ConstantValue.BooleanValue;
+                }
+                else
+                {
+                    return false;
+                }
+
+                if (!sense && IsConditionalState)
+                {
+                    SetConditionalState(StateWhenFalse, StateWhenTrue);
+                }
+
+                return true;
             }
         }
 
