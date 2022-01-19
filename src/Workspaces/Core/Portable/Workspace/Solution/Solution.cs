@@ -335,15 +335,9 @@ namespace Microsoft.CodeAnalysis
         /// Creates a new solution instance with the project specified updated to have the new
         /// assembly name.
         /// </summary>
-        public Solution WithProjectAssemblyName(ProjectId projectId, string assemblyName)
+        public Solution WithProjectAssemblyName(ProjectId projectId, string assemblyName!!)
         {
             CheckContainsProject(projectId);
-
-            if (assemblyName == null)
-            {
-                throw new ArgumentNullException(nameof(assemblyName));
-            }
-
             var newState = _state.WithProjectAssemblyName(projectId, assemblyName);
             if (newState == _state)
             {
@@ -420,15 +414,9 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Creates a new solution instance with the project specified updated to have the name.
         /// </summary>
-        public Solution WithProjectName(ProjectId projectId, string name)
+        public Solution WithProjectName(ProjectId projectId, string name!!)
         {
             CheckContainsProject(projectId);
-
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
             var newState = _state.WithProjectName(projectId, name);
             if (newState == _state)
             {
@@ -543,15 +531,9 @@ namespace Microsoft.CodeAnalysis
         /// <exception cref="ArgumentException">The solution does not contain <paramref name="projectId"/>.</exception>
         /// <exception cref="ArgumentException">The number of documents specified in <paramref name="documentIds"/> is not equal to the number of documents in project <paramref name="projectId"/>.</exception>
         /// <exception cref="InvalidOperationException">Document specified in <paramref name="documentIds"/> does not exist in project <paramref name="projectId"/>.</exception>
-        public Solution WithProjectDocumentsOrder(ProjectId projectId, ImmutableList<DocumentId> documentIds)
+        public Solution WithProjectDocumentsOrder(ProjectId projectId, ImmutableList<DocumentId> documentIds!!)
         {
             CheckContainsProject(projectId);
-
-            if (documentIds == null)
-            {
-                throw new ArgumentNullException(nameof(documentIds));
-            }
-
             var newState = _state.WithProjectDocumentsOrder(projectId, documentIds);
             if (newState == _state)
             {
@@ -726,15 +708,9 @@ namespace Microsoft.CodeAnalysis
         /// <exception cref="ArgumentNullException"><paramref name="metadataReference"/> is <see langword="null"/>.</exception>
         /// <exception cref="InvalidOperationException">The solution does not contain <paramref name="projectId"/>.</exception>
         /// <exception cref="InvalidOperationException">The project does not contain the specified reference.</exception>
-        public Solution RemoveMetadataReference(ProjectId projectId, MetadataReference metadataReference)
+        public Solution RemoveMetadataReference(ProjectId projectId, MetadataReference metadataReference!!)
         {
             CheckContainsProject(projectId);
-
-            if (metadataReference == null)
-            {
-                throw new ArgumentNullException(nameof(metadataReference));
-            }
-
             var newState = _state.RemoveMetadataReference(projectId, metadataReference);
             if (newState == _state)
             {
@@ -791,15 +767,9 @@ namespace Microsoft.CodeAnalysis
         /// <exception cref="ArgumentException"><paramref name="analyzerReferences"/> contains duplicate items.</exception>
         /// <exception cref="InvalidOperationException">The solution does not contain <paramref name="projectId"/>.</exception>
         /// <exception cref="InvalidOperationException">The project already contains the specified reference.</exception>
-        public Solution AddAnalyzerReferences(ProjectId projectId, IEnumerable<AnalyzerReference> analyzerReferences)
+        public Solution AddAnalyzerReferences(ProjectId projectId, IEnumerable<AnalyzerReference> analyzerReferences!!)
         {
             CheckContainsProject(projectId);
-
-            if (analyzerReferences is null)
-            {
-                throw new ArgumentNullException(nameof(analyzerReferences));
-            }
-
             var collection = analyzerReferences.ToImmutableArray();
 
             PublicContract.RequireUniqueNonNullItems(collection, nameof(analyzerReferences));
@@ -829,15 +799,9 @@ namespace Microsoft.CodeAnalysis
         /// <exception cref="ArgumentNullException"><paramref name="analyzerReference"/> is <see langword="null"/>.</exception>
         /// <exception cref="InvalidOperationException">The solution does not contain <paramref name="projectId"/>.</exception>
         /// <exception cref="InvalidOperationException">The project does not contain the specified reference.</exception>
-        public Solution RemoveAnalyzerReference(ProjectId projectId, AnalyzerReference analyzerReference)
+        public Solution RemoveAnalyzerReference(ProjectId projectId, AnalyzerReference analyzerReference!!)
         {
             CheckContainsProject(projectId);
-
-            if (analyzerReference == null)
-            {
-                throw new ArgumentNullException(nameof(analyzerReference));
-            }
-
             var newState = _state.RemoveAnalyzerReference(projectId, analyzerReference);
             if (newState == _state)
             {
@@ -918,13 +882,8 @@ namespace Microsoft.CodeAnalysis
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="analyzerReference"/> is <see langword="null"/>.</exception>
         /// <exception cref="InvalidOperationException">The solution does not contain the specified reference.</exception>
-        public Solution RemoveAnalyzerReference(AnalyzerReference analyzerReference)
+        public Solution RemoveAnalyzerReference(AnalyzerReference analyzerReference!!)
         {
-            if (analyzerReference == null)
-            {
-                throw new ArgumentNullException(nameof(analyzerReference));
-            }
-
             var newState = _state.RemoveAnalyzerReference(analyzerReference);
             if (newState == _state)
             {
@@ -966,21 +925,11 @@ namespace Microsoft.CodeAnalysis
         /// Creates a new solution instance with the corresponding project updated to include a new
         /// document instance defined by its name and text.
         /// </summary>
-        public Solution AddDocument(DocumentId documentId, string name, SourceText text, IEnumerable<string>? folders = null, string? filePath = null, bool isGenerated = false)
+        public Solution AddDocument(DocumentId documentId, string name!!, SourceText text!!, IEnumerable<string>? folders = null, string? filePath = null, bool isGenerated = false)
         {
             if (documentId == null)
             {
                 throw new ArgumentNullException(nameof(documentId));
-            }
-
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
             }
 
             var project = _state.GetProjectState(documentId.ProjectId);
@@ -1016,21 +965,11 @@ namespace Microsoft.CodeAnalysis
         /// Creates a new solution instance with the project updated to include a new document with
         /// the arguments specified.
         /// </summary>
-        public Solution AddDocument(DocumentId documentId, string name, TextLoader loader, IEnumerable<string>? folders = null)
+        public Solution AddDocument(DocumentId documentId, string name!!, TextLoader loader!!, IEnumerable<string>? folders = null)
         {
             if (documentId == null)
             {
                 throw new ArgumentNullException(nameof(documentId));
-            }
-
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            if (loader == null)
-            {
-                throw new ArgumentNullException(nameof(loader));
             }
 
             var project = _state.GetProjectState(documentId.ProjectId);
@@ -1084,21 +1023,11 @@ namespace Microsoft.CodeAnalysis
         /// Creates a new solution instance with the corresponding project updated to include a new
         /// additional document instance defined by its name and text.
         /// </summary>
-        public Solution AddAdditionalDocument(DocumentId documentId, string name, SourceText text, IEnumerable<string>? folders = null, string? filePath = null)
+        public Solution AddAdditionalDocument(DocumentId documentId, string name!!, SourceText text!!, IEnumerable<string>? folders = null, string? filePath = null)
         {
             if (documentId == null)
             {
                 throw new ArgumentNullException(nameof(documentId));
-            }
-
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
             }
 
             var info = CreateDocumentInfo(documentId, name, text, folders, filePath);
@@ -1123,21 +1052,11 @@ namespace Microsoft.CodeAnalysis
         /// Creates a new solution instance with the corresponding project updated to include a new
         /// analyzer config document instance defined by its name and text.
         /// </summary>
-        public Solution AddAnalyzerConfigDocument(DocumentId documentId, string name, SourceText text, IEnumerable<string>? folders = null, string? filePath = null)
+        public Solution AddAnalyzerConfigDocument(DocumentId documentId, string name!!, SourceText text!!, IEnumerable<string>? folders = null, string? filePath = null)
         {
             if (documentId == null)
             {
                 throw new ArgumentNullException(nameof(documentId));
-            }
-
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
             }
 
             // TODO: should we validate file path?
@@ -1272,15 +1191,9 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Creates a new solution instance with the document specified updated to have the new name.
         /// </summary>
-        public Solution WithDocumentName(DocumentId documentId, string name)
+        public Solution WithDocumentName(DocumentId documentId, string name!!)
         {
             CheckContainsDocument(documentId);
-
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
             var newState = _state.WithDocumentName(documentId, name);
             if (newState == _state)
             {
@@ -1312,18 +1225,9 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Creates a new solution instance with the document specified updated to have the specified file path.
         /// </summary>
-        public Solution WithDocumentFilePath(DocumentId documentId, string filePath)
+        public Solution WithDocumentFilePath(DocumentId documentId, string filePath!!)
         {
             CheckContainsDocument(documentId);
-
-            // TODO (https://github.com/dotnet/roslyn/issues/37125): 
-            // We *do* support null file paths. Why can't you switch a document back to null?
-            // See DocumentState.GetSyntaxTreeFilePath
-            if (filePath == null)
-            {
-                throw new ArgumentNullException(nameof(filePath));
-            }
-
             var newState = _state.WithDocumentFilePath(documentId, filePath);
             if (newState == _state)
             {
@@ -1337,15 +1241,9 @@ namespace Microsoft.CodeAnalysis
         /// Creates a new solution instance with the document specified updated to have the text
         /// specified.
         /// </summary>
-        public Solution WithDocumentText(DocumentId documentId, SourceText text, PreservationMode mode = PreservationMode.PreserveValue)
+        public Solution WithDocumentText(DocumentId documentId, SourceText text!!, PreservationMode mode = PreservationMode.PreserveValue)
         {
             CheckContainsDocument(documentId);
-
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
             if (!mode.IsValid())
             {
                 throw new ArgumentOutOfRangeException(nameof(mode));
@@ -1364,15 +1262,9 @@ namespace Microsoft.CodeAnalysis
         /// Creates a new solution instance with the additional document specified updated to have the text
         /// specified.
         /// </summary>
-        public Solution WithAdditionalDocumentText(DocumentId documentId, SourceText text, PreservationMode mode = PreservationMode.PreserveValue)
+        public Solution WithAdditionalDocumentText(DocumentId documentId, SourceText text!!, PreservationMode mode = PreservationMode.PreserveValue)
         {
             CheckContainsAdditionalDocument(documentId);
-
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
             if (!mode.IsValid())
             {
                 throw new ArgumentOutOfRangeException(nameof(mode));
@@ -1391,15 +1283,9 @@ namespace Microsoft.CodeAnalysis
         /// Creates a new solution instance with the analyzer config document specified updated to have the text
         /// supplied by the text loader.
         /// </summary>
-        public Solution WithAnalyzerConfigDocumentText(DocumentId documentId, SourceText text, PreservationMode mode = PreservationMode.PreserveValue)
+        public Solution WithAnalyzerConfigDocumentText(DocumentId documentId, SourceText text!!, PreservationMode mode = PreservationMode.PreserveValue)
         {
             CheckContainsAnalyzerConfigDocument(documentId);
-
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
             if (!mode.IsValid())
             {
                 throw new ArgumentOutOfRangeException(nameof(mode));
@@ -1418,15 +1304,9 @@ namespace Microsoft.CodeAnalysis
         /// Creates a new solution instance with the document specified updated to have the text
         /// and version specified.
         /// </summary>
-        public Solution WithDocumentText(DocumentId documentId, TextAndVersion textAndVersion, PreservationMode mode = PreservationMode.PreserveValue)
+        public Solution WithDocumentText(DocumentId documentId, TextAndVersion textAndVersion!!, PreservationMode mode = PreservationMode.PreserveValue)
         {
             CheckContainsDocument(documentId);
-
-            if (textAndVersion == null)
-            {
-                throw new ArgumentNullException(nameof(textAndVersion));
-            }
-
             if (!mode.IsValid())
             {
                 throw new ArgumentOutOfRangeException(nameof(mode));
@@ -1445,15 +1325,9 @@ namespace Microsoft.CodeAnalysis
         /// Creates a new solution instance with the additional document specified updated to have the text
         /// and version specified.
         /// </summary>
-        public Solution WithAdditionalDocumentText(DocumentId documentId, TextAndVersion textAndVersion, PreservationMode mode = PreservationMode.PreserveValue)
+        public Solution WithAdditionalDocumentText(DocumentId documentId, TextAndVersion textAndVersion!!, PreservationMode mode = PreservationMode.PreserveValue)
         {
             CheckContainsAdditionalDocument(documentId);
-
-            if (textAndVersion == null)
-            {
-                throw new ArgumentNullException(nameof(textAndVersion));
-            }
-
             if (!mode.IsValid())
             {
                 throw new ArgumentOutOfRangeException(nameof(mode));
@@ -1472,15 +1346,9 @@ namespace Microsoft.CodeAnalysis
         /// Creates a new solution instance with the analyzer config document specified updated to have the text
         /// and version specified.
         /// </summary>
-        public Solution WithAnalyzerConfigDocumentText(DocumentId documentId, TextAndVersion textAndVersion, PreservationMode mode = PreservationMode.PreserveValue)
+        public Solution WithAnalyzerConfigDocumentText(DocumentId documentId, TextAndVersion textAndVersion!!, PreservationMode mode = PreservationMode.PreserveValue)
         {
             CheckContainsAnalyzerConfigDocument(documentId);
-
-            if (textAndVersion == null)
-            {
-                throw new ArgumentNullException(nameof(textAndVersion));
-            }
-
             if (!mode.IsValid())
             {
                 throw new ArgumentOutOfRangeException(nameof(mode));
@@ -1499,15 +1367,9 @@ namespace Microsoft.CodeAnalysis
         /// Creates a new solution instance with the document specified updated to have a syntax tree
         /// rooted by the specified syntax node.
         /// </summary>
-        public Solution WithDocumentSyntaxRoot(DocumentId documentId, SyntaxNode root, PreservationMode mode = PreservationMode.PreserveValue)
+        public Solution WithDocumentSyntaxRoot(DocumentId documentId, SyntaxNode root!!, PreservationMode mode = PreservationMode.PreserveValue)
         {
             CheckContainsDocument(documentId);
-
-            if (root == null)
-            {
-                throw new ArgumentNullException(nameof(root));
-            }
-
             if (!mode.IsValid())
             {
                 throw new ArgumentOutOfRangeException(nameof(mode));
@@ -1555,15 +1417,9 @@ namespace Microsoft.CodeAnalysis
         /// Creates a new solution instance with the document specified updated to have the text
         /// supplied by the text loader.
         /// </summary>
-        public Solution WithDocumentTextLoader(DocumentId documentId, TextLoader loader, PreservationMode mode)
+        public Solution WithDocumentTextLoader(DocumentId documentId, TextLoader loader!!, PreservationMode mode)
         {
             CheckContainsDocument(documentId);
-
-            if (loader == null)
-            {
-                throw new ArgumentNullException(nameof(loader));
-            }
-
             if (!mode.IsValid())
             {
                 throw new ArgumentOutOfRangeException(nameof(mode));
@@ -1587,15 +1443,9 @@ namespace Microsoft.CodeAnalysis
         /// Creates a new solution instance with the additional document specified updated to have the text
         /// supplied by the text loader.
         /// </summary>
-        public Solution WithAdditionalDocumentTextLoader(DocumentId documentId, TextLoader loader, PreservationMode mode)
+        public Solution WithAdditionalDocumentTextLoader(DocumentId documentId, TextLoader loader!!, PreservationMode mode)
         {
             CheckContainsAdditionalDocument(documentId);
-
-            if (loader == null)
-            {
-                throw new ArgumentNullException(nameof(loader));
-            }
-
             if (!mode.IsValid())
             {
                 throw new ArgumentOutOfRangeException(nameof(mode));
@@ -1614,15 +1464,9 @@ namespace Microsoft.CodeAnalysis
         /// Creates a new solution instance with the analyzer config document specified updated to have the text
         /// supplied by the text loader.
         /// </summary>
-        public Solution WithAnalyzerConfigDocumentTextLoader(DocumentId documentId, TextLoader loader, PreservationMode mode)
+        public Solution WithAnalyzerConfigDocumentTextLoader(DocumentId documentId, TextLoader loader!!, PreservationMode mode)
         {
             CheckContainsAnalyzerConfigDocument(documentId);
-
-            if (loader == null)
-            {
-                throw new ArgumentNullException(nameof(loader));
-            }
-
             if (!mode.IsValid())
             {
                 throw new ArgumentOutOfRangeException(nameof(mode));
@@ -1715,18 +1559,8 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Creates a new solution instance with all the documents specified updated to have the same specified text.
         /// </summary>
-        public Solution WithDocumentText(IEnumerable<DocumentId?> documentIds, SourceText text, PreservationMode mode = PreservationMode.PreserveValue)
+        public Solution WithDocumentText(IEnumerable<DocumentId?> documentIds!!, SourceText text!!, PreservationMode mode = PreservationMode.PreserveValue)
         {
-            if (documentIds == null)
-            {
-                throw new ArgumentNullException(nameof(documentIds));
-            }
-
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
             if (!mode.IsValid())
             {
                 throw new ArgumentOutOfRangeException(nameof(mode));
@@ -1760,13 +1594,8 @@ namespace Microsoft.CodeAnalysis
         /// Gets an objects that lists the added, changed and removed projects between
         /// this solution and the specified solution.
         /// </summary>
-        public SolutionChanges GetChanges(Solution oldSolution)
+        public SolutionChanges GetChanges(Solution oldSolution!!)
         {
-            if (oldSolution == null)
-            {
-                throw new ArgumentNullException(nameof(oldSolution));
-            }
-
             return new SolutionChanges(this, oldSolution);
         }
 

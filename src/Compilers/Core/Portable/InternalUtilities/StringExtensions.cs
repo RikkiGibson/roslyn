@@ -27,18 +27,8 @@ namespace Roslyn.Utilities
             return (number < numerals.Length) ? numerals[number] : number.ToString();
         }
 
-        public static string Join(this IEnumerable<string?> source, string separator)
+        public static string Join(this IEnumerable<string?> source!!, string separator!!)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            if (separator == null)
-            {
-                throw new ArgumentNullException(nameof(separator));
-            }
-
             return string.Join(separator, source);
         }
 

@@ -37,16 +37,11 @@ namespace Microsoft.CodeAnalysis
         /// <param name="kind">The kind of the display part.</param>
         /// <param name="symbol">An optional associated symbol.</param>
         /// <param name="text">The fixed string value of the part.</param>
-        public SymbolDisplayPart(SymbolDisplayPartKind kind, ISymbol? symbol, string text)
+        public SymbolDisplayPart(SymbolDisplayPartKind kind, ISymbol? symbol, string text!!)
         {
             if (!kind.IsValid())
             {
                 throw new ArgumentOutOfRangeException(nameof(kind));
-            }
-
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
             }
 
             _kind = kind;

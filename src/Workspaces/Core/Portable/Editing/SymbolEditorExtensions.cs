@@ -19,14 +19,9 @@ namespace Microsoft.CodeAnalysis.Editing
         public static async Task<SyntaxNode> GetBaseOrInterfaceDeclarationReferenceAsync(
             this SymbolEditor editor,
             ISymbol symbol,
-            ITypeSymbol baseOrInterfaceType,
+            ITypeSymbol baseOrInterfaceType!!,
             CancellationToken cancellationToken = default)
         {
-            if (baseOrInterfaceType == null)
-            {
-                throw new ArgumentNullException(nameof(baseOrInterfaceType));
-            }
-
             if (baseOrInterfaceType.TypeKind != TypeKind.Error)
             {
                 baseOrInterfaceType = (ITypeSymbol)(await editor.GetCurrentSymbolAsync(baseOrInterfaceType, cancellationToken).ConfigureAwait(false));

@@ -24,9 +24,9 @@ namespace Microsoft.CodeAnalysis.FindSymbols
 
         private readonly WordSimilarityChecker _wordSimilarityChecker;
 
-        private SearchQuery(string name, SearchKind kind)
+        private SearchQuery(string name!!, SearchKind kind)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Name = name;
             Kind = kind;
 
             switch (kind)
@@ -50,10 +50,10 @@ namespace Microsoft.CodeAnalysis.FindSymbols
             }
         }
 
-        private SearchQuery(Func<string, bool> predicate)
+        private SearchQuery(Func<string, bool> predicate!!)
         {
             Kind = SearchKind.Custom;
-            _predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
+            _predicate = predicate;
         }
 
         public void Dispose()

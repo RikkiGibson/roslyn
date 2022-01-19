@@ -216,13 +216,8 @@ namespace Microsoft.CodeAnalysis
         /// Gets the ids for documents in the <see cref="CurrentSolution"/> snapshot associated with the given <paramref name="container"/>.
         /// Documents are normally associated with a text container when the documents are opened.
         /// </summary>
-        public virtual IEnumerable<DocumentId> GetRelatedDocumentIds(SourceTextContainer container)
+        public virtual IEnumerable<DocumentId> GetRelatedDocumentIds(SourceTextContainer container!!)
         {
-            if (container == null)
-            {
-                throw new ArgumentNullException(nameof(container));
-            }
-
             var documentId = GetDocumentIdInCurrentContext(container);
             if (documentId == null)
             {
@@ -236,13 +231,8 @@ namespace Microsoft.CodeAnalysis
         /// Gets the id for the document associated with the given text container in its current context.
         /// Documents are normally associated with a text container when the documents are opened.
         /// </summary>
-        public virtual DocumentId? GetDocumentIdInCurrentContext(SourceTextContainer container)
+        public virtual DocumentId? GetDocumentIdInCurrentContext(SourceTextContainer container!!)
         {
-            if (container == null)
-            {
-                throw new ArgumentNullException(nameof(container));
-            }
-
             using (_stateLock.DisposableWait())
             {
                 return GetDocumentIdInCurrentContext_NoLock(container);

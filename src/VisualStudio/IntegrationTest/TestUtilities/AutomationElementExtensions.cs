@@ -34,13 +34,8 @@ namespace Microsoft.VisualStudio.IntegrationTest.Utilities
         /// Given an <see cref="IUIAutomationElement"/>, returns a descendant with the automation ID specified by <paramref name="automationId"/>.
         /// Throws an <see cref="InvalidOperationException"/> if no such descendant is found.
         /// </summary>
-        public static IUIAutomationElement FindDescendantByAutomationId(this IUIAutomationElement parent, string automationId)
+        public static IUIAutomationElement FindDescendantByAutomationId(this IUIAutomationElement parent!!, string automationId)
         {
-            if (parent == null)
-            {
-                throw new ArgumentNullException(nameof(parent));
-            }
-
             var condition = Helper.Automation.CreatePropertyCondition(AutomationElementIdentifiers.AutomationIdProperty.Id, automationId);
             var child = Helper.Retry(
                 () => parent.FindFirst(TreeScope.TreeScope_Descendants, condition),
@@ -59,13 +54,8 @@ namespace Microsoft.VisualStudio.IntegrationTest.Utilities
         /// Given an <see cref="IUIAutomationElement"/>, returns a descendant with the automation ID specified by <paramref name="name"/>.
         /// Throws an <see cref="InvalidOperationException"/> if no such descendant is found.
         /// </summary>
-        public static IUIAutomationElement FindDescendantByName(this IUIAutomationElement parent, string name)
+        public static IUIAutomationElement FindDescendantByName(this IUIAutomationElement parent!!, string name)
         {
-            if (parent == null)
-            {
-                throw new ArgumentNullException(nameof(parent));
-            }
-
             var condition = Helper.Automation.CreatePropertyCondition(AutomationElementIdentifiers.NameProperty.Id, name);
             var child = Helper.Retry(
                 () => parent.FindFirst(TreeScope.TreeScope_Descendants, condition),
@@ -84,13 +74,8 @@ namespace Microsoft.VisualStudio.IntegrationTest.Utilities
         /// Given an <see cref="IUIAutomationElement"/>, returns a descendant with the className specified by <paramref name="className"/>.
         /// Throws an <see cref="InvalidOperationException"/> if no such descendant is found.
         /// </summary>
-        public static IUIAutomationElement FindDescendantByClass(this IUIAutomationElement parent, string className)
+        public static IUIAutomationElement FindDescendantByClass(this IUIAutomationElement parent!!, string className)
         {
-            if (parent == null)
-            {
-                throw new ArgumentNullException(nameof(parent));
-            }
-
             var condition = Helper.Automation.CreatePropertyCondition(AutomationElementIdentifiers.ClassNameProperty.Id, className);
             var child = Helper.Retry(
                 () => parent.FindFirst(TreeScope.TreeScope_Descendants, condition),
@@ -110,13 +95,8 @@ namespace Microsoft.VisualStudio.IntegrationTest.Utilities
         /// If none are found, the resulting collection will be empty.
         /// </summary>
         /// <returns></returns>
-        public static IUIAutomationElementArray FindDescendantsByClass(this IUIAutomationElement parent, string className)
+        public static IUIAutomationElementArray FindDescendantsByClass(this IUIAutomationElement parent!!, string className)
         {
-            if (parent == null)
-            {
-                throw new ArgumentNullException(nameof(parent));
-            }
-
             var condition = Helper.Automation.CreatePropertyCondition(AutomationElementIdentifiers.ClassNameProperty.Id, className);
             return parent.FindAll(TreeScope.TreeScope_Descendants, condition);
         }

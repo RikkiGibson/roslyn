@@ -28,13 +28,8 @@ namespace Microsoft.CodeAnalysis.Editing
         /// <summary>
         /// Creates a new <see cref="DocumentEditor"/> instance.
         /// </summary>
-        public static async Task<DocumentEditor> CreateAsync(Document document, CancellationToken cancellationToken = default)
+        public static async Task<DocumentEditor> CreateAsync(Document document!!, CancellationToken cancellationToken = default)
         {
-            if (document == null)
-            {
-                throw new ArgumentNullException(nameof(document));
-            }
-
             var model = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
             var root = model.SyntaxTree.GetRoot(cancellationToken);
             return new DocumentEditor(document, model, root);

@@ -89,13 +89,8 @@ namespace Microsoft.CodeAnalysis.Scripting.Hosting
             return typeName;
         }
 
-        public virtual string FormatTypeArguments(Type[] typeArguments, CommonTypeNameFormatterOptions options)
+        public virtual string FormatTypeArguments(Type[] typeArguments!!, CommonTypeNameFormatterOptions options)
         {
-            if (typeArguments == null)
-            {
-                throw new ArgumentNullException(nameof(typeArguments));
-            }
-
             if (typeArguments.Length == 0)
             {
                 throw new ArgumentException(null, nameof(typeArguments));

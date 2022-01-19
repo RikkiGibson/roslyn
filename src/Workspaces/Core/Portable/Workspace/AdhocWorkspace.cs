@@ -48,13 +48,8 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Adds an entire solution to the workspace, replacing any existing solution.
         /// </summary>
-        public Solution AddSolution(SolutionInfo solutionInfo)
+        public Solution AddSolution(SolutionInfo solutionInfo!!)
         {
-            if (solutionInfo == null)
-            {
-                throw new ArgumentNullException(nameof(solutionInfo));
-            }
-
             this.OnSolutionAdded(solutionInfo);
 
             this.UpdateReferencesAfterAdd();
@@ -74,13 +69,8 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Adds a project to the workspace. All previous projects remain intact.
         /// </summary>
-        public Project AddProject(ProjectInfo projectInfo)
+        public Project AddProject(ProjectInfo projectInfo!!)
         {
-            if (projectInfo == null)
-            {
-                throw new ArgumentNullException(nameof(projectInfo));
-            }
-
             this.OnProjectAdded(projectInfo);
 
             this.UpdateReferencesAfterAdd();
@@ -92,13 +82,8 @@ namespace Microsoft.CodeAnalysis
         /// Adds multiple projects to the workspace at once. All existing projects remain intact.
         /// </summary>
         /// <param name="projectInfos"></param>
-        public void AddProjects(IEnumerable<ProjectInfo> projectInfos)
+        public void AddProjects(IEnumerable<ProjectInfo> projectInfos!!)
         {
-            if (projectInfos == null)
-            {
-                throw new ArgumentNullException(nameof(projectInfos));
-            }
-
             foreach (var info in projectInfos)
             {
                 this.OnProjectAdded(info);
@@ -110,21 +95,11 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Adds a document to the workspace.
         /// </summary>
-        public Document AddDocument(ProjectId projectId, string name, SourceText text)
+        public Document AddDocument(ProjectId projectId, string name!!, SourceText text!!)
         {
             if (projectId == null)
             {
                 throw new ArgumentNullException(nameof(projectId));
-            }
-
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
             }
 
             var id = DocumentId.CreateNewId(projectId);
@@ -136,13 +111,8 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Adds a document to the workspace.
         /// </summary>
-        public Document AddDocument(DocumentInfo documentInfo)
+        public Document AddDocument(DocumentInfo documentInfo!!)
         {
-            if (documentInfo == null)
-            {
-                throw new ArgumentNullException(nameof(documentInfo));
-            }
-
             this.OnDocumentAdded(documentInfo);
 
             return this.CurrentSolution.GetDocument(documentInfo.Id);

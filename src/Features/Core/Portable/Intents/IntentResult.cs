@@ -27,11 +27,11 @@ namespace Microsoft.CodeAnalysis.Features.Intents
         /// </summary>
         public readonly string ActionName;
 
-        public IntentProcessorResult(Solution solution, string title, string actionName)
+        public IntentProcessorResult(Solution solution, string title!!, string actionName!!)
         {
             Solution = solution;
-            Title = title ?? throw new ArgumentNullException(nameof(title));
-            ActionName = actionName ?? throw new ArgumentNullException(nameof(actionName));
+            Title = title;
+            ActionName = actionName;
         }
     }
 }

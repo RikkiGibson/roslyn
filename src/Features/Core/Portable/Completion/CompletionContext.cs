@@ -135,24 +135,14 @@ namespace Microsoft.CodeAnalysis.Completion
 
         internal IReadOnlyList<CompletionItem> Items => _items;
 
-        public void AddItem(CompletionItem item)
+        public void AddItem(CompletionItem item!!)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
-
             item = FixItem(item);
             _items.Add(item);
         }
 
-        public void AddItems(IEnumerable<CompletionItem> items)
+        public void AddItems(IEnumerable<CompletionItem> items!!)
         {
-            if (items == null)
-            {
-                throw new ArgumentNullException(nameof(items));
-            }
-
             foreach (var item in items)
             {
                 AddItem(item);

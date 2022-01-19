@@ -10,13 +10,8 @@ namespace Microsoft.CodeAnalysis.ExpressionEvaluator
 {
     internal class DebuggerDiagnosticFormatter : DiagnosticFormatter
     {
-        public override string Format(Diagnostic diagnostic, IFormatProvider? formatter = null)
+        public override string Format(Diagnostic diagnostic!!, IFormatProvider? formatter = null)
         {
-            if (diagnostic == null)
-            {
-                throw new ArgumentNullException(nameof(diagnostic));
-            }
-
             var culture = formatter as CultureInfo;
 
             return string.Format(formatter, "{0}: {1}",

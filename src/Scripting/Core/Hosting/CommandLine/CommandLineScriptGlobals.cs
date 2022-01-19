@@ -39,18 +39,8 @@ namespace Microsoft.CodeAnalysis.Scripting.Hosting
             _outputWriter.WriteLine(_objectFormatter.FormatObject(value, PrintOptions));
         }
 
-        public CommandLineScriptGlobals(TextWriter outputWriter, ObjectFormatter objectFormatter)
+        public CommandLineScriptGlobals(TextWriter outputWriter!!, ObjectFormatter objectFormatter!!)
         {
-            if (outputWriter == null)
-            {
-                throw new ArgumentNullException(nameof(outputWriter));
-            }
-
-            if (objectFormatter == null)
-            {
-                throw new ArgumentNullException(nameof(objectFormatter));
-            }
-
             PrintOptions = new PrintOptions();
 
             _outputWriter = outputWriter;

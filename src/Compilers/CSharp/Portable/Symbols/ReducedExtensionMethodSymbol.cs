@@ -247,13 +247,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         internal override CodeAnalysis.NullableAnnotation ReceiverNullableAnnotation =>
             _reducedFrom.Parameters[0].TypeWithAnnotations.ToPublicAnnotation();
 
-        public override TypeSymbol GetTypeInferredDuringReduction(TypeParameterSymbol reducedFromTypeParameter)
+        public override TypeSymbol GetTypeInferredDuringReduction(TypeParameterSymbol reducedFromTypeParameter!!)
         {
-            if ((object)reducedFromTypeParameter == null)
-            {
-                throw new System.ArgumentNullException();
-            }
-
             if (reducedFromTypeParameter.ContainingSymbol != _reducedFrom)
             {
                 throw new System.ArgumentException();

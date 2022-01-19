@@ -76,13 +76,8 @@ namespace Microsoft.VisualStudio.Debugger.Evaluation.ClrCompilation
         {
         }
 
-        public DkmClrValue Dereference(DkmInspectionContext inspectionContext)
+        public DkmClrValue Dereference(DkmInspectionContext inspectionContext!!)
         {
-            if (inspectionContext == null)
-            {
-                throw new ArgumentNullException(nameof(inspectionContext));
-            }
-
             if (RawValue == null)
             {
                 throw new InvalidOperationException("Cannot dereference invalid value");
@@ -139,33 +134,18 @@ namespace Microsoft.VisualStudio.Debugger.Evaluation.ClrCompilation
                 : null;
         }
 
-        public string GetValueString(DkmInspectionContext inspectionContext, ReadOnlyCollection<string> formatSpecifiers)
+        public string GetValueString(DkmInspectionContext inspectionContext!!, ReadOnlyCollection<string> formatSpecifiers)
         {
-            if (inspectionContext == null)
-            {
-                throw new ArgumentNullException(nameof(inspectionContext));
-            }
-
             return inspectionContext.InspectionSession.InvokeFormatter(this, MethodId.GetValueString, f => f.GetValueString(this, inspectionContext, formatSpecifiers));
         }
 
-        public bool HasUnderlyingString(DkmInspectionContext inspectionContext)
+        public bool HasUnderlyingString(DkmInspectionContext inspectionContext!!)
         {
-            if (inspectionContext == null)
-            {
-                throw new ArgumentNullException(nameof(inspectionContext));
-            }
-
             return inspectionContext.InspectionSession.InvokeFormatter(this, MethodId.HasUnderlyingString, f => f.HasUnderlyingString(this, inspectionContext));
         }
 
-        public string GetUnderlyingString(DkmInspectionContext inspectionContext)
+        public string GetUnderlyingString(DkmInspectionContext inspectionContext!!)
         {
-            if (inspectionContext == null)
-            {
-                throw new ArgumentNullException(nameof(inspectionContext));
-            }
-
             return inspectionContext.InspectionSession.InvokeFormatter(this, MethodId.GetUnderlyingString, f => f.GetUnderlyingString(this, inspectionContext));
         }
 
@@ -198,12 +178,8 @@ namespace Microsoft.VisualStudio.Debugger.Evaluation.ClrCompilation
                 });
         }
 
-        public string EvaluateToString(DkmInspectionContext inspectionContext)
+        public string EvaluateToString(DkmInspectionContext inspectionContext!!)
         {
-            if (inspectionContext == null)
-            {
-                throw new ArgumentNullException(nameof(inspectionContext));
-            }
 
             // This is a rough approximation of the real functionality.  Basically,
             // if object.ToString is not overridden, we return null and it is the
@@ -235,15 +211,9 @@ namespace Microsoft.VisualStudio.Debugger.Evaluation.ClrCompilation
         /// <remarks>
         /// Very simple expression evaluation (may not support all syntax supported by Concord).
         /// </remarks>
-        public void EvaluateDebuggerDisplayString(DkmWorkList workList, DkmInspectionContext inspectionContext, DkmClrType targetType, string formatString, DkmCompletionRoutine<DkmEvaluateDebuggerDisplayStringAsyncResult> completionRoutine)
+        public void EvaluateDebuggerDisplayString(DkmWorkList workList, DkmInspectionContext inspectionContext!!, DkmClrType targetType, string formatString, DkmCompletionRoutine<DkmEvaluateDebuggerDisplayStringAsyncResult> completionRoutine)
         {
             Debug.Assert(!this.IsNull, "Not supported by VIL");
-
-            if (inspectionContext == null)
-            {
-                throw new ArgumentNullException(nameof(inspectionContext));
-            }
-
             var pooled = PooledStringBuilder.GetInstance();
             var builder = pooled.Builder;
 
@@ -379,13 +349,8 @@ namespace Microsoft.VisualStudio.Debugger.Evaluation.ClrCompilation
             workList.AddWork(() => completionRoutine(new DkmEvaluateDebuggerDisplayStringAsyncResult(pooled.ToStringAndFree())));
         }
 
-        public DkmClrValue GetMemberValue(string MemberName, int MemberType, string ParentTypeName, DkmInspectionContext InspectionContext)
+        public DkmClrValue GetMemberValue(string MemberName, int MemberType, string ParentTypeName, DkmInspectionContext InspectionContext!!)
         {
-            if (InspectionContext == null)
-            {
-                throw new ArgumentNullException(nameof(InspectionContext));
-            }
-
             if (this.IsError())
             {
                 throw new InvalidOperationException();
@@ -560,13 +525,8 @@ namespace Microsoft.VisualStudio.Debugger.Evaluation.ClrCompilation
             }
         }
 
-        public DkmClrValue GetArrayElement(int[] indices, DkmInspectionContext inspectionContext)
+        public DkmClrValue GetArrayElement(int[] indices, DkmInspectionContext inspectionContext!!)
         {
-            if (inspectionContext == null)
-            {
-                throw new ArgumentNullException(nameof(inspectionContext));
-            }
-
             var array = (System.Array)RawValue;
             var element = array.GetValue(indices);
             var type = DkmClrType.Create(this.Type.AppDomain, (TypeImpl)((element == null) ? array.GetType().GetElementType() : element.GetType()));
@@ -619,13 +579,8 @@ namespace Microsoft.VisualStudio.Debugger.Evaluation.ClrCompilation
             }
         }
 
-        public DkmClrValue InstantiateProxyType(DkmInspectionContext inspectionContext, DkmClrType proxyType)
+        public DkmClrValue InstantiateProxyType(DkmInspectionContext inspectionContext!!, DkmClrType proxyType)
         {
-            if (inspectionContext == null)
-            {
-                throw new ArgumentNullException(nameof(inspectionContext));
-            }
-
             var lmrType = proxyType.GetLmrType();
             Debug.Assert(!lmrType.IsGenericTypeDefinition);
             const BindingFlags bindingFlags =
@@ -645,13 +600,8 @@ namespace Microsoft.VisualStudio.Debugger.Evaluation.ClrCompilation
         }
 
         private static readonly ReadOnlyCollection<DkmClrType> s_noArguments = ArrayBuilder<DkmClrType>.GetInstance(0).ToImmutableAndFree();
-        public DkmClrValue InstantiateDynamicViewProxy(DkmInspectionContext inspectionContext)
+        public DkmClrValue InstantiateDynamicViewProxy(DkmInspectionContext inspectionContext!!)
         {
-            if (inspectionContext == null)
-            {
-                throw new ArgumentNullException(nameof(inspectionContext));
-            }
-
             var module = new DkmClrModuleInstance(
                 this.Type.AppDomain.RuntimeInstance,
                 typeof(Microsoft.CSharp.RuntimeBinder.RuntimeBinderException).Assembly,
@@ -662,16 +612,11 @@ namespace Microsoft.VisualStudio.Debugger.Evaluation.ClrCompilation
             return this.InstantiateProxyType(inspectionContext, proxyType);
         }
 
-        public DkmClrValue InstantiateResultsViewProxy(DkmInspectionContext inspectionContext, DkmClrType enumerableType)
+        public DkmClrValue InstantiateResultsViewProxy(DkmInspectionContext inspectionContext!!, DkmClrType enumerableType)
         {
             if (EvalFlags.Includes(DkmEvaluationResultFlags.ExceptionThrown))
             {
                 throw new InvalidOperationException();
-            }
-
-            if (inspectionContext == null)
-            {
-                throw new ArgumentNullException(nameof(inspectionContext));
             }
 
             var appDomain = enumerableType.AppDomain;

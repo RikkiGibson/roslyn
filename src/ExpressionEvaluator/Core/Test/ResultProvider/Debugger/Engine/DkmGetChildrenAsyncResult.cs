@@ -15,13 +15,9 @@ namespace Microsoft.VisualStudio.Debugger.Evaluation
 {
     public struct DkmGetChildrenAsyncResult
     {
-        public DkmGetChildrenAsyncResult(DkmEvaluationResult[] InitialChildren, DkmEvaluationResultEnumContext EnumContext)
+        public DkmGetChildrenAsyncResult(DkmEvaluationResult[] InitialChildren!!, DkmEvaluationResultEnumContext EnumContext)
             : this()
         {
-            if (InitialChildren == null)
-            {
-                throw new ArgumentNullException();
-            }
             this.InitialChildren = InitialChildren;
             this.EnumContext = EnumContext;
         }

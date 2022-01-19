@@ -23,9 +23,9 @@ namespace Microsoft.CodeAnalysis.ChangeSignature
 
         public string? ConfirmationMessage { get; }
 
-        public ChangeSignatureCodeActionOperation(Solution changedSolution, string? confirmationMessage)
+        public ChangeSignatureCodeActionOperation(Solution changedSolution!!, string? confirmationMessage)
         {
-            ChangedSolution = changedSolution ?? throw new ArgumentNullException(nameof(changedSolution));
+            ChangedSolution = changedSolution;
             ConfirmationMessage = confirmationMessage;
         }
 

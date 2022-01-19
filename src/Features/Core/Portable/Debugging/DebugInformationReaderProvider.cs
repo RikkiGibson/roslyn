@@ -97,13 +97,8 @@ namespace Microsoft.CodeAnalysis.Debugging
         /// <exception cref="ArgumentNullException"><paramref name="stream"/> is null.</exception>
         /// <exception cref="ArgumentException"><paramref name="stream"/> does not support read and seek operations.</exception>
         /// <exception cref="Exception">Error reading debug information from <paramref name="stream"/>.</exception>
-        public static DebugInformationReaderProvider CreateFromStream(Stream stream)
+        public static DebugInformationReaderProvider CreateFromStream(Stream stream!!)
         {
-            if (stream == null)
-            {
-                throw new ArgumentNullException(nameof(stream));
-            }
-
             if (!stream.CanRead || !stream.CanSeek)
             {
                 throw new ArgumentException(FeaturesResources.StreamMustSupportReadAndSeek, nameof(stream));

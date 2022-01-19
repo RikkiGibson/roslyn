@@ -61,13 +61,8 @@ namespace Roslyn.Test.Utilities
 
         private readonly WeakReference _weakReference;
 
-        public ObjectReference(T target)
+        public ObjectReference(T target!!)
         {
-            if (target == null)
-            {
-                throw new ArgumentNullException(nameof(target));
-            }
-
             _strongReference = target;
             _weakReference = new WeakReference(target);
         }

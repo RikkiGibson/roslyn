@@ -374,18 +374,8 @@ namespace Microsoft.CodeAnalysis.Differencing
         /// to a sequence of nodes <paramref name="newNodes"/>. 
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="oldNodes"/> or <paramref name="newNodes"/> is a null reference.</exception>
-        public IEnumerable<Edit<TNode>> GetSequenceEdits(IEnumerable<TNode> oldNodes, IEnumerable<TNode> newNodes)
+        public IEnumerable<Edit<TNode>> GetSequenceEdits(IEnumerable<TNode> oldNodes!!, IEnumerable<TNode> newNodes!!)
         {
-            if (oldNodes == null)
-            {
-                throw new ArgumentNullException(nameof(oldNodes));
-            }
-
-            if (newNodes == null)
-            {
-                throw new ArgumentNullException(nameof(newNodes));
-            }
-
             var oldList = (oldNodes as IReadOnlyList<TNode>) ?? oldNodes.ToList();
             var newList = (newNodes as IReadOnlyList<TNode>) ?? newNodes.ToList();
 

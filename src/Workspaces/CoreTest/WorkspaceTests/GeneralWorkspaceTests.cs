@@ -167,13 +167,8 @@ namespace Microsoft.CodeAnalysis.UnitTests
                 return this.AddProject(info);
             }
 
-            public Project AddProject(ProjectInfo projectInfo)
+            public Project AddProject(ProjectInfo projectInfo!!)
             {
-                if (projectInfo == null)
-                {
-                    throw new ArgumentNullException(nameof(projectInfo));
-                }
-
                 this.OnProjectAdded(projectInfo);
 
                 this.UpdateReferencesAfterAdd();
@@ -181,21 +176,11 @@ namespace Microsoft.CodeAnalysis.UnitTests
                 return this.CurrentSolution.GetProject(projectInfo.Id);
             }
 
-            public Document AddDocument(ProjectId projectId, string name, SourceText text)
+            public Document AddDocument(ProjectId projectId, string name!!, SourceText text!!)
             {
                 if (projectId == null)
                 {
                     throw new ArgumentNullException(nameof(projectId));
-                }
-
-                if (name == null)
-                {
-                    throw new ArgumentNullException(nameof(name));
-                }
-
-                if (text == null)
-                {
-                    throw new ArgumentNullException(nameof(text));
                 }
 
                 var id = DocumentId.CreateNewId(projectId);
@@ -207,13 +192,8 @@ namespace Microsoft.CodeAnalysis.UnitTests
             /// <summary>
             /// Adds a document to the workspace.
             /// </summary>
-            public Document AddDocument(DocumentInfo documentInfo)
+            public Document AddDocument(DocumentInfo documentInfo!!)
             {
-                if (documentInfo == null)
-                {
-                    throw new ArgumentNullException(nameof(documentInfo));
-                }
-
                 this.OnDocumentAdded(documentInfo);
 
                 return this.CurrentSolution.GetDocument(documentInfo.Id);

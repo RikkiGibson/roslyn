@@ -64,9 +64,9 @@ namespace Roslyn.Utilities
             _editDistance = null!;
         }
 
-        private void Initialize(string text, bool substringsAreSimilar)
+        private void Initialize(string text!!, bool substringsAreSimilar)
         {
-            _source = text ?? throw new ArgumentNullException(nameof(text));
+            _source = text;
             _threshold = GetThreshold(_source);
             _editDistance = new EditDistance(text);
             _substringsAreSimilar = substringsAreSimilar;

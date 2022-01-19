@@ -319,13 +319,8 @@ namespace Microsoft.CodeAnalysis
         /// without creating a compilation and finding an entry point. VB does not allow <see cref="OutputFileName"/> to 
         /// be unspecified.
         /// </remarks>
-        public string GetOutputFilePath(string outputFileName)
+        public string GetOutputFilePath(string outputFileName!!)
         {
-            if (outputFileName == null)
-            {
-                throw new ArgumentNullException(nameof(outputFileName));
-            }
-
             return Path.Combine(OutputDirectory, outputFileName);
         }
 
@@ -339,13 +334,8 @@ namespace Microsoft.CodeAnalysis
         /// without creating a compilation and finding an entry point. VB does not allow <see cref="OutputFileName"/> to 
         /// be unspecified.
         /// </remarks>
-        public string GetPdbFilePath(string outputFileName)
+        public string GetPdbFilePath(string outputFileName!!)
         {
-            if (outputFileName == null)
-            {
-                throw new ArgumentNullException(nameof(outputFileName));
-            }
-
             return PdbPath ?? Path.Combine(OutputDirectory, Path.ChangeExtension(outputFileName, ".pdb"));
         }
 
@@ -363,13 +353,8 @@ namespace Microsoft.CodeAnalysis
         /// <param name="metadataResolver"><see cref="MetadataReferenceResolver"/> to use for assembly name and relative path resolution.</param>
         /// <returns>Yields resolved metadata references or <see cref="UnresolvedMetadataReference"/>.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="metadataResolver"/> is null.</exception>
-        public IEnumerable<MetadataReference> ResolveMetadataReferences(MetadataReferenceResolver metadataResolver)
+        public IEnumerable<MetadataReference> ResolveMetadataReferences(MetadataReferenceResolver metadataResolver!!)
         {
-            if (metadataResolver == null)
-            {
-                throw new ArgumentNullException(nameof(metadataResolver));
-            }
-
             return ResolveMetadataReferences(metadataResolver, diagnosticsOpt: null, messageProviderOpt: null);
         }
 

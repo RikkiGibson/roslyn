@@ -40,23 +40,13 @@ namespace Microsoft.CodeAnalysis.Host.Mef
             _exportProvider = exportProvider;
         }
 
-        public static MefV1HostServices Create(ExportProvider exportProvider)
+        public static MefV1HostServices Create(ExportProvider exportProvider!!)
         {
-            if (exportProvider == null)
-            {
-                throw new ArgumentNullException(nameof(exportProvider));
-            }
-
             return new MefV1HostServices(exportProvider);
         }
 
-        public static MefV1HostServices Create(IEnumerable<Assembly> assemblies)
+        public static MefV1HostServices Create(IEnumerable<Assembly> assemblies!!)
         {
-            if (assemblies == null)
-            {
-                throw new ArgumentNullException(nameof(assemblies));
-            }
-
             if (s_CreationHook != null)
             {
                 return s_CreationHook(assemblies);

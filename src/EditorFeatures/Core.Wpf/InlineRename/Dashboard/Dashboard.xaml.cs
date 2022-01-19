@@ -182,9 +182,9 @@ namespace Microsoft.CodeAnalysis.Editor.Implementation.InlineRename
             }
         }
 
-        private void ConnectToPresentationSource(PresentationSource presentationSource)
+        private void ConnectToPresentationSource(PresentationSource presentationSource!!)
         {
-            _presentationSource = presentationSource ?? throw new ArgumentNullException(nameof(presentationSource));
+            _presentationSource = presentationSource;
 
             if (Application.Current != null && Application.Current.MainWindow != null)
             {

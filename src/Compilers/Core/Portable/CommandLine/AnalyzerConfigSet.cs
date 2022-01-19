@@ -185,13 +185,8 @@ namespace Microsoft.CodeAnalysis
         /// </summary>
         /// <param name="sourcePath">The path to a file such as a source file or additional file. Must be non-null.</param>
         /// <remarks>This method is safe to call from multiple threads.</remarks>
-        public AnalyzerConfigOptionsResult GetOptionsForSourcePath(string sourcePath)
+        public AnalyzerConfigOptionsResult GetOptionsForSourcePath(string sourcePath!!)
         {
-            if (sourcePath == null)
-            {
-                throw new ArgumentNullException(nameof(sourcePath));
-            }
-
             var sectionKey = _sectionKeyPool.Allocate();
 
             var normalizedPath = PathUtilities.NormalizeWithForwardSlash(sourcePath);

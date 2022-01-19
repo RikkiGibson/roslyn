@@ -338,13 +338,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// <summary>
         /// Given a namespace symbol, returns the corresponding module specific namespace symbol
         /// </summary>
-        public NamespaceSymbol GetModuleNamespace(INamespaceSymbol namespaceSymbol)
+        public NamespaceSymbol GetModuleNamespace(INamespaceSymbol namespaceSymbol!!)
         {
-            if (namespaceSymbol == null)
-            {
-                throw new ArgumentNullException(nameof(namespaceSymbol));
-            }
-
             if (namespaceSymbol.NamespaceKind == NamespaceKind.Module)
             {
                 var moduleNs = (namespaceSymbol as PublicModel.NamespaceSymbol)?.UnderlyingNamespaceSymbol;

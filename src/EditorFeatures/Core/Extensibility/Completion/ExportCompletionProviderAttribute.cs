@@ -17,11 +17,11 @@ namespace Microsoft.CodeAnalysis.Editor
         public string Name { get; }
         public string Language { get; }
 
-        public ExportCompletionProviderMef1Attribute(string name, string language)
+        public ExportCompletionProviderMef1Attribute(string name!!, string language!!)
             : base(typeof(CompletionProvider))
         {
-            this.Name = name ?? throw new ArgumentNullException(nameof(name));
-            this.Language = language ?? throw new ArgumentNullException(nameof(language));
+            this.Name = name;
+            this.Language = language;
         }
     }
 }

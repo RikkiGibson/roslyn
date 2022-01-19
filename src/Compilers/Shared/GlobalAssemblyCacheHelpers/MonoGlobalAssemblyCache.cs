@@ -160,16 +160,11 @@ namespace Microsoft.CodeAnalysis
         }
 
         public override AssemblyIdentity ResolvePartialName(
-            string displayName,
+            string displayName!!,
             out string location,
             ImmutableArray<ProcessorArchitecture> architectureFilter,
             CultureInfo preferredCulture)
         {
-            if (displayName == null)
-            {
-                throw new ArgumentNullException(nameof(displayName));
-            }
-
             string cultureName = (preferredCulture != null && !preferredCulture.IsNeutralCulture) ? preferredCulture.Name : null;
 
             var assemblyName = new AssemblyName(displayName);

@@ -40,13 +40,8 @@ namespace Microsoft.CodeAnalysis
             }
         }
 
-        protected Task RaiseWorkspaceChangedEventAsync(WorkspaceChangeKind kind, Solution oldSolution, Solution newSolution, ProjectId projectId = null, DocumentId documentId = null)
+        protected Task RaiseWorkspaceChangedEventAsync(WorkspaceChangeKind kind, Solution oldSolution, Solution newSolution!!, ProjectId projectId = null, DocumentId documentId = null)
         {
-            if (newSolution == null)
-            {
-                throw new ArgumentNullException(nameof(newSolution));
-            }
-
             if (oldSolution == newSolution)
             {
                 return Task.CompletedTask;

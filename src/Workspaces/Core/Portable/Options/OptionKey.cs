@@ -17,7 +17,7 @@ namespace Microsoft.CodeAnalysis.Options
         /// <inheritdoc cref="OptionKey2.Language"/>
         public string? Language { get; }
 
-        public OptionKey(IOption option, string? language = null)
+        public OptionKey(IOption option!!, string? language = null)
         {
             if (language != null && !option.IsPerLanguage)
             {
@@ -28,7 +28,7 @@ namespace Microsoft.CodeAnalysis.Options
                 throw new ArgumentNullException(WorkspacesResources.A_language_name_must_be_specified_for_this_option);
             }
 
-            this.Option = option ?? throw new ArgumentNullException(nameof(option));
+            this.Option = option;
             this.Language = language;
         }
 

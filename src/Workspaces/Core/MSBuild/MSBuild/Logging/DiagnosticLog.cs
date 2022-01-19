@@ -29,13 +29,8 @@ namespace Microsoft.CodeAnalysis.MSBuild.Logging
         IEnumerator IEnumerable.GetEnumerator()
             => GetEnumerator();
 
-        public void Add(DiagnosticLogItem item)
+        public void Add(DiagnosticLogItem item!!)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
-
             _items.Add(item);
         }
 

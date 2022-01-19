@@ -132,38 +132,23 @@ namespace Microsoft.CodeAnalysis.Editing
         /// <param name="node">The node to replace that already exists in the tree.</param>
         /// <param name="computeReplacement">A function that computes a replacement node. 
         /// The node passed into the compute function includes changes from prior edits. It will not appear as a descendant of the original root.</param>
-        public void ReplaceNode(SyntaxNode node, Func<SyntaxNode, SyntaxGenerator, SyntaxNode> computeReplacement)
+        public void ReplaceNode(SyntaxNode node, Func<SyntaxNode, SyntaxGenerator, SyntaxNode> computeReplacement!!)
         {
             CheckNodeInOriginalTreeOrTracked(node);
-            if (computeReplacement == null)
-            {
-                throw new ArgumentNullException(nameof(computeReplacement));
-            }
-
             _allowEditsOnLazilyCreatedTrackedNewNodes = true;
             _changes.Add(new ReplaceChange(node, computeReplacement, this));
         }
 
-        internal void ReplaceNode(SyntaxNode node, Func<SyntaxNode, SyntaxGenerator, IEnumerable<SyntaxNode>> computeReplacement)
+        internal void ReplaceNode(SyntaxNode node, Func<SyntaxNode, SyntaxGenerator, IEnumerable<SyntaxNode>> computeReplacement!!)
         {
             CheckNodeInOriginalTreeOrTracked(node);
-            if (computeReplacement == null)
-            {
-                throw new ArgumentNullException(nameof(computeReplacement));
-            }
-
             _allowEditsOnLazilyCreatedTrackedNewNodes = true;
             _changes.Add(new ReplaceWithCollectionChange(node, computeReplacement, this));
         }
 
-        internal void ReplaceNode<TArgument>(SyntaxNode node, Func<SyntaxNode, SyntaxGenerator, TArgument, SyntaxNode> computeReplacement, TArgument argument)
+        internal void ReplaceNode<TArgument>(SyntaxNode node, Func<SyntaxNode, SyntaxGenerator, TArgument, SyntaxNode> computeReplacement!!, TArgument argument)
         {
             CheckNodeInOriginalTreeOrTracked(node);
-            if (computeReplacement == null)
-            {
-                throw new ArgumentNullException(nameof(computeReplacement));
-            }
-
             _allowEditsOnLazilyCreatedTrackedNewNodes = true;
             _changes.Add(new ReplaceChange<TArgument>(node, computeReplacement, argument, this));
         }
@@ -190,14 +175,9 @@ namespace Microsoft.CodeAnalysis.Editing
         /// </summary>
         /// <param name="node">The node already existing in the tree that the new nodes will be placed before. This must be a node this is contained within a syntax list.</param>
         /// <param name="newNodes">The nodes to place before the existing node. These nodes must be of a compatible type to be placed in the same list containing the existing node.</param>
-        public void InsertBefore(SyntaxNode node, IEnumerable<SyntaxNode> newNodes)
+        public void InsertBefore(SyntaxNode node, IEnumerable<SyntaxNode> newNodes!!)
         {
             CheckNodeInOriginalTreeOrTracked(node);
-            if (newNodes == null)
-            {
-                throw new ArgumentNullException(nameof(newNodes));
-            }
-
             newNodes = ApplyTrackingToNewNodes(newNodes);
             _changes.Add(new InsertChange(node, newNodes, isBefore: true));
         }
@@ -215,14 +195,9 @@ namespace Microsoft.CodeAnalysis.Editing
         /// </summary>
         /// <param name="node">The node already existing in the tree that the new nodes will be placed after. This must be a node this is contained within a syntax list.</param>
         /// <param name="newNodes">The nodes to place after the existing node. These nodes must be of a compatible type to be placed in the same list containing the existing node.</param>
-        public void InsertAfter(SyntaxNode node, IEnumerable<SyntaxNode> newNodes)
+        public void InsertAfter(SyntaxNode node, IEnumerable<SyntaxNode> newNodes!!)
         {
             CheckNodeInOriginalTreeOrTracked(node);
-            if (newNodes == null)
-            {
-                throw new ArgumentNullException(nameof(newNodes));
-            }
-
             newNodes = ApplyTrackingToNewNodes(newNodes);
             _changes.Add(new InsertChange(node, newNodes, isBefore: false));
         }
@@ -235,13 +210,8 @@ namespace Microsoft.CodeAnalysis.Editing
         public void InsertAfter(SyntaxNode node, SyntaxNode newNode)
             => this.InsertAfter(node, new[] { newNode });
 
-        private void CheckNodeInOriginalTreeOrTracked(SyntaxNode node)
+        private void CheckNodeInOriginalTreeOrTracked(SyntaxNode node!!)
         {
-            if (node == null)
-            {
-                throw new ArgumentNullException(nameof(node));
-            }
-
             if (OriginalRoot.Contains(node))
             {
                 // Node is contained in the original tree.

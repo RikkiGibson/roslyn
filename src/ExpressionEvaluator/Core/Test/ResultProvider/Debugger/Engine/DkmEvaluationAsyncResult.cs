@@ -16,14 +16,9 @@ namespace Microsoft.VisualStudio.Debugger.Evaluation.ClrCompilation
     {
         private readonly DkmEvaluationResult _result;
 
-        public DkmEvaluationAsyncResult(DkmEvaluationResult Result)
+        public DkmEvaluationAsyncResult(DkmEvaluationResult Result!!)
             : this()
         {
-            if (Result == null)
-            {
-                throw new ArgumentNullException(nameof(Result));
-            }
-
             _result = Result;
         }
 

@@ -23,9 +23,9 @@ namespace Microsoft.CodeAnalysis.CodeActions
         private readonly DocumentId _documentId;
         private readonly int _position;
 
-        public DocumentNavigationOperation(DocumentId documentId, int position = 0)
+        public DocumentNavigationOperation(DocumentId documentId!!, int position = 0)
         {
-            _documentId = documentId ?? throw new ArgumentNullException(nameof(documentId));
+            _documentId = documentId;
             _position = position;
         }
 

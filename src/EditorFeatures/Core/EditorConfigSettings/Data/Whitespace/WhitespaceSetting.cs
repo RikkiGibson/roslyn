@@ -14,9 +14,9 @@ namespace Microsoft.CodeAnalysis.Editor.EditorConfigSettings.Data
         protected OptionUpdater Updater { get; }
         protected string? Language { get; }
 
-        protected WhitespaceSetting(string description, OptionUpdater updater, SettingLocation location, string? language = null)
+        protected WhitespaceSetting(string description!!, OptionUpdater updater, SettingLocation location, string? language = null)
         {
-            Description = description ?? throw new ArgumentNullException(nameof(description));
+            Description = description;
             Updater = updater;
             Location = location;
             Language = language;

@@ -18,13 +18,8 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Gets the workspace associated with the specific text container.
         /// </summary>
-        public static bool TryGetWorkspace(SourceTextContainer textContainer, [NotNullWhen(true)] out Workspace? workspace)
+        public static bool TryGetWorkspace(SourceTextContainer textContainer!!, [NotNullWhen(true)] out Workspace? workspace)
         {
-            if (textContainer == null)
-            {
-                throw new ArgumentNullException(nameof(textContainer));
-            }
-
             var registration = GetWorkspaceRegistration(textContainer);
             workspace = registration.Workspace;
 
@@ -34,13 +29,8 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Register a correspondence between a text container and a workspace.
         /// </summary>
-        protected void RegisterText(SourceTextContainer textContainer)
+        protected void RegisterText(SourceTextContainer textContainer!!)
         {
-            if (textContainer == null)
-            {
-                throw new ArgumentNullException(nameof(textContainer));
-            }
-
             var registration = GetWorkspaceRegistration(textContainer);
             registration.SetWorkspace(this);
             this.ScheduleTask(() =>
@@ -52,13 +42,8 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Unregister a correspondence between a text container and a workspace.
         /// </summary>
-        protected void UnregisterText(SourceTextContainer textContainer)
+        protected void UnregisterText(SourceTextContainer textContainer!!)
         {
-            if (textContainer == null)
-            {
-                throw new ArgumentNullException(nameof(textContainer));
-            }
-
             var registration = GetWorkspaceRegistration(textContainer);
 
             if (registration.Workspace == this)
@@ -75,13 +60,8 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Returns a <see cref="WorkspaceRegistration" /> for a given text container.
         /// </summary>
-        public static WorkspaceRegistration GetWorkspaceRegistration(SourceTextContainer? textContainer)
+        public static WorkspaceRegistration GetWorkspaceRegistration(SourceTextContainer? textContainer!!)
         {
-            if (textContainer == null)
-            {
-                throw new ArgumentNullException(nameof(textContainer));
-            }
-
             return s_bufferToWorkspaceRegistrationMap.GetValue(textContainer, s_createRegistration);
         }
     }

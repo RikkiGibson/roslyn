@@ -146,18 +146,8 @@ namespace Microsoft.CodeAnalysis.Diagnostics
 
         #region Helper methods for public API argument validation
 
-        private static void VerifyArguments(Compilation compilation, ImmutableArray<DiagnosticAnalyzer> analyzers, CompilationWithAnalyzersOptions analysisOptions)
+        private static void VerifyArguments(Compilation compilation!!, ImmutableArray<DiagnosticAnalyzer> analyzers, CompilationWithAnalyzersOptions analysisOptions!!)
         {
-            if (compilation == null)
-            {
-                throw new ArgumentNullException(nameof(compilation));
-            }
-
-            if (analysisOptions == null)
-            {
-                throw new ArgumentNullException(nameof(analysisOptions));
-            }
-
             VerifyAnalyzersArgumentForStaticApis(analyzers);
         }
 
@@ -219,39 +209,24 @@ namespace Microsoft.CodeAnalysis.Diagnostics
             }
         }
 
-        private void VerifyModel(SemanticModel model)
+        private void VerifyModel(SemanticModel model!!)
         {
-            if (model == null)
-            {
-                throw new ArgumentNullException(nameof(model));
-            }
-
             if (!_compilation.ContainsSyntaxTree(model.SyntaxTree))
             {
                 throw new ArgumentException(CodeAnalysisResources.InvalidTree, nameof(model));
             }
         }
 
-        private void VerifyTree(SyntaxTree tree)
+        private void VerifyTree(SyntaxTree tree!!)
         {
-            if (tree == null)
-            {
-                throw new ArgumentNullException(nameof(tree));
-            }
-
             if (!_compilation.ContainsSyntaxTree(tree))
             {
                 throw new ArgumentException(CodeAnalysisResources.InvalidTree, nameof(tree));
             }
         }
 
-        private void VerifyAdditionalFile(AdditionalText file)
+        private void VerifyAdditionalFile(AdditionalText file!!)
         {
-            if (file == null)
-            {
-                throw new ArgumentNullException(nameof(file));
-            }
-
             if (_analysisOptions.Options == null || !_analysisOptions.Options.AdditionalFiles.Contains(file))
             {
                 throw new ArgumentException(CodeAnalysisResources.InvalidAdditionalFile, nameof(file));
@@ -1295,16 +1270,11 @@ namespace Microsoft.CodeAnalysis.Diagnostics
         /// 3) Diagnostic suppression through applied <see cref="System.Diagnostics.CodeAnalysis.SuppressMessageAttribute"/>.
         /// 4) Pragma directives for the given <paramref name="compilation"/>.
         /// </summary>
-        public static IEnumerable<Diagnostic> GetEffectiveDiagnostics(ImmutableArray<Diagnostic> diagnostics, Compilation compilation)
+        public static IEnumerable<Diagnostic> GetEffectiveDiagnostics(ImmutableArray<Diagnostic> diagnostics, Compilation compilation!!)
         {
             if (diagnostics.IsDefault)
             {
                 throw new ArgumentNullException(nameof(diagnostics));
-            }
-
-            if (compilation == null)
-            {
-                throw new ArgumentNullException(nameof(compilation));
             }
 
             return GetEffectiveDiagnosticsImpl(diagnostics, compilation);

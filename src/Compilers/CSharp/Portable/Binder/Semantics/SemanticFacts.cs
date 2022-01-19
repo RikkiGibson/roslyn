@@ -21,20 +21,10 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// properly do protected access checks.
         /// </summary>
         public static bool IsSymbolAccessible(
-            Symbol symbol,
-            NamedTypeSymbol within,
+            Symbol symbol!!,
+            NamedTypeSymbol within!!,
             NamedTypeSymbol throughTypeOpt = null)
         {
-            if ((object)symbol == null)
-            {
-                throw new ArgumentNullException(nameof(symbol));
-            }
-
-            if ((object)within == null)
-            {
-                throw new ArgumentNullException(nameof(within));
-            }
-
             var discardedUseSiteInfo = CompoundUseSiteInfo<AssemblySymbol>.Discarded;
             return AccessCheck.IsSymbolAccessible(
                 symbol,
@@ -47,19 +37,9 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// Checks if 'symbol' is accessible from within assembly 'within'.  
         /// </summary>
         public static bool IsSymbolAccessible(
-            Symbol symbol,
-            AssemblySymbol within)
+            Symbol symbol!!,
+            AssemblySymbol within!!)
         {
-            if ((object)symbol == null)
-            {
-                throw new ArgumentNullException(nameof(symbol));
-            }
-
-            if ((object)within == null)
-            {
-                throw new ArgumentNullException(nameof(within));
-            }
-
             var discardedUseSiteInfo = CompoundUseSiteInfo<AssemblySymbol>.Discarded;
             return AccessCheck.IsSymbolAccessible(symbol, within, ref discardedUseSiteInfo);
         }

@@ -25,17 +25,8 @@ namespace Microsoft.CodeAnalysis.Operations
         /// <summary>
         /// This will check whether context around the operation has any error such as syntax or semantic error
         /// </summary>
-        internal static bool HasErrors(this IOperation operation, Compilation compilation, CancellationToken cancellationToken = default(CancellationToken))
+        internal static bool HasErrors(this IOperation operation!!, Compilation compilation!!, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (operation == null)
-            {
-                throw new ArgumentNullException(nameof(operation));
-            }
-
-            if (compilation == null)
-            {
-                throw new ArgumentNullException(nameof(compilation));
-            }
 
             // once we made sure every operation has Syntax, we will remove this condition
             if (operation.Syntax == null)
@@ -125,13 +116,8 @@ namespace Microsoft.CodeAnalysis.Operations
         /// Gets all the declared local variables in the given <paramref name="declarationGroup"/>.
         /// </summary>
         /// <param name="declarationGroup">Variable declaration group</param>
-        public static ImmutableArray<ILocalSymbol> GetDeclaredVariables(this IVariableDeclarationGroupOperation declarationGroup)
+        public static ImmutableArray<ILocalSymbol> GetDeclaredVariables(this IVariableDeclarationGroupOperation declarationGroup!!)
         {
-            if (declarationGroup == null)
-            {
-                throw new ArgumentNullException(nameof(declarationGroup));
-            }
-
             var arrayBuilder = ArrayBuilder<ILocalSymbol>.GetInstance();
             foreach (IVariableDeclarationOperation group in declarationGroup.Declarations)
             {
@@ -145,13 +131,8 @@ namespace Microsoft.CodeAnalysis.Operations
         /// Gets all the declared local variables in the given <paramref name="declaration"/>.
         /// </summary>
         /// <param name="declaration">Variable declaration</param>
-        public static ImmutableArray<ILocalSymbol> GetDeclaredVariables(this IVariableDeclarationOperation declaration)
+        public static ImmutableArray<ILocalSymbol> GetDeclaredVariables(this IVariableDeclarationOperation declaration!!)
         {
-            if (declaration == null)
-            {
-                throw new ArgumentNullException(nameof(declaration));
-            }
-
             var arrayBuilder = ArrayBuilder<ILocalSymbol>.GetInstance();
             declaration.GetDeclaredVariables(arrayBuilder);
             return arrayBuilder.ToImmutableAndFree();
@@ -170,13 +151,8 @@ namespace Microsoft.CodeAnalysis.Operations
         /// if the single variable initializer is null.
         /// </summary>
         /// <param name="declarationOperation">Single variable declaration to retrieve initializer for.</param>
-        public static IVariableInitializerOperation? GetVariableInitializer(this IVariableDeclaratorOperation declarationOperation)
+        public static IVariableInitializerOperation? GetVariableInitializer(this IVariableDeclaratorOperation declarationOperation!!)
         {
-            if (declarationOperation == null)
-            {
-                throw new ArgumentNullException(nameof(declarationOperation));
-            }
-
             return declarationOperation.Initializer ?? (declarationOperation.Parent as IVariableDeclarationOperation)?.Initializer;
         }
 
@@ -185,13 +161,8 @@ namespace Microsoft.CodeAnalysis.Operations
         /// </summary>
         /// <param name="dynamicOperation">Dynamic or late bound operation.</param>
         /// <param name="index">Argument index.</param>
-        public static string? GetArgumentName(this IDynamicInvocationOperation dynamicOperation, int index)
+        public static string? GetArgumentName(this IDynamicInvocationOperation dynamicOperation!!, int index)
         {
-            if (dynamicOperation == null)
-            {
-                throw new ArgumentNullException(nameof(dynamicOperation));
-            }
-
             return GetArgumentName((HasDynamicArgumentsExpression)dynamicOperation, index);
         }
 
@@ -200,13 +171,8 @@ namespace Microsoft.CodeAnalysis.Operations
         /// </summary>
         /// <param name="dynamicOperation">Dynamic or late bound operation.</param>
         /// <param name="index">Argument index.</param>
-        public static string? GetArgumentName(this IDynamicIndexerAccessOperation dynamicOperation, int index)
+        public static string? GetArgumentName(this IDynamicIndexerAccessOperation dynamicOperation!!, int index)
         {
-            if (dynamicOperation == null)
-            {
-                throw new ArgumentNullException(nameof(dynamicOperation));
-            }
-
             return GetArgumentName((HasDynamicArgumentsExpression)dynamicOperation, index);
         }
 
@@ -215,13 +181,8 @@ namespace Microsoft.CodeAnalysis.Operations
         /// </summary>
         /// <param name="dynamicOperation">Dynamic or late bound operation.</param>
         /// <param name="index">Argument index.</param>
-        public static string? GetArgumentName(this IDynamicObjectCreationOperation dynamicOperation, int index)
+        public static string? GetArgumentName(this IDynamicObjectCreationOperation dynamicOperation!!, int index)
         {
-            if (dynamicOperation == null)
-            {
-                throw new ArgumentNullException(nameof(dynamicOperation));
-            }
-
             return GetArgumentName((HasDynamicArgumentsExpression)dynamicOperation, index);
         }
 
@@ -253,13 +214,8 @@ namespace Microsoft.CodeAnalysis.Operations
         /// </summary>
         /// <param name="dynamicOperation">Dynamic or late bound operation.</param>
         /// <param name="index">Argument index.</param>
-        public static RefKind? GetArgumentRefKind(this IDynamicInvocationOperation dynamicOperation, int index)
+        public static RefKind? GetArgumentRefKind(this IDynamicInvocationOperation dynamicOperation!!, int index)
         {
-            if (dynamicOperation == null)
-            {
-                throw new ArgumentNullException(nameof(dynamicOperation));
-            }
-
             return GetArgumentRefKind((HasDynamicArgumentsExpression)dynamicOperation, index);
         }
 
@@ -270,13 +226,8 @@ namespace Microsoft.CodeAnalysis.Operations
         /// </summary>
         /// <param name="dynamicOperation">Dynamic or late bound operation.</param>
         /// <param name="index">Argument index.</param>
-        public static RefKind? GetArgumentRefKind(this IDynamicIndexerAccessOperation dynamicOperation, int index)
+        public static RefKind? GetArgumentRefKind(this IDynamicIndexerAccessOperation dynamicOperation!!, int index)
         {
-            if (dynamicOperation == null)
-            {
-                throw new ArgumentNullException(nameof(dynamicOperation));
-            }
-
             return GetArgumentRefKind((HasDynamicArgumentsExpression)dynamicOperation, index);
         }
 
@@ -287,13 +238,8 @@ namespace Microsoft.CodeAnalysis.Operations
         /// </summary>
         /// <param name="dynamicOperation">Dynamic or late bound operation.</param>
         /// <param name="index">Argument index.</param>
-        public static RefKind? GetArgumentRefKind(this IDynamicObjectCreationOperation dynamicOperation, int index)
+        public static RefKind? GetArgumentRefKind(this IDynamicObjectCreationOperation dynamicOperation!!, int index)
         {
-            if (dynamicOperation == null)
-            {
-                throw new ArgumentNullException(nameof(dynamicOperation));
-            }
-
             return GetArgumentRefKind((HasDynamicArgumentsExpression)dynamicOperation, index);
         }
 
@@ -348,13 +294,8 @@ namespace Microsoft.CodeAnalysis.Operations
         /// <returns>The corresponding operation or <c>null</c> in case not found (e.g. no loop or switch syntax, or the branch is not a break or continue)</returns>
         /// <exception cref="ArgumentNullException"><paramref name="operation"/> is null</exception>
         /// <exception cref="InvalidOperationException">The operation is a part of Control Flow Graph</exception>
-        public static IOperation? GetCorrespondingOperation(this IBranchOperation operation)
+        public static IOperation? GetCorrespondingOperation(this IBranchOperation operation!!)
         {
-            if (operation == null)
-            {
-                throw new ArgumentNullException(nameof(operation));
-            }
-
             if (operation.SemanticModel == null)
             {
                 throw new InvalidOperationException(CodeAnalysisResources.OperationMustNotBeControlFlowGraphPart);

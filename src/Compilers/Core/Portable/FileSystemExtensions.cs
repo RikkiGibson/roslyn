@@ -30,7 +30,7 @@ namespace Microsoft.CodeAnalysis
         /// <exception cref="ArgumentException">Path is empty or invalid.</exception>
         /// <exception cref="IOException">An error occurred while reading or writing a file.</exception>
         public static EmitResult Emit(
-            this Compilation compilation,
+            this Compilation compilation!!,
             string outputPath,
             string? pdbPath = null,
             string? xmlDocPath = null,
@@ -38,11 +38,6 @@ namespace Microsoft.CodeAnalysis
             IEnumerable<ResourceDescription>? manifestResources = null,
             CancellationToken cancellationToken = default)
         {
-            if (compilation == null)
-            {
-                throw new ArgumentNullException(nameof(compilation));
-            }
-
             using (var outputStream = FileUtilities.CreateFileStreamChecked(File.Create, outputPath, nameof(outputPath)))
             using (var pdbStream = (pdbPath == null ? null : FileUtilities.CreateFileStreamChecked(File.Create, pdbPath, nameof(pdbPath))))
             using (var xmlDocStream = (xmlDocPath == null ? null : FileUtilities.CreateFileStreamChecked(File.Create, xmlDocPath, nameof(xmlDocPath))))

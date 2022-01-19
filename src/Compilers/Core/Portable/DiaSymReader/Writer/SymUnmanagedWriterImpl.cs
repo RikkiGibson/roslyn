@@ -48,12 +48,8 @@ namespace Microsoft.DiaSymReader
         /// <summary>
         /// Writes the content to the given stream. The writer is disposed and can't be used for further writing.
         /// </summary>
-        public override void WriteTo(Stream stream)
+        public override void WriteTo(Stream stream!!)
         {
-            if (stream == null)
-            {
-                throw new ArgumentNullException(nameof(stream));
-            }
 
             // SymWriter flushes data to the native stream on close.
             // Closing the writer also ensures no further modifications.
@@ -141,13 +137,8 @@ namespace Microsoft.DiaSymReader
             }
         }
 
-        public override int DefineDocument(string name, Guid language, Guid vendor, Guid type, Guid algorithmId, ReadOnlySpan<byte> checksum, ReadOnlySpan<byte> source)
+        public override int DefineDocument(string name!!, Guid language, Guid vendor, Guid type, Guid algorithmId, ReadOnlySpan<byte> checksum, ReadOnlySpan<byte> source)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
             var symWriter = GetSymWriter();
 
             int index = _documentWriters.Count;
@@ -203,18 +194,12 @@ namespace Microsoft.DiaSymReader
             return index;
         }
 
-        public override void DefineSequencePoints(int documentIndex, int count, int[] offsets, int[] startLines, int[] startColumns, int[] endLines, int[] endColumns)
+        public override void DefineSequencePoints(int documentIndex, int count, int[] offsets!!, int[] startLines!!, int[] startColumns!!, int[] endLines!!, int[] endColumns!!)
         {
             if (documentIndex < 0 || documentIndex >= _documentWriters.Count)
             {
                 throw new ArgumentOutOfRangeException(nameof(documentIndex));
             }
-
-            if (offsets == null) throw new ArgumentNullException(nameof(offsets));
-            if (startLines == null) throw new ArgumentNullException(nameof(startLines));
-            if (startColumns == null) throw new ArgumentNullException(nameof(startColumns));
-            if (endLines == null) throw new ArgumentNullException(nameof(endLines));
-            if (endColumns == null) throw new ArgumentNullException(nameof(endColumns));
 
             if (count < 0 || count > startLines.Length || count > startColumns.Length || count > endLines.Length || count > endColumns.Length)
             {
@@ -449,13 +434,8 @@ namespace Microsoft.DiaSymReader
             return true;
         }
 
-        public override void UsingNamespace(string importString)
+        public override void UsingNamespace(string importString!!)
         {
-            if (importString == null)
-            {
-                throw new ArgumentNullException(nameof(importString));
-            }
-
             var symWriter = GetSymWriter();
 
             try
@@ -529,13 +509,8 @@ namespace Microsoft.DiaSymReader
             }
         }
 
-        public override unsafe void DefineCustomMetadata(byte[] metadata)
+        public override unsafe void DefineCustomMetadata(byte[] metadata!!)
         {
-            if (metadata == null)
-            {
-                throw new ArgumentNullException(nameof(metadata));
-            }
-
             if (metadata.Length == 0)
             {
                 return;
@@ -585,13 +560,8 @@ namespace Microsoft.DiaSymReader
             }
         }
 
-        public override unsafe void SetSourceServerData(byte[] data)
+        public override unsafe void SetSourceServerData(byte[] data!!)
         {
-            if (data == null)
-            {
-                throw new ArgumentNullException(nameof(data));
-            }
-
             if (data.Length == 0)
             {
                 return;
@@ -612,13 +582,8 @@ namespace Microsoft.DiaSymReader
             }
         }
 
-        public override unsafe void SetSourceLinkData(byte[] data)
+        public override unsafe void SetSourceLinkData(byte[] data!!)
         {
-            if (data == null)
-            {
-                throw new ArgumentNullException(nameof(data));
-            }
-
             if (data.Length == 0)
             {
                 return;
@@ -750,13 +715,8 @@ namespace Microsoft.DiaSymReader
             ((IPdbWriter)symWriter).GetSignatureAge(out stamp, out age);
         }
 
-        public override void AddCompilerInfo(ushort major, ushort minor, ushort build, ushort revision, string name)
+        public override void AddCompilerInfo(ushort major, ushort minor, ushort build, ushort revision, string name!!)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
             var symWriter = GetSymWriter();
             if (symWriter is not ISymUnmanagedCompilerInfoWriter infoWriter)
             {

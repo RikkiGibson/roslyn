@@ -41,13 +41,8 @@ namespace Microsoft.CodeAnalysis.Editor.Implementation.Adornments
 
         protected abstract void CreateAdornmentManager(IWpfTextView textView);
 
-        public void TextViewCreated(IWpfTextView textView)
+        public void TextViewCreated(IWpfTextView textView!!)
         {
-            if (textView == null)
-            {
-                throw new ArgumentNullException(nameof(textView));
-            }
-
             if (!GlobalOptions.GetOption(EditorComponentOnOffOptions.Adornment))
             {
                 return;

@@ -10,13 +10,8 @@ namespace Roslyn.Utilities
 {
     internal static class ICollectionExtensions
     {
-        public static void AddRange<T>(this ICollection<T> collection, IEnumerable<T>? values)
+        public static void AddRange<T>(this ICollection<T> collection!!, IEnumerable<T>? values)
         {
-            if (collection == null)
-            {
-                throw new ArgumentNullException(nameof(collection));
-            }
-
             if (values != null)
             {
                 foreach (var item in values)
@@ -26,13 +21,8 @@ namespace Roslyn.Utilities
             }
         }
 
-        public static void AddRange<T>(this ICollection<T> collection, ImmutableArray<T> values)
+        public static void AddRange<T>(this ICollection<T> collection!!, ImmutableArray<T> values)
         {
-            if (collection == null)
-            {
-                throw new ArgumentNullException(nameof(collection));
-            }
-
             if (!values.IsDefault)
             {
                 foreach (var item in values)

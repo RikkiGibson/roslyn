@@ -44,13 +44,8 @@ namespace Microsoft.CodeAnalysis
         /// Creates an id string used by external documentation comment files to identify declarations
         /// of types, namespaces, methods, properties, etc.
         /// </summary>
-        public static string CreateDeclarationId(ISymbol symbol)
+        public static string CreateDeclarationId(ISymbol symbol!!)
         {
-            if (symbol == null)
-            {
-                throw new ArgumentNullException(nameof(symbol));
-            }
-
             var builder = new StringBuilder();
             var generator = new DeclarationGenerator(builder);
             generator.Visit(symbol);
@@ -61,13 +56,8 @@ namespace Microsoft.CodeAnalysis
         /// Creates an id string used to reference type symbols (not strictly declarations, includes
         /// arrays, pointers, type parameters, etc.)
         /// </summary>
-        public static string CreateReferenceId(ISymbol symbol)
+        public static string CreateReferenceId(ISymbol symbol!!)
         {
-            if (symbol == null)
-            {
-                throw new ArgumentNullException(nameof(symbol));
-            }
-
             if (symbol is INamespaceSymbol)
             {
                 return CreateDeclarationId(symbol);
@@ -82,18 +72,8 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Gets all declaration symbols that match the declaration id string
         /// </summary>
-        public static ImmutableArray<ISymbol> GetSymbolsForDeclarationId(string id, Compilation compilation)
+        public static ImmutableArray<ISymbol> GetSymbolsForDeclarationId(string id!!, Compilation compilation!!)
         {
-            if (id == null)
-            {
-                throw new ArgumentNullException(nameof(id));
-            }
-
-            if (compilation == null)
-            {
-                throw new ArgumentNullException(nameof(compilation));
-            }
-
             var results = s_symbolListPool.Allocate();
             try
             {
@@ -110,41 +90,16 @@ namespace Microsoft.CodeAnalysis
         /// Try to get all the declaration symbols that match the declaration id string.
         /// Returns true if at least one symbol matches.
         /// </summary>
-        private static bool TryGetSymbolsForDeclarationId(string id, Compilation compilation, List<ISymbol> results)
+        private static bool TryGetSymbolsForDeclarationId(string id!!, Compilation compilation!!, List<ISymbol> results!!)
         {
-            if (id == null)
-            {
-                throw new ArgumentNullException(nameof(id));
-            }
-
-            if (compilation == null)
-            {
-                throw new ArgumentNullException(nameof(compilation));
-            }
-
-            if (results == null)
-            {
-                throw new ArgumentNullException(nameof(results));
-            }
-
             return Parser.ParseDeclaredSymbolId(id, compilation, results);
         }
 
         /// <summary>
         /// Gets the first declaration symbol that matches the declaration id string, order undefined.
         /// </summary>
-        public static ISymbol? GetFirstSymbolForDeclarationId(string id, Compilation compilation)
+        public static ISymbol? GetFirstSymbolForDeclarationId(string id!!, Compilation compilation!!)
         {
-            if (id == null)
-            {
-                throw new ArgumentNullException(nameof(id));
-            }
-
-            if (compilation == null)
-            {
-                throw new ArgumentNullException(nameof(compilation));
-            }
-
             var results = s_symbolListPool.Allocate();
             try
             {
@@ -160,18 +115,8 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Gets the symbols that match the reference id string.
         /// </summary>
-        public static ImmutableArray<ISymbol> GetSymbolsForReferenceId(string id, Compilation compilation)
+        public static ImmutableArray<ISymbol> GetSymbolsForReferenceId(string id!!, Compilation compilation!!)
         {
-            if (id == null)
-            {
-                throw new ArgumentNullException(nameof(id));
-            }
-
-            if (compilation == null)
-            {
-                throw new ArgumentNullException(nameof(compilation));
-            }
-
             var results = s_symbolListPool.Allocate();
             try
             {
@@ -188,23 +133,8 @@ namespace Microsoft.CodeAnalysis
         /// Try to get all symbols that match the reference id string.
         /// Returns true if at least one symbol matches.
         /// </summary>
-        private static bool TryGetSymbolsForReferenceId(string id, Compilation compilation, List<ISymbol> results)
+        private static bool TryGetSymbolsForReferenceId(string id!!, Compilation compilation!!, List<ISymbol> results!!)
         {
-            if (id == null)
-            {
-                throw new ArgumentNullException(nameof(id));
-            }
-
-            if (compilation == null)
-            {
-                throw new ArgumentNullException(nameof(compilation));
-            }
-
-            if (results == null)
-            {
-                throw new ArgumentNullException(nameof(results));
-            }
-
             if (id.Length > 1 && id[0] == 'N' && id[1] == ':')
             {
                 return TryGetSymbolsForDeclarationId(id, compilation, results);
@@ -216,18 +146,8 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Gets the first symbol that matches the reference id string, order undefined.
         /// </summary>
-        public static ISymbol? GetFirstSymbolForReferenceId(string id, Compilation compilation)
+        public static ISymbol? GetFirstSymbolForReferenceId(string id!!, Compilation compilation!!)
         {
-            if (id == null)
-            {
-                throw new ArgumentNullException(nameof(id));
-            }
-
-            if (compilation == null)
-            {
-                throw new ArgumentNullException(nameof(compilation));
-            }
-
             if (id.Length > 1 && id[0] == 'N' && id[1] == ':')
             {
                 return GetFirstSymbolForDeclarationId(id, compilation);

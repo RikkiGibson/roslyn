@@ -27,13 +27,8 @@ namespace Microsoft.CodeAnalysis
             this.Version = version;
         }
 
-        public static TreeAndVersion Create(SyntaxTree tree, VersionStamp version)
+        public static TreeAndVersion Create(SyntaxTree tree!!, VersionStamp version)
         {
-            if (tree == null)
-            {
-                throw new ArgumentNullException(nameof(tree));
-            }
-
             return new TreeAndVersion(tree, version);
         }
     }

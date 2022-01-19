@@ -166,13 +166,8 @@ namespace Microsoft.CodeAnalysis
         /// This method does not guarantee that linked files will have the same contents. Callers
         /// should enforce that policy before passing in the new solution.
         /// </remarks>
-        protected Solution SetCurrentSolution(Solution solution)
+        protected Solution SetCurrentSolution(Solution solution!!)
         {
-            if (solution is null)
-            {
-                throw new ArgumentNullException(nameof(solution));
-            }
-
             var currentSolution = Volatile.Read(ref _latestSolution);
             if (solution == currentSolution)
             {

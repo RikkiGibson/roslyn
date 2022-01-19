@@ -20,13 +20,8 @@ namespace Microsoft.CodeAnalysis
         private readonly Lazy<SourceText?> _text;
         private IList<DiagnosticInfo> _diagnostics;
 
-        public AdditionalTextFile(CommandLineSourceFile sourceFile, CommonCompiler compiler)
+        public AdditionalTextFile(CommandLineSourceFile sourceFile, CommonCompiler compiler!!)
         {
-            if (compiler == null)
-            {
-                throw new ArgumentNullException(nameof(compiler));
-            }
-
             _sourceFile = sourceFile;
             _compiler = compiler;
             _diagnostics = SpecializedCollections.EmptyList<DiagnosticInfo>();

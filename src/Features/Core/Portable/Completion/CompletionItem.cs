@@ -368,13 +368,8 @@ namespace Microsoft.CodeAnalysis.Completion
         /// <summary>
         /// Creates a copy of this <see cref="CompletionItem"/> with a tag added to the <see cref="Tags"/> collection.
         /// </summary>
-        public CompletionItem AddTag(string tag)
+        public CompletionItem AddTag(string tag!!)
         {
-            if (tag == null)
-            {
-                throw new ArgumentNullException(nameof(tag));
-            }
-
             if (Tags.Contains(tag))
             {
                 return this;

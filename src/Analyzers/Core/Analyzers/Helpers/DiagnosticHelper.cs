@@ -36,18 +36,13 @@ namespace Microsoft.CodeAnalysis.Diagnostics
         /// <param name="messageArgs">Arguments to the message of the diagnostic.</param>
         /// <returns>The <see cref="Diagnostic"/> instance.</returns>
         public static Diagnostic Create(
-            DiagnosticDescriptor descriptor,
+            DiagnosticDescriptor descriptor!!,
             Location location,
             ReportDiagnostic effectiveSeverity,
             IEnumerable<Location>? additionalLocations,
             ImmutableDictionary<string, string?>? properties,
             params object[] messageArgs)
         {
-            if (descriptor == null)
-            {
-                throw new ArgumentNullException(nameof(descriptor));
-            }
-
             LocalizableString message;
             if (messageArgs == null || messageArgs.Length == 0)
             {
@@ -225,18 +220,13 @@ namespace Microsoft.CodeAnalysis.Diagnostics
         /// <param name="message">Localizable message for the diagnostic.</param>
         /// <returns>The <see cref="Diagnostic"/> instance.</returns>
         public static Diagnostic CreateWithMessage(
-            DiagnosticDescriptor descriptor,
+            DiagnosticDescriptor descriptor!!,
             Location location,
             ReportDiagnostic effectiveSeverity,
             IEnumerable<Location>? additionalLocations,
             ImmutableDictionary<string, string?>? properties,
             LocalizableString message)
         {
-            if (descriptor == null)
-            {
-                throw new ArgumentNullException(nameof(descriptor));
-            }
-
             return Diagnostic.Create(
                 descriptor.Id,
                 descriptor.Category,
@@ -276,18 +266,8 @@ namespace Microsoft.CodeAnalysis.Diagnostics
             static LocalizableStringWithArguments()
                 => ObjectBinder.RegisterTypeReader(typeof(LocalizableStringWithArguments), reader => new LocalizableStringWithArguments(reader));
 
-            public LocalizableStringWithArguments(LocalizableString messageFormat, params object[] formatArguments)
+            public LocalizableStringWithArguments(LocalizableString messageFormat!!, params object[] formatArguments!!)
             {
-                if (messageFormat == null)
-                {
-                    throw new ArgumentNullException(nameof(messageFormat));
-                }
-
-                if (formatArguments == null)
-                {
-                    throw new ArgumentNullException(nameof(formatArguments));
-                }
-
                 _messageFormat = messageFormat;
                 _formatArguments = new string[formatArguments.Length];
                 for (var i = 0; i < formatArguments.Length; i++)

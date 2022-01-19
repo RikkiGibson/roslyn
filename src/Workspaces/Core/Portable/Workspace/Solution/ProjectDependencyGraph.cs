@@ -211,13 +211,8 @@ namespace Microsoft.CodeAnalysis
         /// Gets the list of projects that directly or transitively this project depends on, if it has already been
         /// cached.
         /// </summary>
-        internal ImmutableHashSet<ProjectId>? TryGetProjectsThatThisProjectTransitivelyDependsOn(ProjectId projectId)
+        internal ImmutableHashSet<ProjectId>? TryGetProjectsThatThisProjectTransitivelyDependsOn(ProjectId projectId!!)
         {
-            if (projectId is null)
-            {
-                throw new ArgumentNullException(nameof(projectId));
-            }
-
             _transitiveReferencesMap.TryGetValue(projectId, out var projects);
             return projects;
         }
@@ -512,13 +507,8 @@ namespace Microsoft.CodeAnalysis
             /// Gets the list of projects that directly or transitively depend on this project, if it has already been
             /// cached.
             /// </summary>
-            public ImmutableHashSet<ProjectId>? TryGetProjectsThatTransitivelyDependOnThisProject(ProjectId projectId)
+            public ImmutableHashSet<ProjectId>? TryGetProjectsThatTransitivelyDependOnThisProject(ProjectId projectId!!)
             {
-                if (projectId is null)
-                {
-                    throw new ArgumentNullException(nameof(projectId));
-                }
-
                 _instance._reverseTransitiveReferencesMap.TryGetValue(projectId, out var projects);
                 return projects;
             }

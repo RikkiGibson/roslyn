@@ -82,7 +82,7 @@ namespace Microsoft.CodeAnalysis.CodeFixes
         /// </param>
         /// <param name="cancellationToken">Cancellation token for fix all computation.</param>
         public FixAllContext(
-            Document document,
+            Document document!!,
             CodeFixProvider codeFixProvider,
             FixAllScope scope,
             string codeActionEquivalenceKey,
@@ -92,10 +92,6 @@ namespace Microsoft.CodeAnalysis.CodeFixes
             : this(new FixAllState(null, document, codeFixProvider, scope, codeActionEquivalenceKey, diagnosticIds, fixAllDiagnosticProvider),
                   new ProgressTracker(), cancellationToken)
         {
-            if (document == null)
-            {
-                throw new ArgumentNullException(nameof(document));
-            }
         }
 
         /// <summary>
@@ -112,7 +108,7 @@ namespace Microsoft.CodeAnalysis.CodeFixes
         /// </param>
         /// <param name="cancellationToken">Cancellation token for fix all computation.</param>
         public FixAllContext(
-            Project project,
+            Project project!!,
             CodeFixProvider codeFixProvider,
             FixAllScope scope,
             string codeActionEquivalenceKey,
@@ -122,10 +118,6 @@ namespace Microsoft.CodeAnalysis.CodeFixes
             : this(new FixAllState(null, project, codeFixProvider, scope, codeActionEquivalenceKey, diagnosticIds, fixAllDiagnosticProvider),
                   new ProgressTracker(), cancellationToken)
         {
-            if (project == null)
-            {
-                throw new ArgumentNullException(nameof(project));
-            }
         }
 
         internal FixAllContext(
@@ -141,13 +133,8 @@ namespace Microsoft.CodeAnalysis.CodeFixes
         /// <summary>
         /// Gets all the diagnostics in the given document filtered by <see cref="DiagnosticIds"/>.
         /// </summary>
-        public async Task<ImmutableArray<Diagnostic>> GetDocumentDiagnosticsAsync(Document document)
+        public async Task<ImmutableArray<Diagnostic>> GetDocumentDiagnosticsAsync(Document document!!)
         {
-            if (document == null)
-            {
-                throw new ArgumentNullException(nameof(document));
-            }
-
             if (this.Project.Language != document.Project.Language)
             {
                 return ImmutableArray<Diagnostic>.Empty;
@@ -174,13 +161,8 @@ namespace Microsoft.CodeAnalysis.CodeFixes
         /// <summary>
         /// Gets all the project-level diagnostics, i.e. diagnostics with no source location, in the given project filtered by <see cref="DiagnosticIds"/>.
         /// </summary>
-        public Task<ImmutableArray<Diagnostic>> GetProjectDiagnosticsAsync(Project project)
+        public Task<ImmutableArray<Diagnostic>> GetProjectDiagnosticsAsync(Project project!!)
         {
-            if (project == null)
-            {
-                throw new ArgumentNullException(nameof(project));
-            }
-
             return GetProjectDiagnosticsAsync(project, includeAllDocumentDiagnostics: false);
         }
 
@@ -188,13 +170,8 @@ namespace Microsoft.CodeAnalysis.CodeFixes
         /// Gets all the diagnostics in the given project filtered by <see cref="DiagnosticIds"/>.
         /// This includes both document-level diagnostics for all documents in the given project and project-level diagnostics, i.e. diagnostics with no source location, in the given project. 
         /// </summary>
-        public Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsAsync(Project project)
+        public Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsAsync(Project project!!)
         {
-            if (project == null)
-            {
-                throw new ArgumentNullException(nameof(project));
-            }
-
             return GetProjectDiagnosticsAsync(project, includeAllDocumentDiagnostics: true);
         }
 

@@ -25,9 +25,9 @@ namespace Microsoft.CodeAnalysis.ExternalAccess.Razor
         [ImportingConstructor]
         [Obsolete(MefConstruction.ImportingConstructorMessage, error: true)]
         public RazorDynamicFileInfoProviderWrapper(
-            Lazy<IRazorDynamicFileInfoProvider> innerDynamicFileInfoProvider)
+            Lazy<IRazorDynamicFileInfoProvider> innerDynamicFileInfoProvider!!)
         {
-            _innerDynamicFileInfoProvider = innerDynamicFileInfoProvider ?? throw new ArgumentNullException(nameof(innerDynamicFileInfoProvider));
+            _innerDynamicFileInfoProvider = innerDynamicFileInfoProvider;
         }
 
         public async Task<DynamicFileInfo?> GetDynamicFileInfoAsync(ProjectId projectId, string projectFilePath, string filePath, CancellationToken cancellationToken)

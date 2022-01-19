@@ -37,7 +37,7 @@ namespace Microsoft.CodeAnalysis.Host.Mef
         /// <param name="type">The type that will be used to retrieve the service from a <see cref="HostLanguageServices"/>.</param>
         /// <param name="language">The language that the service is target for; LanguageNames.CSharp, etc.</param>
         /// <param name="layer">The layer that the service is specified for; ServiceLayer.Default, etc.</param>
-        public ExportLanguageServiceFactoryAttribute(Type type, string language, string layer = ServiceLayer.Default)
+        public ExportLanguageServiceFactoryAttribute(Type type, string language!!, string layer = ServiceLayer.Default)
             : base(typeof(ILanguageServiceFactory))
         {
             if (type == null)
@@ -46,7 +46,7 @@ namespace Microsoft.CodeAnalysis.Host.Mef
             }
 
             this.ServiceType = type.AssemblyQualifiedName;
-            this.Language = language ?? throw new ArgumentNullException(nameof(language));
+            this.Language = language;
             this.Layer = layer;
         }
     }

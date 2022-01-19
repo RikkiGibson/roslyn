@@ -128,18 +128,8 @@ namespace Microsoft.CodeAnalysis.CodeFixes
         /// </summary>
         /// <param name="action">The <see cref="CodeAction"/> that will be invoked to apply the fix.</param>
         /// <param name="diagnostic">The subset of <see cref="Diagnostics"/> being addressed / fixed by the <paramref name="action"/>.</param>
-        public void RegisterCodeFix(CodeAction action, Diagnostic diagnostic)
+        public void RegisterCodeFix(CodeAction action!!, Diagnostic diagnostic!!)
         {
-            if (action == null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
-
-            if (diagnostic == null)
-            {
-                throw new ArgumentNullException(nameof(diagnostic));
-            }
-
             _registerCodeFix(action, ImmutableArray.Create(diagnostic));
         }
 
@@ -148,13 +138,8 @@ namespace Microsoft.CodeAnalysis.CodeFixes
         /// </summary>
         /// <param name="action">The <see cref="CodeAction"/> that will be invoked to apply the fix.</param>
         /// <param name="diagnostics">The subset of <see cref="Diagnostics"/> being addressed / fixed by the <paramref name="action"/>.</param>
-        public void RegisterCodeFix(CodeAction action, IEnumerable<Diagnostic> diagnostics)
+        public void RegisterCodeFix(CodeAction action, IEnumerable<Diagnostic> diagnostics!!)
         {
-            if (diagnostics == null)
-            {
-                throw new ArgumentNullException(nameof(diagnostics));
-            }
-
             RegisterCodeFix(action, diagnostics.ToImmutableArray());
         }
 
@@ -163,13 +148,8 @@ namespace Microsoft.CodeAnalysis.CodeFixes
         /// </summary>
         /// <param name="action">The <see cref="CodeAction"/> that will be invoked to apply the fix.</param>
         /// <param name="diagnostics">The subset of <see cref="Diagnostics"/> being addressed / fixed by the <paramref name="action"/>.</param>
-        public void RegisterCodeFix(CodeAction action, ImmutableArray<Diagnostic> diagnostics)
+        public void RegisterCodeFix(CodeAction action!!, ImmutableArray<Diagnostic> diagnostics)
         {
-            if (action == null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
-
             VerifyDiagnosticsArgument(diagnostics, _span);
 
             // TODO: 

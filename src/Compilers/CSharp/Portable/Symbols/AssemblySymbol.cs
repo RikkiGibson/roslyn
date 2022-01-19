@@ -348,13 +348,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// The name should refer to a non-nested type. If type with this name is not forwarded,
         /// null is returned.
         /// </summary>
-        public NamedTypeSymbol ResolveForwardedType(string fullyQualifiedMetadataName)
+        public NamedTypeSymbol ResolveForwardedType(string fullyQualifiedMetadataName!!)
         {
-            if (fullyQualifiedMetadataName == null)
-            {
-                throw new ArgumentNullException(nameof(fullyQualifiedMetadataName));
-            }
-
             var emittedName = MetadataTypeName.FromFullName(fullyQualifiedMetadataName);
             return TryLookupForwardedMetadataType(ref emittedName);
         }
@@ -572,13 +567,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// </summary>
         /// <param name="fullyQualifiedMetadataName">Type name.</param>
         /// <returns>Symbol for the type or null if type cannot be found or is ambiguous. </returns>
-        public NamedTypeSymbol? GetTypeByMetadataName(string fullyQualifiedMetadataName)
+        public NamedTypeSymbol? GetTypeByMetadataName(string fullyQualifiedMetadataName!!)
         {
-            if (fullyQualifiedMetadataName == null)
-            {
-                throw new ArgumentNullException(nameof(fullyQualifiedMetadataName));
-            }
-
             return this.GetTypeByMetadataName(fullyQualifiedMetadataName, includeReferences: false, isWellKnownType: false, conflicts: out var _);
         }
 

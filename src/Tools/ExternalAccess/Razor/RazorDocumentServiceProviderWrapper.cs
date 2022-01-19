@@ -18,9 +18,9 @@ namespace Microsoft.CodeAnalysis.ExternalAccess.Razor
         private StrongBox<IDocumentExcerptService?>? _lazyExcerptService;
         private StrongBox<DocumentPropertiesService?>? _lazyDocumentPropertiesService;
 
-        public RazorDocumentServiceProviderWrapper(IRazorDocumentServiceProvider innerDocumentServiceProvider)
+        public RazorDocumentServiceProviderWrapper(IRazorDocumentServiceProvider innerDocumentServiceProvider!!)
         {
-            _innerDocumentServiceProvider = innerDocumentServiceProvider ?? throw new ArgumentNullException(nameof(innerDocumentServiceProvider));
+            _innerDocumentServiceProvider = innerDocumentServiceProvider;
         }
 
         public bool CanApplyChange => _innerDocumentServiceProvider.CanApplyChange;

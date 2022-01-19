@@ -39,11 +39,11 @@ namespace Microsoft.CodeAnalysis.Editor.ReferenceHighlighting
         [ImportingConstructor]
         [Obsolete(MefConstruction.ImportingConstructorMessage, error: true)]
         public NavigateToHighlightReferenceCommandHandler(
-            IOutliningManagerService outliningManagerService,
-            IViewTagAggregatorFactoryService tagAggregatorFactory)
+            IOutliningManagerService outliningManagerService!!,
+            IViewTagAggregatorFactoryService tagAggregatorFactory!!)
         {
-            _outliningManagerService = outliningManagerService ?? throw new ArgumentNullException(nameof(outliningManagerService));
-            _tagAggregatorFactory = tagAggregatorFactory ?? throw new ArgumentNullException(nameof(tagAggregatorFactory));
+            _outliningManagerService = outliningManagerService;
+            _tagAggregatorFactory = tagAggregatorFactory;
         }
 
         public CommandState GetCommandState(NavigateToNextHighlightedReferenceCommandArgs args)

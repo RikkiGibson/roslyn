@@ -40,11 +40,8 @@ namespace Microsoft.CodeAnalysis.Collections
         }
 
         /// <inheritdoc cref="ImmutableList.ToImmutableList{TSource}(ImmutableList{TSource}.Builder)"/>
-        public static ImmutableSegmentedList<T> ToImmutableSegmentedList<T>(this ImmutableSegmentedList<T>.Builder builder)
+        public static ImmutableSegmentedList<T> ToImmutableSegmentedList<T>(this ImmutableSegmentedList<T>.Builder builder!!)
         {
-            if (builder is null)
-                throw new ArgumentNullException(nameof(builder));
-
             return builder.ToImmutable();
         }
     }

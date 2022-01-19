@@ -143,13 +143,8 @@ namespace Microsoft.CodeAnalysis.CodeGeneration
         protected static T Cast<T>(object value)
             => (T)value;
 
-        protected static void CheckDeclarationNode<TDeclarationNode>(SyntaxNode destination) where TDeclarationNode : SyntaxNode
+        protected static void CheckDeclarationNode<TDeclarationNode>(SyntaxNode destination!!) where TDeclarationNode : SyntaxNode
         {
-            if (destination == null)
-            {
-                throw new ArgumentNullException(nameof(destination));
-            }
-
             if (destination is not TDeclarationNode)
             {
                 throw new ArgumentException(
@@ -158,15 +153,10 @@ namespace Microsoft.CodeAnalysis.CodeGeneration
             }
         }
 
-        protected static void CheckDeclarationNode<TDeclarationNode1, TDeclarationNode2>(SyntaxNode destination)
+        protected static void CheckDeclarationNode<TDeclarationNode1, TDeclarationNode2>(SyntaxNode destination!!)
             where TDeclarationNode1 : SyntaxNode
             where TDeclarationNode2 : SyntaxNode
         {
-            if (destination == null)
-            {
-                throw new ArgumentNullException(nameof(destination));
-            }
-
             if (destination is not TDeclarationNode1 and
                 not TDeclarationNode2)
             {
@@ -177,16 +167,11 @@ namespace Microsoft.CodeAnalysis.CodeGeneration
             }
         }
 
-        protected static void CheckDeclarationNode<TDeclarationNode1, TDeclarationNode2, TDeclarationNode3>(SyntaxNode destination)
+        protected static void CheckDeclarationNode<TDeclarationNode1, TDeclarationNode2, TDeclarationNode3>(SyntaxNode destination!!)
             where TDeclarationNode1 : SyntaxNode
             where TDeclarationNode2 : SyntaxNode
             where TDeclarationNode3 : SyntaxNode
         {
-            if (destination == null)
-            {
-                throw new ArgumentNullException(nameof(destination));
-            }
-
             if (destination is not TDeclarationNode1 and
                 not TDeclarationNode2 and
                 not TDeclarationNode3)
@@ -450,13 +435,8 @@ namespace Microsoft.CodeAnalysis.CodeGeneration
                 cancellationToken);
         }
 
-        public Task<Document> AddNamespaceOrTypeAsync(Solution solution, INamespaceSymbol destination, INamespaceOrTypeSymbol namespaceOrType, CodeGenerationContext context, CancellationToken cancellationToken)
+        public Task<Document> AddNamespaceOrTypeAsync(Solution solution, INamespaceSymbol destination, INamespaceOrTypeSymbol namespaceOrType!!, CodeGenerationContext context, CancellationToken cancellationToken)
         {
-            if (namespaceOrType == null)
-            {
-                throw new ArgumentNullException(nameof(namespaceOrType));
-            }
-
             if (namespaceOrType is INamespaceSymbol namespaceSymbol)
             {
                 return AddNamespaceAsync(solution, destination, namespaceSymbol, context, cancellationToken);

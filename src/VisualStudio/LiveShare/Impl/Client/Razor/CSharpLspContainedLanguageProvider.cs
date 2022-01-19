@@ -24,13 +24,13 @@ namespace Microsoft.VisualStudio.LanguageServices.LiveShare.Client.Razor
 
         [ImportingConstructor]
         [Obsolete(MefConstruction.ImportingConstructorMessage, error: true)]
-        public CSharpLspContainedLanguageProvider(IContentTypeRegistryService contentTypeRegistry,
-            SVsServiceProvider serviceProvider,
-            CSharpLspRazorProjectFactory razorProjectFactory)
+        public CSharpLspContainedLanguageProvider(IContentTypeRegistryService contentTypeRegistry!!,
+            SVsServiceProvider serviceProvider!!,
+            CSharpLspRazorProjectFactory razorProjectFactory!!)
         {
-            _contentTypeRegistry = contentTypeRegistry ?? throw new ArgumentNullException(nameof(contentTypeRegistry));
-            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-            _razorProjectFactory = razorProjectFactory ?? throw new ArgumentNullException(nameof(razorProjectFactory));
+            _contentTypeRegistry = contentTypeRegistry;
+            _serviceProvider = serviceProvider;
+            _razorProjectFactory = razorProjectFactory;
         }
 
         public IContentType GetContentType(string filePath)

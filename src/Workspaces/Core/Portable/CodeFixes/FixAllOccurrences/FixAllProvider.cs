@@ -51,11 +51,8 @@ namespace Microsoft.CodeAnalysis.CodeFixes
         /// of it (like attributes), or changes to the <see cref="Project"/> or <see cref="Solution"/> it points at
         /// will be considered.
         /// </param>
-        public static FixAllProvider Create(Func<FixAllContext, Document, ImmutableArray<Diagnostic>, Task<Document?>> fixAllAsync)
+        public static FixAllProvider Create(Func<FixAllContext, Document, ImmutableArray<Diagnostic>, Task<Document?>> fixAllAsync!!)
         {
-            if (fixAllAsync == null)
-                throw new ArgumentNullException(nameof(fixAllAsync));
-
             return new CallbackDocumentBasedFixAllProvider(fixAllAsync);
         }
 

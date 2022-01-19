@@ -13,9 +13,9 @@ namespace Microsoft.CodeAnalysis.Options
     {
         public static readonly OptionGroup Default = new(string.Empty, int.MaxValue);
 
-        public OptionGroup(string description, int priority)
+        public OptionGroup(string description!!, int priority)
         {
-            Description = description ?? throw new ArgumentNullException(nameof(description));
+            Description = description;
             Priority = priority;
         }
 

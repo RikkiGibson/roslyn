@@ -44,18 +44,8 @@ namespace Microsoft.CodeAnalysis.Scripting.Hosting
 
         public PrintOptions PrintOptions { get; }
 
-        public InteractiveScriptGlobals(TextWriter outputWriter, ObjectFormatter objectFormatter)
+        public InteractiveScriptGlobals(TextWriter outputWriter!!, ObjectFormatter objectFormatter!!)
         {
-            if (outputWriter == null)
-            {
-                throw new ArgumentNullException(nameof(outputWriter));
-            }
-
-            if (objectFormatter == null)
-            {
-                throw new ArgumentNullException(nameof(objectFormatter));
-            }
-
             Debug.Assert(outputWriter != null);
             Debug.Assert(objectFormatter != null);
 

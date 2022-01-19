@@ -11,9 +11,9 @@ namespace Microsoft.CodeAnalysis
     /// </summary>
     internal sealed class SyntaxContextReceiverAdaptor : ISyntaxContextReceiver
     {
-        private SyntaxContextReceiverAdaptor(ISyntaxReceiver receiver)
+        private SyntaxContextReceiverAdaptor(ISyntaxReceiver receiver!!)
         {
-            Receiver = receiver ?? throw new ArgumentNullException(nameof(receiver));
+            Receiver = receiver;
         }
 
         public ISyntaxReceiver Receiver { get; }

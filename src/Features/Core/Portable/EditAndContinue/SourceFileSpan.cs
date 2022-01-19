@@ -37,9 +37,9 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
         /// <param name="path">The file identifier - typically a relative or absolute path.</param>
         /// <param name="span">The span.</param>
         /// <exception cref="ArgumentNullException"><paramref name="path"/> is null.</exception>
-        public SourceFileSpan(string path, LinePositionSpan span)
+        public SourceFileSpan(string path!!, LinePositionSpan span)
         {
-            Path = path ?? throw new ArgumentNullException(nameof(path));
+            Path = path;
             Span = span;
         }
 

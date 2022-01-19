@@ -68,10 +68,10 @@ namespace Microsoft.CodeAnalysis.Host
             {
                 public static readonly CodeStyleAttributedModelProvider Instance = new();
 
-                public override IEnumerable<Attribute> GetCustomAttributes(Type reflectedType, MemberInfo member)
+                public override IEnumerable<Attribute> GetCustomAttributes(Type reflectedType!!, MemberInfo member!!)
                 {
-                    _ = reflectedType ?? throw new ArgumentNullException(nameof(reflectedType));
-                    _ = member ?? throw new ArgumentNullException(nameof(member));
+                    _ = reflectedType;
+                    _ = member;
 
                     if (member is not System.Reflection.TypeInfo && (object)member.DeclaringType != reflectedType)
                         return Array.Empty<Attribute>();
@@ -79,10 +79,10 @@ namespace Microsoft.CodeAnalysis.Host
                     return FilterCustomAttributes(CustomAttributeExtensions.GetCustomAttributes(member, inherit: false));
                 }
 
-                public override IEnumerable<Attribute> GetCustomAttributes(Type reflectedType, ParameterInfo parameter)
+                public override IEnumerable<Attribute> GetCustomAttributes(Type reflectedType!!, ParameterInfo parameter!!)
                 {
-                    _ = reflectedType ?? throw new ArgumentNullException(nameof(reflectedType));
-                    _ = parameter ?? throw new ArgumentNullException(nameof(parameter));
+                    _ = reflectedType;
+                    _ = parameter;
 
                     return FilterCustomAttributes(CustomAttributeExtensions.GetCustomAttributes(parameter, inherit: false));
                 }

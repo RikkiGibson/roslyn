@@ -78,13 +78,8 @@ namespace Microsoft.SourceLink.Tools
         /// <exception cref="ArgumentNullException"><paramref name="json"/> is null.</exception>
         /// <exception cref="InvalidDataException">The JSON does not follow Source Link specification.</exception>
         /// <exception cref="JsonException"><paramref name="json"/> is not valid JSON string.</exception>
-        public static SourceLinkMap Parse(string json)
+        public static SourceLinkMap Parse(string json!!)
         {
-            if (json is null)
-            {
-                throw new ArgumentNullException(nameof(json));
-            }
-
             var list = new List<Entry>();
 
             var root = JsonDocument.Parse(json, new JsonDocumentOptions() { AllowTrailingCommas = true }).RootElement;
@@ -184,17 +179,12 @@ namespace Microsoft.SourceLink.Tools
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="path"/> is null.</exception>
         public bool TryGetUri(
-            string path,
+            string path!!,
 #if NETCOREAPP
             [NotNullWhen(true)]
 #endif
             out string? uri)
         {
-            if (path == null)
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-
             if (path.IndexOf('*') >= 0)
             {
                 uri = null;

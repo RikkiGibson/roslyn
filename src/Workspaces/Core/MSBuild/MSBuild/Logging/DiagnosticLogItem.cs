@@ -12,10 +12,10 @@ namespace Microsoft.CodeAnalysis.MSBuild.Logging
         public string Message { get; }
         public string ProjectFilePath { get; }
 
-        public DiagnosticLogItem(WorkspaceDiagnosticKind kind, string message, string projectFilePath)
+        public DiagnosticLogItem(WorkspaceDiagnosticKind kind, string message!!, string projectFilePath)
         {
             Kind = kind;
-            Message = message ?? throw new ArgumentNullException(nameof(message));
+            Message = message;
             ProjectFilePath = projectFilePath ?? throw new ArgumentNullException(nameof(message));
         }
 

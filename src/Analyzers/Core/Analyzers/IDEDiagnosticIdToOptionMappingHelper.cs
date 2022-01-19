@@ -27,21 +27,14 @@ namespace Microsoft.CodeAnalysis.Diagnostics
                (s_diagnosticIdToLanguageSpecificOptionsMap.TryGetValue(language, out var map) &&
                 map.TryGetValue(diagnosticId, out options));
 
-        public static void AddOptionMapping(string diagnosticId, ImmutableHashSet<IPerLanguageOption> perLanguageOptions)
+        public static void AddOptionMapping(string diagnosticId!!, ImmutableHashSet<IPerLanguageOption> perLanguageOptions!!)
         {
-            diagnosticId = diagnosticId ?? throw new ArgumentNullException(nameof(diagnosticId));
-            perLanguageOptions = perLanguageOptions ?? throw new ArgumentNullException(nameof(perLanguageOptions));
-
             var options = perLanguageOptions.Cast<IOption2>().ToImmutableHashSet();
             AddOptionMapping(s_diagnosticIdToOptionMap, diagnosticId, options);
         }
 
-        public static void AddOptionMapping(string diagnosticId, ImmutableHashSet<ILanguageSpecificOption> languageSpecificOptions, string language)
+        public static void AddOptionMapping(string diagnosticId!!, ImmutableHashSet<ILanguageSpecificOption> languageSpecificOptions!!, string language!!)
         {
-            diagnosticId = diagnosticId ?? throw new ArgumentNullException(nameof(diagnosticId));
-            languageSpecificOptions = languageSpecificOptions ?? throw new ArgumentNullException(nameof(languageSpecificOptions));
-            language = language ?? throw new ArgumentNullException(nameof(language));
-
             var map = s_diagnosticIdToLanguageSpecificOptionsMap.GetOrAdd(language, _ => new ConcurrentDictionary<string, ImmutableHashSet<IOption2>>());
             var options = languageSpecificOptions.Cast<IOption2>().ToImmutableHashSet();
             AddOptionMapping(map, diagnosticId, options);

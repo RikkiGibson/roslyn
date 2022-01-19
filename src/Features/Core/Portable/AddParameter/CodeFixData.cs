@@ -13,12 +13,12 @@ namespace Microsoft.CodeAnalysis.AddParameter
     internal readonly struct CodeFixData
     {
         public CodeFixData(
-            IMethodSymbol method,
-            Func<CancellationToken, Task<Solution>> createChangedSolutionNonCascading,
+            IMethodSymbol method!!,
+            Func<CancellationToken, Task<Solution>> createChangedSolutionNonCascading!!,
             Func<CancellationToken, Task<Solution>> createChangedSolutionCascading)
         {
-            Method = method ?? throw new ArgumentNullException(nameof(method));
-            CreateChangedSolutionNonCascading = createChangedSolutionNonCascading ?? throw new ArgumentNullException(nameof(createChangedSolutionNonCascading));
+            Method = method;
+            CreateChangedSolutionNonCascading = createChangedSolutionNonCascading;
             CreateChangedSolutionCascading = createChangedSolutionCascading;
         }
 

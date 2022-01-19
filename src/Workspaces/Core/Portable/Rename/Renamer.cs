@@ -20,14 +20,8 @@ namespace Microsoft.CodeAnalysis.Rename
     public static partial class Renamer
     {
         public static async Task<Solution> RenameSymbolAsync(
-            Solution solution, ISymbol symbol, string newName, OptionSet optionSet, CancellationToken cancellationToken = default)
+            Solution solution!!, ISymbol symbol!!, string newName, OptionSet optionSet, CancellationToken cancellationToken = default)
         {
-            if (solution == null)
-                throw new ArgumentNullException(nameof(solution));
-
-            if (symbol == null)
-                throw new ArgumentNullException(nameof(symbol));
-
             if (string.IsNullOrEmpty(newName))
                 throw new ArgumentException(nameof(newName));
 
@@ -65,17 +59,12 @@ namespace Microsoft.CodeAnalysis.Rename
         /// <param name="newDocumentName">The new name for the document. Pass null or the same name to keep unchanged.</param>
         /// <param name="newDocumentFolders">The new set of folders for the <see cref="TextDocument.Folders"/> property</param>
         public static async Task<RenameDocumentActionSet> RenameDocumentAsync(
-            Document document,
+            Document document!!,
             string newDocumentName,
             IReadOnlyList<string>? newDocumentFolders = null,
             OptionSet? optionSet = null,
             CancellationToken cancellationToken = default)
         {
-            if (document is null)
-            {
-                throw new ArgumentNullException(nameof(document));
-            }
-
             if (document.Services.GetService<ISpanMappingService>() != null)
             {
                 // Don't advertise that we can file rename generated documents that map to a different file.

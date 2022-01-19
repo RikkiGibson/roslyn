@@ -28,13 +28,8 @@ namespace Microsoft.CodeAnalysis.Editor.Implementation.SmartIndent
             _globalOptions = globalOptions;
         }
 
-        public ISmartIndent CreateSmartIndent(ITextView textView)
+        public ISmartIndent CreateSmartIndent(ITextView textView!!)
         {
-            if (textView == null)
-            {
-                throw new ArgumentNullException(nameof(textView));
-            }
-
             if (!_globalOptions.GetOption(InternalFeatureOnOffOptions.SmartIndenter))
             {
                 return null;

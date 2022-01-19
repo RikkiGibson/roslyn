@@ -20,9 +20,9 @@ namespace Microsoft.CodeAnalysis.Editor.Shared.Utilities
 
         internal IThreadingContext ThreadingContext => _threadingContext;
 
-        public ForegroundThreadAffinitizedObject(IThreadingContext threadingContext, bool assertIsForeground = false)
+        public ForegroundThreadAffinitizedObject(IThreadingContext threadingContext!!, bool assertIsForeground = false)
         {
-            _threadingContext = threadingContext ?? throw new ArgumentNullException(nameof(threadingContext));
+            _threadingContext = threadingContext;
 
             // ForegroundThreadAffinitizedObject might not necessarily be created on a foreground thread.
             // AssertIsForeground here only if the object must be created on a foreground thread.

@@ -27,11 +27,8 @@ namespace Microsoft.CodeAnalysis.Collections
         /// <paramref name="transformer"/> function; otherwise, <see langword="false"/> if the location's value remained
         /// the same because the last invocation of <paramref name="transformer"/> returned the existing value.
         /// </returns>
-        public static bool Update<T>(ref ImmutableSegmentedList<T> location, Func<ImmutableSegmentedList<T>, ImmutableSegmentedList<T>> transformer)
+        public static bool Update<T>(ref ImmutableSegmentedList<T> location, Func<ImmutableSegmentedList<T>, ImmutableSegmentedList<T>> transformer!!)
         {
-            if (transformer is null)
-                throw new ArgumentNullException(nameof(transformer));
-
             var oldValue = ImmutableSegmentedList<T>.PrivateInterlocked.VolatileRead(in location);
             while (true)
             {
@@ -68,11 +65,8 @@ namespace Microsoft.CodeAnalysis.Collections
         /// <paramref name="transformer"/> function; otherwise, <see langword="false"/> if the location's value remained
         /// the same because the last invocation of <paramref name="transformer"/> returned the existing value.
         /// </returns>
-        public static bool Update<T, TArg>(ref ImmutableSegmentedList<T> location, Func<ImmutableSegmentedList<T>, TArg, ImmutableSegmentedList<T>> transformer, TArg transformerArgument)
+        public static bool Update<T, TArg>(ref ImmutableSegmentedList<T> location, Func<ImmutableSegmentedList<T>, TArg, ImmutableSegmentedList<T>> transformer!!, TArg transformerArgument)
         {
-            if (transformer is null)
-                throw new ArgumentNullException(nameof(transformer));
-
             var oldValue = ImmutableSegmentedList<T>.PrivateInterlocked.VolatileRead(in location);
             while (true)
             {
@@ -149,12 +143,9 @@ namespace Microsoft.CodeAnalysis.Collections
         /// <paramref name="transformer"/> function; otherwise, <see langword="false"/> if the location's value remained
         /// the same because the last invocation of <paramref name="transformer"/> returned the existing value.
         /// </returns>
-        public static bool Update<TKey, TValue>(ref ImmutableSegmentedDictionary<TKey, TValue> location, Func<ImmutableSegmentedDictionary<TKey, TValue>, ImmutableSegmentedDictionary<TKey, TValue>> transformer)
+        public static bool Update<TKey, TValue>(ref ImmutableSegmentedDictionary<TKey, TValue> location, Func<ImmutableSegmentedDictionary<TKey, TValue>, ImmutableSegmentedDictionary<TKey, TValue>> transformer!!)
             where TKey : notnull
         {
-            if (transformer is null)
-                throw new ArgumentNullException(nameof(transformer));
-
             var oldValue = ImmutableSegmentedDictionary<TKey, TValue>.PrivateInterlocked.VolatileRead(in location);
             while (true)
             {
@@ -192,12 +183,9 @@ namespace Microsoft.CodeAnalysis.Collections
         /// <paramref name="transformer"/> function; otherwise, <see langword="false"/> if the location's value remained
         /// the same because the last invocation of <paramref name="transformer"/> returned the existing value.
         /// </returns>
-        public static bool Update<TKey, TValue, TArg>(ref ImmutableSegmentedDictionary<TKey, TValue> location, Func<ImmutableSegmentedDictionary<TKey, TValue>, TArg, ImmutableSegmentedDictionary<TKey, TValue>> transformer, TArg transformerArgument)
+        public static bool Update<TKey, TValue, TArg>(ref ImmutableSegmentedDictionary<TKey, TValue> location, Func<ImmutableSegmentedDictionary<TKey, TValue>, TArg, ImmutableSegmentedDictionary<TKey, TValue>> transformer!!, TArg transformerArgument)
             where TKey : notnull
         {
-            if (transformer is null)
-                throw new ArgumentNullException(nameof(transformer));
-
             var oldValue = ImmutableSegmentedDictionary<TKey, TValue>.PrivateInterlocked.VolatileRead(in location);
             while (true)
             {
@@ -264,12 +252,9 @@ namespace Microsoft.CodeAnalysis.Collections
         }
 
         /// <inheritdoc cref="ImmutableInterlocked.GetOrAdd{TKey, TValue, TArg}(ref ImmutableDictionary{TKey, TValue}, TKey, Func{TKey, TArg, TValue}, TArg)"/>
-        public static TValue GetOrAdd<TKey, TValue, TArg>(ref ImmutableSegmentedDictionary<TKey, TValue> location, TKey key, Func<TKey, TArg, TValue> valueFactory, TArg factoryArgument)
+        public static TValue GetOrAdd<TKey, TValue, TArg>(ref ImmutableSegmentedDictionary<TKey, TValue> location, TKey key, Func<TKey, TArg, TValue> valueFactory!!, TArg factoryArgument)
             where TKey : notnull
         {
-            if (valueFactory is null)
-                throw new ArgumentNullException(nameof(valueFactory));
-
             var map = ImmutableSegmentedDictionary<TKey, TValue>.PrivateInterlocked.VolatileRead(in location);
             if (map.IsDefault)
                 throw new ArgumentNullException(nameof(location));
@@ -284,12 +269,9 @@ namespace Microsoft.CodeAnalysis.Collections
         }
 
         /// <inheritdoc cref="ImmutableInterlocked.GetOrAdd{TKey, TValue}(ref ImmutableDictionary{TKey, TValue}, TKey, Func{TKey, TValue})"/>
-        public static TValue GetOrAdd<TKey, TValue>(ref ImmutableSegmentedDictionary<TKey, TValue> location, TKey key, Func<TKey, TValue> valueFactory)
+        public static TValue GetOrAdd<TKey, TValue>(ref ImmutableSegmentedDictionary<TKey, TValue> location, TKey key, Func<TKey, TValue> valueFactory!!)
             where TKey : notnull
         {
-            if (valueFactory is null)
-                throw new ArgumentNullException(nameof(valueFactory));
-
             var map = ImmutableSegmentedDictionary<TKey, TValue>.PrivateInterlocked.VolatileRead(in location);
             if (map.IsDefault)
                 throw new ArgumentNullException(nameof(location));
@@ -332,14 +314,9 @@ namespace Microsoft.CodeAnalysis.Collections
         }
 
         /// <inheritdoc cref="ImmutableInterlocked.AddOrUpdate{TKey, TValue}(ref ImmutableDictionary{TKey, TValue}, TKey, Func{TKey, TValue}, Func{TKey, TValue, TValue})"/>
-        public static TValue AddOrUpdate<TKey, TValue>(ref ImmutableSegmentedDictionary<TKey, TValue> location, TKey key, Func<TKey, TValue> addValueFactory, Func<TKey, TValue, TValue> updateValueFactory)
+        public static TValue AddOrUpdate<TKey, TValue>(ref ImmutableSegmentedDictionary<TKey, TValue> location, TKey key, Func<TKey, TValue> addValueFactory!!, Func<TKey, TValue, TValue> updateValueFactory!!)
             where TKey : notnull
         {
-            if (addValueFactory is null)
-                throw new ArgumentNullException(nameof(addValueFactory));
-            if (updateValueFactory is null)
-                throw new ArgumentNullException(nameof(updateValueFactory));
-
             TValue newValue;
             var priorCollection = ImmutableSegmentedDictionary<TKey, TValue>.PrivateInterlocked.VolatileRead(in location);
             while (true)
@@ -370,12 +347,9 @@ namespace Microsoft.CodeAnalysis.Collections
         }
 
         /// <inheritdoc cref="ImmutableInterlocked.AddOrUpdate{TKey, TValue}(ref ImmutableDictionary{TKey, TValue}, TKey, TValue, Func{TKey, TValue, TValue})"/>
-        public static TValue AddOrUpdate<TKey, TValue>(ref ImmutableSegmentedDictionary<TKey, TValue> location, TKey key, TValue addValue, Func<TKey, TValue, TValue> updateValueFactory)
+        public static TValue AddOrUpdate<TKey, TValue>(ref ImmutableSegmentedDictionary<TKey, TValue> location, TKey key, TValue addValue, Func<TKey, TValue, TValue> updateValueFactory!!)
             where TKey : notnull
         {
-            if (updateValueFactory is null)
-                throw new ArgumentNullException(nameof(updateValueFactory));
-
             TValue newValue;
             var priorCollection = ImmutableSegmentedDictionary<TKey, TValue>.PrivateInterlocked.VolatileRead(in location);
             while (true)

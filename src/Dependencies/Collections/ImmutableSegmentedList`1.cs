@@ -399,11 +399,8 @@ namespace Microsoft.CodeAnalysis.Collections
         }
 
         /// <inheritdoc cref="ImmutableList{T}.RemoveRange(IEnumerable{T})"/>
-        public ImmutableSegmentedList<T> RemoveRange(IEnumerable<T> items)
+        public ImmutableSegmentedList<T> RemoveRange(IEnumerable<T> items!!)
         {
-            if (items is null)
-                throw new ArgumentNullException(nameof(items));
-
             var self = this;
 
             if (self.IsEmpty)
@@ -423,11 +420,8 @@ namespace Microsoft.CodeAnalysis.Collections
         }
 
         /// <inheritdoc cref="ImmutableList{T}.RemoveRange(IEnumerable{T}, IEqualityComparer{T}?)"/>
-        public ImmutableSegmentedList<T> RemoveRange(IEnumerable<T> items, IEqualityComparer<T>? equalityComparer)
+        public ImmutableSegmentedList<T> RemoveRange(IEnumerable<T> items!!, IEqualityComparer<T>? equalityComparer)
         {
-            if (items is null)
-                throw new ArgumentNullException(nameof(items));
-
             var self = this;
 
             if (self.IsEmpty)

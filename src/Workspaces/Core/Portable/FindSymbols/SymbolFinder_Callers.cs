@@ -30,13 +30,8 @@ namespace Microsoft.CodeAnalysis.FindSymbols
         /// Finds all the callers of a specified symbol.
         /// </summary>
         public static async Task<IEnumerable<SymbolCallerInfo>> FindCallersAsync(
-            ISymbol symbol, Solution solution, IImmutableSet<Document>? documents, CancellationToken cancellationToken = default)
+            ISymbol symbol!!, Solution solution!!, IImmutableSet<Document>? documents, CancellationToken cancellationToken = default)
         {
-            if (symbol is null)
-                throw new System.ArgumentNullException(nameof(symbol));
-            if (solution is null)
-                throw new System.ArgumentNullException(nameof(solution));
-
             symbol = symbol.OriginalDefinition;
             var foundSymbol = await FindSourceDefinitionAsync(symbol, solution, cancellationToken).ConfigureAwait(false);
             symbol = foundSymbol ?? symbol;

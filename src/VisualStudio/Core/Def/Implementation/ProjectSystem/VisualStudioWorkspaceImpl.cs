@@ -584,16 +584,11 @@ namespace Microsoft.VisualStudio.LanguageServices.Implementation.ProjectSystem
             parseOptionsService.Apply(options, storage);
         }
 
-        protected override void ApplyAnalyzerReferenceAdded(ProjectId projectId, AnalyzerReference analyzerReference)
+        protected override void ApplyAnalyzerReferenceAdded(ProjectId projectId, AnalyzerReference analyzerReference!!)
         {
             if (projectId == null)
             {
                 throw new ArgumentNullException(nameof(projectId));
-            }
-
-            if (analyzerReference == null)
-            {
-                throw new ArgumentNullException(nameof(analyzerReference));
             }
 
             GetProjectData(projectId, out _, out var project);
@@ -606,16 +601,11 @@ namespace Microsoft.VisualStudio.LanguageServices.Implementation.ProjectSystem
             }
         }
 
-        protected override void ApplyAnalyzerReferenceRemoved(ProjectId projectId, AnalyzerReference analyzerReference)
+        protected override void ApplyAnalyzerReferenceRemoved(ProjectId projectId, AnalyzerReference analyzerReference!!)
         {
             if (projectId == null)
             {
                 throw new ArgumentNullException(nameof(projectId));
-            }
-
-            if (analyzerReference == null)
-            {
-                throw new ArgumentNullException(nameof(analyzerReference));
             }
 
             GetProjectData(projectId, out _, out var project);
@@ -639,16 +629,11 @@ namespace Microsoft.VisualStudio.LanguageServices.Implementation.ProjectSystem
         }
 
         protected override void ApplyMetadataReferenceAdded(
-            ProjectId projectId, MetadataReference metadataReference)
+            ProjectId projectId, MetadataReference metadataReference!!)
         {
             if (projectId == null)
             {
                 throw new ArgumentNullException(nameof(projectId));
-            }
-
-            if (metadataReference == null)
-            {
-                throw new ArgumentNullException(nameof(metadataReference));
             }
 
             GetProjectData(projectId, out _, out var project);
@@ -665,16 +650,11 @@ namespace Microsoft.VisualStudio.LanguageServices.Implementation.ProjectSystem
         }
 
         protected override void ApplyMetadataReferenceRemoved(
-            ProjectId projectId, MetadataReference metadataReference)
+            ProjectId projectId, MetadataReference metadataReference!!)
         {
             if (projectId == null)
             {
                 throw new ArgumentNullException(nameof(projectId));
-            }
-
-            if (metadataReference == null)
-            {
-                throw new ArgumentNullException(nameof(metadataReference));
             }
 
             GetProjectData(projectId, out _, out var project);

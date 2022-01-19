@@ -19,9 +19,9 @@ namespace Microsoft.CodeAnalysis.Collections.Internal
     {
         private readonly IDictionary<K, V> _dict;
 
-        public IDictionaryDebugView(IDictionary<K, V> dictionary)
+        public IDictionaryDebugView(IDictionary<K, V> dictionary!!)
         {
-            _dict = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
+            _dict = dictionary;
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
@@ -40,9 +40,9 @@ namespace Microsoft.CodeAnalysis.Collections.Internal
     {
         private readonly ICollection<TKey> _collection;
 
-        public DictionaryKeyCollectionDebugView(ICollection<TKey> collection)
+        public DictionaryKeyCollectionDebugView(ICollection<TKey> collection!!)
         {
-            _collection = collection ?? throw new ArgumentNullException(nameof(collection));
+            _collection = collection;
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
@@ -61,9 +61,9 @@ namespace Microsoft.CodeAnalysis.Collections.Internal
     {
         private readonly ICollection<TValue> _collection;
 
-        public DictionaryValueCollectionDebugView(ICollection<TValue> collection)
+        public DictionaryValueCollectionDebugView(ICollection<TValue> collection!!)
         {
-            _collection = collection ?? throw new ArgumentNullException(nameof(collection));
+            _collection = collection;
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]

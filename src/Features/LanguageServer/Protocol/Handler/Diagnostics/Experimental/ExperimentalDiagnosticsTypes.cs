@@ -23,13 +23,13 @@ internal class DocumentDiagnosticParams : IPartialResultParams<DocumentDiagnosti
 {
     [JsonConstructor]
     public DocumentDiagnosticParams(
-        TextDocumentIdentifier textDocument,
+        TextDocumentIdentifier textDocument!!,
         string? identifier,
         string? previousResultId,
         IProgress<DocumentDiagnosticPartialReport[]>? partialResultToken,
         IProgress<DocumentDiagnosticPartialReport[]>? workDoneToken)
     {
-        TextDocument = textDocument ?? throw new ArgumentNullException(nameof(textDocument));
+        TextDocument = textDocument;
         Identifier = identifier;
         PreviousResultId = previousResultId;
         PartialResultToken = partialResultToken;
@@ -66,10 +66,10 @@ internal enum DocumentDiagnosticReportKind
 internal class FullDocumentDiagnosticReport
 {
     [JsonConstructor]
-    public FullDocumentDiagnosticReport(string? resultId, VisualStudio.LanguageServer.Protocol.Diagnostic[] items)
+    public FullDocumentDiagnosticReport(string? resultId, VisualStudio.LanguageServer.Protocol.Diagnostic[] items!!)
     {
         ResultId = resultId;
-        Items = items ?? throw new ArgumentNullException(nameof(items));
+        Items = items;
     }
 
     [JsonProperty(PropertyName = "kind", Required = Required.Always)]
@@ -100,9 +100,9 @@ internal class UnchangedDocumentDiagnosticReport
 internal class DocumentDiagnosticPartialResult
 {
     [JsonConstructor]
-    public DocumentDiagnosticPartialResult(Dictionary<Uri, DocumentDiagnosticReport> relatedDocuments)
+    public DocumentDiagnosticPartialResult(Dictionary<Uri, DocumentDiagnosticReport> relatedDocuments!!)
     {
-        RelatedDocuments = relatedDocuments ?? throw new ArgumentNullException(nameof(relatedDocuments));
+        RelatedDocuments = relatedDocuments;
     }
 
     [JsonProperty(PropertyName = "relatedDocuments", Required = Required.Always)]
@@ -140,10 +140,10 @@ internal class WorkspaceDiagnosticParams : IPartialResultParams<WorkspaceDiagnos
 internal class PreviousResultId
 {
     [JsonConstructor]
-    public PreviousResultId(Uri uri, string value)
+    public PreviousResultId(Uri uri!!, string value!!)
     {
-        Uri = uri ?? throw new ArgumentNullException(nameof(uri));
-        Value = value ?? throw new ArgumentNullException(nameof(value));
+        Uri = uri;
+        Value = value;
     }
 
     [JsonProperty(PropertyName = "uri", Required = Required.Always)]
@@ -157,9 +157,9 @@ internal class PreviousResultId
 internal class WorkspaceDiagnosticReport
 {
     [JsonConstructor]
-    public WorkspaceDiagnosticReport(WorkspaceDocumentDiagnosticReport[] items)
+    public WorkspaceDiagnosticReport(WorkspaceDocumentDiagnosticReport[] items!!)
     {
-        Items = items ?? throw new ArgumentNullException(nameof(items));
+        Items = items;
     }
 
     [JsonProperty(PropertyName = "items", Required = Required.Always)]
@@ -170,12 +170,12 @@ internal class WorkspaceFullDocumentDiagnosticReport : FullDocumentDiagnosticRep
 {
     [JsonConstructor]
     public WorkspaceFullDocumentDiagnosticReport(
-        Uri uri,
+        Uri uri!!,
         VisualStudio.LanguageServer.Protocol.Diagnostic[] items,
         int? version,
         string? resultId) : base(resultId, items)
     {
-        Uri = uri ?? throw new ArgumentNullException(nameof(uri));
+        Uri = uri;
         Version = version;
     }
 
@@ -190,9 +190,9 @@ internal class WorkspaceFullDocumentDiagnosticReport : FullDocumentDiagnosticRep
 internal class WorkspaceUnchangedDocumentDiagnosticReport : UnchangedDocumentDiagnosticReport
 {
     [JsonConstructor]
-    public WorkspaceUnchangedDocumentDiagnosticReport(Uri uri, string? resultId, int? version) : base(resultId)
+    public WorkspaceUnchangedDocumentDiagnosticReport(Uri uri!!, string? resultId, int? version) : base(resultId)
     {
-        Uri = uri ?? throw new ArgumentNullException(nameof(uri));
+        Uri = uri;
         Version = version;
     }
 

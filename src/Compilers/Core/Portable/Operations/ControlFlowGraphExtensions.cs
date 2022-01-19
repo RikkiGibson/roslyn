@@ -13,18 +13,8 @@ namespace Microsoft.CodeAnalysis.FlowAnalysis
         /// Gets or creates a control flow graph for the given <paramref name="localFunction"/> defined in
         /// the given <paramref name="controlFlowGraph"/> or any of it's parent control flow graphs.
         /// </summary>
-        public static ControlFlowGraph GetLocalFunctionControlFlowGraphInScope(this ControlFlowGraph controlFlowGraph, IMethodSymbol localFunction, CancellationToken cancellationToken = default)
+        public static ControlFlowGraph GetLocalFunctionControlFlowGraphInScope(this ControlFlowGraph controlFlowGraph!!, IMethodSymbol localFunction!!, CancellationToken cancellationToken = default)
         {
-            if (controlFlowGraph == null)
-            {
-                throw new ArgumentNullException(nameof(controlFlowGraph));
-            }
-
-            if (localFunction == null)
-            {
-                throw new ArgumentNullException(nameof(localFunction));
-            }
-
             ControlFlowGraph? currentGraph = controlFlowGraph;
             do
             {
@@ -42,18 +32,8 @@ namespace Microsoft.CodeAnalysis.FlowAnalysis
         /// Gets or creates a control flow graph for the given <paramref name="anonymousFunction"/> defined in
         /// the given <paramref name="controlFlowGraph"/> or any of it's parent control flow graphs.
         /// </summary>
-        public static ControlFlowGraph GetAnonymousFunctionControlFlowGraphInScope(this ControlFlowGraph controlFlowGraph, IFlowAnonymousFunctionOperation anonymousFunction, CancellationToken cancellationToken = default)
+        public static ControlFlowGraph GetAnonymousFunctionControlFlowGraphInScope(this ControlFlowGraph controlFlowGraph!!, IFlowAnonymousFunctionOperation anonymousFunction!!, CancellationToken cancellationToken = default)
         {
-            if (controlFlowGraph == null)
-            {
-                throw new ArgumentNullException(nameof(controlFlowGraph));
-            }
-
-            if (anonymousFunction == null)
-            {
-                throw new ArgumentNullException(nameof(anonymousFunction));
-            }
-
             ControlFlowGraph? currentGraph = controlFlowGraph;
             do
             {

@@ -80,13 +80,8 @@ namespace Microsoft.CodeAnalysis.Scripting
         /// </remarks>
         /// <returns><see cref="ScriptVariable"/> or null, if no variable of the specified <paramref name="name"/> is defined in the script.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="name"/> is null.</exception>
-        public ScriptVariable GetVariable(string name)
+        public ScriptVariable GetVariable(string name!!)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
             int index;
             return GetVariableMap().TryGetValue(name, out index) ? Variables[index] : null;
         }

@@ -14,11 +14,11 @@ namespace Microsoft.CodeAnalysis.SolutionCrawler
         public string Name { get; }
         public string Language { get; }
 
-        public ExportPerLanguageIncrementalAnalyzerProviderAttribute(string name, string language)
+        public ExportPerLanguageIncrementalAnalyzerProviderAttribute(string name!!, string language!!)
             : base(typeof(IPerLanguageIncrementalAnalyzerProvider))
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            Language = language ?? throw new ArgumentNullException(nameof(language));
+            Name = name;
+            Language = language;
         }
     }
 }

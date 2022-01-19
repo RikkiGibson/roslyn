@@ -15,9 +15,9 @@ namespace Microsoft.CodeAnalysis.CodeActions
         private readonly DocumentId _documentId;
         private readonly bool _activate;
 
-        public OpenDocumentOperation(DocumentId documentId, bool activateIfAlreadyOpen = false)
+        public OpenDocumentOperation(DocumentId documentId!!, bool activateIfAlreadyOpen = false)
         {
-            _documentId = documentId ?? throw new ArgumentNullException(nameof(documentId));
+            _documentId = documentId;
             _activate = activateIfAlreadyOpen;
         }
 

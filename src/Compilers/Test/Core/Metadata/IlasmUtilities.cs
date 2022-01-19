@@ -58,11 +58,8 @@ namespace Microsoft.CodeAnalysis.Test.Utilities
 
         private static readonly string IlasmPath = GetIlasmPath();
 
-        public static void IlasmTempAssembly(string declarations, bool appendDefaultHeader, bool includePdb, bool autoInherit, out string assemblyPath, out string pdbPath)
+        public static void IlasmTempAssembly(string declarations!!, bool appendDefaultHeader, bool includePdb, bool autoInherit, out string assemblyPath, out string pdbPath)
         {
-            if (declarations == null)
-                throw new ArgumentNullException(nameof(declarations));
-
             using (var sourceFile = new DisposableFile(extension: ".il"))
             {
                 string sourceFileName = Path.GetFileNameWithoutExtension(sourceFile.Path);

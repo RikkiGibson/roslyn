@@ -201,15 +201,9 @@ namespace Microsoft.CodeAnalysis.FindSymbols
         /// <returns>The derived types of the symbol. The symbol passed in is not included in this list.</returns>
 #pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
         public static async Task<IEnumerable<INamedTypeSymbol>> FindDerivedClassesAsync(
-            INamedTypeSymbol type, Solution solution, bool transitive = true, IImmutableSet<Project> projects = null, CancellationToken cancellationToken = default)
+            INamedTypeSymbol type!!, Solution solution!!, bool transitive = true, IImmutableSet<Project> projects = null, CancellationToken cancellationToken = default)
 #pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
-
-            if (solution == null)
-                throw new ArgumentNullException(nameof(solution));
-
             return await FindDerivedClassesArrayAsync(type, solution, transitive, projects, cancellationToken).ConfigureAwait(false);
         }
 
@@ -237,15 +231,9 @@ namespace Microsoft.CodeAnalysis.FindSymbols
         /// <returns>The derived interfaces of the symbol. The symbol passed in is not included in this list.</returns>
 #pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
         public static async Task<IEnumerable<INamedTypeSymbol>> FindDerivedInterfacesAsync(
-            INamedTypeSymbol type, Solution solution, bool transitive = true, IImmutableSet<Project> projects = null, CancellationToken cancellationToken = default)
+            INamedTypeSymbol type!!, Solution solution!!, bool transitive = true, IImmutableSet<Project> projects = null, CancellationToken cancellationToken = default)
 #pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
-
-            if (solution == null)
-                throw new ArgumentNullException(nameof(solution));
-
             return await FindDerivedInterfacesArrayAsync(type, solution, transitive, projects, cancellationToken).ConfigureAwait(false);
         }
 
@@ -273,15 +261,9 @@ namespace Microsoft.CodeAnalysis.FindSymbols
         /// <param name="projects">The projects to search. Can be null to search the entire solution.</param>
 #pragma warning disable RS0026 // Do not add multiple public overloads with optional parameters
         public static async Task<IEnumerable<INamedTypeSymbol>> FindImplementationsAsync(
-            INamedTypeSymbol type, Solution solution, bool transitive = true, IImmutableSet<Project> projects = null, CancellationToken cancellationToken = default)
+            INamedTypeSymbol type!!, Solution solution!!, bool transitive = true, IImmutableSet<Project> projects = null, CancellationToken cancellationToken = default)
 #pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
-
-            if (solution == null)
-                throw new ArgumentNullException(nameof(solution));
-
             return await FindImplementationsArrayAsync(type, solution, transitive, projects, cancellationToken).ConfigureAwait(false);
         }
 
@@ -302,13 +284,8 @@ namespace Microsoft.CodeAnalysis.FindSymbols
         /// cref="INamedTypeSymbol"/> this will be both immediate and transitive implementations.
         /// </summary>
         public static async Task<IEnumerable<ISymbol>> FindImplementationsAsync(
-            ISymbol symbol, Solution solution, IImmutableSet<Project> projects = null, CancellationToken cancellationToken = default)
+            ISymbol symbol!!, Solution solution!!, IImmutableSet<Project> projects = null, CancellationToken cancellationToken = default)
         {
-            if (symbol == null)
-                throw new ArgumentNullException(nameof(symbol));
-
-            if (solution == null)
-                throw new ArgumentNullException(nameof(solution));
 
             // A symbol can only have implementations if it's an interface or a
             // method/property/event from an interface.

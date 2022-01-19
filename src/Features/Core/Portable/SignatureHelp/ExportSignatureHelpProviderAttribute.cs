@@ -14,11 +14,11 @@ namespace Microsoft.CodeAnalysis.SignatureHelp
         public string Name { get; }
         public string Language { get; }
 
-        public ExportSignatureHelpProviderAttribute(string name, string language)
+        public ExportSignatureHelpProviderAttribute(string name!!, string language!!)
             : base(typeof(ISignatureHelpProvider))
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            Language = language ?? throw new ArgumentNullException(nameof(language));
+            Name = name;
+            Language = language;
         }
     }
 }

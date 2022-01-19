@@ -42,13 +42,8 @@ namespace Microsoft.CodeAnalysis.FindSymbols
         }
 
         internal static async Task<ImmutableArray<ISymbol>> FindSourceDeclarationsWithCustomQueryAsync(
-            Solution solution, SearchQuery query, SymbolFilter filter, CancellationToken cancellationToken)
+            Solution solution!!, SearchQuery query, SymbolFilter filter, CancellationToken cancellationToken)
         {
-            if (solution == null)
-            {
-                throw new ArgumentNullException(nameof(solution));
-            }
-
             if (query.Name != null && string.IsNullOrWhiteSpace(query.Name))
             {
                 return ImmutableArray<ISymbol>.Empty;
@@ -87,13 +82,8 @@ namespace Microsoft.CodeAnalysis.FindSymbols
         }
 
         internal static async Task<ImmutableArray<ISymbol>> FindSourceDeclarationsWithCustomQueryAsync(
-            Project project, SearchQuery query, SymbolFilter filter, CancellationToken cancellationToken)
+            Project project!!, SearchQuery query, SymbolFilter filter, CancellationToken cancellationToken)
         {
-            if (project == null)
-            {
-                throw new ArgumentNullException(nameof(project));
-            }
-
             if (query.Name != null && string.IsNullOrWhiteSpace(query.Name))
             {
                 return ImmutableArray<ISymbol>.Empty;

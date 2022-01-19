@@ -14,10 +14,10 @@ namespace Microsoft.CodeAnalysis.Diagnostics
     /// </summary>
     public struct Suppression : IEquatable<Suppression>
     {
-        private Suppression(SuppressionDescriptor descriptor, Diagnostic suppressedDiagnostic)
+        private Suppression(SuppressionDescriptor descriptor!!, Diagnostic suppressedDiagnostic!!)
         {
-            Descriptor = descriptor ?? throw new ArgumentNullException(nameof(descriptor));
-            SuppressedDiagnostic = suppressedDiagnostic ?? throw new ArgumentNullException(nameof(suppressedDiagnostic));
+            Descriptor = descriptor;
+            SuppressedDiagnostic = suppressedDiagnostic;
             Debug.Assert(suppressedDiagnostic.ProgrammaticSuppressionInfo == null);
 
             if (descriptor.SuppressedDiagnosticId != suppressedDiagnostic.Id)

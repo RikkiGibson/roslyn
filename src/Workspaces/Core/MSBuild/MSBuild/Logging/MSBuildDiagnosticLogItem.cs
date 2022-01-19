@@ -12,10 +12,10 @@ namespace Microsoft.CodeAnalysis.MSBuild.Logging
         public int LineNumber { get; }
         public int ColumnNumber { get; }
 
-        public MSBuildDiagnosticLogItem(WorkspaceDiagnosticKind kind, string projectFilePath, string message, string fileName, int lineNumber, int columnNumber)
+        public MSBuildDiagnosticLogItem(WorkspaceDiagnosticKind kind, string projectFilePath, string message, string fileName!!, int lineNumber, int columnNumber)
             : base(kind, message, projectFilePath)
         {
-            FileName = fileName ?? throw new ArgumentNullException(nameof(fileName));
+            FileName = fileName;
             LineNumber = lineNumber;
             ColumnNumber = columnNumber;
         }

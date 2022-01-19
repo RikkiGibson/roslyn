@@ -18,7 +18,7 @@ namespace Microsoft.CodeAnalysis.CodeCleanup.Providers
         public string Name { get; }
         public IEnumerable<string> Languages { get; }
 
-        public ExportCodeCleanupProvider(string name, params string[] languages)
+        public ExportCodeCleanupProvider(string name, params string[] languages!!)
             : base(typeof(ICodeCleanupProvider))
         {
             if (languages.Length == 0)
@@ -27,7 +27,7 @@ namespace Microsoft.CodeAnalysis.CodeCleanup.Providers
             }
 
             this.Name = name;
-            this.Languages = languages ?? throw new ArgumentNullException(nameof(languages));
+            this.Languages = languages;
         }
     }
 }

@@ -14,19 +14,19 @@ namespace Microsoft.CodeAnalysis.Completion
     internal sealed class ArgumentContext
     {
         public ArgumentContext(
-            ArgumentProvider provider,
-            OptionSet options,
-            SemanticModel semanticModel,
+            ArgumentProvider provider!!,
+            OptionSet options!!,
+            SemanticModel semanticModel!!,
             int position,
-            IParameterSymbol parameter,
+            IParameterSymbol parameter!!,
             string? previousValue,
             CancellationToken cancellationToken)
         {
-            Provider = provider ?? throw new ArgumentNullException(nameof(provider));
-            Options = options ?? throw new ArgumentNullException(nameof(options));
-            SemanticModel = semanticModel ?? throw new ArgumentNullException(nameof(semanticModel));
+            Provider = provider;
+            Options = options;
+            SemanticModel = semanticModel;
             Position = position;
-            Parameter = parameter ?? throw new ArgumentNullException(nameof(parameter));
+            Parameter = parameter;
             PreviousValue = previousValue;
             CancellationToken = cancellationToken;
         }

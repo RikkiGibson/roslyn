@@ -122,10 +122,8 @@ namespace Microsoft.CodeAnalysis.Scripting
         /// </summary>
         /// <exception cref="ArgumentNullException">Stream is null.</exception>
         /// <exception cref="ArgumentException">Stream is not readable or seekable.</exception>
-        public Script<TResult> ContinueWith<TResult>(Stream code, ScriptOptions options = null)
+        public Script<TResult> ContinueWith<TResult>(Stream code!!, ScriptOptions options = null)
         {
-            if (code == null)
-                throw new ArgumentNullException(nameof(code));
             options = options ?? InheritOptions(Options);
             return new Script<TResult>(Compiler, Builder, SourceText.From(code, options.FileEncoding), options, GlobalsType, this);
         }
@@ -517,16 +515,8 @@ namespace Microsoft.CodeAnalysis.Scripting
         /// <returns>A <see cref="ScriptState"/> that represents the state after running the script, including all declared variables and return value.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="previousState"/> is null.</exception>
         /// <exception cref="ArgumentException"><paramref name="previousState"/> is not a previous execution state of this script.</exception>
-        public new Task<ScriptState<T>> RunFromAsync(ScriptState previousState, Func<Exception, bool> catchException = null, CancellationToken cancellationToken = default(CancellationToken))
+        public new Task<ScriptState<T>> RunFromAsync(ScriptState previousState!!, Func<Exception, bool> catchException = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            // The following validation and executor construction may throw;
-            // do so synchronously so that the exception is not wrapped in the task.
-
-            if (previousState == null)
-            {
-                throw new ArgumentNullException(nameof(previousState));
-            }
-
             if (previousState.Script == this)
             {
                 // this state is already the output of running this script.

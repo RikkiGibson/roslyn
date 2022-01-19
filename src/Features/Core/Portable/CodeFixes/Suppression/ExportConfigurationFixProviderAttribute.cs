@@ -27,22 +27,17 @@ namespace Microsoft.CodeAnalysis.CodeFixes
         public string[] Languages { get; }
 
         public ExportConfigurationFixProviderAttribute(
-            string name,
-            params string[] languages)
+            string name!!,
+            params string[] languages!!)
             : base(typeof(IConfigurationFixProvider))
         {
-            if (languages == null)
-            {
-                throw new ArgumentNullException(nameof(languages));
-            }
-
             if (languages.Length == 0)
             {
                 throw new ArgumentException(nameof(languages));
             }
 
             Languages = languages;
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Name = name;
         }
     }
 }

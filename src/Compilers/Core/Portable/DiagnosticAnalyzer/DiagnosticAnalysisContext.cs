@@ -1119,13 +1119,8 @@ namespace Microsoft.CodeAnalysis.Diagnostics
         /// Gets a <see cref="ControlFlowGraph"/> for a given <paramref name="operationBlock"/> from this analysis context's <see cref="OperationBlocks"/>.
         /// </summary>
         /// <param name="operationBlock">Operation block.</param>
-        public ControlFlowGraph GetControlFlowGraph(IOperation operationBlock)
+        public ControlFlowGraph GetControlFlowGraph(IOperation operationBlock!!)
         {
-            if (operationBlock == null)
-            {
-                throw new ArgumentNullException(nameof(operationBlock));
-            }
-
             if (!OperationBlocks.Contains(operationBlock))
             {
                 throw new ArgumentException(CodeAnalysisResources.InvalidOperationBlockForAnalysisContext, nameof(operationBlock));
@@ -1234,13 +1229,8 @@ namespace Microsoft.CodeAnalysis.Diagnostics
         /// Gets a <see cref="ControlFlowGraph"/> for a given <paramref name="operationBlock"/> from this analysis context's <see cref="OperationBlocks"/>.
         /// </summary>
         /// <param name="operationBlock">Operation block.</param>
-        public ControlFlowGraph GetControlFlowGraph(IOperation operationBlock)
+        public ControlFlowGraph GetControlFlowGraph(IOperation operationBlock!!)
         {
-            if (operationBlock == null)
-            {
-                throw new ArgumentNullException(nameof(operationBlock));
-            }
-
             if (!OperationBlocks.Contains(operationBlock))
             {
                 throw new ArgumentException(CodeAnalysisResources.InvalidOperationBlockForAnalysisContext, nameof(operationBlock));

@@ -40,13 +40,8 @@ namespace Microsoft.CodeAnalysis.Text
             private static readonly ConditionalWeakTable<ITextBuffer, TextBufferContainer> s_textContainerMap = new ConditionalWeakTable<ITextBuffer, TextBufferContainer>();
             private static readonly ConditionalWeakTable<ITextBuffer, TextBufferContainer>.CreateValueCallback s_createContainerCallback = CreateContainer;
 
-            public static TextBufferContainer From(ITextBuffer buffer)
+            public static TextBufferContainer From(ITextBuffer buffer!!)
             {
-                if (buffer == null)
-                {
-                    throw new ArgumentNullException(nameof(buffer));
-                }
-
                 return s_textContainerMap.GetValue(buffer, s_createContainerCallback);
             }
 

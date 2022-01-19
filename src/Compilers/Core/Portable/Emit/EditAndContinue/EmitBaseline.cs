@@ -127,13 +127,8 @@ namespace Microsoft.CodeAnalysis.Emit
         /// <exception cref="IOException">Error reading module metadata.</exception>
         /// <exception cref="BadImageFormatException">Module metadata is invalid.</exception>
         /// <exception cref="ObjectDisposedException">Module has been disposed.</exception>
-        public static EmitBaseline CreateInitialBaseline(ModuleMetadata module, Func<MethodDefinitionHandle, EditAndContinueMethodDebugInformation> debugInformationProvider)
+        public static EmitBaseline CreateInitialBaseline(ModuleMetadata module!!, Func<MethodDefinitionHandle, EditAndContinueMethodDebugInformation> debugInformationProvider)
         {
-            if (module == null)
-            {
-                throw new ArgumentNullException(nameof(module));
-            }
-
             if (!module.Module.HasIL)
             {
                 throw new ArgumentException(CodeAnalysisResources.PEImageNotAvailable, nameof(module));
@@ -198,26 +193,11 @@ namespace Microsoft.CodeAnalysis.Emit
         /// <exception cref="BadImageFormatException">Module metadata is invalid.</exception>
         /// <exception cref="ObjectDisposedException">Module has been disposed.</exception>
         public static EmitBaseline CreateInitialBaseline(
-            ModuleMetadata module,
-            Func<MethodDefinitionHandle, EditAndContinueMethodDebugInformation> debugInformationProvider,
-            Func<MethodDefinitionHandle, StandaloneSignatureHandle> localSignatureProvider,
+            ModuleMetadata module!!,
+            Func<MethodDefinitionHandle, EditAndContinueMethodDebugInformation> debugInformationProvider!!,
+            Func<MethodDefinitionHandle, StandaloneSignatureHandle> localSignatureProvider!!,
             bool hasPortableDebugInformation)
         {
-            if (module == null)
-            {
-                throw new ArgumentNullException(nameof(module));
-            }
-
-            if (debugInformationProvider == null)
-            {
-                throw new ArgumentNullException(nameof(debugInformationProvider));
-            }
-
-            if (localSignatureProvider == null)
-            {
-                throw new ArgumentNullException(nameof(localSignatureProvider));
-            }
-
             var reader = module.MetadataReader;
 
             return new EmitBaseline(

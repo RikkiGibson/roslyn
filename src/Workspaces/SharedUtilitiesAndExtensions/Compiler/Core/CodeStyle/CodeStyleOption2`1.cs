@@ -50,10 +50,10 @@ namespace Microsoft.CodeAnalysis.CodeStyle
 
         private readonly NotificationOption2 _notification;
 
-        public CodeStyleOption2(T value, NotificationOption2 notification)
+        public CodeStyleOption2(T value, NotificationOption2 notification!!)
         {
             Value = value;
-            _notification = notification ?? throw new ArgumentNullException(nameof(notification));
+            _notification = notification;
         }
 
         public T Value { get; }

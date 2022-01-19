@@ -126,18 +126,8 @@ namespace Microsoft.CodeAnalysis.Interactive
             Interlocked.Exchange(ref _lazyRemoteService, null)?.Dispose();
         }
 
-        public void SetOutputs(TextWriter output, TextWriter errorOutput)
+        public void SetOutputs(TextWriter output!!, TextWriter errorOutput!!)
         {
-            if (output == null)
-            {
-                throw new ArgumentNullException(nameof(output));
-            }
-
-            if (errorOutput == null)
-            {
-                throw new ArgumentNullException(nameof(errorOutput));
-            }
-
             lock (_outputGuard)
             {
                 _output.Flush();

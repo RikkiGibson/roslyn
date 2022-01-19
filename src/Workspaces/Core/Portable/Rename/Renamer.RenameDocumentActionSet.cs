@@ -71,13 +71,8 @@ namespace Microsoft.CodeAnalysis.Rename
             /// immediately call <see cref="UpdateSolutionAsync(Solution, ImmutableArray{RenameDocumentAction}, CancellationToken)"/> without
             /// having to inspect the returned <see cref="ApplicableActions"/>.
             /// </remarks>
-            public async Task<Solution> UpdateSolutionAsync(Solution solution, ImmutableArray<RenameDocumentAction> actions, CancellationToken cancellationToken)
+            public async Task<Solution> UpdateSolutionAsync(Solution solution!!, ImmutableArray<RenameDocumentAction> actions, CancellationToken cancellationToken)
             {
-                if (solution is null)
-                {
-                    throw new ArgumentNullException(nameof(solution));
-                }
-
                 if (actions.Any(a => !ApplicableActions.Contains(a)))
                 {
                     throw new ArgumentException(string.Format(WorkspacesResources.Cannot_apply_action_that_is_not_in_0, nameof(ApplicableActions)));

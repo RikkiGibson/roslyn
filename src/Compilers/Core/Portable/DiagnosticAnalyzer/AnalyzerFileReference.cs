@@ -49,12 +49,12 @@ namespace Microsoft.CodeAnalysis.Diagnostics
         /// </summary>
         /// <param name="fullPath">Full path of the analyzer assembly.</param>
         /// <param name="assemblyLoader">Loader for obtaining the <see cref="Assembly"/> from the <paramref name="fullPath"/></param>
-        public AnalyzerFileReference(string fullPath, IAnalyzerAssemblyLoader assemblyLoader)
+        public AnalyzerFileReference(string fullPath, IAnalyzerAssemblyLoader assemblyLoader!!)
         {
             CompilerPathUtilities.RequireAbsolutePath(fullPath, nameof(fullPath));
 
             FullPath = fullPath;
-            _assemblyLoader = assemblyLoader ?? throw new ArgumentNullException(nameof(assemblyLoader));
+            _assemblyLoader = assemblyLoader;
 
             _diagnosticAnalyzers = new(this, typeof(DiagnosticAnalyzerAttribute), GetDiagnosticsAnalyzerSupportedLanguages, allowNetFramework: true);
             _generators = new(this, typeof(GeneratorAttribute), GetGeneratorSupportedLanguages, allowNetFramework: false, coerceFunction: CoerceGeneratorType);

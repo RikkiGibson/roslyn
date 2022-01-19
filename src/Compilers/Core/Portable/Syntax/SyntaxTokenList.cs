@@ -335,16 +335,11 @@ namespace Microsoft.CodeAnalysis
         /// </summary>
         /// <param name="index">The index to insert the new tokens.</param>
         /// <param name="tokens">The tokens to insert.</param>
-        public SyntaxTokenList InsertRange(int index, IEnumerable<SyntaxToken> tokens)
+        public SyntaxTokenList InsertRange(int index, IEnumerable<SyntaxToken> tokens!!)
         {
             if (index < 0 || index > this.Count)
             {
                 throw new ArgumentOutOfRangeException(nameof(index));
-            }
-
-            if (tokens == null)
-            {
-                throw new ArgumentNullException(nameof(tokens));
             }
 
             var items = tokens.ToList();

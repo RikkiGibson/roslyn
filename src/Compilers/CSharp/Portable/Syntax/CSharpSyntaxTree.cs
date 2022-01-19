@@ -328,7 +328,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("The diagnosticOptions and isGeneratedCode parameters are obsolete due to performance problems, if you are using them use CompilationOptions.SyntaxTreeOptionsProvider instead", error: false)]
         public static SyntaxTree Create(
-            CSharpSyntaxNode root,
+            CSharpSyntaxNode root!!,
             CSharpParseOptions? options,
             string path,
             Encoding? encoding,
@@ -337,11 +337,6 @@ namespace Microsoft.CodeAnalysis.CSharp
             // obsolete parameter -- unused
             bool? isGeneratedCode)
         {
-            if (root == null)
-            {
-                throw new ArgumentNullException(nameof(root));
-            }
-
             var directives = root.Kind() == SyntaxKind.CompilationUnit ?
                 ((CompilationUnitSyntax)root).GetConditionalDirectivesStack() :
                 InternalSyntax.DirectiveStack.Empty;
@@ -473,18 +468,13 @@ namespace Microsoft.CodeAnalysis.CSharp
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("The diagnosticOptions and isGeneratedCode parameters are obsolete due to performance problems, if you are using them use CompilationOptions.SyntaxTreeOptionsProvider instead", error: false)]
         public static SyntaxTree ParseText(
-            SourceText text,
+            SourceText text!!,
             CSharpParseOptions? options,
             string path,
             ImmutableDictionary<string, ReportDiagnostic>? diagnosticOptions,
             bool? isGeneratedCode,
             CancellationToken cancellationToken)
         {
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
             options = options ?? CSharpParseOptions.Default;
 
             using var lexer = new InternalSyntax.Lexer(text, options);
@@ -535,13 +525,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             return this.WithChanges(newText, new[] { new TextChangeRange(new TextSpan(0, this.Length), newText.Length) });
         }
 
-        private SyntaxTree WithChanges(SourceText newText, IReadOnlyList<TextChangeRange> changes)
+        private SyntaxTree WithChanges(SourceText newText, IReadOnlyList<TextChangeRange> changes!!)
         {
-            if (changes == null)
-            {
-                throw new ArgumentNullException(nameof(changes));
-            }
-
             IReadOnlyList<TextChangeRange>? workingChanges = changes;
             CSharpSyntaxTree? oldTree = this;
 
@@ -579,13 +564,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// </summary>
         /// <param name="oldTree">The old tree. Cannot be <c>null</c>.</param>
         /// <remarks>The list is pessimistic because it may claim more or larger regions than actually changed.</remarks>
-        public override IList<TextSpan> GetChangedSpans(SyntaxTree oldTree)
+        public override IList<TextSpan> GetChangedSpans(SyntaxTree oldTree!!)
         {
-            if (oldTree == null)
-            {
-                throw new ArgumentNullException(nameof(oldTree));
-            }
-
             return SyntaxDiffer.GetPossiblyDifferentTextSpans(oldTree, this);
         }
 
@@ -594,13 +574,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// </summary>
         /// <param name="oldTree">The old tree. Cannot be <c>null</c>.</param>
         /// <remarks>The list of changes may be different than the original changes that produced this tree.</remarks>
-        public override IList<TextChange> GetChanges(SyntaxTree oldTree)
+        public override IList<TextChange> GetChanges(SyntaxTree oldTree!!)
         {
-            if (oldTree == null)
-            {
-                throw new ArgumentNullException(nameof(oldTree));
-            }
-
             return SyntaxDiffer.GetTextChanges(oldTree, this);
         }
 
@@ -765,13 +740,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// This method does not filter diagnostics based on <c>#pragma</c>s and compiler options
         /// like /nowarn, /warnaserror etc.
         /// </remarks>
-        public override IEnumerable<Diagnostic> GetDiagnostics(SyntaxNode node)
+        public override IEnumerable<Diagnostic> GetDiagnostics(SyntaxNode node!!)
         {
-            if (node == null)
-            {
-                throw new ArgumentNullException(nameof(node));
-            }
-
             return GetDiagnostics(node.Green, node.Position);
         }
 

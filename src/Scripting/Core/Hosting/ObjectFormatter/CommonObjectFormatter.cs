@@ -19,16 +19,8 @@ namespace Microsoft.CodeAnalysis.Scripting.Hosting
     /// </summary>
     internal abstract partial class CommonObjectFormatter : ObjectFormatter
     {
-        public override string FormatObject(object obj, PrintOptions options)
+        public override string FormatObject(object obj, PrintOptions options!!)
         {
-            if (options == null)
-            {
-                // We could easily recover by using default options, but it makes
-                // more sense for the host to choose the defaults so we'll require
-                // that options be passed.
-                throw new ArgumentNullException(nameof(options));
-            }
-
             var visitor = new Visitor(this, GetInternalBuilderOptions(options), GetPrimitiveOptions(options), GetTypeNameOptions(options), options.MemberDisplayFormat);
             return visitor.FormatObject(obj);
         }
@@ -59,13 +51,8 @@ namespace Microsoft.CodeAnalysis.Scripting.Hosting
                 arrayBoundRadix: printOptions.NumberRadix,
                 showNamespaces: false);
 
-        public override string FormatException(Exception e)
+        public override string FormatException(Exception e!!)
         {
-            if (e == null)
-            {
-                throw new ArgumentNullException(nameof(e));
-            }
-
             var pooled = PooledStringBuilder.GetInstance();
             var builder = pooled.Builder;
 

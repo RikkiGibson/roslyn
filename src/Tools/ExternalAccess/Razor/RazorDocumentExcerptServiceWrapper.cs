@@ -15,9 +15,9 @@ namespace Microsoft.CodeAnalysis.ExternalAccess.Razor
     {
         private readonly IRazorDocumentExcerptService _razorDocumentExcerptService;
 
-        public RazorDocumentExcerptServiceWrapper(IRazorDocumentExcerptService razorDocumentExcerptService)
+        public RazorDocumentExcerptServiceWrapper(IRazorDocumentExcerptService razorDocumentExcerptService!!)
         {
-            _razorDocumentExcerptService = razorDocumentExcerptService ?? throw new ArgumentNullException(nameof(razorDocumentExcerptService));
+            _razorDocumentExcerptService = razorDocumentExcerptService;
         }
 
         public async Task<ExcerptResult?> TryExcerptAsync(Document document, TextSpan span, ExcerptMode mode, CancellationToken cancellationToken)

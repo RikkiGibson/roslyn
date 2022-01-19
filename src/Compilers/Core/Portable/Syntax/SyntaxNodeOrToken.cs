@@ -622,13 +622,8 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Creates a new node or token identical to this one with the specified annotations.
         /// </summary>
-        public SyntaxNodeOrToken WithAdditionalAnnotations(IEnumerable<SyntaxAnnotation> annotations)
+        public SyntaxNodeOrToken WithAdditionalAnnotations(IEnumerable<SyntaxAnnotation> annotations!!)
         {
-            if (annotations == null)
-            {
-                throw new ArgumentNullException(nameof(annotations));
-            }
-
             if (_token != null)
             {
                 return this.AsToken().WithAdditionalAnnotations(annotations);
@@ -653,13 +648,8 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Creates a new node or token identical to this one without the specified annotations.
         /// </summary>
-        public SyntaxNodeOrToken WithoutAnnotations(IEnumerable<SyntaxAnnotation> annotations)
+        public SyntaxNodeOrToken WithoutAnnotations(IEnumerable<SyntaxAnnotation> annotations!!)
         {
-            if (annotations == null)
-            {
-                throw new ArgumentNullException(nameof(annotations));
-            }
-
             if (_token != null)
             {
                 return this.AsToken().WithoutAnnotations(annotations);
@@ -676,13 +666,8 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Creates a new node or token identical to this one without annotations of the specified kind.
         /// </summary>
-        public SyntaxNodeOrToken WithoutAnnotations(string annotationKind)
+        public SyntaxNodeOrToken WithoutAnnotations(string annotationKind!!)
         {
-            if (annotationKind == null)
-            {
-                throw new ArgumentNullException(nameof(annotationKind));
-            }
-
             if (this.HasAnnotations(annotationKind))
             {
                 return this.WithoutAnnotations(this.GetAnnotations(annotationKind));

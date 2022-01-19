@@ -84,11 +84,8 @@ namespace Microsoft.CodeAnalysis.Collections
             public void Add(T item)
                 => GetOrCreateMutableList().Add(item);
 
-            public void AddRange(IEnumerable<T> items)
+            public void AddRange(IEnumerable<T> items!!)
             {
-                if (items is null)
-                    throw new ArgumentNullException(nameof(items));
-
                 GetOrCreateMutableList().AddRange(items);
             }
 

@@ -16,10 +16,10 @@ namespace Microsoft.CodeAnalysis.Editor.UnitTests.Classification
 
         private FormattedClassification() { }
 
-        public FormattedClassification(string text, string classificationName)
+        public FormattedClassification(string text!!, string classificationName!!)
         {
-            Text = text ?? throw new ArgumentNullException(nameof(text));
-            ClassificationName = classificationName ?? throw new ArgumentNullException(nameof(classificationName));
+            Text = text;
+            ClassificationName = classificationName;
         }
 
         public override bool Equals(object obj)

@@ -200,17 +200,12 @@ namespace Microsoft.CodeAnalysis.CSharp
         }
 
         private static ImmutableArray<SymbolDisplayPart> ToDisplayParts(
-            ISymbol symbol,
+            ISymbol symbol!!,
             SemanticModel? semanticModelOpt,
             int positionOpt,
             SymbolDisplayFormat format,
             bool minimal)
         {
-            if (symbol == null)
-            {
-                throw new ArgumentNullException(nameof(symbol));
-            }
-
             if (minimal)
             {
                 if (semanticModelOpt == null)

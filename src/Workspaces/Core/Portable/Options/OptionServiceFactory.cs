@@ -127,13 +127,8 @@ namespace Microsoft.CodeAnalysis.Options
             public void RegisterWorkspace(Workspace workspace) => _globalOptionService.RegisterWorkspace(workspace);
             public void UnregisterWorkspace(Workspace workspace) => _globalOptionService.UnregisterWorkspace(workspace);
 
-            public void RegisterDocumentOptionsProvider(IDocumentOptionsProvider documentOptionsProvider)
+            public void RegisterDocumentOptionsProvider(IDocumentOptionsProvider documentOptionsProvider!!)
             {
-                if (documentOptionsProvider == null)
-                {
-                    throw new ArgumentNullException(nameof(documentOptionsProvider));
-                }
-
                 lock (_gate)
                 {
                     _documentOptionsProviders = _documentOptionsProviders.Add(documentOptionsProvider);

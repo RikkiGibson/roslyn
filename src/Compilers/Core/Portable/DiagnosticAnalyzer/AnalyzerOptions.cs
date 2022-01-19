@@ -31,13 +31,8 @@ namespace Microsoft.CodeAnalysis.Diagnostics
         /// </summary>
         /// <param name="additionalFiles">A set of additional non-code text files that can be used by analyzers.</param>
         /// <param name="optionsProvider">A set of per-tree options that can be used by analyzers.</param>
-        public AnalyzerOptions(ImmutableArray<AdditionalText> additionalFiles, AnalyzerConfigOptionsProvider optionsProvider)
+        public AnalyzerOptions(ImmutableArray<AdditionalText> additionalFiles, AnalyzerConfigOptionsProvider optionsProvider!!)
         {
-            if (optionsProvider is null)
-            {
-                throw new ArgumentNullException(nameof(optionsProvider));
-            }
-
             AdditionalFiles = additionalFiles.NullToEmpty();
             AnalyzerConfigOptionsProvider = optionsProvider;
         }

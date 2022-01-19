@@ -48,9 +48,9 @@ namespace Roslyn.Utilities
         private string _source;
         private char[] _sourceLowerCaseCharacters;
 
-        public EditDistance(string text)
+        public EditDistance(string text!!)
         {
-            _source = text ?? throw new ArgumentNullException(nameof(text));
+            _source = text;
             _sourceLowerCaseCharacters = ConvertToLowercaseArray(text);
         }
 

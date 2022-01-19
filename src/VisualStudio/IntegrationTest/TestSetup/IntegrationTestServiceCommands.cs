@@ -49,9 +49,9 @@ namespace Microsoft.VisualStudio.IntegrationTest.Setup
         private ObjRef? _marshalledService;
 #pragma warning restore IDE0052 // Remove unread private members
 
-        private IntegrationTestServiceCommands(Package package)
+        private IntegrationTestServiceCommands(Package package!!)
         {
-            _package = package ?? throw new ArgumentNullException(nameof(package));
+            _package = package;
 
             var startMenuCmdId = new CommandID(guidTestWindowCmdSet, cmdidStartIntegrationTestService);
             _startMenuCmd = new MenuCommand(StartServiceCallback, startMenuCmdId)

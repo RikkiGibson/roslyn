@@ -28,7 +28,7 @@ namespace Microsoft.CodeAnalysis.CodeFixes
 
         internal FixAllState(
             FixAllProvider? fixAllProvider,
-            Document document,
+            Document document!!,
             CodeFixProvider codeFixProvider,
             FixAllScope scope,
             string? codeActionEquivalenceKey,
@@ -36,15 +36,11 @@ namespace Microsoft.CodeAnalysis.CodeFixes
             FixAllContext.DiagnosticProvider fixAllDiagnosticProvider)
             : this(fixAllProvider, document, document.Project, codeFixProvider, scope, codeActionEquivalenceKey, diagnosticIds, fixAllDiagnosticProvider)
         {
-            if (document == null)
-            {
-                throw new ArgumentNullException(nameof(document));
-            }
         }
 
         internal FixAllState(
             FixAllProvider? fixAllProvider,
-            Project project,
+            Project project!!,
             CodeFixProvider codeFixProvider,
             FixAllScope scope,
             string? codeActionEquivalenceKey,
@@ -52,28 +48,19 @@ namespace Microsoft.CodeAnalysis.CodeFixes
             FixAllContext.DiagnosticProvider fixAllDiagnosticProvider)
             : this(fixAllProvider, null, project, codeFixProvider, scope, codeActionEquivalenceKey, diagnosticIds, fixAllDiagnosticProvider)
         {
-            if (project == null)
-            {
-                throw new ArgumentNullException(nameof(project));
-            }
         }
 
         private FixAllState(
             FixAllProvider? fixAllProvider,
             Document? document,
             Project project,
-            CodeFixProvider codeFixProvider,
+            CodeFixProvider codeFixProvider!!,
             FixAllScope scope,
             string? codeActionEquivalenceKey,
-            IEnumerable<string> diagnosticIds,
-            FixAllContext.DiagnosticProvider fixAllDiagnosticProvider)
+            IEnumerable<string> diagnosticIds!!,
+            FixAllContext.DiagnosticProvider fixAllDiagnosticProvider!!)
         {
             Contract.ThrowIfNull(project);
-            if (diagnosticIds == null)
-            {
-                throw new ArgumentNullException(nameof(diagnosticIds));
-            }
-
             if (diagnosticIds.Any(d => d == null))
             {
                 throw new ArgumentException(WorkspaceExtensionsResources.Supplied_diagnostic_cannot_be_null, nameof(diagnosticIds));
@@ -82,11 +69,11 @@ namespace Microsoft.CodeAnalysis.CodeFixes
             this.FixAllProvider = fixAllProvider;
             this.Document = document;
             this.Project = project;
-            this.CodeFixProvider = codeFixProvider ?? throw new ArgumentNullException(nameof(codeFixProvider));
+            this.CodeFixProvider = codeFixProvider;
             this.Scope = scope;
             this.CodeActionEquivalenceKey = codeActionEquivalenceKey;
             this.DiagnosticIds = ImmutableHashSet.CreateRange(diagnosticIds);
-            this.DiagnosticProvider = fixAllDiagnosticProvider ?? throw new ArgumentNullException(nameof(fixAllDiagnosticProvider));
+            this.DiagnosticProvider = fixAllDiagnosticProvider;
         }
 
         internal bool IsFixMultiple => this.DiagnosticProvider is FixMultipleDiagnosticProvider;

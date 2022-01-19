@@ -27,18 +27,8 @@ namespace Microsoft.CodeAnalysis
         /// </summary>
         /// <param name="firstLanguage">One language to which the generator applies.</param>
         /// <param name="additionalLanguages">Additional languages to which the generator applies. See <see cref="LanguageNames"/>.</param>
-        public GeneratorAttribute(string firstLanguage, params string[] additionalLanguages)
+        public GeneratorAttribute(string firstLanguage!!, params string[] additionalLanguages!!)
         {
-            if (firstLanguage == null)
-            {
-                throw new ArgumentNullException(nameof(firstLanguage));
-            }
-
-            if (additionalLanguages == null)
-            {
-                throw new ArgumentNullException(nameof(additionalLanguages));
-            }
-
             var languages = new string[additionalLanguages.Length + 1];
             languages[0] = firstLanguage;
             for (int index = 0; index < additionalLanguages.Length; index++)

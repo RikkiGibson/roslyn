@@ -141,15 +141,9 @@ namespace Microsoft.VisualStudio.LanguageServices.Implementation.Interop
             }
         }
 
-        public void Add(TKey key, TValue value)
+        public void Add(TKey key, TValue value!!)
         {
             this.AssertIsForeground();
-
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
             if (_table.ContainsKey(key))
             {
                 throw new InvalidOperationException($"Key already exists in table: {(key != null ? key.ToString() : "<null>")}.");

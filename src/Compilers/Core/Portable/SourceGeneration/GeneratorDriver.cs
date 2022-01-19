@@ -105,17 +105,8 @@ namespace Microsoft.CodeAnalysis
             return FromState(newState);
         }
 
-        public GeneratorDriver ReplaceAdditionalText(AdditionalText oldText, AdditionalText newText)
+        public GeneratorDriver ReplaceAdditionalText(AdditionalText oldText!!, AdditionalText newText!!)
         {
-            if (oldText is null)
-            {
-                throw new ArgumentNullException(nameof(oldText));
-            }
-            if (newText is null)
-            {
-                throw new ArgumentNullException(nameof(newText));
-            }
-
             var newState = _state.With(additionalTexts: _state.AdditionalTexts.Replace(oldText, newText));
             return FromState(newState);
         }

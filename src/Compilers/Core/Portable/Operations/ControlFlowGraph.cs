@@ -80,18 +80,8 @@ namespace Microsoft.CodeAnalysis.FlowAnalysis
         /// Returns null if <see cref="SemanticModel.GetOperation(SyntaxNode, CancellationToken)"/> returns null for the given <paramref name="node"/> and <paramref name="semanticModel"/>.
         /// Otherwise, returns a <see cref="ControlFlowGraph"/> for the executable code block.
         /// </returns>
-        public static ControlFlowGraph? Create(SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken = default)
+        public static ControlFlowGraph? Create(SyntaxNode node!!, SemanticModel semanticModel!!, CancellationToken cancellationToken = default)
         {
-            if (node == null)
-            {
-                throw new ArgumentNullException(nameof(node));
-            }
-
-            if (semanticModel == null)
-            {
-                throw new ArgumentNullException(nameof(semanticModel));
-            }
-
             IOperation? operation = semanticModel.GetOperation(node, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             return operation == null ? null : CreateCore(operation, nameof(operation), cancellationToken);
@@ -227,15 +217,9 @@ namespace Microsoft.CodeAnalysis.FlowAnalysis
         /// <summary>
         /// Creates a control flow graph for the given <paramref name="localFunction"/>.
         /// </summary>
-        public ControlFlowGraph GetLocalFunctionControlFlowGraph(IMethodSymbol localFunction, CancellationToken cancellationToken = default)
+        public ControlFlowGraph GetLocalFunctionControlFlowGraph(IMethodSymbol localFunction!!, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-
-            if (localFunction is null)
-            {
-                throw new ArgumentNullException(nameof(localFunction));
-            }
-
             if (!TryGetLocalFunctionControlFlowGraph(localFunction, cancellationToken, out var controlFlowGraph))
             {
                 throw new ArgumentOutOfRangeException(nameof(localFunction));
@@ -276,15 +260,9 @@ namespace Microsoft.CodeAnalysis.FlowAnalysis
         /// <summary>
         /// Creates a control flow graph for the given <paramref name="anonymousFunction"/>.
         /// </summary>
-        public ControlFlowGraph GetAnonymousFunctionControlFlowGraph(IFlowAnonymousFunctionOperation anonymousFunction, CancellationToken cancellationToken = default)
+        public ControlFlowGraph GetAnonymousFunctionControlFlowGraph(IFlowAnonymousFunctionOperation anonymousFunction!!, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-
-            if (anonymousFunction is null)
-            {
-                throw new ArgumentNullException(nameof(anonymousFunction));
-            }
-
             if (!TryGetAnonymousFunctionControlFlowGraph(anonymousFunction, cancellationToken, out ControlFlowGraph? controlFlowGraph))
             {
                 throw new ArgumentOutOfRangeException(nameof(anonymousFunction));

@@ -439,13 +439,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// <param name="interfaceMember">
         /// Must be a non-null interface property, method, or event.
         /// </param>
-        public Symbol FindImplementationForInterfaceMember(Symbol interfaceMember)
+        public Symbol FindImplementationForInterfaceMember(Symbol interfaceMember!!)
         {
-            if ((object)interfaceMember == null)
-            {
-                throw new ArgumentNullException(nameof(interfaceMember));
-            }
-
             if (!interfaceMember.IsImplementableInterfaceMember())
             {
                 return null;

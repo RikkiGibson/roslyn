@@ -41,7 +41,7 @@ namespace Microsoft.CodeAnalysis.Options
         /// </summary>
         public bool IsPerLanguage { get; }
 
-        public OptionDefinition(string feature, OptionGroup group, string name, object? defaultValue, Type type, bool isPerLanguage)
+        public OptionDefinition(string feature, OptionGroup group!!, string name, object? defaultValue, Type type!!, bool isPerLanguage)
         {
             if (string.IsNullOrWhiteSpace(feature))
             {
@@ -54,10 +54,10 @@ namespace Microsoft.CodeAnalysis.Options
             }
 
             this.Feature = feature;
-            this.Group = group ?? throw new ArgumentNullException(nameof(group));
+            this.Group = group;
             this.Name = name;
             this.DefaultValue = defaultValue;
-            this.Type = type ?? throw new ArgumentNullException(nameof(type));
+            this.Type = type;
             this.IsPerLanguage = isPerLanguage;
         }
 

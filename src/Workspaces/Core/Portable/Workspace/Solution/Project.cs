@@ -457,13 +457,8 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Gets an object that lists the added, changed and removed documents between this project and the specified project.
         /// </summary>
-        public ProjectChanges GetChanges(Project oldProject)
+        public ProjectChanges GetChanges(Project oldProject!!)
         {
-            if (oldProject == null)
-            {
-                throw new ArgumentNullException(nameof(oldProject));
-            }
-
             return new ProjectChanges(this, oldProject);
         }
 

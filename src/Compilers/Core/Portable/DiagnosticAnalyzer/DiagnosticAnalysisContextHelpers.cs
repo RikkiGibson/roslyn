@@ -40,17 +40,12 @@ namespace Microsoft.CodeAnalysis.Diagnostics
             VerifyOperationKinds(operationKinds);
         }
 
-        internal static void VerifyArguments(Diagnostic diagnostic, Compilation? compilation, Func<Diagnostic, bool> isSupportedDiagnostic)
+        internal static void VerifyArguments(Diagnostic diagnostic!!, Compilation? compilation, Func<Diagnostic, bool> isSupportedDiagnostic)
         {
             if (diagnostic is DiagnosticWithInfo)
             {
                 // Compiler diagnostic, skip validations.
                 return;
-            }
-
-            if (diagnostic == null)
-            {
-                throw new ArgumentNullException(nameof(diagnostic));
             }
 
             if (compilation != null)
@@ -106,12 +101,8 @@ namespace Microsoft.CodeAnalysis.Diagnostics
             }
         }
 
-        private static void VerifyAction<TContext>(Action<TContext> action)
+        private static void VerifyAction<TContext>(Action<TContext> action!!)
         {
-            if (action == null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
         }
 
         private static void VerifySymbolKinds(ImmutableArray<SymbolKind> symbolKinds)
@@ -154,18 +145,9 @@ namespace Microsoft.CodeAnalysis.Diagnostics
             }
         }
 
-        internal static void VerifyArguments<TKey, TValue>(TKey key, AnalysisValueProvider<TKey, TValue> valueProvider)
+        internal static void VerifyArguments<TKey, TValue>(TKey key!!, AnalysisValueProvider<TKey, TValue> valueProvider!!)
             where TKey : class
         {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
-            if (valueProvider == null)
-            {
-                throw new ArgumentNullException(nameof(valueProvider));
-            }
         }
 
         internal static ControlFlowGraph GetControlFlowGraph(IOperation operation, Func<IOperation, ControlFlowGraph>? getControlFlowGraph, CancellationToken cancellationToken)

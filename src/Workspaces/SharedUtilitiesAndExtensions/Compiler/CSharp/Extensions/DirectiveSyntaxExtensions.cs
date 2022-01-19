@@ -54,26 +54,16 @@ namespace Microsoft.CodeAnalysis.CSharp.Extensions
             return info;
         }
 
-        internal static DirectiveTriviaSyntax GetMatchingDirective(this DirectiveTriviaSyntax directive, CancellationToken cancellationToken)
+        internal static DirectiveTriviaSyntax GetMatchingDirective(this DirectiveTriviaSyntax directive!!, CancellationToken cancellationToken)
         {
-            if (directive == null)
-            {
-                throw new ArgumentNullException(nameof(directive));
-            }
-
             var directiveSyntaxMap = GetDirectiveInfo(directive, cancellationToken).DirectiveMap;
             directiveSyntaxMap.TryGetValue(directive, out var result);
 
             return result;
         }
 
-        internal static IReadOnlyList<DirectiveTriviaSyntax> GetMatchingConditionalDirectives(this DirectiveTriviaSyntax directive, CancellationToken cancellationToken)
+        internal static IReadOnlyList<DirectiveTriviaSyntax> GetMatchingConditionalDirectives(this DirectiveTriviaSyntax directive!!, CancellationToken cancellationToken)
         {
-            if (directive == null)
-            {
-                throw new ArgumentNullException(nameof(directive));
-            }
-
             var directiveConditionalMap = GetDirectiveInfo(directive, cancellationToken).ConditionalMap;
             directiveConditionalMap.TryGetValue(directive, out var result);
 

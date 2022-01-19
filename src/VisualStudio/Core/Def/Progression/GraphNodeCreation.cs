@@ -18,18 +18,8 @@ namespace Microsoft.VisualStudio.LanguageServices.Progression
     /// </summary>
     public static class GraphNodeCreation
     {
-        public static async Task<GraphNodeId> CreateNodeIdAsync(ISymbol symbol, Solution solution, CancellationToken cancellationToken)
+        public static async Task<GraphNodeId> CreateNodeIdAsync(ISymbol symbol!!, Solution solution!!, CancellationToken cancellationToken)
         {
-            if (symbol == null)
-            {
-                throw new ArgumentNullException(nameof(symbol));
-            }
-
-            if (solution == null)
-            {
-                throw new ArgumentNullException(nameof(solution));
-            }
-
             switch (symbol.Kind)
             {
                 case SymbolKind.Assembly:
@@ -59,23 +49,8 @@ namespace Microsoft.VisualStudio.LanguageServices.Progression
             }
         }
 
-        public static async Task<GraphNode> CreateNodeAsync(this Graph graph, ISymbol symbol, Solution solution, CancellationToken cancellationToken)
+        public static async Task<GraphNode> CreateNodeAsync(this Graph graph!!, ISymbol symbol!!, Solution solution!!, CancellationToken cancellationToken)
         {
-            if (graph == null)
-            {
-                throw new ArgumentNullException(nameof(graph));
-            }
-
-            if (symbol == null)
-            {
-                throw new ArgumentNullException(nameof(symbol));
-            }
-
-            if (solution == null)
-            {
-                throw new ArgumentNullException(nameof(solution));
-            }
-
             return await GraphBuilder.GetOrCreateNodeAsync(graph, symbol, solution, cancellationToken).ConfigureAwait(false);
         }
     }

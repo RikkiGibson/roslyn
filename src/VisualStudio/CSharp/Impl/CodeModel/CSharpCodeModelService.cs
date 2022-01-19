@@ -795,13 +795,8 @@ namespace Microsoft.VisualStudio.LanguageServices.CSharp.CodeModel
                 : name;
         }
 
-        public override string GetName(SyntaxNode node)
+        public override string GetName(SyntaxNode node!!)
         {
-            if (node == null)
-            {
-                throw new ArgumentNullException(nameof(node));
-            }
-
             switch (node.Kind())
             {
                 case SyntaxKind.ClassDeclaration:
@@ -870,12 +865,8 @@ namespace Microsoft.VisualStudio.LanguageServices.CSharp.CodeModel
             return node;
         }
 
-        public override SyntaxNode SetName(SyntaxNode node, string name)
+        public override SyntaxNode SetName(SyntaxNode node!!, string name)
         {
-            if (node == null)
-            {
-                throw new ArgumentNullException(nameof(node));
-            }
 
             // In all cases, the resulting syntax for the new name has elastic trivia attached,
             // whether via this call to SyntaxFactory.Identifier or via explicitly added elastic

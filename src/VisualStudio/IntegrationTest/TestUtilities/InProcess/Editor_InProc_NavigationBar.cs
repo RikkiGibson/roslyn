@@ -136,13 +136,8 @@ namespace Microsoft.VisualStudio.IntegrationTest.Utilities.InProcess
             return vsDropDownBarAdapterMargin;
         }
 
-        private static IVsCodeWindow? TryGetCodeWindow(IVsTextView textView)
+        private static IVsCodeWindow? TryGetCodeWindow(IVsTextView textView!!)
         {
-            if (textView == null)
-            {
-                throw new ArgumentNullException(nameof(textView));
-            }
-
             if (textView is not IObjectWithSite objectWithSite)
             {
                 return null;

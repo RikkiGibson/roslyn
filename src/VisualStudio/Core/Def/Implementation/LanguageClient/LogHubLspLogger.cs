@@ -16,10 +16,10 @@ namespace Microsoft.VisualStudio.LanguageServices.Implementation.LanguageClient
         private readonly TraceSource _traceSource;
         private bool _disposed;
 
-        public LogHubLspLogger(TraceConfiguration configuration, TraceSource traceSource)
+        public LogHubLspLogger(TraceConfiguration configuration!!, TraceSource traceSource!!)
         {
-            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            _traceSource = traceSource ?? throw new ArgumentNullException(nameof(traceSource));
+            _configuration = configuration;
+            _traceSource = traceSource;
         }
 
         public void Dispose()

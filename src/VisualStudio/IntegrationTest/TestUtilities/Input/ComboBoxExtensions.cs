@@ -111,13 +111,8 @@ namespace Microsoft.VisualStudio.IntegrationTest.Utilities.Input
             return true;
         }
 
-        public static async Task<bool> SimulateSetTextAsync(this ComboBox comboBox, JoinableTaskFactory joinableTaskFactory, string value)
+        public static async Task<bool> SimulateSetTextAsync(this ComboBox comboBox, JoinableTaskFactory joinableTaskFactory, string value!!)
         {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
             await joinableTaskFactory.SwitchToMainThreadAsync();
 
             if (comboBox.Text == value)

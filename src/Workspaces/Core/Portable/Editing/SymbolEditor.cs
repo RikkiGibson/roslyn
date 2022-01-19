@@ -31,26 +31,16 @@ namespace Microsoft.CodeAnalysis.Editing
         /// <summary>
         /// Creates a new <see cref="SymbolEditor"/> instance.
         /// </summary>
-        public static SymbolEditor Create(Solution solution)
+        public static SymbolEditor Create(Solution solution!!)
         {
-            if (solution == null)
-            {
-                throw new ArgumentNullException(nameof(solution));
-            }
-
             return new SymbolEditor(solution);
         }
 
         /// <summary>
         /// Creates a new <see cref="SymbolEditor"/> instance.
         /// </summary>
-        public static SymbolEditor Create(Document document)
+        public static SymbolEditor Create(Document document!!)
         {
-            if (document == null)
-            {
-                throw new ArgumentNullException(nameof(document));
-            }
-
             return new SymbolEditor(document.Project.Solution);
         }
 

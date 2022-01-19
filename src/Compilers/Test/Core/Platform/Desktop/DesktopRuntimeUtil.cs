@@ -37,16 +37,11 @@ namespace Roslyn.Test.Utilities.Desktop
         /// <param name="documentation">Provides XML documentation for symbol found in the reference.</param>
         /// <param name="filePath">Optional path that describes the location of the metadata. The file doesn't need to exist on disk. The path is opaque to the compiler.</param>
         internal static PortableExecutableReference CreateMetadataReferenceFromHexGZipImage(
-            string image,
+            string image!!,
             MetadataReferenceProperties properties = default(MetadataReferenceProperties),
             DocumentationProvider documentation = null,
             string filePath = null)
         {
-            if (image == null)
-            {
-                throw new ArgumentNullException(nameof(image));
-            }
-
             using (var compressed = new MemoryStream(SoapHexBinary.Parse(image).Value))
             using (var gzipStream = new GZipStream(compressed, CompressionMode.Decompress))
             using (var uncompressed = new MemoryStream())

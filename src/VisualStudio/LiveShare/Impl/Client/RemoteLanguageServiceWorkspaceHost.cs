@@ -56,12 +56,12 @@ namespace Microsoft.VisualStudio.LanguageServices.LiveShare.Client
         [Obsolete(MefConstruction.ImportingConstructorMessage, error: true)]
         public RemoteLanguageServiceWorkspaceHost(RemoteLanguageServiceWorkspace remoteLanguageServiceWorkspace,
                                                   RemoteProjectInfoProvider remoteProjectInfoProvider,
-                                                  SVsServiceProvider serviceProvider,
+                                                  SVsServiceProvider serviceProvider!!,
                                                   IThreadingContext threadingContext)
         {
             _remoteLanguageServiceWorkspace = Requires.NotNull(remoteLanguageServiceWorkspace, nameof(remoteLanguageServiceWorkspace));
             _remoteProjectInfoProvider = Requires.NotNull(remoteProjectInfoProvider, nameof(remoteProjectInfoProvider));
-            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _serviceProvider = serviceProvider;
             _threadingContext = Requires.NotNull(threadingContext, nameof(threadingContext));
         }
 

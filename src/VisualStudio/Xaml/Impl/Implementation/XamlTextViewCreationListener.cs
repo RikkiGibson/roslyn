@@ -40,16 +40,11 @@ namespace Microsoft.VisualStudio.LanguageServices.Xaml
             _serverUIContext = UIContext.FromUIContextGuid(s_serverUIContextGuid);
         }
 
-        public void TextViewCreated(IWpfTextView textView)
+        public void TextViewCreated(IWpfTextView textView!!)
         {
             if (_serverUIContext.IsActive)
             {
                 return;
-            }
-
-            if (textView == null)
-            {
-                throw new ArgumentNullException(nameof(textView));
             }
 
             var filePath = textView.GetFilePath();

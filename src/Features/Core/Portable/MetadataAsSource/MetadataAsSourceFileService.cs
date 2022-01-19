@@ -65,18 +65,8 @@ namespace Microsoft.CodeAnalysis.MetadataAsSource
             return _rootTemporaryPathWithGuid;
         }
 
-        public async Task<MetadataAsSourceFile> GetGeneratedFileAsync(Project project, ISymbol symbol, bool signaturesOnly, bool allowDecompilation, CancellationToken cancellationToken = default)
+        public async Task<MetadataAsSourceFile> GetGeneratedFileAsync(Project project!!, ISymbol symbol!!, bool signaturesOnly, bool allowDecompilation, CancellationToken cancellationToken = default)
         {
-            if (project == null)
-            {
-                throw new ArgumentNullException(nameof(project));
-            }
-
-            if (symbol == null)
-            {
-                throw new ArgumentNullException(nameof(symbol));
-            }
-
             if (symbol.Kind == SymbolKind.Namespace)
             {
                 throw new ArgumentException(FeaturesResources.symbol_cannot_be_a_namespace, nameof(symbol));

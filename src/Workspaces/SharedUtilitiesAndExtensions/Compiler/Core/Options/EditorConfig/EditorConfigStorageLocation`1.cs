@@ -26,37 +26,24 @@ namespace Microsoft.CodeAnalysis.Options
         private readonly Func<string, Type, Optional<T>> _parseValue;
         private readonly Func<T, OptionSet, string?> _getEditorConfigStringForValue;
 
-        public EditorConfigStorageLocation(string keyName, Func<string, Optional<T>> parseValue, Func<T, string> getEditorConfigStringForValue)
+        public EditorConfigStorageLocation(string keyName, Func<string, Optional<T>> parseValue, Func<T, string> getEditorConfigStringForValue!!)
             : this(keyName, parseValue, (value, optionSet) => getEditorConfigStringForValue(value))
         {
-            if (getEditorConfigStringForValue == null)
-            {
-                throw new ArgumentNullException(nameof(getEditorConfigStringForValue));
-            }
         }
 
-        public EditorConfigStorageLocation(string keyName, Func<string, Optional<T>> parseValue, Func<OptionSet, string> getEditorConfigStringForValue)
+        public EditorConfigStorageLocation(string keyName, Func<string, Optional<T>> parseValue, Func<OptionSet, string> getEditorConfigStringForValue!!)
             : this(keyName, parseValue, (value, optionSet) => getEditorConfigStringForValue(optionSet))
         {
-            if (getEditorConfigStringForValue == null)
-            {
-                throw new ArgumentNullException(nameof(getEditorConfigStringForValue));
-            }
         }
 
-        public EditorConfigStorageLocation(string keyName, Func<string, Optional<T>> parseValue, Func<T, OptionSet, string> getEditorConfigStringForValue)
+        public EditorConfigStorageLocation(string keyName!!, Func<string, Optional<T>> parseValue!!, Func<T, OptionSet, string> getEditorConfigStringForValue!!)
         {
-            if (parseValue == null)
-            {
-                throw new ArgumentNullException(nameof(parseValue));
-            }
-
-            KeyName = keyName ?? throw new ArgumentNullException(nameof(keyName));
+            KeyName = keyName;
 
             // If we're explicitly given a parsing function we can throw away the type when parsing
             _parseValue = (s, type) => parseValue(s);
 
-            _getEditorConfigStringForValue = getEditorConfigStringForValue ?? throw new ArgumentNullException(nameof(getEditorConfigStringForValue));
+            _getEditorConfigStringForValue = getEditorConfigStringForValue;
         }
 
         public bool TryGetOption(IReadOnlyDictionary<string, string?> rawOptions, Type type, out object? result)

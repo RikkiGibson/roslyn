@@ -55,9 +55,9 @@ namespace Microsoft.CodeAnalysis.ExternalAccess.IntelliCode.Api
         /// </summary>
         public TextSpan PriorSelection { get; }
 
-        public IntentRequestContext(string intentName, SnapshotSpan currentSnapshotSpan, ImmutableArray<TextChange> textEditsToPrior, TextSpan priorSelection, string? intentData)
+        public IntentRequestContext(string intentName!!, SnapshotSpan currentSnapshotSpan, ImmutableArray<TextChange> textEditsToPrior, TextSpan priorSelection, string? intentData)
         {
-            IntentName = intentName ?? throw new ArgumentNullException(nameof(intentName));
+            IntentName = intentName;
             IntentData = intentData;
             CurrentSnapshotSpan = currentSnapshotSpan;
             PriorTextEdits = textEditsToPrior;
@@ -87,11 +87,11 @@ namespace Microsoft.CodeAnalysis.ExternalAccess.IntelliCode.Api
         /// </summary>
         public readonly string ActionName { get; }
 
-        public IntentSource(string title, ImmutableArray<TextChange> textChanges, string actionName)
+        public IntentSource(string title!!, ImmutableArray<TextChange> textChanges, string actionName!!)
         {
             TextChanges = textChanges;
-            Title = title ?? throw new ArgumentNullException(nameof(title));
-            ActionName = actionName ?? throw new ArgumentNullException(nameof(actionName));
+            Title = title;
+            ActionName = actionName;
         }
     }
 }

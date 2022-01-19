@@ -183,13 +183,8 @@ namespace Microsoft.CodeAnalysis.EditAndContinue
         /// <remarks>
         /// Automatically detects the underlying PDB format and returns the appropriate reader.
         /// </remarks>
-        public static unsafe EditAndContinueMethodDebugInfoReader Create(ISymUnmanagedReader5 symReader, int version = 1)
+        public static unsafe EditAndContinueMethodDebugInfoReader Create(ISymUnmanagedReader5 symReader!!, int version = 1)
         {
-            if (symReader == null)
-            {
-                throw new ArgumentNullException(nameof(symReader));
-            }
-
             if (version <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(version));

@@ -26,10 +26,9 @@ namespace Microsoft.CodeAnalysis.Editor.Implementation.CommandHandlers
 
         [ImportingConstructor]
         [Obsolete(MefConstruction.ImportingConstructorMessage, error: true)]
-        public GoToMatchingBraceCommandHandler(IBraceMatchingService braceMatchingService)
+        public GoToMatchingBraceCommandHandler(IBraceMatchingService braceMatchingService!!)
         {
-            _braceMatchingService = braceMatchingService ??
-                throw new ArgumentNullException(nameof(braceMatchingService));
+            _braceMatchingService = braceMatchingService;
         }
 
         public string DisplayName => nameof(GoToMatchingBraceCommandHandler);

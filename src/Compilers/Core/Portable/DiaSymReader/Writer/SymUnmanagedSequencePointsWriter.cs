@@ -19,14 +19,14 @@ namespace Microsoft.DiaSymReader
         private int[] _endLines;
         private int[] _endColumns;
 
-        public SymUnmanagedSequencePointsWriter(SymUnmanagedWriter writer, int capacity = 64)
+        public SymUnmanagedSequencePointsWriter(SymUnmanagedWriter writer!!, int capacity = 64)
         {
             if (capacity <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(capacity));
             }
 
-            _writer = writer ?? throw new ArgumentNullException(nameof(writer));
+            _writer = writer;
             _currentDocumentIndex = -1;
             _offsets = new int[capacity];
             _startLines = new int[capacity];

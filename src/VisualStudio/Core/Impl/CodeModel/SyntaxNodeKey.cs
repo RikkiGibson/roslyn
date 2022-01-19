@@ -21,7 +21,7 @@ namespace Microsoft.VisualStudio.LanguageServices.Implementation.CodeModel
 
         public static readonly SyntaxNodeKey Empty = new SyntaxNodeKey();
 
-        public SyntaxNodeKey(string name, int ordinal)
+        public SyntaxNodeKey(string name!!, int ordinal)
         {
             if (ordinal < -1)
             {
@@ -30,7 +30,7 @@ namespace Microsoft.VisualStudio.LanguageServices.Implementation.CodeModel
                 throw new ArgumentOutOfRangeException(nameof(ordinal));
             }
 
-            _name = name ?? throw new ArgumentNullException(nameof(name));
+            _name = name;
             _ordinal = ordinal;
         }
 

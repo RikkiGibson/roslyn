@@ -180,13 +180,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>
         /// Deserialize a syntax node from the byte stream.
         /// </summary>
-        public static SyntaxNode DeserializeFrom(Stream stream, CancellationToken cancellationToken = default)
+        public static SyntaxNode DeserializeFrom(Stream stream!!, CancellationToken cancellationToken = default)
         {
-            if (stream == null)
-            {
-                throw new ArgumentNullException(nameof(stream));
-            }
-
             if (!stream.CanRead)
             {
                 throw new InvalidOperationException(CodeAnalysisResources.TheStreamCannotBeReadFrom);

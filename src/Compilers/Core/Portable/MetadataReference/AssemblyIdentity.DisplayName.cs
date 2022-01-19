@@ -152,13 +152,8 @@ namespace Microsoft.CodeAnalysis
             return GetDisplayName(fullKey: true);
         }
 
-        public static bool TryParseDisplayName(string displayName, [NotNullWhen(true)] out AssemblyIdentity? identity)
+        public static bool TryParseDisplayName(string displayName!!, [NotNullWhen(true)] out AssemblyIdentity? identity)
         {
-            if (displayName == null)
-            {
-                throw new ArgumentNullException(nameof(displayName));
-            }
-
             return TryParseDisplayName(displayName, out identity, parts: out _);
         }
 
@@ -179,18 +174,12 @@ namespace Microsoft.CodeAnalysis
         /// If neither public key nor token is specified the identity is considered weak.
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="displayName"/> is null.</exception>
-        public static bool TryParseDisplayName(string displayName, [NotNullWhen(true)] out AssemblyIdentity? identity, out AssemblyIdentityParts parts)
+        public static bool TryParseDisplayName(string displayName!!, [NotNullWhen(true)] out AssemblyIdentity? identity, out AssemblyIdentityParts parts)
         {
             // see ndp\clr\src\Binder\TextualIdentityParser.cpp, ndp\clr\src\Binder\StringLexer.cpp
 
             identity = null;
             parts = 0;
-
-            if (displayName == null)
-            {
-                throw new ArgumentNullException(nameof(displayName));
-            }
-
             if (displayName.IndexOf('\0') >= 0)
             {
                 return false;

@@ -24,13 +24,8 @@ namespace Microsoft.CodeAnalysis
             Debug.Assert(properties.Kind != MetadataImageKind.Module);
         }
 
-        internal static MetadataReferenceProperties GetProperties(Compilation compilation, ImmutableArray<string> aliases, bool embedInteropTypes)
+        internal static MetadataReferenceProperties GetProperties(Compilation compilation!!, ImmutableArray<string> aliases, bool embedInteropTypes)
         {
-            if (compilation == null)
-            {
-                throw new ArgumentNullException(nameof(compilation));
-            }
-
             if (compilation.IsSubmission)
             {
                 throw new NotSupportedException(CodeAnalysisResources.CannotCreateReferenceToSubmission);

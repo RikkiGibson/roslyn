@@ -40,16 +40,11 @@ namespace Microsoft.CodeAnalysis.FindSymbols
         /// <param name="workspace">A workspace to provide context.</param>
         /// <param name="cancellationToken">A CancellationToken.</param>
         public static async Task<ISymbol> FindSymbolAtPositionAsync(
-            SemanticModel semanticModel,
+            SemanticModel semanticModel!!,
             int position,
-            Workspace workspace,
+            Workspace workspace!!,
             CancellationToken cancellationToken = default)
         {
-            if (semanticModel is null)
-                throw new ArgumentNullException(nameof(semanticModel));
-            if (workspace is null)
-                throw new ArgumentNullException(nameof(workspace));
-
             var semanticInfo = await GetSemanticInfoAtPositionAsync(
                 semanticModel, position, workspace.Services, cancellationToken: cancellationToken).ConfigureAwait(false);
             return semanticInfo.GetAnySymbol(includeType: false);
@@ -85,13 +80,10 @@ namespace Microsoft.CodeAnalysis.FindSymbols
         }
 
         public static async Task<ISymbol> FindSymbolAtPositionAsync(
-            Document document,
+            Document document!!,
             int position,
             CancellationToken cancellationToken = default)
         {
-            if (document is null)
-                throw new ArgumentNullException(nameof(document));
-
             var semanticModel = await document.GetRequiredSemanticModelAsync(cancellationToken).ConfigureAwait(false);
             return await FindSymbolAtPositionAsync(semanticModel, position, document.Project.Solution.Workspace, cancellationToken).ConfigureAwait(false);
         }
@@ -201,15 +193,9 @@ namespace Microsoft.CodeAnalysis.FindSymbols
         /// <param name="compilation">A compilation to find the corresponding symbol within. The compilation may or may not be the origin of the symbol.</param>
         /// <param name="cancellationToken">A CancellationToken.</param>
         /// <returns></returns>
-        public static IEnumerable<TSymbol> FindSimilarSymbols<TSymbol>(TSymbol symbol, Compilation compilation, CancellationToken cancellationToken = default)
+        public static IEnumerable<TSymbol> FindSimilarSymbols<TSymbol>(TSymbol symbol!!, Compilation compilation!!, CancellationToken cancellationToken = default)
             where TSymbol : ISymbol
         {
-            if (symbol is null)
-                throw new ArgumentNullException(nameof(symbol));
-
-            if (compilation is null)
-                throw new ArgumentNullException(nameof(compilation));
-
             var key = symbol.GetSymbolKey(cancellationToken);
 
             // We may be talking about different compilations.  So do not try to resolve locations.

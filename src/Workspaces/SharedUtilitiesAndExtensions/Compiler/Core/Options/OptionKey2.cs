@@ -17,7 +17,7 @@ namespace Microsoft.CodeAnalysis.Options
         public IOption2 Option { get; }
         public string? Language { get; }
 
-        public OptionKey2(IOption2 option, string? language = null)
+        public OptionKey2(IOption2 option!!, string? language = null)
         {
             if (language != null && !option.IsPerLanguage)
             {
@@ -28,7 +28,7 @@ namespace Microsoft.CodeAnalysis.Options
                 throw new ArgumentNullException(WorkspacesResources.A_language_name_must_be_specified_for_this_option);
             }
 
-            this.Option = option ?? throw new ArgumentNullException(nameof(option));
+            this.Option = option;
             this.Language = language;
         }
 

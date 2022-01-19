@@ -818,13 +818,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>
         /// Creates a new compilation with additional syntax trees.
         /// </summary>
-        public new CSharpCompilation AddSyntaxTrees(IEnumerable<SyntaxTree> trees)
+        public new CSharpCompilation AddSyntaxTrees(IEnumerable<SyntaxTree> trees!!)
         {
-            if (trees == null)
-            {
-                throw new ArgumentNullException(nameof(trees));
-            }
-
             if (trees.IsEmpty())
             {
                 return this;
@@ -891,13 +886,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// Creates a new compilation without the specified syntax trees. Preserves metadata info for use with trees
         /// added later.
         /// </summary>
-        public new CSharpCompilation RemoveSyntaxTrees(IEnumerable<SyntaxTree> trees)
+        public new CSharpCompilation RemoveSyntaxTrees(IEnumerable<SyntaxTree> trees!!)
         {
-            if (trees == null)
-            {
-                throw new ArgumentNullException(nameof(trees));
-            }
-
             if (trees.IsEmpty())
             {
                 return this;
@@ -956,17 +946,11 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>
         /// Creates a new compilation without the old tree but with the new tree.
         /// </summary>
-        public new CSharpCompilation ReplaceSyntaxTree(SyntaxTree oldTree, SyntaxTree? newTree)
+        public new CSharpCompilation ReplaceSyntaxTree(SyntaxTree oldTree!!, SyntaxTree? newTree)
         {
             // this is just to force a cast exception
             oldTree = (CSharpSyntaxTree)oldTree;
             newTree = (CSharpSyntaxTree?)newTree;
-
-            if (oldTree == null)
-            {
-                throw new ArgumentNullException(nameof(oldTree));
-            }
-
             if (newTree == null)
             {
                 return this.RemoveSyntaxTrees(oldTree);
@@ -1071,13 +1055,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <remarks>
         /// Uses object identity when comparing two references.
         /// </remarks>
-        internal new Symbol? GetAssemblyOrModuleSymbol(MetadataReference reference)
+        internal new Symbol? GetAssemblyOrModuleSymbol(MetadataReference reference!!)
         {
-            if (reference == null)
-            {
-                throw new ArgumentNullException(nameof(reference));
-            }
-
             if (reference.Properties.Kind == MetadataImageKind.Assembly)
             {
                 return GetBoundReferenceManager().GetReferencedAssemblySymbol(reference);
@@ -2089,22 +2068,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <param name="destination">Destination type of value to be converted</param>
         /// <returns>A <see cref="Conversion"/> that classifies the conversion from the
         /// <paramref name="source"/> type to the <paramref name="destination"/> type.</returns>
-        public Conversion ClassifyConversion(ITypeSymbol source, ITypeSymbol destination)
+        public Conversion ClassifyConversion(ITypeSymbol source!!, ITypeSymbol destination!!)
         {
-            // Note that it is possible for there to be both an implicit user-defined conversion
-            // and an explicit built-in conversion from source to destination. In that scenario
-            // this method returns the implicit conversion.
-
-            if ((object)source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            if ((object)destination == null)
-            {
-                throw new ArgumentNullException(nameof(destination));
-            }
-
             TypeSymbol? cssource = source.EnsureCSharpSymbolOrNull(nameof(source));
             TypeSymbol? csdest = destination.EnsureCSharpSymbolOrNull(nameof(destination));
 
@@ -2162,13 +2127,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// Returns a new ArrayTypeSymbol representing an array type tied to the base types of the
         /// COR Library in this Compilation.
         /// </summary>
-        internal ArrayTypeSymbol CreateArrayTypeSymbol(TypeSymbol elementType, int rank = 1, NullableAnnotation elementNullableAnnotation = NullableAnnotation.Oblivious)
+        internal ArrayTypeSymbol CreateArrayTypeSymbol(TypeSymbol elementType!!, int rank = 1, NullableAnnotation elementNullableAnnotation = NullableAnnotation.Oblivious)
         {
-            if ((object)elementType == null)
-            {
-                throw new ArgumentNullException(nameof(elementType));
-            }
-
             if (rank < 1)
             {
                 throw new ArgumentException(nameof(rank));
@@ -2180,13 +2140,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>
         /// Returns a new PointerTypeSymbol representing a pointer type tied to a type in this Compilation.
         /// </summary>
-        internal PointerTypeSymbol CreatePointerTypeSymbol(TypeSymbol elementType, NullableAnnotation elementNullableAnnotation = NullableAnnotation.Oblivious)
+        internal PointerTypeSymbol CreatePointerTypeSymbol(TypeSymbol elementType!!, NullableAnnotation elementNullableAnnotation = NullableAnnotation.Oblivious)
         {
-            if ((object)elementType == null)
-            {
-                throw new ArgumentNullException(nameof(elementType));
-            }
-
             return new PointerTypeSymbol(TypeWithAnnotations.Create(elementType, elementNullableAnnotation));
         }
 
@@ -2229,13 +2184,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>
         /// Gets a new SyntaxTreeSemanticModel for the specified syntax tree.
         /// </summary>
-        public new SemanticModel GetSemanticModel(SyntaxTree syntaxTree, bool ignoreAccessibility)
+        public new SemanticModel GetSemanticModel(SyntaxTree syntaxTree!!, bool ignoreAccessibility)
         {
-            if (syntaxTree == null)
-            {
-                throw new ArgumentNullException(nameof(syntaxTree));
-            }
-
             if (!_syntaxAndDeclarations.GetLazyState().RootNamespaces.ContainsKey(syntaxTree))
             {
                 throw new ArgumentException(CSharpResources.SyntaxTreeNotFound, nameof(syntaxTree));
@@ -3624,18 +3574,13 @@ namespace Microsoft.CodeAnalysis.CSharp
         }
 
         protected override IFunctionPointerTypeSymbol CommonCreateFunctionPointerTypeSymbol(
-            ITypeSymbol returnType,
+            ITypeSymbol returnType!!,
             RefKind returnRefKind,
             ImmutableArray<ITypeSymbol> parameterTypes,
             ImmutableArray<RefKind> parameterRefKinds,
             SignatureCallingConvention callingConvention,
             ImmutableArray<INamedTypeSymbol> callingConventionTypes)
         {
-            if (returnType is null)
-            {
-                throw new ArgumentNullException(nameof(returnType));
-            }
-
             if (parameterTypes.IsDefault)
             {
                 throw new ArgumentNullException(nameof(parameterTypes));
@@ -3862,13 +3807,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>
         /// Return true if there is a source declaration symbol name that meets given predicate.
         /// </summary>
-        public override bool ContainsSymbolsWithName(Func<string, bool> predicate, SymbolFilter filter = SymbolFilter.TypeAndMember, CancellationToken cancellationToken = default)
+        public override bool ContainsSymbolsWithName(Func<string, bool> predicate!!, SymbolFilter filter = SymbolFilter.TypeAndMember, CancellationToken cancellationToken = default)
         {
-            if (predicate == null)
-            {
-                throw new ArgumentNullException(nameof(predicate));
-            }
-
             if (filter == SymbolFilter.None)
             {
                 throw new ArgumentException(CSharpResources.NoNoneSearchCriteria, nameof(filter));
@@ -3880,13 +3820,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>
         /// Return source declaration symbols whose name meets given predicate.
         /// </summary>
-        public override IEnumerable<ISymbol> GetSymbolsWithName(Func<string, bool> predicate, SymbolFilter filter = SymbolFilter.TypeAndMember, CancellationToken cancellationToken = default)
+        public override IEnumerable<ISymbol> GetSymbolsWithName(Func<string, bool> predicate!!, SymbolFilter filter = SymbolFilter.TypeAndMember, CancellationToken cancellationToken = default)
         {
-            if (predicate == null)
-            {
-                throw new ArgumentNullException(nameof(predicate));
-            }
-
             if (filter == SymbolFilter.None)
             {
                 throw new ArgumentException(CSharpResources.NoNoneSearchCriteria, nameof(filter));
@@ -3901,13 +3836,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// This will be faster than <see cref="ContainsSymbolsWithName(Func{string, bool}, SymbolFilter, CancellationToken)"/>
         /// when predicate is just a simple string check.
         /// </summary>
-        public override bool ContainsSymbolsWithName(string name, SymbolFilter filter = SymbolFilter.TypeAndMember, CancellationToken cancellationToken = default)
+        public override bool ContainsSymbolsWithName(string name!!, SymbolFilter filter = SymbolFilter.TypeAndMember, CancellationToken cancellationToken = default)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
             if (filter == SymbolFilter.None)
             {
                 throw new ArgumentException(CSharpResources.NoNoneSearchCriteria, nameof(filter));
@@ -3927,13 +3857,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             return GetSymbolsWithNameCore(name, filter, cancellationToken).GetPublicSymbols()!;
         }
 
-        internal IEnumerable<Symbol> GetSymbolsWithNameCore(string name, SymbolFilter filter = SymbolFilter.TypeAndMember, CancellationToken cancellationToken = default)
+        internal IEnumerable<Symbol> GetSymbolsWithNameCore(string name!!, SymbolFilter filter = SymbolFilter.TypeAndMember, CancellationToken cancellationToken = default)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
             if (filter == SymbolFilter.None)
             {
                 throw new ArgumentException(CSharpResources.NoNoneSearchCriteria, nameof(filter));

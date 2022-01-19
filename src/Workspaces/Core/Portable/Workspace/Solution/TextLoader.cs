@@ -132,13 +132,8 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Creates a new <see cref="TextLoader"/> from an already existing source text and version.
         /// </summary>
-        public static TextLoader From(TextAndVersion textAndVersion)
+        public static TextLoader From(TextAndVersion textAndVersion!!)
         {
-            if (textAndVersion == null)
-            {
-                throw new ArgumentNullException(nameof(textAndVersion));
-            }
-
             return new TextDocumentLoader(textAndVersion);
         }
 
@@ -148,13 +143,8 @@ namespace Microsoft.CodeAnalysis
         /// The text obtained from the loader will be the current text of the container at the time
         /// the loader is accessed.
         /// </summary>
-        public static TextLoader From(SourceTextContainer container, VersionStamp version, string? filePath = null)
+        public static TextLoader From(SourceTextContainer container!!, VersionStamp version, string? filePath = null)
         {
-            if (container == null)
-            {
-                throw new ArgumentNullException(nameof(container));
-            }
-
             return new TextContainerLoader(container, version, filePath);
         }
 

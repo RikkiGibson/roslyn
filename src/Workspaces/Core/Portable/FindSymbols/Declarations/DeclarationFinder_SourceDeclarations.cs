@@ -26,18 +26,8 @@ namespace Microsoft.CodeAnalysis.FindSymbols
         // remote the query to the OOP process, and will fallback to local processing if they can't.
 
         public static async Task<ImmutableArray<ISymbol>> FindSourceDeclarationsWithNormalQueryAsync(
-            Solution solution, string name, bool ignoreCase, SymbolFilter criteria, CancellationToken cancellationToken)
+            Solution solution!!, string name!!, bool ignoreCase, SymbolFilter criteria, CancellationToken cancellationToken)
         {
-            if (solution == null)
-            {
-                throw new ArgumentNullException(nameof(solution));
-            }
-
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
             if (string.IsNullOrWhiteSpace(name))
             {
                 return ImmutableArray<ISymbol>.Empty;
@@ -64,18 +54,8 @@ namespace Microsoft.CodeAnalysis.FindSymbols
         }
 
         public static async Task<ImmutableArray<ISymbol>> FindSourceDeclarationsWithNormalQueryAsync(
-            Project project, string name, bool ignoreCase, SymbolFilter criteria, CancellationToken cancellationToken)
+            Project project!!, string name!!, bool ignoreCase, SymbolFilter criteria, CancellationToken cancellationToken)
         {
-            if (project == null)
-            {
-                throw new ArgumentNullException(nameof(project));
-            }
-
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
             if (string.IsNullOrWhiteSpace(name))
             {
                 return ImmutableArray<ISymbol>.Empty;
@@ -102,18 +82,8 @@ namespace Microsoft.CodeAnalysis.FindSymbols
         }
 
         public static async Task<ImmutableArray<ISymbol>> FindSourceDeclarationsWithPatternAsync(
-            Solution solution, string pattern, SymbolFilter criteria, CancellationToken cancellationToken)
+            Solution solution!!, string pattern!!, SymbolFilter criteria, CancellationToken cancellationToken)
         {
-            if (solution == null)
-            {
-                throw new ArgumentNullException(nameof(solution));
-            }
-
-            if (pattern == null)
-            {
-                throw new ArgumentNullException(nameof(pattern));
-            }
-
             var client = await RemoteHostClient.TryGetClientAsync(solution.Workspace, cancellationToken).ConfigureAwait(false);
             if (client != null)
             {
@@ -135,18 +105,8 @@ namespace Microsoft.CodeAnalysis.FindSymbols
         }
 
         public static async Task<ImmutableArray<ISymbol>> FindSourceDeclarationsWithPatternAsync(
-            Project project, string pattern, SymbolFilter criteria, CancellationToken cancellationToken)
+            Project project!!, string pattern!!, SymbolFilter criteria, CancellationToken cancellationToken)
         {
-            if (project == null)
-            {
-                throw new ArgumentNullException(nameof(project));
-            }
-
-            if (pattern == null)
-            {
-                throw new ArgumentNullException(nameof(pattern));
-            }
-
             var client = await RemoteHostClient.TryGetClientAsync(project, cancellationToken).ConfigureAwait(false);
             if (client != null)
             {

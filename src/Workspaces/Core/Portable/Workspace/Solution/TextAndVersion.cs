@@ -58,13 +58,8 @@ namespace Microsoft.CodeAnalysis
         /// <param name="filePath">An optional file path that identifies the original of the source text.</param>
         /// <param name="loadDiagnostic">Diagnostic describing failure to load the source text.</param>
         /// <returns></returns>
-        internal static TextAndVersion Create(SourceText text, VersionStamp version, string? filePath, Diagnostic? loadDiagnostic)
+        internal static TextAndVersion Create(SourceText text!!, VersionStamp version, string? filePath, Diagnostic? loadDiagnostic)
         {
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
             return new TextAndVersion(text, version, filePath, loadDiagnostic);
         }
     }

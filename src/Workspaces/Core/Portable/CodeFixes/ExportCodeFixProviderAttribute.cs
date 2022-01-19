@@ -32,17 +32,12 @@ namespace Microsoft.CodeAnalysis.CodeFixes
         /// <param name="firstLanguage">One language to which the code fix provider applies.</param>
         /// <param name="additionalLanguages">Additional languages to which the code fix provider applies. See <see cref="LanguageNames"/>.</param>
         public ExportCodeFixProviderAttribute(
-            string firstLanguage,
-            params string[] additionalLanguages)
+            string firstLanguage!!,
+            params string[] additionalLanguages!!)
             : base(typeof(CodeFixProvider))
         {
-            if (additionalLanguages == null)
-            {
-                throw new ArgumentNullException(nameof(additionalLanguages));
-            }
-
             var languages = new string[additionalLanguages.Length + 1];
-            languages[0] = firstLanguage ?? throw new ArgumentNullException(nameof(firstLanguage));
+            languages[0] = firstLanguage;
             for (var index = 0; index < additionalLanguages.Length; index++)
             {
                 languages[index + 1] = additionalLanguages[index];

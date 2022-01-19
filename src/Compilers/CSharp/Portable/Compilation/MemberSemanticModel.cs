@@ -186,13 +186,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             return false;
         }
 
-        internal override BoundExpression GetSpeculativelyBoundExpression(int position, ExpressionSyntax expression, SpeculativeBindingOption bindingOption, out Binder binder, out ImmutableArray<Symbol> crefSymbols)
+        internal override BoundExpression GetSpeculativelyBoundExpression(int position, ExpressionSyntax expression!!, SpeculativeBindingOption bindingOption, out Binder binder, out ImmutableArray<Symbol> crefSymbols)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
-
             if (bindingOption == SpeculativeBindingOption.BindAsExpression && GetSnapshotManager() is { } snapshotManager)
             {
                 crefSymbols = default;
@@ -416,14 +411,9 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         public override Conversion ClassifyConversion(
             ExpressionSyntax expression,
-            ITypeSymbol destination,
+            ITypeSymbol destination!!,
             bool isExplicitInSource = false)
         {
-            if ((object)destination == null)
-            {
-                throw new ArgumentNullException(nameof(destination));
-            }
-
             TypeSymbol csdestination = destination.EnsureCSharpSymbolOrNull(nameof(destination));
 
             if (expression.Kind() == SyntaxKind.DeclarationExpression)
@@ -472,15 +462,9 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         internal override Conversion ClassifyConversionForCast(
             ExpressionSyntax expression,
-            TypeSymbol destination)
+            TypeSymbol destination!!)
         {
             CheckSyntaxNode(expression);
-
-            if ((object)destination == null)
-            {
-                throw new ArgumentNullException(nameof(destination));
-            }
-
             var binder = this.GetEnclosingBinderInternal(expression, GetAdjustedNodePosition(expression));
             CSharpSyntaxNode bindableNode = this.GetBindableSyntaxNode(expression);
             var boundExpression = this.GetLowerBoundNode(bindableNode) as BoundExpression;

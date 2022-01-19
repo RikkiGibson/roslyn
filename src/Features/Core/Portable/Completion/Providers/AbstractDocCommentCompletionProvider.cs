@@ -66,9 +66,9 @@ namespace Microsoft.CodeAnalysis.Completion.Providers
 
         private readonly CompletionItemRules defaultRules;
 
-        protected AbstractDocCommentCompletionProvider(CompletionItemRules defaultRules)
+        protected AbstractDocCommentCompletionProvider(CompletionItemRules defaultRules!!)
         {
-            this.defaultRules = defaultRules ?? throw new ArgumentNullException(nameof(defaultRules));
+            this.defaultRules = defaultRules;
         }
 
         public override async Task ProvideCompletionsAsync(CompletionContext context)

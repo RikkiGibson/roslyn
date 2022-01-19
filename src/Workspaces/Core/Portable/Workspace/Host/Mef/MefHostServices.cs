@@ -30,23 +30,13 @@ namespace Microsoft.CodeAnalysis.Host.Mef
         public MefHostServices(CompositionContext compositionContext)
             => _compositionContext = compositionContext;
 
-        public static MefHostServices Create(CompositionContext compositionContext)
+        public static MefHostServices Create(CompositionContext compositionContext!!)
         {
-            if (compositionContext == null)
-            {
-                throw new ArgumentNullException(nameof(compositionContext));
-            }
-
             return new MefHostServices(compositionContext);
         }
 
-        public static MefHostServices Create(IEnumerable<System.Reflection.Assembly> assemblies)
+        public static MefHostServices Create(IEnumerable<System.Reflection.Assembly> assemblies!!)
         {
-            if (assemblies == null)
-            {
-                throw new ArgumentNullException(nameof(assemblies));
-            }
-
             if (s_creationHook != null)
             {
                 return s_creationHook(assemblies);

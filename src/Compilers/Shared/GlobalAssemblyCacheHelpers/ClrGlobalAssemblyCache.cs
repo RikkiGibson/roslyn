@@ -196,16 +196,11 @@ namespace Microsoft.CodeAnalysis
         }
 
         public override AssemblyIdentity ResolvePartialName(
-            string displayName,
+            string displayName!!,
             out string location,
             ImmutableArray<ProcessorArchitecture> architectureFilter,
             CultureInfo preferredCulture)
         {
-            if (displayName == null)
-            {
-                throw new ArgumentNullException(nameof(displayName));
-            }
-
             location = null;
             FusionAssemblyIdentity.IAssemblyName nameObject = FusionAssemblyIdentity.ToAssemblyNameObject(displayName);
             if (nameObject == null)

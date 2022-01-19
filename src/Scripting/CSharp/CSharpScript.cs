@@ -30,10 +30,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Scripting
         /// <param name="assemblyLoader">Custom  assembly loader.</param>
         /// <typeparam name="T">The return type of the script</typeparam>
         /// <exception cref="ArgumentNullException">Code is null.</exception>
-        public static Script<T> Create<T>(string code, ScriptOptions options = null, Type globalsType = null, InteractiveAssemblyLoader assemblyLoader = null)
+        public static Script<T> Create<T>(string code!!, ScriptOptions options = null, Type globalsType = null, InteractiveAssemblyLoader assemblyLoader = null)
         {
-            if (code == null)
-                throw new ArgumentNullException(nameof(code));
             return Script.CreateInitialScript<T>(CSharpScriptCompiler.Instance, SourceText.From(code, options?.FileEncoding), options, globalsType, assemblyLoader);
         }
 
@@ -47,10 +45,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Scripting
         /// <typeparam name="T">The return type of the script</typeparam>
         /// <exception cref="ArgumentNullException">Stream is null.</exception>
         /// <exception cref="ArgumentException">Stream is not readable or seekable.</exception>
-        public static Script<T> Create<T>(Stream code, ScriptOptions options = null, Type globalsType = null, InteractiveAssemblyLoader assemblyLoader = null)
+        public static Script<T> Create<T>(Stream code!!, ScriptOptions options = null, Type globalsType = null, InteractiveAssemblyLoader assemblyLoader = null)
         {
-            if (code == null)
-                throw new ArgumentNullException(nameof(code));
             return Script.CreateInitialScript<T>(CSharpScriptCompiler.Instance, SourceText.From(code, options?.FileEncoding), options, globalsType, assemblyLoader);
         }
 
@@ -62,10 +58,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Scripting
         /// <param name="globalsType">Type of global object.</param>
         /// <param name="assemblyLoader">Custom  assembly loader.</param>
         /// <exception cref="ArgumentNullException">Code is null.</exception>
-        public static Script<object> Create(string code, ScriptOptions options = null, Type globalsType = null, InteractiveAssemblyLoader assemblyLoader = null)
+        public static Script<object> Create(string code!!, ScriptOptions options = null, Type globalsType = null, InteractiveAssemblyLoader assemblyLoader = null)
         {
-            if (code == null)
-                throw new ArgumentNullException(nameof(code));
             return Create<object>(code, options, globalsType, assemblyLoader);
         }
 
@@ -78,10 +72,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Scripting
         /// <param name="assemblyLoader">Custom  assembly loader.</param>
         /// <exception cref="ArgumentNullException">Stream is null.</exception>
         /// <exception cref="ArgumentException">Stream is not readable or seekable.</exception>
-        public static Script<object> Create(Stream code, ScriptOptions options = null, Type globalsType = null, InteractiveAssemblyLoader assemblyLoader = null)
+        public static Script<object> Create(Stream code!!, ScriptOptions options = null, Type globalsType = null, InteractiveAssemblyLoader assemblyLoader = null)
         {
-            if (code == null)
-                throw new ArgumentNullException(nameof(code));
             return Create<object>(code, options, globalsType, assemblyLoader);
         }
 

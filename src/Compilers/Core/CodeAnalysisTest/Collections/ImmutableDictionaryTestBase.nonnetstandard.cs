@@ -281,11 +281,8 @@ namespace Microsoft.CodeAnalysis.UnitTests.Collections
             return list;
         }
 
-        private static void KeysOrValuesTestHelper<T>(ICollection<T> collection, T containedValue)
+        private static void KeysOrValuesTestHelper<T>(ICollection<T> collection!!, T containedValue)
         {
-            if (collection is null)
-                throw new ArgumentNullException(nameof(collection));
-
             Assert.True(collection.Contains(containedValue));
             Assert.Throws<NotSupportedException>(() => collection.Add(default(T)!));
             Assert.Throws<NotSupportedException>(() => collection.Clear());

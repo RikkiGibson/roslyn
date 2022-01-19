@@ -99,13 +99,8 @@ namespace Microsoft.CodeAnalysis
         /// </summary>
         /// <param name="peImage">The portable executable image beginning with the DOS header ("MZ").</param>
         /// <exception cref="ArgumentNullException"><paramref name="peImage"/> is null.</exception>
-        public static ModuleMetadata CreateFromImage(IEnumerable<byte> peImage)
+        public static ModuleMetadata CreateFromImage(IEnumerable<byte> peImage!!)
         {
-            if (peImage == null)
-            {
-                throw new ArgumentNullException(nameof(peImage));
-            }
-
             return CreateFromImage(ImmutableArray.CreateRange(peImage));
         }
 
@@ -157,13 +152,8 @@ namespace Microsoft.CodeAnalysis
         /// <exception cref="IOException">
         /// <see cref="PEStreamOptions.PrefetchMetadata"/> or <see cref="PEStreamOptions.PrefetchEntireImage"/> is specified and an error occurs while reading the stream.
         /// </exception>
-        public static ModuleMetadata CreateFromStream(Stream peStream, PEStreamOptions options)
+        public static ModuleMetadata CreateFromStream(Stream peStream!!, PEStreamOptions options)
         {
-            if (peStream == null)
-            {
-                throw new ArgumentNullException(nameof(peStream));
-            }
-
             if (!peStream.CanRead || !peStream.CanSeek)
             {
                 throw new ArgumentException(CodeAnalysisResources.StreamMustSupportReadAndSeek, nameof(peStream));

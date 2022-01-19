@@ -223,15 +223,12 @@ namespace Microsoft.CodeAnalysis.Editor.Implementation.IntelliSense.AsyncComplet
         }
 
         public Task<AsyncCompletionData.CompletionContext> GetCompletionContextAsync(
-            IAsyncCompletionSession session,
+            IAsyncCompletionSession session!!,
             AsyncCompletionData.CompletionTrigger trigger,
             SnapshotPoint triggerLocation,
             SnapshotSpan applicableToSpan,
             CancellationToken cancellationToken)
         {
-            if (session is null)
-                throw new ArgumentNullException(nameof(session));
-
             return GetCompletionContextWorkerAsync(session, trigger, triggerLocation, isExpanded: false, cancellationToken);
         }
 
@@ -369,13 +366,8 @@ namespace Microsoft.CodeAnalysis.Editor.Implementation.IntelliSense.AsyncComplet
                 filterSet.GetFilterStatesInSet(addUnselectedExpander: expandItemsAvailable));
         }
 
-        public async Task<object?> GetDescriptionAsync(IAsyncCompletionSession session, VSCompletionItem item, CancellationToken cancellationToken)
+        public async Task<object?> GetDescriptionAsync(IAsyncCompletionSession session!!, VSCompletionItem item!!, CancellationToken cancellationToken)
         {
-            if (session is null)
-                throw new ArgumentNullException(nameof(session));
-            if (item is null)
-                throw new ArgumentNullException(nameof(item));
-
             if (!item.Properties.TryGetProperty(RoslynItem, out RoslynCompletionItem roslynItem) ||
                 !item.Properties.TryGetProperty(TriggerLocation, out SnapshotPoint triggerLocation))
             {

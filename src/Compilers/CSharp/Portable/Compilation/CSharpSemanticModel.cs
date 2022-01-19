@@ -276,13 +276,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <remarks>
         /// Keep in sync with Binder.BindCrefParameterOrReturnType.
         /// </remarks>
-        protected BoundExpression GetSpeculativelyBoundExpressionWithoutNullability(int position, ExpressionSyntax expression, SpeculativeBindingOption bindingOption, out Binder binder, out ImmutableArray<Symbol> crefSymbols)
+        protected BoundExpression GetSpeculativelyBoundExpressionWithoutNullability(int position, ExpressionSyntax expression!!, SpeculativeBindingOption bindingOption, out Binder binder, out ImmutableArray<Symbol> crefSymbols)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
-
             crefSymbols = default(ImmutableArray<Symbol>);
 
             expression = SyntaxFactory.GetStandaloneExpression(expression);
@@ -396,13 +391,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// Bind the given attribute speculatively at the given position, and return back
         /// the resulting bound node. May return null in some error cases.
         /// </summary>
-        private BoundAttribute GetSpeculativelyBoundAttribute(int position, AttributeSyntax attribute, out Binder binder)
+        private BoundAttribute GetSpeculativelyBoundAttribute(int position, AttributeSyntax attribute!!, out Binder binder)
         {
-            if (attribute == null)
-            {
-                throw new ArgumentNullException(nameof(attribute));
-            }
-
             binder = this.GetSpeculativeBinderForAttribute(position, attribute);
             if (binder == null)
             {
@@ -765,16 +755,11 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <param name="constructorInitializer">A syntax node that represents a parsed constructor initializer. This syntax node
         /// need not and typically does not appear in the source code referred to SemanticModel instance.</param>
         /// <returns>The semantic information for the topmost node of the constructor initializer.</returns>
-        public SymbolInfo GetSpeculativeSymbolInfo(int position, ConstructorInitializerSyntax constructorInitializer)
+        public SymbolInfo GetSpeculativeSymbolInfo(int position, ConstructorInitializerSyntax constructorInitializer!!)
         {
             Debug.Assert(CanGetSemanticInfo(constructorInitializer, isSpeculative: true));
 
             position = CheckAndAdjustPosition(position);
-
-            if (constructorInitializer == null)
-            {
-                throw new ArgumentNullException(nameof(constructorInitializer));
-            }
 
             // NOTE: since we're going to be depending on a MemberModel to do the binding for us,
             // we need to find a constructor initializer in the tree of this semantic model.
@@ -837,16 +822,11 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <param name="constructorInitializer">A syntax node that represents a parsed constructor initializer. This syntax node
         /// need not and typically does not appear in the source code referred to SemanticModel instance.</param>
         /// <returns>The semantic information for the topmost node of the constructor initializer.</returns>
-        public SymbolInfo GetSpeculativeSymbolInfo(int position, PrimaryConstructorBaseTypeSyntax constructorInitializer)
+        public SymbolInfo GetSpeculativeSymbolInfo(int position, PrimaryConstructorBaseTypeSyntax constructorInitializer!!)
         {
             Debug.Assert(CanGetSemanticInfo(constructorInitializer, isSpeculative: true));
 
             position = CheckAndAdjustPosition(position);
-
-            if (constructorInitializer == null)
-            {
-                throw new ArgumentNullException(nameof(constructorInitializer));
-            }
 
             // NOTE: since we're going to be depending on a MemberModel to do the binding for us,
             // we need to find a constructor initializer in the tree of this semantic model.
@@ -1343,13 +1323,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             Debug.Assert(position == CheckAndAdjustPosition(position), "Expected adjusted position");
         }
 
-        protected void CheckSyntaxNode(CSharpSyntaxNode syntax)
+        protected void CheckSyntaxNode(CSharpSyntaxNode syntax!!)
         {
-            if (syntax == null)
-            {
-                throw new ArgumentNullException(nameof(syntax));
-            }
-
             if (!IsInTree(syntax))
             {
                 throw new ArgumentException(CSharpResources.SyntaxNodeIsNotWithinSynt);
@@ -1357,13 +1332,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         }
 
         // This method ensures that the given syntax node to speculate is non-null and doesn't belong to a SyntaxTree of any model in the chain.
-        private void CheckModelAndSyntaxNodeToSpeculate(CSharpSyntaxNode syntax)
+        private void CheckModelAndSyntaxNodeToSpeculate(CSharpSyntaxNode syntax!!)
         {
-            if (syntax == null)
-            {
-                throw new ArgumentNullException(nameof(syntax));
-            }
-
             if (this.IsSpeculativeSemanticModel)
             {
                 throw new InvalidOperationException(CSharpResources.ChainingSpeculativeModelIsNotSupported);
@@ -1817,15 +1787,9 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// modifiers on symbol and its containing types. Even if true is returned, the given symbol
         /// may not be able to be referenced for other reasons, such as name hiding.
         /// </remarks>
-        public bool IsAccessible(int position, Symbol symbol)
+        public bool IsAccessible(int position, Symbol symbol!!)
         {
             position = CheckAndAdjustPosition(position);
-
-            if ((object)symbol == null)
-            {
-                throw new ArgumentNullException(nameof(symbol));
-            }
-
             var binder = this.GetEnclosingBinder(position);
             if (binder != null)
             {
@@ -2784,13 +2748,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// Conversion object with a false "Exists" property is returned.</returns>
         /// <remarks>To determine the conversion between two types (instead of an expression and a
         /// type), use Compilation.ClassifyConversion.</remarks>
-        public Conversion ClassifyConversion(int position, ExpressionSyntax expression, ITypeSymbol destination, bool isExplicitInSource = false)
+        public Conversion ClassifyConversion(int position, ExpressionSyntax expression, ITypeSymbol destination!!, bool isExplicitInSource = false)
         {
-            if ((object)destination == null)
-            {
-                throw new ArgumentNullException(nameof(destination));
-            }
-
             TypeSymbol cdestination = destination.EnsureCSharpSymbolOrNull(nameof(destination));
 
             if (expression.Kind() == SyntaxKind.DeclarationExpression)
@@ -2852,13 +2811,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// Conversion object with a false "Exists" property is returned.</returns>
         /// <remarks>To determine the conversion between two types (instead of an expression and a
         /// type), use Compilation.ClassifyConversion.</remarks>
-        internal Conversion ClassifyConversionForCast(int position, ExpressionSyntax expression, TypeSymbol destination)
+        internal Conversion ClassifyConversionForCast(int position, ExpressionSyntax expression, TypeSymbol destination!!)
         {
-            if ((object)destination == null)
-            {
-                throw new ArgumentNullException(nameof(destination));
-            }
-
             position = CheckAndAdjustPosition(position);
             var binder = this.GetEnclosingBinder(position);
             if (binder != null)
@@ -5183,18 +5137,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             return LookupLabels(position, name);
         }
 
-        protected sealed override ControlFlowAnalysis AnalyzeControlFlowCore(SyntaxNode firstStatement, SyntaxNode lastStatement)
+        protected sealed override ControlFlowAnalysis AnalyzeControlFlowCore(SyntaxNode firstStatement!!, SyntaxNode lastStatement!!)
         {
-            if (firstStatement == null)
-            {
-                throw new ArgumentNullException(nameof(firstStatement));
-            }
-
-            if (lastStatement == null)
-            {
-                throw new ArgumentNullException(nameof(lastStatement));
-            }
-
             if (!(firstStatement is StatementSyntax firstStatementSyntax))
             {
                 throw new ArgumentException("firstStatement is not a StatementSyntax.");
@@ -5208,13 +5152,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             return this.AnalyzeControlFlow(firstStatementSyntax, lastStatementSyntax);
         }
 
-        protected sealed override ControlFlowAnalysis AnalyzeControlFlowCore(SyntaxNode statement)
+        protected sealed override ControlFlowAnalysis AnalyzeControlFlowCore(SyntaxNode statement!!)
         {
-            if (statement == null)
-            {
-                throw new ArgumentNullException(nameof(statement));
-            }
-
             if (!(statement is StatementSyntax statementSyntax))
             {
                 throw new ArgumentException("statement is not a StatementSyntax.");
@@ -5223,18 +5162,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             return this.AnalyzeControlFlow(statementSyntax);
         }
 
-        protected sealed override DataFlowAnalysis AnalyzeDataFlowCore(SyntaxNode firstStatement, SyntaxNode lastStatement)
+        protected sealed override DataFlowAnalysis AnalyzeDataFlowCore(SyntaxNode firstStatement!!, SyntaxNode lastStatement!!)
         {
-            if (firstStatement == null)
-            {
-                throw new ArgumentNullException(nameof(firstStatement));
-            }
-
-            if (lastStatement == null)
-            {
-                throw new ArgumentNullException(nameof(lastStatement));
-            }
-
             if (!(firstStatement is StatementSyntax firstStatementSyntax))
             {
                 throw new ArgumentException("firstStatement is not a StatementSyntax.");
@@ -5267,13 +5196,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        protected sealed override Optional<object> GetConstantValueCore(SyntaxNode node, CancellationToken cancellationToken)
+        protected sealed override Optional<object> GetConstantValueCore(SyntaxNode node!!, CancellationToken cancellationToken)
         {
-            if (node == null)
-            {
-                throw new ArgumentNullException(nameof(node));
-            }
-
             return node is ExpressionSyntax expression
                 ? GetConstantValue(expression, cancellationToken)
                 : default(Optional<object>);

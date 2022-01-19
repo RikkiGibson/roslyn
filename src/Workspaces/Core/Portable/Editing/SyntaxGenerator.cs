@@ -1684,13 +1684,8 @@ namespace Microsoft.CodeAnalysis.Editing
         /// <summary>
         /// Creates a name expression from a dotted name string.
         /// </summary>
-        public SyntaxNode DottedName(string dottedName)
+        public SyntaxNode DottedName(string dottedName!!)
         {
-            if (dottedName == null)
-            {
-                throw new ArgumentNullException(nameof(dottedName));
-            }
-
             var parts = dottedName.Split(s_dotSeparator);
             Debug.Assert(!parts.IsEmpty());
 
@@ -1756,13 +1751,8 @@ namespace Microsoft.CodeAnalysis.Editing
         /// <summary>
         /// Creates an expression that denotes a tuple type.
         /// </summary>
-        public SyntaxNode TupleTypeExpression(IEnumerable<SyntaxNode> elements)
+        public SyntaxNode TupleTypeExpression(IEnumerable<SyntaxNode> elements!!)
         {
-            if (elements == null)
-            {
-                throw new ArgumentNullException(nameof(elements));
-            }
-
             if (elements.Count() <= 1)
             {
                 throw new ArgumentException("Tuples must have at least two elements.", nameof(elements));
@@ -1782,13 +1772,8 @@ namespace Microsoft.CodeAnalysis.Editing
         /// <summary>
         /// Creates an expression that denotes a tuple type.
         /// </summary>
-        public SyntaxNode TupleTypeExpression(IEnumerable<ITypeSymbol> elementTypes, IEnumerable<string>? elementNames = null)
+        public SyntaxNode TupleTypeExpression(IEnumerable<ITypeSymbol> elementTypes!!, IEnumerable<string>? elementNames = null)
         {
-            if (elementTypes == null)
-            {
-                throw new ArgumentNullException(nameof(elementTypes));
-            }
-
             if (elementNames != null)
             {
                 if (elementNames.Count() != elementTypes.Count())

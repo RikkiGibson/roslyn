@@ -92,17 +92,10 @@ namespace Microsoft.CodeAnalysis.Editor.EditorConfigSettings.Updater
             }
         }
 
-        public static SourceText? TryUpdateAnalyzerConfigDocument(SourceText originalText,
-                                                                  string filePath,
-                                                                  IReadOnlyList<(string option, string value, Language language)> settingsToUpdate)
+        public static SourceText? TryUpdateAnalyzerConfigDocument(SourceText originalText!!,
+                                                                  string filePath!!,
+                                                                  IReadOnlyList<(string option, string value, Language language)> settingsToUpdate!!)
         {
-            if (originalText is null)
-                throw new ArgumentNullException(nameof(originalText));
-            if (filePath is null)
-                throw new ArgumentNullException(nameof(filePath));
-            if (settingsToUpdate is null)
-                throw new ArgumentNullException(nameof(settingsToUpdate));
-
             var updatedText = originalText;
             TextLine? lastValidHeaderSpanEnd;
             TextLine? lastValidSpecificHeaderSpanEnd;

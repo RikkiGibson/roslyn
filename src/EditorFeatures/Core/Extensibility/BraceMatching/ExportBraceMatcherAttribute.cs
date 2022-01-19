@@ -15,10 +15,10 @@ namespace Microsoft.CodeAnalysis.Editor
     {
         public string Language { get; }
 
-        public ExportBraceMatcherAttribute(string language)
+        public ExportBraceMatcherAttribute(string language!!)
             : base(typeof(IBraceMatcher))
         {
-            this.Language = language ?? throw new ArgumentNullException(nameof(language));
+            this.Language = language;
         }
     }
 }

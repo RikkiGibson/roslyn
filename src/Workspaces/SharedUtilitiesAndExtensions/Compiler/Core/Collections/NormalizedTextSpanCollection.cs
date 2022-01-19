@@ -580,13 +580,8 @@ namespace Microsoft.CodeAnalysis.Shared
             }
         }
 
-        private static IList<TextSpan> NormalizeSpans(IEnumerable<TextSpan> spans)
+        private static IList<TextSpan> NormalizeSpans(IEnumerable<TextSpan> spans!!)
         {
-            if (spans == null)
-            {
-                throw new ArgumentNullException(nameof(spans));
-            }
-
             var sorted = new List<TextSpan>(spans);
             if (sorted.Count <= 1)
             {

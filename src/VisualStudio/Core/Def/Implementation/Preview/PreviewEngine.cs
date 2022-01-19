@@ -50,9 +50,9 @@ namespace Microsoft.VisualStudio.LanguageServices.Implementation.Preview
 
         public PreviewEngine(
             IThreadingContext threadingContext,
-            string title,
-            string helpString,
-            string description,
+            string title!!,
+            string helpString!!,
+            string description!!,
             string topLevelItemName,
             Glyph topLevelGlyph,
             Solution newSolution,
@@ -64,9 +64,9 @@ namespace Microsoft.VisualStudio.LanguageServices.Implementation.Preview
         {
             _topLevelName = topLevelItemName;
             _topLevelGlyph = topLevelGlyph;
-            _title = title ?? throw new ArgumentNullException(nameof(title));
-            _helpString = helpString ?? throw new ArgumentNullException(nameof(helpString));
-            _description = description ?? throw new ArgumentNullException(nameof(description));
+            _title = title;
+            _helpString = helpString;
+            _description = description;
             _newSolution = newSolution.WithMergedLinkedFileChangesAsync(oldSolution, cancellationToken: CancellationToken.None).Result;
             _oldSolution = oldSolution;
             _editorFactory = componentModel.GetService<IVsEditorAdaptersFactoryService>();

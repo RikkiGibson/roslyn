@@ -17,10 +17,10 @@ namespace Microsoft.CodeAnalysis.MetadataAsSource
     {
         public string Name { get; }
 
-        public ExportMetadataAsSourceFileProviderAttribute(string name)
+        public ExportMetadataAsSourceFileProviderAttribute(string name!!)
             : base(typeof(IMetadataAsSourceFileProvider))
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Name = name;
         }
     }
 }

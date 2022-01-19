@@ -176,13 +176,8 @@ namespace Microsoft.CodeAnalysis
         /// Manifest module.
         /// </param>
         /// <remarks>This object disposes <paramref name="module"/> it when it is itself disposed.</remarks>
-        public static AssemblyMetadata Create(ModuleMetadata module)
+        public static AssemblyMetadata Create(ModuleMetadata module!!)
         {
-            if (module == null)
-            {
-                throw new ArgumentNullException(nameof(module));
-            }
-
             return new AssemblyMetadata(ImmutableArray.Create(module));
         }
 

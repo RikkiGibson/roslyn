@@ -92,18 +92,8 @@ namespace Microsoft.CodeAnalysis.MSBuild
         /// <param name="projectFileExtension">The project file extension to associate with <paramref name="language"/>.</param>
         /// <param name="language">The language to associate with <paramref name="projectFileExtension"/>. This value
         /// should typically be taken from <see cref="LanguageNames"/>.</param>
-        public void AssociateFileExtensionWithLanguage(string projectFileExtension, string language)
+        public void AssociateFileExtensionWithLanguage(string projectFileExtension!!, string language!!)
         {
-            if (projectFileExtension == null)
-            {
-                throw new ArgumentNullException(nameof(projectFileExtension));
-            }
-
-            if (language == null)
-            {
-                throw new ArgumentNullException(nameof(language));
-            }
-
             _projectFileLoaderRegistry.AssociateFileExtensionWithLanguage(projectFileExtension, language);
         }
 
@@ -142,16 +132,11 @@ namespace Microsoft.CodeAnalysis.MSBuild
         /// <param name="msbuildLogger">An optional <see cref="ILogger"/> that will log msbuild results.</param>
         /// <param name="cancellationToken">An optional <see cref="CancellationToken"/> to allow cancellation of this operation.</param>
         public async Task<SolutionInfo> LoadSolutionInfoAsync(
-            string solutionFilePath,
+            string solutionFilePath!!,
             IProgress<ProjectLoadProgress>? progress = null,
             ILogger? msbuildLogger = null,
             CancellationToken cancellationToken = default)
         {
-            if (solutionFilePath == null)
-            {
-                throw new ArgumentNullException(nameof(solutionFilePath));
-            }
-
             if (!_pathResolver.TryGetAbsoluteSolutionPath(solutionFilePath, baseDirectory: Directory.GetCurrentDirectory(), DiagnosticReportingMode.Throw, out var absoluteSolutionPath))
             {
                 // TryGetAbsoluteSolutionPath should throw before we get here.
@@ -237,17 +222,12 @@ namespace Microsoft.CodeAnalysis.MSBuild
         /// <param name="msbuildLogger">An optional <see cref="ILogger"/> that will log msbuild results.</param>
         /// <param name="cancellationToken">An optional <see cref="CancellationToken"/> to allow cancellation of this operation.</param>
         public async Task<ImmutableArray<ProjectInfo>> LoadProjectInfoAsync(
-            string projectFilePath,
+            string projectFilePath!!,
             ProjectMap? projectMap = null,
             IProgress<ProjectLoadProgress>? progress = null,
             ILogger? msbuildLogger = null,
             CancellationToken cancellationToken = default)
         {
-            if (projectFilePath == null)
-            {
-                throw new ArgumentNullException(nameof(projectFilePath));
-            }
-
             var requestedProjectOptions = DiagnosticReportingOptions.ThrowForAll;
 
             var reportingMode = GetReportingModeForUnrecognizedProjects();

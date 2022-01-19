@@ -254,16 +254,11 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// Insert one or more tokens in the list at the specified index.
         /// </summary>
         /// <returns>A new list with the tokens inserted.</returns>
-        public static SyntaxTokenList Insert(this SyntaxTokenList list, int index, params SyntaxToken[] items)
+        public static SyntaxTokenList Insert(this SyntaxTokenList list, int index, params SyntaxToken[] items!!)
         {
             if (index < 0 || index > list.Count)
             {
                 throw new ArgumentOutOfRangeException(nameof(index));
-            }
-
-            if (items == null)
-            {
-                throw new ArgumentNullException(nameof(items));
             }
 
             if (list.Count == 0)
@@ -777,13 +772,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <param name="conversionExpression">The conversion expression to get original info from.</param>
         /// <returns>The underlying <see cref="Conversion"/>.</returns>
         /// <exception cref="InvalidCastException">If the <see cref="IConversionOperation"/> was not created from CSharp code.</exception>
-        public static Conversion GetConversion(this IConversionOperation conversionExpression)
+        public static Conversion GetConversion(this IConversionOperation conversionExpression!!)
         {
-            if (conversionExpression is null)
-            {
-                throw new ArgumentNullException(nameof(conversionExpression));
-            }
-
             if (conversionExpression.Language == LanguageNames.CSharp)
             {
                 return (Conversion)((ConversionOperation)conversionExpression).ConversionConvertible;
@@ -803,13 +793,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <remarks>
         /// This compound assignment must have been created from C# code.
         /// </remarks>
-        public static Conversion GetInConversion(this ICompoundAssignmentOperation compoundAssignment)
+        public static Conversion GetInConversion(this ICompoundAssignmentOperation compoundAssignment!!)
         {
-            if (compoundAssignment == null)
-            {
-                throw new ArgumentNullException(nameof(compoundAssignment));
-            }
-
             if (compoundAssignment.Language == LanguageNames.CSharp)
             {
                 return (Conversion)((CompoundAssignmentOperation)compoundAssignment).InConversionConvertible;
@@ -829,13 +814,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <remarks>
         /// This compound assignment must have been created from C# code.
         /// </remarks>
-        public static Conversion GetOutConversion(this ICompoundAssignmentOperation compoundAssignment)
+        public static Conversion GetOutConversion(this ICompoundAssignmentOperation compoundAssignment!!)
         {
-            if (compoundAssignment == null)
-            {
-                throw new ArgumentNullException(nameof(compoundAssignment));
-            }
-
             if (compoundAssignment.Language == LanguageNames.CSharp)
             {
                 return (Conversion)((CompoundAssignmentOperation)compoundAssignment).OutConversionConvertible;

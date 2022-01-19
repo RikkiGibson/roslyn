@@ -49,17 +49,17 @@ namespace Microsoft.CodeAnalysis.CodeRefactorings
         /// Creates a code refactoring context to be passed into <see cref="CodeRefactoringProvider.ComputeRefactoringsAsync(CodeRefactoringContext)"/> method.
         /// </summary>
         internal CodeRefactoringContext(
-            Document document,
+            Document document!!,
             TextSpan span,
-            Action<CodeAction, TextSpan?> registerRefactoring,
+            Action<CodeAction, TextSpan?> registerRefactoring!!,
             bool isBlocking,
             CancellationToken cancellationToken)
         {
             // NOTE/TODO: Don't make this overload public & obsolete the `Action<CodeAction> registerRefactoring`
             // overload to stop leaking the Lambda implementation detail.
-            Document = document ?? throw new ArgumentNullException(nameof(document));
+            Document = document;
             Span = span;
-            _registerRefactoring = registerRefactoring ?? throw new ArgumentNullException(nameof(registerRefactoring));
+            _registerRefactoring = registerRefactoring;
             _isBlocking = isBlocking;
             CancellationToken = cancellationToken;
         }
@@ -81,13 +81,8 @@ namespace Microsoft.CodeAnalysis.CodeRefactorings
         /// </remarks>
         internal void RegisterRefactoring(CodeAction action, TextSpan applicableToSpan) => RegisterRefactoring(action, new Nullable<TextSpan>(applicableToSpan));
 
-        private void RegisterRefactoring(CodeAction action, TextSpan? applicableToSpan)
+        private void RegisterRefactoring(CodeAction action!!, TextSpan? applicableToSpan)
         {
-            if (action == null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
-
             _registerRefactoring(action, applicableToSpan);
         }
 

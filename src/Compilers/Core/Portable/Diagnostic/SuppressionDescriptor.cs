@@ -53,7 +53,7 @@ namespace Microsoft.CodeAnalysis
         public SuppressionDescriptor(
             string id,
             string suppressedDiagnosticId,
-            LocalizableString justification)
+            LocalizableString justification!!)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
@@ -67,7 +67,7 @@ namespace Microsoft.CodeAnalysis
 
             this.Id = id;
             this.SuppressedDiagnosticId = suppressedDiagnosticId;
-            this.Justification = justification ?? throw new ArgumentNullException(nameof(justification));
+            this.Justification = justification;
         }
 
         public bool Equals(SuppressionDescriptor? other)

@@ -17,10 +17,10 @@ namespace Roslyn.Test.Utilities
         private readonly SendOrPostCallback _postCallback;
         private readonly SynchronizationContext _synchronizationContext;
 
-        internal SynchronizationContextTaskScheduler(SynchronizationContext synchronizationContext)
+        internal SynchronizationContextTaskScheduler(SynchronizationContext synchronizationContext!!)
         {
             _postCallback = new SendOrPostCallback(PostCallback);
-            _synchronizationContext = synchronizationContext ?? throw new ArgumentNullException(nameof(synchronizationContext));
+            _synchronizationContext = synchronizationContext;
         }
 
         public override Int32 MaximumConcurrencyLevel => 1;

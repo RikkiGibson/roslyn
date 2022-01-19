@@ -32,25 +32,10 @@ namespace Microsoft.CodeAnalysis.Editor.Implementation.Peek
             => _metadataAsSourceFileService = metadataAsSourceFileService;
 
         public async Task<IEnumerable<IPeekableItem>> GetPeekableItemsAsync(
-            ISymbol symbol, Project project,
-            IPeekResultFactory peekResultFactory,
+            ISymbol symbol!!, Project project!!,
+            IPeekResultFactory peekResultFactory!!,
             CancellationToken cancellationToken)
         {
-            if (symbol == null)
-            {
-                throw new ArgumentNullException(nameof(symbol));
-            }
-
-            if (project == null)
-            {
-                throw new ArgumentNullException(nameof(project));
-            }
-
-            if (peekResultFactory == null)
-            {
-                throw new ArgumentNullException(nameof(peekResultFactory));
-            }
-
             var results = new List<IPeekableItem>();
 
             var solution = project.Solution;

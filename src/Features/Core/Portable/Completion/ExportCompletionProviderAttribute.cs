@@ -19,11 +19,11 @@ namespace Microsoft.CodeAnalysis.Completion
         public string Language { get; }
         public string[]? Roles { get; set; }
 
-        public ExportCompletionProviderAttribute(string name, string language)
+        public ExportCompletionProviderAttribute(string name!!, string language!!)
             : base(typeof(CompletionProvider))
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            Language = language ?? throw new ArgumentNullException(nameof(language));
+            Name = name;
+            Language = language;
         }
     }
 }

@@ -9,13 +9,8 @@ namespace Microsoft.CodeAnalysis.Shared.Extensions
 {
     internal static class ICollectionExtensions
     {
-        public static void RemoveRange<T>(this ICollection<T> collection, IEnumerable<T>? items)
+        public static void RemoveRange<T>(this ICollection<T> collection!!, IEnumerable<T>? items)
         {
-            if (collection == null)
-            {
-                throw new ArgumentNullException(nameof(collection));
-            }
-
             if (items != null)
             {
                 foreach (var item in items)

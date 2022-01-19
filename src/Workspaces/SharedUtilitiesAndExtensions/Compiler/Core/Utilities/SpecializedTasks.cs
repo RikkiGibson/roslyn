@@ -112,16 +112,11 @@ namespace Roslyn.Utilities
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> that the operation will observe.</param>
         /// <returns></returns>
         public static ValueTask<TResult> TransformWithoutIntermediateCancellationExceptionAsync<TArg, TIntermediate, TResult>(
-            Func<TArg, CancellationToken, ValueTask<TIntermediate>> func,
-            Func<TIntermediate, TArg, TResult> transform,
+            Func<TArg, CancellationToken, ValueTask<TIntermediate>> func!!,
+            Func<TIntermediate, TArg, TResult> transform!!,
             TArg arg,
             CancellationToken cancellationToken)
         {
-            if (func is null)
-                throw new ArgumentNullException(nameof(func));
-            if (transform is null)
-                throw new ArgumentNullException(nameof(transform));
-
             var intermediateResult = func(arg, cancellationToken);
             if (intermediateResult.IsCompletedSuccessfully)
             {

@@ -204,13 +204,8 @@ namespace Microsoft.CodeAnalysis
         /// </summary>
         /// <param name="index">The index to insert at.</param>
         /// <param name="node">The node to insert.</param>
-        public SyntaxList<TNode> Insert(int index, TNode node)
+        public SyntaxList<TNode> Insert(int index, TNode node!!)
         {
-            if (node == null)
-            {
-                throw new ArgumentNullException(nameof(node));
-            }
-
             return InsertRange(index, new[] { node });
         }
 
@@ -219,16 +214,11 @@ namespace Microsoft.CodeAnalysis
         /// </summary>
         /// <param name="index">The index to insert at.</param>
         /// <param name="nodes">The nodes to insert.</param>
-        public SyntaxList<TNode> InsertRange(int index, IEnumerable<TNode> nodes)
+        public SyntaxList<TNode> InsertRange(int index, IEnumerable<TNode> nodes!!)
         {
             if (index < 0 || index > this.Count)
             {
                 throw new ArgumentOutOfRangeException(nameof(index));
-            }
-
-            if (nodes == null)
-            {
-                throw new ArgumentNullException(nameof(nodes));
             }
 
             var list = this.ToList();
@@ -282,18 +272,8 @@ namespace Microsoft.CodeAnalysis
         /// </summary>
         /// <param name="nodeInList">The element to replace.</param>
         /// <param name="newNodes">The new nodes.</param>
-        public SyntaxList<TNode> ReplaceRange(TNode nodeInList, IEnumerable<TNode> newNodes)
+        public SyntaxList<TNode> ReplaceRange(TNode nodeInList!!, IEnumerable<TNode> newNodes!!)
         {
-            if (nodeInList == null)
-            {
-                throw new ArgumentNullException(nameof(nodeInList));
-            }
-
-            if (newNodes == null)
-            {
-                throw new ArgumentNullException(nameof(newNodes));
-            }
-
             var index = this.IndexOf(nodeInList);
             if (index >= 0 && index < this.Count)
             {

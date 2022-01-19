@@ -34,12 +34,12 @@ namespace Microsoft.CodeAnalysis.QuickInfo
         /// Creates a <see cref="QuickInfoContext"/> instance.
         /// </summary>
         public QuickInfoContext(
-            Document document,
+            Document document!!,
             int position,
             SymbolDescriptionOptions options,
             CancellationToken cancellationToken)
         {
-            Document = document ?? throw new ArgumentNullException(nameof(document));
+            Document = document;
             Position = position;
             Options = options;
             CancellationToken = cancellationToken;

@@ -18,16 +18,13 @@ namespace Roslyn.Test.Utilities
         /// Launch a process, wait for it to complete, and return output, error, and exit code.
         /// </summary>
         public static ProcessResult Run(
-            string fileName,
+            string fileName!!,
             string arguments,
             string workingDirectory = null,
             IEnumerable<KeyValuePair<string, string>> additionalEnvironmentVars = null,
             string stdInput = null,
             bool redirectStandardInput = false)
         {
-            if (fileName == null)
-                throw new ArgumentNullException(nameof(fileName));
-
             var startInfo = new ProcessStartInfo
             {
                 FileName = fileName,
@@ -94,13 +91,8 @@ namespace Roslyn.Test.Utilities
         /// Launch a process, and return Process object. The process continues to run asynchronously.
         /// You cannot capture the output.
         /// </summary>
-        public static Process StartProcess(string fileName, string arguments, string workingDirectory = null)
+        public static Process StartProcess(string fileName!!, string arguments, string workingDirectory = null)
         {
-            if (fileName == null)
-            {
-                throw new ArgumentNullException(nameof(fileName));
-            }
-
             var startInfo = new ProcessStartInfo
             {
                 FileName = fileName,

@@ -140,9 +140,9 @@ namespace Microsoft.CodeAnalysis
 
         internal DiagnosticDescriptor(
             string id,
-            LocalizableString title,
-            LocalizableString messageFormat,
-            string category,
+            LocalizableString title!!,
+            LocalizableString messageFormat!!,
+            string category!!,
             DiagnosticSeverity defaultSeverity,
             bool isEnabledByDefault,
             LocalizableString? description,
@@ -154,21 +154,6 @@ namespace Microsoft.CodeAnalysis
             if (string.IsNullOrWhiteSpace(id))
             {
                 throw new ArgumentException(CodeAnalysisResources.DiagnosticIdCantBeNullOrWhitespace, nameof(id));
-            }
-
-            if (messageFormat == null)
-            {
-                throw new ArgumentNullException(nameof(messageFormat));
-            }
-
-            if (category == null)
-            {
-                throw new ArgumentNullException(nameof(category));
-            }
-
-            if (title == null)
-            {
-                throw new ArgumentNullException(nameof(title));
             }
 
             this.Id = id;

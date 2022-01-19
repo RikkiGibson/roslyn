@@ -67,13 +67,8 @@ namespace Microsoft.CodeAnalysis.Text
             /// </summary>
             private static readonly ConditionalWeakTable<ITextImage, WeakReference<ITextSnapshot>> s_textImageToEditorSnapshotMap = new ConditionalWeakTable<ITextImage, WeakReference<ITextSnapshot>>();
 
-            public static SourceText From(ITextBufferCloneService? textBufferCloneService, ITextSnapshot editorSnapshot)
+            public static SourceText From(ITextBufferCloneService? textBufferCloneService, ITextSnapshot editorSnapshot!!)
             {
-                if (editorSnapshot == null)
-                {
-                    throw new ArgumentNullException(nameof(editorSnapshot));
-                }
-
                 if (!s_textSnapshotMap.TryGetValue(editorSnapshot, out var snapshot))
                 {
                     // Explicitly obtain the TextBufferContainer before calling GetValue to avoid reentrancy in
@@ -91,13 +86,8 @@ namespace Microsoft.CodeAnalysis.Text
             /// <summary>
             /// This only exist to break circular dependency on creating buffer. nobody except extension itself should use it
             /// </summary>
-            internal static SourceText From(ITextBufferCloneService? textBufferCloneService, ITextSnapshot editorSnapshot, TextBufferContainer container)
+            internal static SourceText From(ITextBufferCloneService? textBufferCloneService, ITextSnapshot editorSnapshot!!, TextBufferContainer container)
             {
-                if (editorSnapshot == null)
-                {
-                    throw new ArgumentNullException(nameof(editorSnapshot));
-                }
-
                 Contract.ThrowIfFalse(editorSnapshot.TextBuffer == container.GetTextBuffer());
                 return s_textSnapshotMap.GetValue(editorSnapshot, s => new SnapshotSourceText(textBufferCloneService, s, container));
             }
@@ -181,13 +171,8 @@ namespace Microsoft.CodeAnalysis.Text
                 return res;
             }
 
-            public override SourceText WithChanges(IEnumerable<TextChange> changes)
+            public override SourceText WithChanges(IEnumerable<TextChange> changes!!)
             {
-                if (changes == null)
-                {
-                    throw new ArgumentNullException(nameof(changes));
-                }
-
                 if (!changes.Any())
                 {
                     return this;
@@ -284,12 +269,8 @@ namespace Microsoft.CodeAnalysis.Text
                     _baseSnapshot = baseSnapshot;
                 }
 
-                public override IReadOnlyList<TextChangeRange> GetChangeRanges(SourceText oldText)
+                public override IReadOnlyList<TextChangeRange> GetChangeRanges(SourceText oldText!!)
                 {
-                    if (oldText == null)
-                    {
-                        throw new ArgumentNullException(nameof(oldText));
-                    }
 
                     // if they are the same text there is no change.
                     if (oldText == this)
@@ -314,12 +295,8 @@ namespace Microsoft.CodeAnalysis.Text
 
             #region GetChangeRangesImplementation 
 
-            public override IReadOnlyList<TextChangeRange> GetChangeRanges(SourceText oldText)
+            public override IReadOnlyList<TextChangeRange> GetChangeRanges(SourceText oldText!!)
             {
-                if (oldText == null)
-                {
-                    throw new ArgumentNullException(nameof(oldText));
-                }
 
                 // if they are the same text there is no change.
                 if (oldText == this)

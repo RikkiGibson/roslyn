@@ -21,13 +21,8 @@ namespace Microsoft.CodeAnalysis.ExternalAccess.Razor.Api
         [ImportingConstructor]
         [Obsolete(MefConstruction.ImportingConstructorMessage, error: true)]
         public RazorDocumentOptionsProviderFactory(
-            Lazy<IRazorDocumentOptionsService> innerRazorDocumentOptionsService)
+            Lazy<IRazorDocumentOptionsService> innerRazorDocumentOptionsService!!)
         {
-            if (innerRazorDocumentOptionsService is null)
-            {
-                throw new ArgumentNullException(nameof(innerRazorDocumentOptionsService));
-            }
-
             _innerRazorDocumentOptionsService = innerRazorDocumentOptionsService;
         }
 

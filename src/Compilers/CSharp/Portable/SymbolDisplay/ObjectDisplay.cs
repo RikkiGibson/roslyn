@@ -213,13 +213,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <remarks>
         /// Optionally escapes non-printable characters.
         /// </remarks>
-        public static string FormatLiteral(string value, ObjectDisplayOptions options)
+        public static string FormatLiteral(string value!!, ObjectDisplayOptions options)
         {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
             const char quote = '"';
 
             var pooledBuilder = PooledStringBuilder.GetInstance();

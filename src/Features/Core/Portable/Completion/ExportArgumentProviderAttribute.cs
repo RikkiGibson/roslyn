@@ -15,11 +15,11 @@ namespace Microsoft.CodeAnalysis.Completion
         public string Language { get; }
         public string[] Roles { get; set; }
 
-        public ExportArgumentProviderAttribute(string name, string language)
+        public ExportArgumentProviderAttribute(string name!!, string language!!)
             : base(typeof(ArgumentProvider))
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            Language = language ?? throw new ArgumentNullException(nameof(language));
+            Name = name;
+            Language = language;
             Roles = Array.Empty<string>();
         }
     }

@@ -26,16 +26,11 @@ namespace Microsoft.CodeAnalysis.UnitTests.Collections
         /// <param name="objectUnderTest">An instance of the collection to test, which must have at least two elements.</param>
         /// <param name="additionalItem">A unique item that does not already exist in <paramref name="objectUnderTest" />.</param>
         /// <param name="equalsStructurally">A delegate that invokes the EqualsStructurally method.</param>
-        protected static void StructuralEqualityHelper<TCollection, TElement>(TCollection objectUnderTest, TElement additionalItem, Func<TCollection, IEnumerable<TElement>?, bool> equalsStructurally)
+        protected static void StructuralEqualityHelper<TCollection, TElement>(TCollection objectUnderTest!!, TElement additionalItem, Func<TCollection, IEnumerable<TElement>?, bool> equalsStructurally!!)
             where TCollection : class, IEnumerable<TElement>
         {
-            if (objectUnderTest is null)
-                throw new ArgumentNullException(nameof(objectUnderTest));
             if (objectUnderTest.Count() < 2)
                 throw new ArgumentException("Collection must contain at least two elements.", nameof(objectUnderTest));
-            if (equalsStructurally is null)
-                throw new ArgumentNullException(nameof(equalsStructurally));
-
             var structuralEquatableUnderTest = objectUnderTest as IStructuralEquatable;
             var enumerableUnderTest = (IEnumerable<TElement>)objectUnderTest;
 
@@ -79,9 +74,9 @@ namespace Microsoft.CodeAnalysis.UnitTests.Collections
         {
             private readonly IEnumerable _enumerable;
 
-            internal NonGenericEnumerableWrapper(IEnumerable enumerable)
+            internal NonGenericEnumerableWrapper(IEnumerable enumerable!!)
             {
-                _enumerable = enumerable ?? throw new ArgumentNullException(nameof(enumerable));
+                _enumerable = enumerable;
             }
 
             public IEnumerator GetEnumerator()

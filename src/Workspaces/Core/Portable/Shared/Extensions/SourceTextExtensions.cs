@@ -310,13 +310,8 @@ namespace Microsoft.CodeAnalysis.Shared.Extensions
                 return Read(_position++);
             }
 
-            public override int Read(char[] buffer, int index, int count)
+            public override int Read(char[] buffer!!, int index, int count)
             {
-                if (buffer == null)
-                {
-                    throw new ArgumentNullException(nameof(buffer));
-                }
-
                 if (index < 0 || index >= buffer.Length)
                 {
                     throw new ArgumentOutOfRangeException(nameof(index));

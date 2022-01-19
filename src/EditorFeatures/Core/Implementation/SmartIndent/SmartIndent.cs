@@ -28,11 +28,8 @@ namespace Microsoft.CodeAnalysis.Editor.Implementation.SmartIndent
         {
         }
 
-        private int? GetDesiredIndentation(ITextSnapshotLine line, CancellationToken cancellationToken)
+        private int? GetDesiredIndentation(ITextSnapshotLine line!!, CancellationToken cancellationToken)
         {
-            if (line == null)
-                throw new ArgumentNullException(nameof(line));
-
             using (Logger.LogBlock(FunctionId.SmartIndentation_Start, cancellationToken))
             {
                 var document = line.Snapshot.GetOpenDocumentInCurrentContextWithChanges();

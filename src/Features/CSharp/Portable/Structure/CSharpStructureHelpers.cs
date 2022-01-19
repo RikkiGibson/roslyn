@@ -242,15 +242,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Structure
         }
 
         public static void CollectCommentBlockSpans(
-            SyntaxNode node,
+            SyntaxNode node!!,
             ref TemporaryArray<BlockSpan> spans,
             in BlockStructureOptions options)
         {
-            if (node == null)
-            {
-                throw new ArgumentNullException(nameof(node));
-            }
-
             if (options.IsMetadataAsSource && TryGetLeadingCollapsibleSpan(node, out var span))
             {
                 spans.Add(span);

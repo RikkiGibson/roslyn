@@ -24,11 +24,8 @@ namespace Microsoft.CodeAnalysis.Editor.Tagging
         {
         }
 
-        public ITagger<T> CreateTagger<T>(ITextBuffer subjectBuffer) where T : ITag
+        public ITagger<T> CreateTagger<T>(ITextBuffer subjectBuffer!!) where T : ITag
         {
-            if (subjectBuffer == null)
-                throw new ArgumentNullException(nameof(subjectBuffer));
-
             return this.CreateTaggerWorker<T>(null, subjectBuffer);
         }
 

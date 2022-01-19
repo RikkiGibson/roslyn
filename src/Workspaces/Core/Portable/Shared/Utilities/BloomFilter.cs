@@ -67,9 +67,9 @@ namespace Microsoft.CodeAnalysis.Shared.Utilities
             AddRange(longValues);
         }
 
-        private BloomFilter(BitArray bitArray, int hashFunctionCount, bool isCaseSensitive)
+        private BloomFilter(BitArray bitArray!!, int hashFunctionCount, bool isCaseSensitive)
         {
-            _bitArray = bitArray ?? throw new ArgumentNullException(nameof(bitArray));
+            _bitArray = bitArray;
             _hashFunctionCount = hashFunctionCount;
             _isCaseSensitive = isCaseSensitive;
         }

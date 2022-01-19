@@ -20,10 +20,10 @@ namespace Microsoft.VisualStudio.LanguageServices.Implementation.MoveToNamespace
         public MoveToNamespaceDialogViewModel(
             string defaultNamespace,
             ImmutableArray<string> availableNamespaces,
-            ISyntaxFacts syntaxFacts,
+            ISyntaxFacts syntaxFacts!!,
             ImmutableArray<string> namespaceHistory)
         {
-            _syntaxFacts = syntaxFacts ?? throw new ArgumentNullException(nameof(syntaxFacts));
+            _syntaxFacts = syntaxFacts;
             _namespaceName = defaultNamespace;
             AvailableNamespaces = namespaceHistory.Select(n => new NamespaceItem(true, n))
                 .Concat(availableNamespaces.Except(namespaceHistory).Select(n => new NamespaceItem(false, n)))

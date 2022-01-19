@@ -29,13 +29,8 @@ namespace Microsoft.CodeAnalysis.Host
             private readonly ConcurrentDictionary<string, DocumentationProvider> _assemblyPathToDocumentationProviderMap =
                 new();
 
-            public DocumentationProvider GetDocumentationProvider(string assemblyPath)
+            public DocumentationProvider GetDocumentationProvider(string assemblyPath!!)
             {
-                if (assemblyPath == null)
-                {
-                    throw new ArgumentNullException(nameof(assemblyPath));
-                }
-
                 assemblyPath = Path.ChangeExtension(assemblyPath, "xml");
                 if (!_assemblyPathToDocumentationProviderMap.TryGetValue(assemblyPath, out var provider))
                 {

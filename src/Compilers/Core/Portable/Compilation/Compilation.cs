@@ -234,13 +234,8 @@ namespace Microsoft.CodeAnalysis
         /// Returns a new INamedTypeSymbol representing an error type with the given name and arity
         /// in the given optional container.
         /// </summary>
-        public INamedTypeSymbol CreateErrorTypeSymbol(INamespaceOrTypeSymbol? container, string name, int arity)
+        public INamedTypeSymbol CreateErrorTypeSymbol(INamespaceOrTypeSymbol? container, string name!!, int arity)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
             if (arity < 0)
             {
                 throw new ArgumentException($"{nameof(arity)} must be >= 0", nameof(arity));
@@ -254,18 +249,8 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Returns a new INamespaceSymbol representing an error (missing) namespace with the given name.
         /// </summary>
-        public INamespaceSymbol CreateErrorNamespaceSymbol(INamespaceSymbol container, string name)
+        public INamespaceSymbol CreateErrorNamespaceSymbol(INamespaceSymbol container!!, string name!!)
         {
-            if (container == null)
-            {
-                throw new ArgumentNullException(nameof(container));
-            }
-
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
             return CommonCreateErrorNamespaceSymbol(container, name);
         }
 
@@ -661,13 +646,8 @@ namespace Microsoft.CodeAnalysis
         /// </summary>
         /// <param name="references">The new references.</param>
         /// <returns>A new compilation.</returns>
-        public Compilation AddReferences(IEnumerable<MetadataReference> references)
+        public Compilation AddReferences(IEnumerable<MetadataReference> references!!)
         {
-            if (references == null)
-            {
-                throw new ArgumentNullException(nameof(references));
-            }
-
             if (references.IsEmpty())
             {
                 return this;
@@ -691,13 +671,8 @@ namespace Microsoft.CodeAnalysis
         /// </summary>
         /// <param name="references">The new references.</param>
         /// <returns>A new compilation.</returns>
-        public Compilation RemoveReferences(IEnumerable<MetadataReference> references)
+        public Compilation RemoveReferences(IEnumerable<MetadataReference> references!!)
         {
-            if (references == null)
-            {
-                throw new ArgumentNullException(nameof(references));
-            }
-
             if (references.IsEmpty())
             {
                 return this;
@@ -735,13 +710,8 @@ namespace Microsoft.CodeAnalysis
         /// <param name="newReference">The new reference.</param>
         /// <param name="oldReference">The old reference.</param>
         /// <returns>A new compilation.</returns>
-        public Compilation ReplaceReference(MetadataReference oldReference, MetadataReference? newReference)
+        public Compilation ReplaceReference(MetadataReference oldReference!!, MetadataReference? newReference)
         {
-            if (oldReference == null)
-            {
-                throw new ArgumentNullException(nameof(oldReference));
-            }
-
             if (newReference == null)
             {
                 return this.RemoveReferences(oldReference);
@@ -1263,16 +1233,11 @@ namespace Microsoft.CodeAnalysis
         /// The underlying type needs to be tuple-compatible.
         /// </summary>
         public INamedTypeSymbol CreateTupleTypeSymbol(
-            INamedTypeSymbol underlyingType,
+            INamedTypeSymbol underlyingType!!,
             ImmutableArray<string?> elementNames = default,
             ImmutableArray<Location?> elementLocations = default,
             ImmutableArray<NullableAnnotation> elementNullableAnnotations = default)
         {
-            if ((object)underlyingType == null)
-            {
-                throw new ArgumentNullException(nameof(underlyingType));
-            }
-
             return CommonCreateTupleTypeSymbol(underlyingType, elementNames, elementLocations, elementNullableAnnotations);
         }
 #pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
@@ -1424,20 +1389,10 @@ namespace Microsoft.CodeAnalysis
         /// helpful for more precisely diagnosing reasons for accessibility failure.</para>
         /// </remarks>
         public bool IsSymbolAccessibleWithin(
-            ISymbol symbol,
-            ISymbol within,
+            ISymbol symbol!!,
+            ISymbol within!!,
             ITypeSymbol? throughType = null)
         {
-            if (symbol is null)
-            {
-                throw new ArgumentNullException(nameof(symbol));
-            }
-
-            if (within is null)
-            {
-                throw new ArgumentNullException(nameof(within));
-            }
-
             if (!(within is INamedTypeSymbol || within is IAssemblySymbol))
             {
                 throw new ArgumentException(string.Format(CodeAnalysisResources.IsSymbolAccessibleBadWithin, nameof(within)), nameof(within));
@@ -2570,7 +2525,7 @@ namespace Microsoft.CodeAnalysis
         }
 
         internal EmitResult Emit(
-            Stream peStream,
+            Stream peStream!!,
             Stream? pdbStream,
             Stream? xmlDocumentationStream,
             Stream? win32Resources,
@@ -2583,11 +2538,6 @@ namespace Microsoft.CodeAnalysis
             RebuildData? rebuildData,
             CancellationToken cancellationToken)
         {
-            if (peStream == null)
-            {
-                throw new ArgumentNullException(nameof(peStream));
-            }
-
             if (!peStream.CanWrite)
             {
                 throw new ArgumentException(CodeAnalysisResources.StreamMustSupportWrite, nameof(peStream));
@@ -2848,47 +2798,14 @@ namespace Microsoft.CodeAnalysis
         /// subsequent Edit and Continue.
         /// </summary>
         public EmitDifferenceResult EmitDifference(
-            EmitBaseline baseline,
-            IEnumerable<SemanticEdit> edits,
-            Func<ISymbol, bool> isAddedSymbol,
-            Stream metadataStream,
-            Stream ilStream,
-            Stream pdbStream,
+            EmitBaseline baseline!!,
+            IEnumerable<SemanticEdit> edits!!,
+            Func<ISymbol, bool> isAddedSymbol!!,
+            Stream metadataStream!!,
+            Stream ilStream!!,
+            Stream pdbStream!!,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (baseline == null)
-            {
-                throw new ArgumentNullException(nameof(baseline));
-            }
-
-            // TODO: check if baseline is an assembly manifest module/netmodule
-            // Do we support EnC on netmodules?
-
-            if (edits == null)
-            {
-                throw new ArgumentNullException(nameof(edits));
-            }
-
-            if (isAddedSymbol == null)
-            {
-                throw new ArgumentNullException(nameof(isAddedSymbol));
-            }
-
-            if (metadataStream == null)
-            {
-                throw new ArgumentNullException(nameof(metadataStream));
-            }
-
-            if (ilStream == null)
-            {
-                throw new ArgumentNullException(nameof(ilStream));
-            }
-
-            if (pdbStream == null)
-            {
-                throw new ArgumentNullException(nameof(pdbStream));
-            }
-
             return this.EmitDifference(baseline, edits, isAddedSymbol, metadataStream, ilStream, pdbStream, testData: null, cancellationToken);
         }
 #pragma warning restore RS0026 // Do not add multiple public overloads with optional parameters
@@ -3500,13 +3417,8 @@ namespace Microsoft.CodeAnalysis
         /// Given a <see cref="Diagnostic"/> reporting unreferenced <see cref="AssemblyIdentity"/>s, returns
         /// the actual <see cref="AssemblyIdentity"/> instances that were not referenced.
         /// </summary>
-        public ImmutableArray<AssemblyIdentity> GetUnreferencedAssemblyIdentities(Diagnostic diagnostic)
+        public ImmutableArray<AssemblyIdentity> GetUnreferencedAssemblyIdentities(Diagnostic diagnostic!!)
         {
-            if (diagnostic == null)
-            {
-                throw new ArgumentNullException(nameof(diagnostic));
-            }
-
             if (!IsUnreferencedAssemblyIdentityDiagnosticCode(diagnostic.Code))
             {
                 return ImmutableArray<AssemblyIdentity>.Empty;
@@ -3531,13 +3443,8 @@ namespace Microsoft.CodeAnalysis
         /// Returns the required language version found in a <see cref="Diagnostic"/>, if any is found.
         /// Returns null if none is found.
         /// </summary>
-        public static string? GetRequiredLanguageVersion(Diagnostic diagnostic)
+        public static string? GetRequiredLanguageVersion(Diagnostic diagnostic!!)
         {
-            if (diagnostic == null)
-            {
-                throw new ArgumentNullException(nameof(diagnostic));
-            }
-
             bool found = false;
             string? foundVersion = null;
             if (diagnostic.Arguments != null)

@@ -517,7 +517,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return null;
         }
 
-        public override Conversion ClassifyConversion(ExpressionSyntax expression, ITypeSymbol destination, bool isExplicitInSource = false)
+        public override Conversion ClassifyConversion(ExpressionSyntax expression, ITypeSymbol destination!!, bool isExplicitInSource = false)
         {
             TypeSymbol csdestination = destination.EnsureCSharpSymbolOrNull(nameof(destination));
 
@@ -533,11 +533,6 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
 
             CheckSyntaxNode(expression);
-
-            if ((object)destination == null)
-            {
-                throw new ArgumentNullException(nameof(destination));
-            }
 
             // TODO(cyrusn): Check arguments. This is a public entrypoint, so we must do appropriate
             // checks here. However, no other methods in this type do any checking currently. So I'm
@@ -555,15 +550,9 @@ namespace Microsoft.CodeAnalysis.CSharp
             return model.ClassifyConversion(expression, destination);
         }
 
-        internal override Conversion ClassifyConversionForCast(ExpressionSyntax expression, TypeSymbol destination)
+        internal override Conversion ClassifyConversionForCast(ExpressionSyntax expression, TypeSymbol destination!!)
         {
             CheckSyntaxNode(expression);
-
-            if ((object)destination == null)
-            {
-                throw new ArgumentNullException(nameof(destination));
-            }
-
             var model = this.GetMemberModel(expression);
             if (model == null)
             {
@@ -740,12 +729,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             return false;
         }
 
-        internal override BoundExpression GetSpeculativelyBoundExpression(int position, ExpressionSyntax expression, SpeculativeBindingOption bindingOption, out Binder binder, out ImmutableArray<Symbol> crefSymbols)
+        internal override BoundExpression GetSpeculativelyBoundExpression(int position, ExpressionSyntax expression!!, SpeculativeBindingOption bindingOption, out Binder binder, out ImmutableArray<Symbol> crefSymbols)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
 
             // If the given position is in a member that we can get a semantic model for, we want to defer to that implementation
             // of GetSpeculativelyBoundExpression so it can take nullability into account.
@@ -2144,13 +2129,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <param name="typeParameter"></param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        public override ITypeParameterSymbol GetDeclaredSymbol(TypeParameterSyntax typeParameter, CancellationToken cancellationToken = default(CancellationToken))
+        public override ITypeParameterSymbol GetDeclaredSymbol(TypeParameterSyntax typeParameter!!, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (typeParameter == null)
-            {
-                throw new ArgumentNullException(nameof(typeParameter));
-            }
-
             if (!IsInTree(typeParameter))
             {
                 throw new ArgumentException("typeParameter not within tree");
@@ -2211,18 +2191,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             return result;
         }
 
-        private void ValidateStatementRange(StatementSyntax firstStatement, StatementSyntax lastStatement)
+        private void ValidateStatementRange(StatementSyntax firstStatement!!, StatementSyntax lastStatement!!)
         {
-            if (firstStatement == null)
-            {
-                throw new ArgumentNullException(nameof(firstStatement));
-            }
-
-            if (lastStatement == null)
-            {
-                throw new ArgumentNullException(nameof(lastStatement));
-            }
-
             if (!IsInTree(firstStatement))
             {
                 throw new ArgumentException("statements not within tree");
@@ -2247,13 +2217,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        public override DataFlowAnalysis AnalyzeDataFlow(ExpressionSyntax expression)
+        public override DataFlowAnalysis AnalyzeDataFlow(ExpressionSyntax expression!!)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
-
             if (!IsInTree(expression))
             {
                 throw new ArgumentException("expression not within tree");
@@ -2264,13 +2229,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             return result;
         }
 
-        public override DataFlowAnalysis AnalyzeDataFlow(ConstructorInitializerSyntax constructorInitializer)
+        public override DataFlowAnalysis AnalyzeDataFlow(ConstructorInitializerSyntax constructorInitializer!!)
         {
-            if (constructorInitializer == null)
-            {
-                throw new ArgumentNullException(nameof(constructorInitializer));
-            }
-
             if (!IsInTree(constructorInitializer))
             {
                 throw new ArgumentException("node not within tree");
@@ -2281,13 +2241,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             return result;
         }
 
-        public override DataFlowAnalysis AnalyzeDataFlow(PrimaryConstructorBaseTypeSyntax primaryConstructorBaseType)
+        public override DataFlowAnalysis AnalyzeDataFlow(PrimaryConstructorBaseTypeSyntax primaryConstructorBaseType!!)
         {
-            if (primaryConstructorBaseType == null)
-            {
-                throw new ArgumentNullException(nameof(primaryConstructorBaseType));
-            }
-
             if (!IsInTree(primaryConstructorBaseType))
             {
                 throw new ArgumentException("node not within tree");

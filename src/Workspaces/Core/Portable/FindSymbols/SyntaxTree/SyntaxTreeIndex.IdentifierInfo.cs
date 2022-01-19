@@ -18,11 +18,11 @@ namespace Microsoft.CodeAnalysis.FindSymbols
             private readonly BloomFilter _escapedIdentifierFilter;
 
             public IdentifierInfo(
-                BloomFilter identifierFilter,
-                BloomFilter escapedIdentifierFilter)
+                BloomFilter identifierFilter!!,
+                BloomFilter escapedIdentifierFilter!!)
             {
-                _identifierFilter = identifierFilter ?? throw new ArgumentNullException(nameof(identifierFilter));
-                _escapedIdentifierFilter = escapedIdentifierFilter ?? throw new ArgumentNullException(nameof(escapedIdentifierFilter));
+                _identifierFilter = identifierFilter;
+                _escapedIdentifierFilter = escapedIdentifierFilter;
             }
 
             /// <summary>

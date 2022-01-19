@@ -141,11 +141,8 @@ namespace Microsoft.CodeAnalysis.LanguageServer
             }
         }
 
-        public static Uri GetUriFromFilePath(string? filePath)
+        public static Uri GetUriFromFilePath(string? filePath!!)
         {
-            if (filePath is null)
-                throw new ArgumentNullException(nameof(filePath));
-
             return new Uri(filePath, UriKind.Absolute);
         }
 

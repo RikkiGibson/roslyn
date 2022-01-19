@@ -27,13 +27,8 @@ namespace Microsoft.CodeAnalysis.Syntax
             AddInternal(item.Green);
         }
 
-        internal void AddInternal(GreenNode item)
+        internal void AddInternal(GreenNode item!!)
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException();
-            }
-
             if (Count >= _nodes.Length)
             {
                 this.Grow(Count == 0 ? 8 : _nodes.Length * 2);

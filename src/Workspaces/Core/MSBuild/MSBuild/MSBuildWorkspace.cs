@@ -78,18 +78,8 @@ namespace Microsoft.CodeAnalysis.MSBuild
         /// <param name="properties">The MSBuild properties used when interpreting project files.
         /// These are the same properties that are passed to msbuild via the /property:&lt;n&gt;=&lt;v&gt; command line argument.</param>
         /// <param name="hostServices">The <see cref="HostServices"/> used to configure this workspace.</param>
-        public static MSBuildWorkspace Create(IDictionary<string, string> properties, HostServices hostServices)
+        public static MSBuildWorkspace Create(IDictionary<string, string> properties!!, HostServices hostServices!!)
         {
-            if (properties == null)
-            {
-                throw new ArgumentNullException(nameof(properties));
-            }
-
-            if (hostServices == null)
-            {
-                throw new ArgumentNullException(nameof(hostServices));
-            }
-
             return new MSBuildWorkspace(hostServices, properties.ToImmutableDictionary());
         }
 
@@ -189,16 +179,11 @@ namespace Microsoft.CodeAnalysis.MSBuild
 #pragma warning disable RS0026 // Special case to avoid ILogger type getting loaded in downstream clients
         public async Task<Solution> OpenSolutionAsync(
 #pragma warning restore RS0026
-            string solutionFilePath,
+            string solutionFilePath!!,
             ILogger? msbuildLogger,
             IProgress<ProjectLoadProgress>? progress = null,
             CancellationToken cancellationToken = default)
         {
-            if (solutionFilePath == null)
-            {
-                throw new ArgumentNullException(nameof(solutionFilePath));
-            }
-
             this.ClearSolution();
 
             var solutionInfo = await _loader.LoadSolutionInfoAsync(solutionFilePath, progress, msbuildLogger, cancellationToken).ConfigureAwait(false);
@@ -237,16 +222,11 @@ namespace Microsoft.CodeAnalysis.MSBuild
 #pragma warning disable RS0026 // Special case to avoid ILogger type getting loaded in downstream clients
         public async Task<Project> OpenProjectAsync(
 #pragma warning restore RS0026
-            string projectFilePath,
+            string projectFilePath!!,
             ILogger? msbuildLogger,
             IProgress<ProjectLoadProgress>? progress = null,
             CancellationToken cancellationToken = default)
         {
-            if (projectFilePath == null)
-            {
-                throw new ArgumentNullException(nameof(projectFilePath));
-            }
-
             var projectMap = ProjectMap.Create(this.CurrentSolution);
             var projects = await _loader.LoadProjectInfoAsync(projectFilePath, projectMap, progress, msbuildLogger, cancellationToken).ConfigureAwait(false);
 

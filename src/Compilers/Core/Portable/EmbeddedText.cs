@@ -95,15 +95,9 @@ namespace Microsoft.CodeAnalysis
         /// <paramref name="filePath"/> empty.
         /// <paramref name="text"/> cannot be embedded (see <see cref="SourceText.CanBeEmbedded"/>).
         /// </exception>
-        public static EmbeddedText FromSource(string filePath, SourceText text)
+        public static EmbeddedText FromSource(string filePath, SourceText text!!)
         {
             ValidateFilePath(filePath);
-
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
             if (!text.CanBeEmbedded)
             {
                 throw new ArgumentException(CodeAnalysisResources.SourceTextCannotBeEmbedded, nameof(text));
@@ -134,15 +128,9 @@ namespace Microsoft.CodeAnalysis
         /// </exception>
         /// <exception cref="IOException">An I/O error occurs.</exception>
         /// <remarks>Reads from the beginning of the stream. Leaves the stream open.</remarks>
-        public static EmbeddedText FromStream(string filePath, Stream stream, SourceHashAlgorithm checksumAlgorithm = SourceHashAlgorithm.Sha1)
+        public static EmbeddedText FromStream(string filePath, Stream stream!!, SourceHashAlgorithm checksumAlgorithm = SourceHashAlgorithm.Sha1)
         {
             ValidateFilePath(filePath);
-
-            if (stream == null)
-            {
-                throw new ArgumentNullException(nameof(stream));
-            }
-
             if (!stream.CanRead || !stream.CanSeek)
             {
                 throw new ArgumentException(CodeAnalysisResources.StreamMustSupportReadAndSeek, nameof(stream));
@@ -193,13 +181,8 @@ namespace Microsoft.CodeAnalysis
 
         /// <exception cref="ArgumentNullException"><paramref name="filePath"/> is null.</exception>
         /// <exception cref="ArgumentException"><paramref name="filePath"/> is empty.</exception>
-        private static void ValidateFilePath(string filePath)
+        private static void ValidateFilePath(string filePath!!)
         {
-            if (filePath == null)
-            {
-                throw new ArgumentNullException(nameof(filePath));
-            }
-
             if (filePath.Length == 0)
             {
                 throw new ArgumentException(CodeAnalysisResources.ArgumentCannotBeEmpty, nameof(filePath));

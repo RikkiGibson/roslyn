@@ -1390,13 +1390,8 @@ namespace Microsoft.VisualStudio.LanguageServices.Implementation.ProjectSystem
                 return documentId;
             }
 
-            public DocumentId AddTextContainer(SourceTextContainer textContainer, string fullPath, SourceCodeKind sourceCodeKind, ImmutableArray<string> folders, bool designTimeOnly, IDocumentServiceProvider? documentServiceProvider)
+            public DocumentId AddTextContainer(SourceTextContainer textContainer!!, string fullPath, SourceCodeKind sourceCodeKind, ImmutableArray<string> folders, bool designTimeOnly, IDocumentServiceProvider? documentServiceProvider)
             {
-                if (textContainer == null)
-                {
-                    throw new ArgumentNullException(nameof(textContainer));
-                }
-
                 var documentId = DocumentId.CreateNewId(_project.Id, fullPath);
                 var textLoader = new SourceTextLoader(textContainer, fullPath);
                 var documentInfo = DocumentInfo.Create(
@@ -1564,13 +1559,8 @@ namespace Microsoft.VisualStudio.LanguageServices.Implementation.ProjectSystem
                 }
             }
 
-            public void RemoveTextContainer(SourceTextContainer textContainer)
+            public void RemoveTextContainer(SourceTextContainer textContainer!!)
             {
-                if (textContainer == null)
-                {
-                    throw new ArgumentNullException(nameof(textContainer));
-                }
-
                 using (_project._gate.DisposableWait())
                 {
                     if (!_sourceTextContainersToDocumentIds.TryGetValue(textContainer, out var documentId))

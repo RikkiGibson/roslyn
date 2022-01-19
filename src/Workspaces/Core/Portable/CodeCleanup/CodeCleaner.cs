@@ -26,13 +26,8 @@ namespace Microsoft.CodeAnalysis.CodeCleanup
         /// 
         /// This can be modified and given to the Cleanup method to provide different cleaners.
         /// </summary>
-        public static ImmutableArray<ICodeCleanupProvider> GetDefaultProviders(Document document)
+        public static ImmutableArray<ICodeCleanupProvider> GetDefaultProviders(Document document!!)
         {
-            if (document == null)
-            {
-                throw new ArgumentNullException(nameof(document));
-            }
-
             var service = document.GetLanguageService<ICodeCleanerService>();
             if (service != null)
             {

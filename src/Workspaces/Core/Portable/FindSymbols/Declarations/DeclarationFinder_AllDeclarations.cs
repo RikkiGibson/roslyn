@@ -22,17 +22,11 @@ namespace Microsoft.CodeAnalysis.FindSymbols
     internal static partial class DeclarationFinder
     {
         public static async Task<ImmutableArray<ISymbol>> FindAllDeclarationsWithNormalQueryAsync(
-            Project project, SearchQuery query, SymbolFilter criteria, CancellationToken cancellationToken)
+            Project project!!, SearchQuery query, SymbolFilter criteria, CancellationToken cancellationToken)
         {
             // All entrypoints to this function are Find functions that are only searching
             // for specific strings (i.e. they never do a custom search).
             Contract.ThrowIfTrue(query.Kind == SearchKind.Custom, "Custom queries are not supported in this API");
-
-            if (project == null)
-            {
-                throw new ArgumentNullException(nameof(project));
-            }
-
             if (query.Name != null && string.IsNullOrWhiteSpace(query.Name))
             {
                 return ImmutableArray<ISymbol>.Empty;

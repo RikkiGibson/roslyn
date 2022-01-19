@@ -498,13 +498,8 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Create a new solution instance that includes a project with the specified project information.
         /// </summary>
-        public SolutionState AddProject(ProjectInfo projectInfo)
+        public SolutionState AddProject(ProjectInfo projectInfo!!)
         {
-            if (projectInfo == null)
-            {
-                throw new ArgumentNullException(nameof(projectInfo));
-            }
-
             var projectId = projectInfo.Id;
 
             var language = projectInfo.Language;

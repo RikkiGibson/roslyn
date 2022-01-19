@@ -95,9 +95,9 @@ namespace Roslyn.Utilities
         {
         }
 
-        private ReferenceCountedDisposable(T instance, BoxedReferenceCount referenceCount)
+        private ReferenceCountedDisposable(T instance!!, BoxedReferenceCount referenceCount)
         {
-            _instance = instance ?? throw new ArgumentNullException(nameof(instance));
+            _instance = instance;
 
             // The reference count has already been incremented for this instance
             _boxedReferenceCount = referenceCount;
@@ -230,14 +230,9 @@ namespace Roslyn.Utilities
         {
             private readonly BoxedReferenceCount? _boxedReferenceCount;
 
-            public WeakReference(ReferenceCountedDisposable<T> reference)
+            public WeakReference(ReferenceCountedDisposable<T> reference!!)
                 : this()
             {
-                if (reference == null)
-                {
-                    throw new ArgumentNullException(nameof(reference));
-                }
-
                 var instance = reference._instance;
                 var referenceCount = reference._boxedReferenceCount;
                 if (instance == null)

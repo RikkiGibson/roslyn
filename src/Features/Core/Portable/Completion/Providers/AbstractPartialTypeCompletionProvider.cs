@@ -78,13 +78,8 @@ namespace Microsoft.CodeAnalysis.Completion.Providers
 
         protected abstract (string displayText, string suffix, string insertionText) GetDisplayAndSuffixAndInsertionText(INamedTypeSymbol symbol, TSyntaxContext context);
 
-        protected virtual IEnumerable<INamedTypeSymbol>? LookupCandidateSymbols(TSyntaxContext context, INamedTypeSymbol declaredSymbol, CancellationToken cancellationToken)
+        protected virtual IEnumerable<INamedTypeSymbol>? LookupCandidateSymbols(TSyntaxContext context, INamedTypeSymbol declaredSymbol!!, CancellationToken cancellationToken)
         {
-            if (declaredSymbol == null)
-            {
-                throw new ArgumentNullException(nameof(declaredSymbol));
-            }
-
             var semanticModel = context.SemanticModel;
 
             if (declaredSymbol.ContainingSymbol is not INamespaceOrTypeSymbol containingSymbol)

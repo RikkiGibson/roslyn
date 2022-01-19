@@ -309,18 +309,8 @@ namespace Microsoft.CodeAnalysis.CodeActions
         /// <param name="createChangedDocument">Function to create the <see cref="Document"/>.</param>
         /// <param name="equivalenceKey">Optional value used to determine the equivalence of the <see cref="CodeAction"/> with other <see cref="CodeAction"/>s. See <see cref="CodeAction.EquivalenceKey"/>.</param>
         [SuppressMessage("ApiDesign", "RS0027:Public API with optional parameter(s) should have the most parameters amongst its public overloads.", Justification = "Preserving existing public API")]
-        public static CodeAction Create(string title, Func<CancellationToken, Task<Document>> createChangedDocument, string? equivalenceKey = null)
+        public static CodeAction Create(string title!!, Func<CancellationToken, Task<Document>> createChangedDocument!!, string? equivalenceKey = null)
         {
-            if (title == null)
-            {
-                throw new ArgumentNullException(nameof(title));
-            }
-
-            if (createChangedDocument == null)
-            {
-                throw new ArgumentNullException(nameof(createChangedDocument));
-            }
-
             return new DocumentChangeAction(title, createChangedDocument, equivalenceKey);
         }
 
@@ -332,18 +322,8 @@ namespace Microsoft.CodeAnalysis.CodeActions
         /// <param name="createChangedSolution">Function to create the <see cref="Solution"/>.</param>
         /// <param name="equivalenceKey">Optional value used to determine the equivalence of the <see cref="CodeAction"/> with other <see cref="CodeAction"/>s. See <see cref="CodeAction.EquivalenceKey"/>.</param>
         [SuppressMessage("ApiDesign", "RS0027:Public API with optional parameter(s) should have the most parameters amongst its public overloads.", Justification = "Preserving existing public API")]
-        public static CodeAction Create(string title, Func<CancellationToken, Task<Solution>> createChangedSolution, string? equivalenceKey = null)
+        public static CodeAction Create(string title!!, Func<CancellationToken, Task<Solution>> createChangedSolution!!, string? equivalenceKey = null)
         {
-            if (title == null)
-            {
-                throw new ArgumentNullException(nameof(title));
-            }
-
-            if (createChangedSolution == null)
-            {
-                throw new ArgumentNullException(nameof(createChangedSolution));
-            }
-
             return new SolutionChangeAction(title, createChangedSolution, equivalenceKey);
         }
 
@@ -354,13 +334,8 @@ namespace Microsoft.CodeAnalysis.CodeActions
         /// <param name="nestedActions">The code actions within the group.</param>
         /// <param name="isInlinable"><see langword="true"/> to allow inlining the members of the group into the parent;
         /// otherwise, <see langword="false"/> to require that this group appear as a group with nested actions.</param>
-        public static CodeAction Create(string title, ImmutableArray<CodeAction> nestedActions, bool isInlinable)
+        public static CodeAction Create(string title!!, ImmutableArray<CodeAction> nestedActions, bool isInlinable)
         {
-            if (title is null)
-            {
-                throw new ArgumentNullException(nameof(title));
-            }
-
             if (nestedActions == null)
             {
                 throw new ArgumentNullException(nameof(nestedActions));

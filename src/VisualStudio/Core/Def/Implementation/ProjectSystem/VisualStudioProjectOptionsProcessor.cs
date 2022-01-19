@@ -46,10 +46,10 @@ namespace Microsoft.VisualStudio.LanguageServices.Implementation.ProjectSystem
         private IReferenceCountedDisposable<ICacheEntry<string, IRuleSetFile>>? _ruleSetFile = null;
 
         public VisualStudioProjectOptionsProcessor(
-            VisualStudioProject project,
+            VisualStudioProject project!!,
             HostWorkspaceServices workspaceServices)
         {
-            _project = project ?? throw new ArgumentNullException(nameof(project));
+            _project = project;
             _workspaceServices = workspaceServices;
             _commandLineParserService = workspaceServices.GetLanguageServices(project.Language).GetRequiredService<ICommandLineParserService>();
             _temporaryStorageService = workspaceServices.GetRequiredService<ITemporaryStorageService>();
@@ -87,11 +87,8 @@ namespace Microsoft.VisualStudio.LanguageServices.Implementation.ProjectSystem
         }
 
         [Obsolete("To avoid contributing to the large object heap, use SetOptions(ImmutableArray<string>). This API will be removed in the future.")]
-        public void SetCommandLine(string commandLine)
+        public void SetCommandLine(string commandLine!!)
         {
-            if (commandLine == null)
-                throw new ArgumentNullException(nameof(commandLine));
-
             var arguments = CommandLineParser.SplitCommandLineIntoArguments(commandLine, removeHashComments: false);
 
             SetCommandLine(arguments.ToImmutableArray());

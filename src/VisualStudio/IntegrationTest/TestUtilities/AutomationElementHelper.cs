@@ -62,9 +62,9 @@ namespace Microsoft.VisualStudio.IntegrationTest.Utilities
         {
             private readonly Action<IUIAutomationElement, int> _action;
 
-            public AutomationEventHandler(Action<IUIAutomationElement, int> action)
+            public AutomationEventHandler(Action<IUIAutomationElement, int> action!!)
             {
-                _action = action ?? throw new ArgumentNullException(nameof(action));
+                _action = action;
             }
 
             public void HandleAutomationEvent(IUIAutomationElement sender, int eventId)

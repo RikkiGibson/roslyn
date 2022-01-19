@@ -29,13 +29,8 @@ namespace Microsoft.VisualStudio.Debugger
             return null;
         }
 
-        public void SetDataItem<T>(DkmDataCreationDisposition creationDisposition, T item) where T : DkmDataItem
+        public void SetDataItem<T>(DkmDataCreationDisposition creationDisposition, T item!!) where T : DkmDataItem
         {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
-
             Guid key = item.GetType().GUID;
             if (creationDisposition == DkmDataCreationDisposition.CreateNew)
             {
