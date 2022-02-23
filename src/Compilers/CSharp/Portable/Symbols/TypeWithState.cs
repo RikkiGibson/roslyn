@@ -15,6 +15,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
     {
         public readonly TypeSymbol? Type;
         public readonly NullableFlowState State;
+        public readonly bool SuppressionChangedNullableState;
+
         [MemberNotNullWhen(false, nameof(Type))]
         public bool HasNullType => Type is null;
         public bool MayBeNull => State == NullableFlowState.MaybeNull;
@@ -25,16 +27,16 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return Create(type, NullableFlowState.MaybeDefault);
         }
 
-        public static TypeWithState Create(TypeSymbol? type, NullableFlowState defaultState)
+        public static TypeWithState Create(TypeSymbol? type, NullableFlowState defaultState, bool suppressionChangedNullableState = false)
         {
             if (defaultState == NullableFlowState.MaybeDefault &&
                 (type is null || type.IsTypeParameterDisallowingAnnotationInCSharp8()))
             {
                 Debug.Assert(type?.IsNullableTypeOrTypeParameter() != true);
-                return new TypeWithState(type, defaultState);
+                return new TypeWithState(type, defaultState, suppressionChangedNullableState);
             }
             var state = defaultState != NullableFlowState.NotNull && type?.CanContainNull() != false ? NullableFlowState.MaybeNull : NullableFlowState.NotNull;
-            return new TypeWithState(type, state);
+            return new TypeWithState(type, state, suppressionChangedNullableState);
         }
 
         public static TypeWithState Create(TypeWithAnnotations typeWithAnnotations, FlowAnalysisAnnotations annotations = FlowAnalysisAnnotations.None)
@@ -66,21 +68,23 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return Create(type, state);
         }
 
-        private TypeWithState(TypeSymbol? type, NullableFlowState state)
+        private TypeWithState(TypeSymbol? type, NullableFlowState state, bool suppressionChangedNullableState)
         {
             Debug.Assert(state == NullableFlowState.NotNull || type?.CanContainNull() != false);
             Debug.Assert(state != NullableFlowState.MaybeDefault || type is null || type.IsTypeParameterDisallowingAnnotationInCSharp8());
+            Debug.Assert(!suppressionChangedNullableState || state == NullableFlowState.NotNull);
             Type = type;
             State = state;
+            SuppressionChangedNullableState = suppressionChangedNullableState;
         }
 
         public string GetDebuggerDisplay() => $"{{Type:{Type?.GetDebuggerDisplay()}, State:{State}{"}"}";
 
         public override string ToString() => GetDebuggerDisplay();
 
-        public TypeWithState WithNotNullState() => new TypeWithState(Type, NullableFlowState.NotNull);
+        public TypeWithState WithNotNullState() => new TypeWithState(Type, NullableFlowState.NotNull, SuppressionChangedNullableState);
 
-        public TypeWithState WithSuppression(bool suppress) => suppress ? new TypeWithState(Type, NullableFlowState.NotNull) : this;
+        public TypeWithState WithSuppression(bool suppress) => suppress ? new TypeWithState(Type, NullableFlowState.NotNull, suppressionChangedNullableState: suppress && !State.IsNotNull()) : this;
 
         public TypeWithAnnotations ToTypeWithAnnotations(CSharpCompilation compilation, bool asAnnotatedType = false)
         {

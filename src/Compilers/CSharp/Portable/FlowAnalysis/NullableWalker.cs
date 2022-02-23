@@ -318,8 +318,6 @@ namespace Microsoft.CodeAnalysis.CSharp
             SetAnalyzedNullability(expression, new VisitResult(resultType, lvalueType), isLvalue);
         }
 
-        private bool ShouldMakeNotNullRvalue(BoundExpression node) => node.IsSuppressed || node.HasAnyErrors || !IsReachable();
-
         /// <summary>
         /// Sets the analyzed nullability of the expression to be the given result.
         /// </summary>
@@ -3074,12 +3072,15 @@ namespace Microsoft.CodeAnalysis.CSharp
             Debug.Assert((object?)resultType.Type != _invalidType.Type);
             Debug.Assert(AreCloseEnough(resultType.Type, node.Type));
 #endif
-
-            if (ShouldMakeNotNullRvalue(node))
+            if (node.IsSuppressed)
             {
-                var result = resultType.WithNotNullState();
-                SetResult(node, result, LvalueResultType);
+                SetResult(node, resultType.WithSuppression(suppress: true), LvalueResultType);
             }
+            else if (node.HasAnyErrors || !IsReachable())
+            {
+                SetResult(node, resultType.WithNotNullState(), LvalueResultType);
+            }
+
             return null;
         }
 
@@ -7169,7 +7170,12 @@ namespace Microsoft.CodeAnalysis.CSharp
         {
             if (!targetTypeOpt.HasType)
             {
-                return VisitRvalueWithState(expr);
+                var result = VisitRvalueWithState(expr);
+                if (expr.IsSuppressed && !result.SuppressionChangedNullableState)
+                {
+                    ReportDiagnostic(ErrorCode.WRN_UnnecessaryNullableSuppression, expr.Syntax);
+                }
+                return result;
             }
 
             var (resultType, completion) = VisitOptionalImplicitConversion(expr, targetTypeOpt, useLegacyWarnings, trackMembers, assignmentKind, delayCompletionForTargetType: false);
@@ -7908,6 +7914,30 @@ namespace Microsoft.CodeAnalysis.CSharp
                 default:
                     Debug.Assert(targetType.IsValueType || targetType.IsErrorType());
                     break;
+            }
+
+            // e.g. is this an 'expr!' where 'expr' has not-null state, and conversion of 'expr' wouldn't produce nested nullability warnings.
+
+            // string? x = null!; // ok
+            // x.ToString();
+
+            if (isSuppressed && canConvertNestedNullability)
+            {
+                if (
+                    // The suppression is redundant.
+                    // string x = "a"!;
+                    !operandType.SuppressionChangedNullableState
+
+                    // The suppression is unnecessary.
+                    // void M(string? x);
+                    // M(maybeString!);
+
+                    // TODO: issue link
+                    // || (assignmentKind != AssignmentKind.Assignment && targetTypeWithNullability.NullableAnnotation.IsAnnotated())
+                    )
+                {
+                    ReportDiagnostic(ErrorCode.WRN_UnnecessaryNullableSuppression, diagnosticLocationOpt);
+                }
             }
 
             TypeWithState resultType = calculateResultType(targetTypeWithNullability, fromExplicitCast, resultState, isSuppressed, targetType);

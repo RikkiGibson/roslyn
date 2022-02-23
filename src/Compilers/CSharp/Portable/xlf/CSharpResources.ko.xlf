@@ -3590,6 +3590,11 @@
         <target state="translated">생성자를 종료할 때 null을 허용하지 않는 필드에 null이 아닌 값을 포함해야 합니다. null 허용으로 선언해 보세요.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WRN_UnnecessaryNullableSuppression">
+        <source>Unnecessary '!' nullable suppression.</source>
+        <target state="new">Unnecessary '!' nullable suppression.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WRN_UnreadRecordParameter">
         <source>Parameter '{0}' is unread. Did you forget to use it to initialize the property with that name?</source>
         <target state="translated">'{0}' 매개 변수를 읽을 수 없습니다. 이 매개 변수를 사용하여 해당 이름으로 속성을 초기화했는지 확인하세요.</target>
