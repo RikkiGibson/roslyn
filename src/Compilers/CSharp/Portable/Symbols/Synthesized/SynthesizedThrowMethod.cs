@@ -27,7 +27,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             {
                 ParameterSymbol paramName = this.Parameters[0];
 
-                //throw new SwitchExpressionException(paramName);
+                //throw new ArgumentNullException(paramName);
 
                 var body = F.Block(
                         ImmutableArray<LocalSymbol>.Empty,
