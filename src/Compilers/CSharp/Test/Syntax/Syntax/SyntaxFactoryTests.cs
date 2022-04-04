@@ -606,5 +606,15 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests
             var parsedWithPreview = SyntaxFactory.ParseTypeName(type, options: TestOptions.Regular9);
             parsedWithPreview.GetDiagnostics().Verify();
         }
+
+        class TestVisitor : CSharpSyntaxWalker { }
+
+        [Fact]
+        public void TestEmptyXmlText()
+        {
+            var text = SyntaxFactory.XmlText(default(SyntaxTokenList));
+            var visitor = new TestVisitor();
+            visitor.Visit(text);
+        }
     }
 }
