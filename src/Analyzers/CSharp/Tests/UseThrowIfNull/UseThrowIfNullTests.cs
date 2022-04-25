@@ -5,16 +5,16 @@
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Shared.Extensions;
-using Microsoft.CodeAnalysis.CSharp.UseParameterNullChecking;
+using Microsoft.CodeAnalysis.CSharp.UseThrowIfNull;
 using Microsoft.CodeAnalysis.Editor.UnitTests.CodeActions;
 using Microsoft.CodeAnalysis.Test.Utilities;
 using Xunit;
 
-namespace Microsoft.CodeAnalysis.Editor.CSharp.UnitTests.UseParameterNullChecking
+namespace Microsoft.CodeAnalysis.Editor.CSharp.UnitTests.UseThrowIfNull
 {
-    using VerifyCS = CSharpCodeFixVerifier<CSharpUseParameterNullCheckingDiagnosticAnalyzer, CSharpUseParameterNullCheckingCodeFixProvider>;
+    using VerifyCS = CSharpCodeFixVerifier<CSharpUseThrowIfNullDiagnosticAnalyzer, CSharpUseThrowIfNullCodeFixProvider>;
 
-    public class UseParameterNullCheckingTests
+    public class UseThrowIfNullTests
     {
         [Theory]
         [Trait(Traits.Feature, Traits.Features.CodeActionsUseIsNullCheck)]

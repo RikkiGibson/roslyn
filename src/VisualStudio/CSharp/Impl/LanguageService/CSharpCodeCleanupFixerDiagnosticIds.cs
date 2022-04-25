@@ -313,13 +313,13 @@ namespace Microsoft.VisualStudio.LanguageServices.CSharp.LanguageService
         public static readonly FixIdDefinition? UseNullCheckOverTypeCheckDiagnosticId;
 
         [Export]
-        [FixId(IDEDiagnosticIds.UseParameterNullCheckingId)]
-        [Name(IDEDiagnosticIds.UseParameterNullCheckingId)]
+        [FixId(IDEDiagnosticIds.UseThrowIfNullId)]
+        [Name(IDEDiagnosticIds.UseThrowIfNullId)]
         [Order(After = IDEDiagnosticIds.RemoveUnnecessaryCastDiagnosticId)]
         [ConfigurationKey("unused")]
-        [HelpLink($"https://docs.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/{IDEDiagnosticIds.UseParameterNullCheckingId}")]
+        [HelpLink($"https://docs.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/{IDEDiagnosticIds.UseThrowIfNullId}")]
         [LocalizedName(typeof(CSharpFeaturesResources), nameof(CSharpFeaturesResources.Apply_parameter_null_preferences))]
-        public static readonly FixIdDefinition? UseParameterNullCheckingId;
+        public static readonly FixIdDefinition? UseThrowIfNullId;
 
         [Export]
         [FixId(IDEDiagnosticIds.UsePatternCombinatorsDiagnosticId)]

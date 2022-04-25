@@ -13,18 +13,18 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Shared.Extensions;
 using Roslyn.Utilities;
 
-namespace Microsoft.CodeAnalysis.CSharp.UseParameterNullChecking
+namespace Microsoft.CodeAnalysis.CSharp.UseThrowIfNull
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    internal sealed class CSharpUseParameterNullCheckingDiagnosticAnalyzer
+    internal sealed class CSharpUseThrowIfNullDiagnosticAnalyzer
         : AbstractBuiltInCodeStyleDiagnosticAnalyzer
     {
         private const string ArgumentNullExceptionName = $"{nameof(System)}.{nameof(ArgumentNullException)}";
         private static readonly LocalizableResourceString s_resourceTitle = new(nameof(AnalyzersResources.Null_check_can_be_simplified), AnalyzersResources.ResourceManager, typeof(AnalyzersResources));
 
-        public CSharpUseParameterNullCheckingDiagnosticAnalyzer()
-            : base(IDEDiagnosticIds.UseParameterNullCheckingId,
-                   EnforceOnBuildValues.UseParameterNullChecking,
+        public CSharpUseThrowIfNullDiagnosticAnalyzer()
+            : base(IDEDiagnosticIds.UseThrowIfNullId,
+                   EnforceOnBuildValues.UseThrowIfNull,
                    CSharpCodeStyleOptions.PreferParameterNullChecking,
                    LanguageNames.CSharp,
                    s_resourceTitle,

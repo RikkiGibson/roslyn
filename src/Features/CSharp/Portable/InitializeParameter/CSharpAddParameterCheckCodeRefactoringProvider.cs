@@ -110,7 +110,7 @@ namespace Microsoft.CodeAnalysis.CSharp.InitializeParameter
                 return null;
 
             var options = await document.GetOptionsAsync(cancellationToken).ConfigureAwait(false);
-            if (!options.GetOption(CSharpCodeStyleOptions.PreferParameterNullChecking).Value)
+            if (!options.GetOption(CSharpCodeStyleOptions.PreferThrowIfNull).Value)
                 return null;
 
             // We expect the syntax tree to already be in memory since we already have a node from the tree

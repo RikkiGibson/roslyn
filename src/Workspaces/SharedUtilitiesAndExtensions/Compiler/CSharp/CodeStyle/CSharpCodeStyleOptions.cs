@@ -300,11 +300,11 @@ namespace Microsoft.CodeAnalysis.CSharp.CodeStyle
             "csharp_style_prefer_null_check_over_type_check",
             $"TextEditor.CSharp.Specific.{nameof(PreferNullCheckOverTypeCheck)}");
 
-        internal static readonly Option2<CodeStyleOption2<bool>> PreferParameterNullChecking = CreateOption(
-            CSharpCodeStyleOptionGroups.NullCheckingPreferences, nameof(PreferParameterNullChecking),
+        internal static readonly Option2<CodeStyleOption2<bool>> PreferThrowIfNull = CreateOption(
+            CSharpCodeStyleOptionGroups.NullCheckingPreferences, nameof(PreferThrowIfNull),
             defaultValue: s_trueWithSuggestionEnforcement,
             "csharp_style_prefer_parameter_null_checking",
-            $"TextEditor.CSharp.Specific.{nameof(PreferParameterNullChecking)}");
+            $"TextEditor.CSharp.Specific.{nameof(PreferThrowIfNull)}");
 
         public static Option2<CodeStyleOption2<bool>> AllowEmbeddedStatementsOnSameLine { get; } = CreateOption(
             CSharpCodeStyleOptionGroups.NewLinePreferences, nameof(AllowEmbeddedStatementsOnSameLine),

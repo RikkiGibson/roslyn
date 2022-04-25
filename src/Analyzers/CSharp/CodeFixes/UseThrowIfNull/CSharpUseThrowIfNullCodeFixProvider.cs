@@ -19,19 +19,19 @@ using Microsoft.CodeAnalysis.PooledObjects;
 using Microsoft.CodeAnalysis.Shared.Extensions;
 using Roslyn.Utilities;
 
-namespace Microsoft.CodeAnalysis.CSharp.UseParameterNullChecking
+namespace Microsoft.CodeAnalysis.CSharp.UseThrowIfNull
 {
-    [ExportCodeFixProvider(LanguageNames.CSharp, Name = PredefinedCodeFixProviderNames.UseParameterNullChecking), Shared]
-    internal sealed class CSharpUseParameterNullCheckingCodeFixProvider : SyntaxEditorBasedCodeFixProvider
+    [ExportCodeFixProvider(LanguageNames.CSharp, Name = PredefinedCodeFixProviderNames.UseThrowIfNull), Shared]
+    internal sealed class CSharpUseThrowIfNullCodeFixProvider : SyntaxEditorBasedCodeFixProvider
     {
         [ImportingConstructor]
         [Obsolete(MefConstruction.ImportingConstructorMessage, error: true)]
-        public CSharpUseParameterNullCheckingCodeFixProvider()
+        public CSharpUseThrowIfNullCodeFixProvider()
         {
         }
 
         public override ImmutableArray<string> FixableDiagnosticIds
-            => ImmutableArray.Create(IDEDiagnosticIds.UseParameterNullCheckingId);
+            => ImmutableArray.Create(IDEDiagnosticIds.UseThrowIfNullId);
 
         public override Task RegisterCodeFixesAsync(CodeFixContext context)
         {

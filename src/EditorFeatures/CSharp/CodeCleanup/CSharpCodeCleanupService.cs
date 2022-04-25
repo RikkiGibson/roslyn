@@ -180,7 +180,7 @@ namespace Microsoft.CodeAnalysis.CSharp.CodeCleanup
                     IDEDiagnosticIds.InvokeDelegateWithConditionalAccessId),
                 //   csharp_style_prefer_parameter_null_checking
                 new DiagnosticSet(CSharpFeaturesResources.Apply_parameter_null_preferences,
-                    IDEDiagnosticIds.UseParameterNullCheckingId),
+                    IDEDiagnosticIds.UseThrowIfNullId),
 
                 // Modifier preferences
                 //   csharp_prefer_static_local_function
