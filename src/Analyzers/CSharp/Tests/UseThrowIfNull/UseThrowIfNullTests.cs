@@ -16,6 +16,22 @@ namespace Microsoft.CodeAnalysis.Editor.CSharp.UnitTests.UseThrowIfNull
 
     public class UseThrowIfNullTests
     {
+        private const string ArgumentNullExceptionSource = """
+            namespace System
+            {
+                public class ArgumentNullException : Exception
+                {
+                    public ArgumentNullException() { }
+                    public ArgumentNullException(string paramName) { }
+
+                    public static void ThrowIfNull(object param, string paramName = null)
+                    {
+                        if (param is null) throw new ArgumentNullException(paramName);
+                    }
+                }
+            }
+            """;
+
         [Theory]
         [Trait(Traits.Feature, Traits.Features.CodeActionsUseIsNullCheck)]
         [InlineData("==")]
@@ -40,10 +56,13 @@ using System;
 
 class C
 {
-    void M(string s!!)
+    void M(string s)
     {
+        ArgumentNullException.ThrowIfNull(s);
     }
 }",
+                TestState = { Sources = { ArgumentNullExceptionSource } },
+                FixedState = { Sources = { ArgumentNullExceptionSource } },
                 LanguageVersion = LanguageVersionExtensions.CSharpNext
             }.RunAsync();
         }

@@ -3,10 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.CodeAnalysis.CodeStyle;
 using Microsoft.CodeAnalysis.CSharp.CodeStyle;
+using Microsoft.CodeAnalysis.CSharp.Extensions;
 using Microsoft.CodeAnalysis.CSharp.Shared.Extensions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -19,13 +21,15 @@ namespace Microsoft.CodeAnalysis.CSharp.UseThrowIfNull
     internal sealed class CSharpUseThrowIfNullDiagnosticAnalyzer
         : AbstractBuiltInCodeStyleDiagnosticAnalyzer
     {
+        public const string ParameterName = nameof(ParameterName);
+
         private const string ArgumentNullExceptionName = $"{nameof(System)}.{nameof(ArgumentNullException)}";
         private static readonly LocalizableResourceString s_resourceTitle = new(nameof(AnalyzersResources.Null_check_can_be_simplified), AnalyzersResources.ResourceManager, typeof(AnalyzersResources));
 
         public CSharpUseThrowIfNullDiagnosticAnalyzer()
             : base(IDEDiagnosticIds.UseThrowIfNullId,
                    EnforceOnBuildValues.UseThrowIfNull,
-                   CSharpCodeStyleOptions.PreferParameterNullChecking,
+                   CSharpCodeStyleOptions.PreferThrowIfNull,
                    LanguageNames.CSharp,
                    s_resourceTitle,
                    s_resourceTitle)
@@ -72,7 +76,18 @@ namespace Microsoft.CodeAnalysis.CSharp.UseThrowIfNull
                     }
                 }
 
-                if (argumentNullExceptionConstructor is null || argumentNullExceptionStringConstructor is null)
+                // Can only offer the fix if the method we want to use actually exists.
+                IMethodSymbol? throwIfNullMethod = null;
+                foreach (var symbol in argumentNullException.GetMembers("ThrowIfNull"))
+                {
+                    if (symbol is IMethodSymbol { DeclaredAccessibility: Accessibility.Public, IsStatic: true, Parameters: [{ Type.SpecialType: SpecialType.System_Object }, { Type.SpecialType: SpecialType.System_String }] } method)
+                    {
+                        throwIfNullMethod = method;
+                        break;
+                    }
+                }
+
+                if (argumentNullExceptionConstructor is null || argumentNullExceptionStringConstructor is null || throwIfNullMethod is null)
                 {
                     return;
                 }
@@ -107,7 +122,7 @@ namespace Microsoft.CodeAnalysis.CSharp.UseThrowIfNull
             var semanticModel = context.SemanticModel;
             var syntaxTree = semanticModel.SyntaxTree;
 
-            var option = context.Options.GetOption(CSharpCodeStyleOptions.PreferParameterNullChecking, syntaxTree, cancellationToken);
+            var option = context.Options.GetOption(CSharpCodeStyleOptions.PreferThrowIfNull, syntaxTree, cancellationToken);
             if (!option.Value)
             {
                 return;
@@ -142,33 +157,14 @@ namespace Microsoft.CodeAnalysis.CSharp.UseThrowIfNull
             foreach (var statement in block.Statements)
             {
                 if (TryGetParameterNullCheckedByStatement(statement) is var (parameter, diagnosticLocation)
-                    && ParameterCanUseNullChecking(parameter)
-                    && parameter.DeclaringSyntaxReferences.FirstOrDefault() is SyntaxReference reference
-                    && reference.SyntaxTree.Equals(statement.SyntaxTree)
-                    && reference.GetSyntax() is ParameterSyntax parameterSyntax)
+                    && ParameterCanUseNullChecking(parameter))
                 {
                     context.ReportDiagnostic(DiagnosticHelper.Create(
                         Descriptor,
                         diagnosticLocation,
                         option.Notification.Severity,
-                        additionalLocations: new[] { parameterSyntax.GetLocation() },
-                        properties: null));
-                }
-                else
-                {
-                    var descendants = statement.DescendantNodesAndSelf(descendIntoChildren: static c => c is StatementSyntax);
-                    foreach (var descendant in descendants)
-                    {
-                        // Mostly, we are fine with simplifying null checks in a way that
-                        // causes us to *throw a different exception than before* for some inputs.
-                        // However, we don't want to change semantics such that we
-                        // *throw an exception instead of returning* or vice-versa.
-                        // Therefore we ignore any null checks which are syntactically preceded by conditional or unconditional returns.
-                        if (descendant is ReturnStatementSyntax)
-                        {
-                            return;
-                        }
-                    }
+                        additionalLocations: null,
+                        properties: ImmutableDictionary<string, string?>.Empty.Add(ParameterName, parameter.Name)));
                 }
             }
 
@@ -182,102 +178,67 @@ namespace Microsoft.CodeAnalysis.CSharp.UseThrowIfNull
                 if (parameter.RefKind == RefKind.Out)
                     return false;
 
-                if (parameter.Type.IsValueType)
-                {
-                    return parameter.Type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T
-                        || parameter.Type.TypeKind is TypeKind.Pointer or TypeKind.FunctionPointer;
-                }
-
-                return true;
+                // TODO: we can also support on pointer types if the appropriate ThrowIfNull overload is present.
+                // however, we shouldn't offer the fix on nullable value types, since we would have to box.
+                return parameter.Type.IsReferenceType;
             }
 
             (IParameterSymbol parameter, Location diagnosticLocation)? TryGetParameterNullCheckedByStatement(StatementSyntax statement)
             {
-                switch (statement)
+                // if (param == null) { throw new ArgumentNullException(nameof(param)); }
+                // if (param is null) { throw new ArgumentNullException(nameof(param)); }
+                // if (object.ReferenceEquals(param, null)) { throw new ArgumentNullException(nameof(param)); }
+                if (statement is IfStatementSyntax ifStatement)
                 {
-                    // if (param == null) { throw new ArgumentNullException(nameof(param)); }
-                    // if (param is null) { throw new ArgumentNullException(nameof(param)); }
-                    // if (object.ReferenceEquals(param, null)) { throw new ArgumentNullException(nameof(param)); }
-                    case IfStatementSyntax ifStatement:
-                        ExpressionSyntax left, right;
-                        switch (ifStatement)
-                        {
-                            case { Condition: BinaryExpressionSyntax { OperatorToken.RawKind: (int)SyntaxKind.EqualsEqualsToken } binary }:
-                                left = binary.Left;
-                                right = binary.Right;
-                                break;
-                            case { Condition: IsPatternExpressionSyntax { Expression: var patternInput, Pattern: ConstantPatternSyntax { Expression: var patternExpression } } }:
-                                left = patternInput;
-                                right = patternExpression;
-                                break;
-                            case { Condition: InvocationExpressionSyntax { Expression: var receiver, ArgumentList.Arguments: { Count: 2 } arguments } }
-                                when referenceEqualsMethod != null && referenceEqualsMethod.Equals(semanticModel.GetSymbolInfo(receiver, cancellationToken).Symbol):
-
-                                left = arguments[0].Expression;
-                                right = arguments[1].Expression;
-                                break;
-
-                            default:
-                                return null;
-                        }
-
-                        var parameterInBinary = left.IsKind(SyntaxKind.NullLiteralExpression) ? TryGetParameter(right)
-                            : right.IsKind(SyntaxKind.NullLiteralExpression) ? TryGetParameter(left)
-                            : null;
-                        if (parameterInBinary is null)
-                        {
-                            return null;
-                        }
-
-                        var throwStatement = ifStatement.Statement switch
-                        {
-                            ThrowStatementSyntax @throw => @throw,
-                            BlockSyntax { Statements: { Count: 1 } statements } => statements[0] as ThrowStatementSyntax,
-                            _ => null
-                        };
-
-                        if (throwStatement?.Expression is not ObjectCreationExpressionSyntax thrownInIf
-                            || !IsConstructorApplicable(thrownInIf, parameterInBinary))
-                        {
-                            return null;
-                        }
-
-                        // The if statement could be associated with an arbitrarily complex else clause. We only want to highlight the "if" part which is removed by the fix.
-                        var location = Location.Create(ifStatement.SyntaxTree, Text.TextSpan.FromBounds(ifStatement.SpanStart, ifStatement.Statement.Span.End));
-                        return (parameterInBinary, location);
-
-                    // this.field = param ?? throw new ArgumentNullException(nameof(param));
-                    case ExpressionStatementSyntax
+                    ExpressionSyntax left, right;
+                    switch (ifStatement)
                     {
-                        Expression: AssignmentExpressionSyntax
-                        {
-                            Left: var leftOfAssignment,
-                            Right: BinaryExpressionSyntax
-                            {
-                                OperatorToken.RawKind: (int)SyntaxKind.QuestionQuestionToken,
-                                Left: ExpressionSyntax maybeParameter,
-                                Right: ThrowExpressionSyntax { Expression: ObjectCreationExpressionSyntax thrownInNullCoalescing } throwExpression
-                            }
-                        }
-                    }:
-                        var coalescedParameter = TryGetParameter(maybeParameter);
-                        if (coalescedParameter is null || !IsConstructorApplicable(thrownInNullCoalescing, coalescedParameter))
-                        {
+                        case { Condition: BinaryExpressionSyntax(SyntaxKind.EqualsExpression) binary }:
+                            left = binary.Left;
+                            right = binary.Right;
+                            break;
+                        case { Condition: IsPatternExpressionSyntax { Expression: var patternInput, Pattern: ConstantPatternSyntax { Expression: var patternExpression } } }:
+                            left = patternInput;
+                            right = patternExpression;
+                            break;
+                        case { Condition: InvocationExpressionSyntax { Expression: var receiver, ArgumentList.Arguments: { Count: 2 } arguments } }
+                            when referenceEqualsMethod != null && referenceEqualsMethod.Equals(semanticModel.GetSymbolInfo(receiver, cancellationToken).Symbol):
+
+                            left = arguments[0].Expression;
+                            right = arguments[1].Expression;
+                            break;
+
+                        default:
                             return null;
-                        }
+                    }
 
-                        // ensure we delete the entire statement in the below scenario:
-                        //     void M(string s) { s = s ?? throw new ArgumentNullException(); }
-                        // otherwise, we just replace the '??' expression with its left operand
-                        var diagnosticLocation = coalescedParameter.Equals(semanticModel.GetSymbolInfo(leftOfAssignment, cancellationToken).Symbol)
-                            ? statement.GetLocation()
-                            : throwExpression.GetLocation();
-
-                        return (coalescedParameter, diagnosticLocation);
-
-                    default:
+                    var parameterInBinary = left.IsKind(SyntaxKind.NullLiteralExpression) ? TryGetParameter(right)
+                        : right.IsKind(SyntaxKind.NullLiteralExpression) ? TryGetParameter(left)
+                        : null;
+                    if (parameterInBinary is null)
+                    {
                         return null;
+                    }
+
+                    var throwStatement = ifStatement.Statement switch
+                    {
+                        ThrowStatementSyntax @throw => @throw,
+                        BlockSyntax { Statements: { Count: 1 } statements } => statements[0] as ThrowStatementSyntax,
+                        _ => null
+                    };
+
+                    if (throwStatement?.Expression is not ObjectCreationExpressionSyntax thrownInIf
+                        || !IsConstructorApplicable(thrownInIf, parameterInBinary))
+                    {
+                        return null;
+                    }
+
+                    // The if statement could be associated with an arbitrarily complex else clause. We only want to highlight the "if" part which is removed by the fix.
+                    var location = Location.Create(ifStatement.SyntaxTree, Text.TextSpan.FromBounds(ifStatement.SpanStart, ifStatement.Statement.Span.End));
+                    return (parameterInBinary, location);
                 }
+
+                return null;
             }
 
             IParameterSymbol? TryGetParameter(ExpressionSyntax maybeParameter)

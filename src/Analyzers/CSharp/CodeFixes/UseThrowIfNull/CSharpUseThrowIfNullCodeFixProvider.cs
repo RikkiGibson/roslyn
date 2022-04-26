@@ -43,51 +43,31 @@ namespace Microsoft.CodeAnalysis.CSharp.UseThrowIfNull
             Document document, ImmutableArray<Diagnostic> diagnostics,
             SyntaxEditor editor, CodeActionOptionsProvider options, CancellationToken cancellationToken)
         {
-            // Tracking parameters which have already been fixed by a fix-all operation.
-            // This avoids crashing the fixer when the same parameter is null-tested multiple times.
-            using var _ = PooledHashSet<Location>.GetInstance(out var fixedParameterLocations);
+            // before: if (param is null) throw...
+            // after:: ArgumentNullException.ThrowIfNull(param);
             foreach (var diagnostic in diagnostics)
             {
                 var node = diagnostic.Location.FindNode(getInnermostNodeForTie: true, cancellationToken: cancellationToken);
+                var paramName = diagnostic.Properties[CSharpUseThrowIfNullDiagnosticAnalyzer.ParameterName];
+
+                var throwIfNullStatement = SyntaxFactory.ParseStatement($"{nameof(System)}.{nameof(ArgumentNullException)}.ThrowIfNull({paramName})");
                 switch (node)
                 {
-                    case ExpressionSyntax { Parent: BinaryExpressionSyntax(SyntaxKind.CoalesceExpression) nullCoalescing }:
-                        var parameterReferenceSyntax = nullCoalescing.Left;
-                        editor.ReplaceNode(nullCoalescing, parameterReferenceSyntax.WithAppendedTrailingTrivia(SyntaxFactory.ElasticMarker));
-                        break;
                     case IfStatementSyntax { Else.Statement: BlockSyntax { Statements: var statementsWithinElse } } ifStatementWithElseBlock:
                         var parent = (BlockSyntax)ifStatementWithElseBlock.GetRequiredParent();
                         var newStatements = parent.Statements.ReplaceRange(ifStatementWithElseBlock, statementsWithinElse.Select(s => s.WithPrependedLeadingTrivia(SyntaxFactory.ElasticMarker)));
+                        editor.InsertBefore(parent, throwIfNullStatement);
                         editor.ReplaceNode(parent, parent.WithStatements(newStatements));
                         break;
                     case IfStatementSyntax { Else.Statement: StatementSyntax statementWithinElse }:
+                        editor.InsertBefore(node, throwIfNullStatement);
                         editor.ReplaceNode(node, statementWithinElse.WithPrependedLeadingTrivia(SyntaxFactory.ElasticMarker));
                         break;
                     case IfStatementSyntax:
-                    case ExpressionStatementSyntax { Expression: AssignmentExpressionSyntax { Right: BinaryExpressionSyntax(SyntaxKind.CoalesceExpression) } }:
-                        editor.RemoveNode(node);
+                        editor.ReplaceNode(node, throwIfNullStatement);
                         break;
                     default:
                         throw ExceptionUtilities.UnexpectedValue(node);
-                }
-
-                var parameterLocation = diagnostic.AdditionalLocations[0];
-                if (fixedParameterLocations.Add(parameterLocation))
-                {
-                    var parameterSyntax = (ParameterSyntax)parameterLocation.FindNode(cancellationToken);
-                    if (parameterSyntax.ExclamationExclamationToken.IsKind(SyntaxKind.None))
-                    {
-                        var identifier = parameterSyntax.Identifier;
-                        var newIdentifier = identifier.WithoutTrailingTrivia();
-                        var newExclamationExclamationToken = SyntaxFactory.Token(SyntaxTriviaList.Empty, SyntaxKind.ExclamationExclamationToken, identifier.TrailingTrivia);
-                        editor.ReplaceNode(parameterSyntax, parameterSyntax.Update(
-                            parameterSyntax.AttributeLists,
-                            parameterSyntax.Modifiers,
-                            parameterSyntax.Type,
-                            newIdentifier,
-                            newExclamationExclamationToken,
-                            parameterSyntax.Default));
-                    }
                 }
             }
 
