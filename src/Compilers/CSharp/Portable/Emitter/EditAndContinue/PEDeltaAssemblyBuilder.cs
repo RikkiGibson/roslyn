@@ -160,7 +160,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Emit
                 }
 
                 var metadataName = reader.GetString(def.Name);
-                var name = MetadataHelpers.InferTypeArityAndUnmangleMetadataName(metadataName, out _);
+                var name = MetadataHelpers.InferTypeArityAndUnmangleMetadataName(metadataName, out _, out _);
 
                 if (name.StartsWith(AnonymousTypeNameWithoutModulePrefix, StringComparison.Ordinal))
                 {

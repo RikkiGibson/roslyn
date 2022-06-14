@@ -388,7 +388,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             parameterCount = 0;
             generation = 0;
 
-            name = MetadataHelpers.InferTypeArityAndUnmangleMetadataName(name, out var arity);
+            name = MetadataHelpers.InferTypeArityAndUnmangleMetadataName(name, out var arity, out _);
 
             returnsVoid = name.StartsWith(ActionDelegateNamePrefix);
 

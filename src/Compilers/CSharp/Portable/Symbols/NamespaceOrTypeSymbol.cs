@@ -256,6 +256,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             Debug.Assert(!isTopLevel || scope.ToDisplayString(SymbolDisplayFormat.QualifiedNameOnlyFormat) == emittedTypeName.NamespaceName);
 
+            // observe that the type name is mangled for file types
+            // first pass by the name we are given, then attempt to detect the file type naming pattern, and lookup based on file types.
+            // since nested file types aren't supported for now, we can skip the file type lookup when checking within a type.
+
+            // when a file type is imported from metadata, we don't unmangle the file type part. this lookup just works.
+            // PROTOTYPE(ft): should the file type prefix be unmangled when type is imported from metadata?
+
             if (emittedTypeName.IsMangled)
             {
                 Debug.Assert(!emittedTypeName.UnmangledTypeName.Equals(emittedTypeName.TypeName) && emittedTypeName.InferredArity > 0);

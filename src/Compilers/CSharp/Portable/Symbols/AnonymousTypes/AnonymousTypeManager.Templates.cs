@@ -394,7 +394,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             return new AnonymousDelegateTemplateSymbol(
                 this,
-               MetadataHelpers.InferTypeArityAndUnmangleMetadataName(name, out _),
+               MetadataHelpers.InferTypeArityAndUnmangleMetadataName(name, out _, out _),
                this.System_Object,
                Compilation.GetSpecialType(SpecialType.System_IntPtr),
                returnsVoid ? Compilation.GetSpecialType(SpecialType.System_Void) : null,

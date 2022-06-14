@@ -594,15 +594,28 @@ ExitDecodeTypeName:
             associatedSyntaxTreeOrdinal = InferSyntaxTreeOrdinalFromMetadataName(emittedTypeName, out int prefixEndsAt);
 
             // PROTOTYPE(ft): remove the prefixed file-type mangling from the name
-
-            if (arity == 0)
+            if (arity == 0 && associatedSyntaxTreeOrdinal == -1)
             {
                 Debug.Assert(suffixStartsAt == -1);
+                Debug.Assert(prefixEndsAt == -1);
                 return emittedTypeName;
             }
 
-            Debug.Assert(suffixStartsAt > 0 && suffixStartsAt < emittedTypeName.Length - 1);
-            return emittedTypeName.Substring(0, suffixStartsAt);
+            // PROTOTYPE: should we just normalize these in the 'InferFromMetadataName' above?
+            if (associatedSyntaxTreeOrdinal == -1)
+            {
+                prefixEndsAt = 0;
+            }
+
+            if (arity == 0)
+            {
+                suffixStartsAt = emittedTypeName.Length;
+            }
+
+
+            Debug.Assert(suffixStartsAt > 0 && suffixStartsAt <= emittedTypeName.Length);
+            Debug.Assert(prefixEndsAt >= 0);
+            return emittedTypeName.Substring(prefixEndsAt, suffixStartsAt - prefixEndsAt);
         }
 
         internal static string UnmangleMetadataNameForArity(string emittedTypeName, int arity)

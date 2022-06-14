@@ -142,7 +142,8 @@ Namespace Microsoft.CodeAnalysis.VisualBasic.Emit
 
                 Dim metadataName = reader.GetString(def.Name)
                 Dim arity As Short = 0
-                Dim name = MetadataHelpers.InferTypeArityAndUnmangleMetadataName(metadataName, arity)
+                Dim unused As Integer = 0
+                Dim name = MetadataHelpers.InferTypeArityAndUnmangleMetadataName(metadataName, arity, unused)
 
                 Dim index As Integer = 0
                 If TryParseAnonymousTypeTemplateName(GeneratedNameConstants.AnonymousTypeTemplateNamePrefix, name, index) Then
