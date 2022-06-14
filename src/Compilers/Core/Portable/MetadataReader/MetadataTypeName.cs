@@ -68,6 +68,10 @@ namespace Microsoft.CodeAnalysis
         /// </summary>
         private ImmutableArray<string> _namespaceSegments;
 
+        private const int OrdinalUnknown = -2;
+        private const int OrdinalNotFileScoped = -1;
+        private int _associatedSyntaxTreeOrdinal;
+
         public static MetadataTypeName FromFullName(string fullName, bool useCLSCompliantNameArityEncoding = false, int forcedArity = -1)
         {
             Debug.Assert(fullName != null);
@@ -87,6 +91,7 @@ namespace Microsoft.CodeAnalysis
             name._useCLSCompliantNameArityEncoding = useCLSCompliantNameArityEncoding;
             name._forcedArity = (short)forcedArity;
             name._namespaceSegments = default(ImmutableArray<string>);
+            name._associatedSyntaxTreeOrdinal = OrdinalUnknown;
 
             return name;
         }
@@ -115,6 +120,7 @@ namespace Microsoft.CodeAnalysis
             name._useCLSCompliantNameArityEncoding = useCLSCompliantNameArityEncoding;
             name._forcedArity = (short)forcedArity;
             name._namespaceSegments = default(ImmutableArray<string>);
+            name._associatedSyntaxTreeOrdinal = OrdinalUnknown;
 
             return name;
         }
@@ -139,6 +145,7 @@ namespace Microsoft.CodeAnalysis
             name._useCLSCompliantNameArityEncoding = useCLSCompliantNameArityEncoding;
             name._forcedArity = (short)forcedArity;
             name._namespaceSegments = ImmutableArray<string>.Empty;
+            name._associatedSyntaxTreeOrdinal = OrdinalUnknown;
 
             return name;
         }
@@ -205,7 +212,7 @@ namespace Microsoft.CodeAnalysis
                 if (_unmangledTypeName == null)
                 {
                     Debug.Assert(_inferredArity == -1);
-                    _unmangledTypeName = MetadataHelpers.InferTypeArityAndUnmangleMetadataName(TypeName, out _inferredArity);
+                    _unmangledTypeName = MetadataHelpers.InferTypeArityAndUnmangleMetadataName(TypeName, out _inferredArity, out _associatedSyntaxTreeOrdinal);
                 }
 
                 return _unmangledTypeName;
@@ -223,10 +230,24 @@ namespace Microsoft.CodeAnalysis
                 if (_inferredArity == -1)
                 {
                     Debug.Assert(_unmangledTypeName == null);
-                    _unmangledTypeName = MetadataHelpers.InferTypeArityAndUnmangleMetadataName(TypeName, out _inferredArity);
+                    _unmangledTypeName = MetadataHelpers.InferTypeArityAndUnmangleMetadataName(TypeName, out _inferredArity, out _associatedSyntaxTreeOrdinal);
                 }
 
                 return _inferredArity;
+            }
+        }
+
+        public int AssociatedSyntaxTreeOrdinal
+        {
+            get
+            {
+                if (_associatedSyntaxTreeOrdinal == OrdinalUnknown)
+                {
+                    Debug.Assert(_unmangledTypeName == null);
+                    _unmangledTypeName = MetadataHelpers.InferTypeArityAndUnmangleMetadataName(TypeName, out _inferredArity, out _associatedSyntaxTreeOrdinal);
+                }
+
+                return _associatedSyntaxTreeOrdinal;
             }
         }
 

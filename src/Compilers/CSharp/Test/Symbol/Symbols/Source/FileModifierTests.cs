@@ -2916,5 +2916,22 @@ public class FileModifierTests : CSharpTestBase
         Assert.Equal("System.Void@<tree 0>", typeInfo.Type!.ToDisplayString(SymbolDisplayFormat.TestFormat.WithCompilerInternalOptions(SymbolDisplayCompilerInternalOptions.IncludeContainingFileForFileTypes)));
     }
 
+    [Fact]
+    public void PublicAPI_01()
+    {
+        var source1 = """
+            file class C { }
+            """;
+
+        var comp = CreateCompilation(source1);
+        comp.VerifyDiagnostics();
+
+        var member = comp.GetMember<NamedTypeSymbol>("C");
+        Assert.Equal("<>F0__C", member.MetadataName);
+
+        var type = comp.GetTypeByMetadataName("<>F0__C");
+        Assert.Equal(member, type);
+    }
+
     // PROTOTYPE(ft): public API (INamedTypeSymbol.IsFile?)
 }

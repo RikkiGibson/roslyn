@@ -12,6 +12,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis.Collections;
 using Microsoft.CodeAnalysis.PooledObjects;
 using Roslyn.Utilities;
@@ -531,10 +532,68 @@ ExitDecodeTypeName:
             return (short)arity;
         }
 
-        internal static string InferTypeArityAndUnmangleMetadataName(string emittedTypeName, out short arity)
+        // <ContainingFile>FN__ClassName`OptionalArity
+        private static Regex s_fileTypeOrdinalPattern = new Regex(@">F(\d)+__()");
+
+        private static int InferSyntaxTreeOrdinalFromMetadataName(string emittedTypeName, out int prefixEndsAt)
         {
-            int suffixStartsAt;
-            arity = InferTypeArityFromMetadataName(emittedTypeName, out suffixStartsAt);
+            if (s_fileTypeOrdinalPattern.Match(emittedTypeName) is Match { Success: true } match
+                && int.TryParse(match.Groups[1].Value, out int ordinal))
+            {
+                prefixEndsAt = match.Groups[2].Index;
+                return ordinal;
+            }
+
+            prefixEndsAt = -1;
+            return -1;
+
+            // PROTOTYPE(ft): do we need to do some handwritten regex stuff like this?
+            // int index = 0;
+            // for (; index < emittedTypeName.Length; index++)
+            // {
+            //     if (emittedTypeName[index] == '>')
+            //     {
+            //         break;
+            //     }
+            // }
+
+            // index++;
+            // if (emittedTypeName[index] != 'F')
+            // {
+            //     prefixEndsAt = 0;
+            //     return -1;
+            // }
+
+            // index++;
+            // for (; index < emittedTypeName.Length; index++)
+            // {
+            //     var c = emittedTypeName[index];
+            //     if (!char.IsDigit(c))
+            //     {
+            //         if (c == '_'
+            //             && index + 1 < emittedTypeName.Length
+            //             && emittedTypeName[index + 1] == '_')
+            //         {
+            //             index++;
+            //             break;
+            //         }
+
+            //         prefixEndsAt = 0;
+            //         return -1;
+            //     }
+            // }
+
+            // if (!int.TryParse(emittedTypeName.AsSpan()[])
+
+
+        }
+
+        internal static string InferTypeArityAndUnmangleMetadataName(string emittedTypeName, out short arity, out int associatedSyntaxTreeOrdinal)
+        {
+            arity = InferTypeArityFromMetadataName(emittedTypeName, out int suffixStartsAt);
+            associatedSyntaxTreeOrdinal = InferSyntaxTreeOrdinalFromMetadataName(emittedTypeName, out int prefixEndsAt);
+
+            // PROTOTYPE(ft): remove the prefixed file-type mangling from the name
 
             if (arity == 0)
             {
