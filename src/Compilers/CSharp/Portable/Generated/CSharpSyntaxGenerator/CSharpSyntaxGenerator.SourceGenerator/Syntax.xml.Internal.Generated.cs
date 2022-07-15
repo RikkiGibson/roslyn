@@ -131,11 +131,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.identifier);
         }
-
-        static IdentifierNameSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(IdentifierNameSyntax), r => new IdentifierNameSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for qualified name.</summary>
@@ -248,11 +243,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.dotToken);
             writer.WriteValue(this.right);
         }
-
-        static QualifiedNameSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(QualifiedNameSyntax), r => new QualifiedNameSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for generic name.</summary>
@@ -350,11 +340,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.identifier);
             writer.WriteValue(this.typeArgumentList);
-        }
-
-        static GenericNameSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(GenericNameSyntax), r => new GenericNameSyntax(r));
         }
     }
 
@@ -480,11 +465,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.arguments);
             writer.WriteValue(this.greaterThanToken);
         }
-
-        static TypeArgumentListSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(TypeArgumentListSyntax), r => new TypeArgumentListSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for alias qualified name.</summary>
@@ -597,11 +577,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.colonColonToken);
             writer.WriteValue(this.name);
         }
-
-        static AliasQualifiedNameSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(AliasQualifiedNameSyntax), r => new AliasQualifiedNameSyntax(r));
-        }
     }
 
     /// <summary>Provides the base class from which the classes that represent type syntax nodes are derived. This is an abstract class.</summary>
@@ -700,11 +675,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         {
             base.WriteTo(writer);
             writer.WriteValue(this.keyword);
-        }
-
-        static PredefinedTypeSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(PredefinedTypeSyntax), r => new PredefinedTypeSyntax(r));
         }
     }
 
@@ -815,11 +785,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.elementType);
             writer.WriteValue(this.rankSpecifiers);
-        }
-
-        static ArrayTypeSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ArrayTypeSyntax), r => new ArrayTypeSyntax(r));
         }
     }
 
@@ -941,11 +906,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.sizes);
             writer.WriteValue(this.closeBracketToken);
         }
-
-        static ArrayRankSpecifierSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ArrayRankSpecifierSyntax), r => new ArrayRankSpecifierSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for pointer type.</summary>
@@ -1043,11 +1003,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.elementType);
             writer.WriteValue(this.asteriskToken);
-        }
-
-        static PointerTypeSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(PointerTypeSyntax), r => new PointerTypeSyntax(r));
         }
     }
 
@@ -1186,11 +1141,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.callingConvention);
             writer.WriteValue(this.parameterList);
         }
-
-        static FunctionPointerTypeSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(FunctionPointerTypeSyntax), r => new FunctionPointerTypeSyntax(r));
-        }
     }
 
     /// <summary>Function pointer parameter list syntax.</summary>
@@ -1315,11 +1265,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.parameters);
             writer.WriteValue(this.greaterThanToken);
         }
-
-        static FunctionPointerParameterListSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(FunctionPointerParameterListSyntax), r => new FunctionPointerParameterListSyntax(r));
-        }
     }
 
     /// <summary>Function pointer calling convention syntax.</summary>
@@ -1429,11 +1374,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.managedOrUnmanagedKeyword);
             writer.WriteValue(this.unmanagedCallingConventionList);
-        }
-
-        static FunctionPointerCallingConventionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(FunctionPointerCallingConventionSyntax), r => new FunctionPointerCallingConventionSyntax(r));
         }
     }
 
@@ -1559,11 +1499,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.callingConventions);
             writer.WriteValue(this.closeBracketToken);
         }
-
-        static FunctionPointerUnmanagedCallingConventionListSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(FunctionPointerUnmanagedCallingConventionListSyntax), r => new FunctionPointerUnmanagedCallingConventionListSyntax(r));
-        }
     }
 
     /// <summary>Individual function pointer unmanaged calling convention.</summary>
@@ -1643,11 +1578,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         {
             base.WriteTo(writer);
             writer.WriteValue(this.name);
-        }
-
-        static FunctionPointerUnmanagedCallingConventionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(FunctionPointerUnmanagedCallingConventionSyntax), r => new FunctionPointerUnmanagedCallingConventionSyntax(r));
         }
     }
 
@@ -1746,11 +1676,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.elementType);
             writer.WriteValue(this.questionToken);
-        }
-
-        static NullableTypeSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(NullableTypeSyntax), r => new NullableTypeSyntax(r));
         }
     }
 
@@ -1875,11 +1800,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.elements);
             writer.WriteValue(this.closeParenToken);
         }
-
-        static TupleTypeSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(TupleTypeSyntax), r => new TupleTypeSyntax(r));
-        }
     }
 
     /// <summary>Tuple type element.</summary>
@@ -1990,11 +1910,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.type);
             writer.WriteValue(this.identifier);
         }
-
-        static TupleElementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(TupleElementSyntax), r => new TupleElementSyntax(r));
-        }
     }
 
     /// <summary>Class which represents a placeholder in the type argument list of an unbound generic type.</summary>
@@ -2074,11 +1989,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         {
             base.WriteTo(writer);
             writer.WriteValue(this.omittedTypeArgumentToken);
-        }
-
-        static OmittedTypeArgumentSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(OmittedTypeArgumentSyntax), r => new OmittedTypeArgumentSyntax(r));
         }
     }
 
@@ -2226,11 +2136,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.readOnlyKeyword);
             writer.WriteValue(this.scopedKeyword);
             writer.WriteValue(this.type);
-        }
-
-        static RefTypeSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(RefTypeSyntax), r => new RefTypeSyntax(r));
         }
     }
 
@@ -2381,11 +2286,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.expression);
             writer.WriteValue(this.closeParenToken);
         }
-
-        static ParenthesizedExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ParenthesizedExpressionSyntax), r => new ParenthesizedExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for tuple expression.</summary>
@@ -2510,11 +2410,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.arguments);
             writer.WriteValue(this.closeParenToken);
         }
-
-        static TupleExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(TupleExpressionSyntax), r => new TupleExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for prefix unary expression.</summary>
@@ -2612,11 +2507,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.operatorToken);
             writer.WriteValue(this.operand);
-        }
-
-        static PrefixUnaryExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(PrefixUnaryExpressionSyntax), r => new PrefixUnaryExpressionSyntax(r));
         }
     }
 
@@ -2716,11 +2606,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.awaitKeyword);
             writer.WriteValue(this.expression);
         }
-
-        static AwaitExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(AwaitExpressionSyntax), r => new AwaitExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for postfix unary expression.</summary>
@@ -2818,11 +2703,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.operand);
             writer.WriteValue(this.operatorToken);
-        }
-
-        static PostfixUnaryExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(PostfixUnaryExpressionSyntax), r => new PostfixUnaryExpressionSyntax(r));
         }
     }
 
@@ -2936,11 +2816,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.operatorToken);
             writer.WriteValue(this.name);
         }
-
-        static MemberAccessExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(MemberAccessExpressionSyntax), r => new MemberAccessExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for conditional access expression.</summary>
@@ -3053,11 +2928,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.operatorToken);
             writer.WriteValue(this.whenNotNull);
         }
-
-        static ConditionalAccessExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ConditionalAccessExpressionSyntax), r => new ConditionalAccessExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for member binding expression.</summary>
@@ -3156,11 +3026,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.operatorToken);
             writer.WriteValue(this.name);
         }
-
-        static MemberBindingExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(MemberBindingExpressionSyntax), r => new MemberBindingExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for element binding expression.</summary>
@@ -3240,11 +3105,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         {
             base.WriteTo(writer);
             writer.WriteValue(this.argumentList);
-        }
-
-        static ElementBindingExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ElementBindingExpressionSyntax), r => new ElementBindingExpressionSyntax(r));
         }
     }
 
@@ -3382,11 +3242,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.operatorToken);
             writer.WriteValue(this.rightOperand);
         }
-
-        static RangeExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(RangeExpressionSyntax), r => new RangeExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for implicit element access expression.</summary>
@@ -3466,11 +3321,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         {
             base.WriteTo(writer);
             writer.WriteValue(this.argumentList);
-        }
-
-        static ImplicitElementAccessSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ImplicitElementAccessSyntax), r => new ImplicitElementAccessSyntax(r));
         }
     }
 
@@ -3584,11 +3434,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.operatorToken);
             writer.WriteValue(this.right);
         }
-
-        static BinaryExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(BinaryExpressionSyntax), r => new BinaryExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents an expression that has an assignment operator.</summary>
@@ -3700,11 +3545,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.left);
             writer.WriteValue(this.operatorToken);
             writer.WriteValue(this.right);
-        }
-
-        static AssignmentExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(AssignmentExpressionSyntax), r => new AssignmentExpressionSyntax(r));
         }
     }
 
@@ -3846,11 +3686,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.colonToken);
             writer.WriteValue(this.whenFalse);
         }
-
-        static ConditionalExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ConditionalExpressionSyntax), r => new ConditionalExpressionSyntax(r));
-        }
     }
 
     /// <summary>Provides the base class from which the classes that represent instance expression syntax nodes are derived. This is an abstract class.</summary>
@@ -3950,11 +3785,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.token);
         }
-
-        static ThisExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ThisExpressionSyntax), r => new ThisExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for a base expression.</summary>
@@ -4035,11 +3865,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.token);
         }
-
-        static BaseExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(BaseExpressionSyntax), r => new BaseExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for a literal expression.</summary>
@@ -4119,11 +3944,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         {
             base.WriteTo(writer);
             writer.WriteValue(this.token);
-        }
-
-        static LiteralExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(LiteralExpressionSyntax), r => new LiteralExpressionSyntax(r));
         }
     }
 
@@ -4251,11 +4071,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.expression);
             writer.WriteValue(this.closeParenToken);
         }
-
-        static MakeRefExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(MakeRefExpressionSyntax), r => new MakeRefExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for RefType expression.</summary>
@@ -4381,11 +4196,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.openParenToken);
             writer.WriteValue(this.expression);
             writer.WriteValue(this.closeParenToken);
-        }
-
-        static RefTypeExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(RefTypeExpressionSyntax), r => new RefTypeExpressionSyntax(r));
         }
     }
 
@@ -4541,11 +4351,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.type);
             writer.WriteValue(this.closeParenToken);
         }
-
-        static RefValueExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(RefValueExpressionSyntax), r => new RefValueExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for Checked or Unchecked expression.</summary>
@@ -4671,11 +4476,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.openParenToken);
             writer.WriteValue(this.expression);
             writer.WriteValue(this.closeParenToken);
-        }
-
-        static CheckedExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(CheckedExpressionSyntax), r => new CheckedExpressionSyntax(r));
         }
     }
 
@@ -4803,11 +4603,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.type);
             writer.WriteValue(this.closeParenToken);
         }
-
-        static DefaultExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(DefaultExpressionSyntax), r => new DefaultExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for TypeOf expression.</summary>
@@ -4933,11 +4728,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.openParenToken);
             writer.WriteValue(this.type);
             writer.WriteValue(this.closeParenToken);
-        }
-
-        static TypeOfExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(TypeOfExpressionSyntax), r => new TypeOfExpressionSyntax(r));
         }
     }
 
@@ -5065,11 +4855,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.type);
             writer.WriteValue(this.closeParenToken);
         }
-
-        static SizeOfExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(SizeOfExpressionSyntax), r => new SizeOfExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for invocation expression.</summary>
@@ -5168,11 +4953,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.expression);
             writer.WriteValue(this.argumentList);
         }
-
-        static InvocationExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(InvocationExpressionSyntax), r => new InvocationExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for element access expression.</summary>
@@ -5270,11 +5050,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.expression);
             writer.WriteValue(this.argumentList);
-        }
-
-        static ElementAccessExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ElementAccessExpressionSyntax), r => new ElementAccessExpressionSyntax(r));
         }
     }
 
@@ -5422,11 +5197,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.arguments);
             writer.WriteValue(this.closeParenToken);
         }
-
-        static ArgumentListSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ArgumentListSyntax), r => new ArgumentListSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for bracketed argument list.</summary>
@@ -5550,11 +5320,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.openBracketToken);
             writer.WriteValue(this.arguments);
             writer.WriteValue(this.closeBracketToken);
-        }
-
-        static BracketedArgumentListSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(BracketedArgumentListSyntax), r => new BracketedArgumentListSyntax(r));
         }
     }
 
@@ -5692,11 +5457,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.refKindKeyword);
             writer.WriteValue(this.expression);
         }
-
-        static ArgumentSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ArgumentSyntax), r => new ArgumentSyntax(r));
-        }
     }
 
     internal abstract partial class BaseExpressionColonSyntax : CSharpSyntaxNode
@@ -5814,11 +5574,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.expression);
             writer.WriteValue(this.colonToken);
         }
-
-        static ExpressionColonSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ExpressionColonSyntax), r => new ExpressionColonSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for name colon syntax.</summary>
@@ -5917,11 +5672,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.name);
             writer.WriteValue(this.colonToken);
         }
-
-        static NameColonSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(NameColonSyntax), r => new NameColonSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for the variable declaration in an out var declaration or a deconstruction declaration.</summary>
@@ -6018,11 +5768,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.type);
             writer.WriteValue(this.designation);
-        }
-
-        static DeclarationExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(DeclarationExpressionSyntax), r => new DeclarationExpressionSyntax(r));
         }
     }
 
@@ -6149,11 +5894,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.type);
             writer.WriteValue(this.closeParenToken);
             writer.WriteValue(this.expression);
-        }
-
-        static CastExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(CastExpressionSyntax), r => new CastExpressionSyntax(r));
         }
     }
 
@@ -6368,11 +6108,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.parameterList);
             writer.WriteValue(this.block);
             writer.WriteValue(this.expressionBody);
-        }
-
-        static AnonymousMethodExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(AnonymousMethodExpressionSyntax), r => new AnonymousMethodExpressionSyntax(r));
         }
     }
 
@@ -6604,11 +6339,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.block);
             writer.WriteValue(this.expressionBody);
         }
-
-        static SimpleLambdaExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(SimpleLambdaExpressionSyntax), r => new SimpleLambdaExpressionSyntax(r));
-        }
     }
 
     internal sealed partial class RefExpressionSyntax : ExpressionSyntax
@@ -6703,11 +6433,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.refKeyword);
             writer.WriteValue(this.expression);
-        }
-
-        static RefExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(RefExpressionSyntax), r => new RefExpressionSyntax(r));
         }
     }
 
@@ -6940,11 +6665,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.block);
             writer.WriteValue(this.expressionBody);
         }
-
-        static ParenthesizedLambdaExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ParenthesizedLambdaExpressionSyntax), r => new ParenthesizedLambdaExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for initializer expression.</summary>
@@ -7068,11 +6788,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.openBraceToken);
             writer.WriteValue(this.expressions);
             writer.WriteValue(this.closeBraceToken);
-        }
-
-        static InitializerExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(InitializerExpressionSyntax), r => new InitializerExpressionSyntax(r));
         }
     }
 
@@ -7225,11 +6940,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.argumentList);
             writer.WriteValue(this.initializer);
         }
-
-        static ImplicitObjectCreationExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ImplicitObjectCreationExpressionSyntax), r => new ImplicitObjectCreationExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for object creation expression.</summary>
@@ -7380,11 +7090,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.argumentList);
             writer.WriteValue(this.initializer);
         }
-
-        static ObjectCreationExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ObjectCreationExpressionSyntax), r => new ObjectCreationExpressionSyntax(r));
-        }
     }
 
     internal sealed partial class WithExpressionSyntax : ExpressionSyntax
@@ -7494,11 +7199,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.withKeyword);
             writer.WriteValue(this.initializer);
         }
-
-        static WithExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(WithExpressionSyntax), r => new WithExpressionSyntax(r));
-        }
     }
 
     internal sealed partial class AnonymousObjectMemberDeclaratorSyntax : CSharpSyntaxNode
@@ -7607,11 +7307,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.nameEquals);
             writer.WriteValue(this.expression);
-        }
-
-        static AnonymousObjectMemberDeclaratorSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(AnonymousObjectMemberDeclaratorSyntax), r => new AnonymousObjectMemberDeclaratorSyntax(r));
         }
     }
 
@@ -7751,11 +7446,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.initializers);
             writer.WriteValue(this.closeBraceToken);
         }
-
-        static AnonymousObjectCreationExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(AnonymousObjectCreationExpressionSyntax), r => new AnonymousObjectCreationExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for array creation expression.</summary>
@@ -7879,11 +7569,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.newKeyword);
             writer.WriteValue(this.type);
             writer.WriteValue(this.initializer);
-        }
-
-        static ArrayCreationExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ArrayCreationExpressionSyntax), r => new ArrayCreationExpressionSyntax(r));
         }
     }
 
@@ -8037,11 +7722,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.closeBracketToken);
             writer.WriteValue(this.initializer);
         }
-
-        static ImplicitArrayCreationExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ImplicitArrayCreationExpressionSyntax), r => new ImplicitArrayCreationExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents the syntax node for stackalloc array creation expression.</summary>
@@ -8165,11 +7845,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.stackAllocKeyword);
             writer.WriteValue(this.type);
             writer.WriteValue(this.initializer);
-        }
-
-        static StackAllocArrayCreationExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(StackAllocArrayCreationExpressionSyntax), r => new StackAllocArrayCreationExpressionSyntax(r));
         }
     }
 
@@ -8296,11 +7971,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.openBracketToken);
             writer.WriteValue(this.closeBracketToken);
             writer.WriteValue(this.initializer);
-        }
-
-        static ImplicitStackAllocArrayCreationExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ImplicitStackAllocArrayCreationExpressionSyntax), r => new ImplicitStackAllocArrayCreationExpressionSyntax(r));
         }
     }
 
@@ -8433,11 +8103,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.fromClause);
             writer.WriteValue(this.body);
         }
-
-        static QueryExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(QueryExpressionSyntax), r => new QueryExpressionSyntax(r));
-        }
     }
 
     internal sealed partial class QueryBodySyntax : CSharpSyntaxNode
@@ -8569,11 +8234,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.clauses);
             writer.WriteValue(this.selectOrGroup);
             writer.WriteValue(this.continuation);
-        }
-
-        static QueryBodySyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(QueryBodySyntax), r => new QueryBodySyntax(r));
         }
     }
 
@@ -8722,11 +8382,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.inKeyword);
             writer.WriteValue(this.expression);
         }
-
-        static FromClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(FromClauseSyntax), r => new FromClauseSyntax(r));
-        }
     }
 
     internal sealed partial class LetClauseSyntax : QueryClauseSyntax
@@ -8848,11 +8503,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.identifier);
             writer.WriteValue(this.equalsToken);
             writer.WriteValue(this.expression);
-        }
-
-        static LetClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(LetClauseSyntax), r => new LetClauseSyntax(r));
         }
     }
 
@@ -9078,11 +8728,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.rightExpression);
             writer.WriteValue(this.into);
         }
-
-        static JoinClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(JoinClauseSyntax), r => new JoinClauseSyntax(r));
-        }
     }
 
     internal sealed partial class JoinIntoClauseSyntax : CSharpSyntaxNode
@@ -9179,11 +8824,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.intoKeyword);
             writer.WriteValue(this.identifier);
         }
-
-        static JoinIntoClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(JoinIntoClauseSyntax), r => new JoinIntoClauseSyntax(r));
-        }
     }
 
     internal sealed partial class WhereClauseSyntax : QueryClauseSyntax
@@ -9278,11 +8918,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.whereKeyword);
             writer.WriteValue(this.condition);
-        }
-
-        static WhereClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(WhereClauseSyntax), r => new WhereClauseSyntax(r));
         }
     }
 
@@ -9391,11 +9026,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.orderByKeyword);
             writer.WriteValue(this.orderings);
         }
-
-        static OrderByClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(OrderByClauseSyntax), r => new OrderByClauseSyntax(r));
-        }
     }
 
     internal sealed partial class OrderingSyntax : CSharpSyntaxNode
@@ -9503,11 +9133,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.expression);
             writer.WriteValue(this.ascendingOrDescendingKeyword);
         }
-
-        static OrderingSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(OrderingSyntax), r => new OrderingSyntax(r));
-        }
     }
 
     internal sealed partial class SelectClauseSyntax : SelectOrGroupClauseSyntax
@@ -9602,11 +9227,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.selectKeyword);
             writer.WriteValue(this.expression);
-        }
-
-        static SelectClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(SelectClauseSyntax), r => new SelectClauseSyntax(r));
         }
     }
 
@@ -9729,11 +9349,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.byKeyword);
             writer.WriteValue(this.byExpression);
         }
-
-        static GroupClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(GroupClauseSyntax), r => new GroupClauseSyntax(r));
-        }
     }
 
     internal sealed partial class QueryContinuationSyntax : CSharpSyntaxNode
@@ -9843,11 +9458,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.identifier);
             writer.WriteValue(this.body);
         }
-
-        static QueryContinuationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(QueryContinuationSyntax), r => new QueryContinuationSyntax(r));
-        }
     }
 
     /// <summary>Class which represents a placeholder in an array size list.</summary>
@@ -9927,11 +9537,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         {
             base.WriteTo(writer);
             writer.WriteValue(this.omittedArraySizeExpressionToken);
-        }
-
-        static OmittedArraySizeExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(OmittedArraySizeExpressionSyntax), r => new OmittedArraySizeExpressionSyntax(r));
         }
     }
 
@@ -10056,11 +9661,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.contents);
             writer.WriteValue(this.stringEndToken);
         }
-
-        static InterpolatedStringExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(InterpolatedStringExpressionSyntax), r => new InterpolatedStringExpressionSyntax(r));
-        }
     }
 
     /// <summary>Class which represents a simple pattern-matching expression using the "is" keyword.</summary>
@@ -10172,11 +9772,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.isKeyword);
             writer.WriteValue(this.pattern);
         }
-
-        static IsPatternExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(IsPatternExpressionSyntax), r => new IsPatternExpressionSyntax(r));
-        }
     }
 
     internal sealed partial class ThrowExpressionSyntax : ExpressionSyntax
@@ -10272,11 +9867,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.throwKeyword);
             writer.WriteValue(this.expression);
         }
-
-        static ThrowExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ThrowExpressionSyntax), r => new ThrowExpressionSyntax(r));
-        }
     }
 
     internal sealed partial class WhenClauseSyntax : CSharpSyntaxNode
@@ -10371,11 +9961,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.whenKeyword);
             writer.WriteValue(this.condition);
-        }
-
-        static WhenClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(WhenClauseSyntax), r => new WhenClauseSyntax(r));
         }
     }
 
@@ -10473,11 +10058,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.underscoreToken);
         }
-
-        static DiscardPatternSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(DiscardPatternSyntax), r => new DiscardPatternSyntax(r));
-        }
     }
 
     internal sealed partial class DeclarationPatternSyntax : PatternSyntax
@@ -10573,11 +10153,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.type);
             writer.WriteValue(this.designation);
         }
-
-        static DeclarationPatternSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(DeclarationPatternSyntax), r => new DeclarationPatternSyntax(r));
-        }
     }
 
     internal sealed partial class VarPatternSyntax : PatternSyntax
@@ -10672,11 +10247,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.varKeyword);
             writer.WriteValue(this.designation);
-        }
-
-        static VarPatternSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(VarPatternSyntax), r => new VarPatternSyntax(r));
         }
     }
 
@@ -10847,11 +10417,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.propertyPatternClause);
             writer.WriteValue(this.designation);
         }
-
-        static RecursivePatternSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(RecursivePatternSyntax), r => new RecursivePatternSyntax(r));
-        }
     }
 
     internal sealed partial class PositionalPatternClauseSyntax : CSharpSyntaxNode
@@ -10971,11 +10536,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.openParenToken);
             writer.WriteValue(this.subpatterns);
             writer.WriteValue(this.closeParenToken);
-        }
-
-        static PositionalPatternClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(PositionalPatternClauseSyntax), r => new PositionalPatternClauseSyntax(r));
         }
     }
 
@@ -11097,11 +10657,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.subpatterns);
             writer.WriteValue(this.closeBraceToken);
         }
-
-        static PropertyPatternClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(PropertyPatternClauseSyntax), r => new PropertyPatternClauseSyntax(r));
-        }
     }
 
     internal sealed partial class SubpatternSyntax : CSharpSyntaxNode
@@ -11209,11 +10764,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.expressionColon);
             writer.WriteValue(this.pattern);
         }
-
-        static SubpatternSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(SubpatternSyntax), r => new SubpatternSyntax(r));
-        }
     }
 
     internal sealed partial class ConstantPatternSyntax : PatternSyntax
@@ -11292,11 +10842,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         {
             base.WriteTo(writer);
             writer.WriteValue(this.expression);
-        }
-
-        static ConstantPatternSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ConstantPatternSyntax), r => new ConstantPatternSyntax(r));
         }
     }
 
@@ -11406,11 +10951,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.pattern);
             writer.WriteValue(this.closeParenToken);
         }
-
-        static ParenthesizedPatternSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ParenthesizedPatternSyntax), r => new ParenthesizedPatternSyntax(r));
-        }
     }
 
     internal sealed partial class RelationalPatternSyntax : PatternSyntax
@@ -11507,11 +11047,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.operatorToken);
             writer.WriteValue(this.expression);
         }
-
-        static RelationalPatternSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(RelationalPatternSyntax), r => new RelationalPatternSyntax(r));
-        }
     }
 
     internal sealed partial class TypePatternSyntax : PatternSyntax
@@ -11590,11 +11125,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         {
             base.WriteTo(writer);
             writer.WriteValue(this.type);
-        }
-
-        static TypePatternSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(TypePatternSyntax), r => new TypePatternSyntax(r));
         }
     }
 
@@ -11704,11 +11234,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.operatorToken);
             writer.WriteValue(this.right);
         }
-
-        static BinaryPatternSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(BinaryPatternSyntax), r => new BinaryPatternSyntax(r));
-        }
     }
 
     internal sealed partial class UnaryPatternSyntax : PatternSyntax
@@ -11803,11 +11328,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.operatorToken);
             writer.WriteValue(this.pattern);
-        }
-
-        static UnaryPatternSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(UnaryPatternSyntax), r => new UnaryPatternSyntax(r));
         }
     }
 
@@ -11954,11 +11474,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.closeBracketToken);
             writer.WriteValue(this.designation);
         }
-
-        static ListPatternSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ListPatternSyntax), r => new ListPatternSyntax(r));
-        }
     }
 
     internal sealed partial class SlicePatternSyntax : PatternSyntax
@@ -12066,11 +11581,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.dotDotToken);
             writer.WriteValue(this.pattern);
         }
-
-        static SlicePatternSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(SlicePatternSyntax), r => new SlicePatternSyntax(r));
-        }
     }
 
     internal abstract partial class InterpolatedStringContentSyntax : CSharpSyntaxNode
@@ -12167,11 +11677,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         {
             base.WriteTo(writer);
             writer.WriteValue(this.textToken);
-        }
-
-        static InterpolatedStringTextSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(InterpolatedStringTextSyntax), r => new InterpolatedStringTextSyntax(r));
         }
     }
 
@@ -12335,11 +11840,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.formatClause);
             writer.WriteValue(this.closeBraceToken);
         }
-
-        static InterpolationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(InterpolationSyntax), r => new InterpolationSyntax(r));
-        }
     }
 
     internal sealed partial class InterpolationAlignmentClauseSyntax : CSharpSyntaxNode
@@ -12434,11 +11934,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.commaToken);
             writer.WriteValue(this.value);
-        }
-
-        static InterpolationAlignmentClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(InterpolationAlignmentClauseSyntax), r => new InterpolationAlignmentClauseSyntax(r));
         }
     }
 
@@ -12535,11 +12030,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.colonToken);
             writer.WriteValue(this.formatStringToken);
-        }
-
-        static InterpolationFormatClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(InterpolationFormatClauseSyntax), r => new InterpolationFormatClauseSyntax(r));
         }
     }
 
@@ -12672,11 +12162,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.attributeLists);
             writer.WriteValue(this.modifiers);
             writer.WriteValue(this.statement);
-        }
-
-        static GlobalStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(GlobalStatementSyntax), r => new GlobalStatementSyntax(r));
         }
     }
 
@@ -12843,11 +12328,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.openBraceToken);
             writer.WriteValue(this.statements);
             writer.WriteValue(this.closeBraceToken);
-        }
-
-        static BlockSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(BlockSyntax), r => new BlockSyntax(r));
         }
     }
 
@@ -13134,11 +12614,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.expressionBody);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static LocalFunctionStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(LocalFunctionStatementSyntax), r => new LocalFunctionStatementSyntax(r));
-        }
     }
 
     internal sealed partial class LocalDeclarationStatementSyntax : StatementSyntax
@@ -13335,11 +12810,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.declaration);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static LocalDeclarationStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(LocalDeclarationStatementSyntax), r => new LocalDeclarationStatementSyntax(r));
-        }
     }
 
     internal sealed partial class VariableDeclarationSyntax : CSharpSyntaxNode
@@ -13446,11 +12916,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.type);
             writer.WriteValue(this.variables);
-        }
-
-        static VariableDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(VariableDeclarationSyntax), r => new VariableDeclarationSyntax(r));
         }
     }
 
@@ -13585,11 +13050,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.argumentList);
             writer.WriteValue(this.initializer);
         }
-
-        static VariableDeclaratorSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(VariableDeclaratorSyntax), r => new VariableDeclaratorSyntax(r));
-        }
     }
 
     internal sealed partial class EqualsValueClauseSyntax : CSharpSyntaxNode
@@ -13684,11 +13144,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.equalsToken);
             writer.WriteValue(this.value);
-        }
-
-        static EqualsValueClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(EqualsValueClauseSyntax), r => new EqualsValueClauseSyntax(r));
         }
     }
 
@@ -13786,11 +13241,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.identifier);
         }
-
-        static SingleVariableDesignationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(SingleVariableDesignationSyntax), r => new SingleVariableDesignationSyntax(r));
-        }
     }
 
     internal sealed partial class DiscardDesignationSyntax : VariableDesignationSyntax
@@ -13868,11 +13318,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         {
             base.WriteTo(writer);
             writer.WriteValue(this.underscoreToken);
-        }
-
-        static DiscardDesignationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(DiscardDesignationSyntax), r => new DiscardDesignationSyntax(r));
         }
     }
 
@@ -13994,11 +13439,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.variables);
             writer.WriteValue(this.closeParenToken);
         }
-
-        static ParenthesizedVariableDesignationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ParenthesizedVariableDesignationSyntax), r => new ParenthesizedVariableDesignationSyntax(r));
-        }
     }
 
     internal sealed partial class ExpressionStatementSyntax : StatementSyntax
@@ -14119,11 +13559,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.expression);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static ExpressionStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ExpressionStatementSyntax), r => new ExpressionStatementSyntax(r));
-        }
     }
 
     internal sealed partial class EmptyStatementSyntax : StatementSyntax
@@ -14230,11 +13665,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.attributeLists);
             writer.WriteValue(this.semicolonToken);
-        }
-
-        static EmptyStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(EmptyStatementSyntax), r => new EmptyStatementSyntax(r));
         }
     }
 
@@ -14371,11 +13801,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.identifier);
             writer.WriteValue(this.colonToken);
             writer.WriteValue(this.statement);
-        }
-
-        static LabeledStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(LabeledStatementSyntax), r => new LabeledStatementSyntax(r));
         }
     }
 
@@ -14562,11 +13987,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.expression);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static GotoStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(GotoStatementSyntax), r => new GotoStatementSyntax(r));
-        }
     }
 
     internal sealed partial class BreakStatementSyntax : StatementSyntax
@@ -14687,11 +14107,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.breakKeyword);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static BreakStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(BreakStatementSyntax), r => new BreakStatementSyntax(r));
-        }
     }
 
     internal sealed partial class ContinueStatementSyntax : StatementSyntax
@@ -14811,11 +14226,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.attributeLists);
             writer.WriteValue(this.continueKeyword);
             writer.WriteValue(this.semicolonToken);
-        }
-
-        static ContinueStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ContinueStatementSyntax), r => new ContinueStatementSyntax(r));
         }
     }
 
@@ -14962,11 +14372,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.expression);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static ReturnStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ReturnStatementSyntax), r => new ReturnStatementSyntax(r));
-        }
     }
 
     internal sealed partial class ThrowStatementSyntax : StatementSyntax
@@ -15111,11 +14516,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.throwKeyword);
             writer.WriteValue(this.expression);
             writer.WriteValue(this.semicolonToken);
-        }
-
-        static ThrowStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ThrowStatementSyntax), r => new ThrowStatementSyntax(r));
         }
     }
 
@@ -15275,11 +14675,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.expression);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static YieldStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(YieldStatementSyntax), r => new YieldStatementSyntax(r));
-        }
     }
 
     internal sealed partial class WhileStatementSyntax : StatementSyntax
@@ -15438,11 +14833,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.condition);
             writer.WriteValue(this.closeParenToken);
             writer.WriteValue(this.statement);
-        }
-
-        static WhileStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(WhileStatementSyntax), r => new WhileStatementSyntax(r));
         }
     }
 
@@ -15628,11 +15018,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.condition);
             writer.WriteValue(this.closeParenToken);
             writer.WriteValue(this.semicolonToken);
-        }
-
-        static DoStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(DoStatementSyntax), r => new DoStatementSyntax(r));
         }
     }
 
@@ -15906,11 +15291,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.closeParenToken);
             writer.WriteValue(this.statement);
         }
-
-        static ForStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ForStatementSyntax), r => new ForStatementSyntax(r));
-        }
     }
 
     internal abstract partial class CommonForEachStatementSyntax : StatementSyntax
@@ -16167,11 +15547,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.closeParenToken);
             writer.WriteValue(this.statement);
         }
-
-        static ForEachStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ForEachStatementSyntax), r => new ForEachStatementSyntax(r));
-        }
     }
 
     internal sealed partial class ForEachVariableStatementSyntax : CommonForEachStatementSyntax
@@ -16387,11 +15762,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.expression);
             writer.WriteValue(this.closeParenToken);
             writer.WriteValue(this.statement);
-        }
-
-        static ForEachVariableStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ForEachVariableStatementSyntax), r => new ForEachVariableStatementSyntax(r));
         }
     }
 
@@ -16614,11 +15984,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.closeParenToken);
             writer.WriteValue(this.statement);
         }
-
-        static UsingStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(UsingStatementSyntax), r => new UsingStatementSyntax(r));
-        }
     }
 
     internal sealed partial class FixedStatementSyntax : StatementSyntax
@@ -16778,11 +16143,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.closeParenToken);
             writer.WriteValue(this.statement);
         }
-
-        static FixedStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(FixedStatementSyntax), r => new FixedStatementSyntax(r));
-        }
     }
 
     internal sealed partial class CheckedStatementSyntax : StatementSyntax
@@ -16903,11 +16263,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.keyword);
             writer.WriteValue(this.block);
         }
-
-        static CheckedStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(CheckedStatementSyntax), r => new CheckedStatementSyntax(r));
-        }
     }
 
     internal sealed partial class UnsafeStatementSyntax : StatementSyntax
@@ -17027,11 +16382,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.attributeLists);
             writer.WriteValue(this.unsafeKeyword);
             writer.WriteValue(this.block);
-        }
-
-        static UnsafeStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(UnsafeStatementSyntax), r => new UnsafeStatementSyntax(r));
         }
     }
 
@@ -17191,11 +16541,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.expression);
             writer.WriteValue(this.closeParenToken);
             writer.WriteValue(this.statement);
-        }
-
-        static LockStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(LockStatementSyntax), r => new LockStatementSyntax(r));
         }
     }
 
@@ -17402,11 +16747,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.statement);
             writer.WriteValue(this.@else);
         }
-
-        static IfStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(IfStatementSyntax), r => new IfStatementSyntax(r));
-        }
     }
 
     /// <summary>Represents an else statement syntax.</summary>
@@ -17505,11 +16845,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.elseKeyword);
             writer.WriteValue(this.statement);
-        }
-
-        static ElseClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ElseClauseSyntax), r => new ElseClauseSyntax(r));
         }
     }
 
@@ -17754,11 +17089,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.sections);
             writer.WriteValue(this.closeBraceToken);
         }
-
-        static SwitchStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(SwitchStatementSyntax), r => new SwitchStatementSyntax(r));
-        }
     }
 
     /// <summary>Represents a switch section syntax of a switch statement.</summary>
@@ -17884,11 +17214,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.labels);
             writer.WriteValue(this.statements);
-        }
-
-        static SwitchSectionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(SwitchSectionSyntax), r => new SwitchSectionSyntax(r));
         }
     }
 
@@ -18057,11 +17382,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.whenClause);
             writer.WriteValue(this.colonToken);
         }
-
-        static CasePatternSwitchLabelSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(CasePatternSwitchLabelSyntax), r => new CasePatternSwitchLabelSyntax(r));
-        }
     }
 
     /// <summary>Represents a case label within a switch statement.</summary>
@@ -18175,11 +17495,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.value);
             writer.WriteValue(this.colonToken);
         }
-
-        static CaseSwitchLabelSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(CaseSwitchLabelSyntax), r => new CaseSwitchLabelSyntax(r));
-        }
     }
 
     /// <summary>Represents a default label within a switch statement.</summary>
@@ -18276,11 +17591,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.keyword);
             writer.WriteValue(this.colonToken);
-        }
-
-        static DefaultSwitchLabelSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(DefaultSwitchLabelSyntax), r => new DefaultSwitchLabelSyntax(r));
         }
     }
 
@@ -18428,11 +17738,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.arms);
             writer.WriteValue(this.closeBraceToken);
         }
-
-        static SwitchExpressionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(SwitchExpressionSyntax), r => new SwitchExpressionSyntax(r));
-        }
     }
 
     internal sealed partial class SwitchExpressionArmSyntax : CSharpSyntaxNode
@@ -18565,11 +17870,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.whenClause);
             writer.WriteValue(this.equalsGreaterThanToken);
             writer.WriteValue(this.expression);
-        }
-
-        static SwitchExpressionArmSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(SwitchExpressionArmSyntax), r => new SwitchExpressionArmSyntax(r));
         }
     }
 
@@ -18741,11 +18041,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.catches);
             writer.WriteValue(this.@finally);
         }
-
-        static TryStatementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(TryStatementSyntax), r => new TryStatementSyntax(r));
-        }
     }
 
     internal sealed partial class CatchClauseSyntax : CSharpSyntaxNode
@@ -18891,11 +18186,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.filter);
             writer.WriteValue(this.block);
         }
-
-        static CatchClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(CatchClauseSyntax), r => new CatchClauseSyntax(r));
-        }
     }
 
     internal sealed partial class CatchDeclarationSyntax : CSharpSyntaxNode
@@ -19029,11 +18319,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.identifier);
             writer.WriteValue(this.closeParenToken);
         }
-
-        static CatchDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(CatchDeclarationSyntax), r => new CatchDeclarationSyntax(r));
-        }
     }
 
     internal sealed partial class CatchFilterClauseSyntax : CSharpSyntaxNode
@@ -19155,11 +18440,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.filterExpression);
             writer.WriteValue(this.closeParenToken);
         }
-
-        static CatchFilterClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(CatchFilterClauseSyntax), r => new CatchFilterClauseSyntax(r));
-        }
     }
 
     internal sealed partial class FinallyClauseSyntax : CSharpSyntaxNode
@@ -19254,11 +18534,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.finallyKeyword);
             writer.WriteValue(this.block);
-        }
-
-        static FinallyClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(FinallyClauseSyntax), r => new FinallyClauseSyntax(r));
         }
     }
 
@@ -19443,11 +18718,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.members);
             writer.WriteValue(this.endOfFileToken);
         }
-
-        static CompilationUnitSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(CompilationUnitSyntax), r => new CompilationUnitSyntax(r));
-        }
     }
 
     /// <summary>
@@ -19575,11 +18845,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.aliasKeyword);
             writer.WriteValue(this.identifier);
             writer.WriteValue(this.semicolonToken);
-        }
-
-        static ExternAliasDirectiveSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ExternAliasDirectiveSyntax), r => new ExternAliasDirectiveSyntax(r));
         }
     }
 
@@ -19763,11 +19028,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.alias);
             writer.WriteValue(this.name);
             writer.WriteValue(this.semicolonToken);
-        }
-
-        static UsingDirectiveSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(UsingDirectiveSyntax), r => new UsingDirectiveSyntax(r));
         }
     }
 
@@ -20094,11 +19354,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.closeBraceToken);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static NamespaceDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(NamespaceDeclarationSyntax), r => new NamespaceDeclarationSyntax(r));
-        }
     }
 
     internal sealed partial class FileScopedNamespaceDeclarationSyntax : BaseNamespaceDeclarationSyntax
@@ -20332,11 +19587,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.usings);
             writer.WriteValue(this.members);
         }
-
-        static FileScopedNamespaceDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(FileScopedNamespaceDeclarationSyntax), r => new FileScopedNamespaceDeclarationSyntax(r));
-        }
     }
 
     /// <summary>Class representing one or more attributes applied to a language construct.</summary>
@@ -20487,11 +19737,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.attributes);
             writer.WriteValue(this.closeBracketToken);
         }
-
-        static AttributeListSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(AttributeListSyntax), r => new AttributeListSyntax(r));
-        }
     }
 
     /// <summary>Class representing what language construct an attribute targets.</summary>
@@ -20589,11 +19834,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.identifier);
             writer.WriteValue(this.colonToken);
-        }
-
-        static AttributeTargetSpecifierSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(AttributeTargetSpecifierSyntax), r => new AttributeTargetSpecifierSyntax(r));
         }
     }
 
@@ -20703,11 +19943,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.name);
             writer.WriteValue(this.argumentList);
-        }
-
-        static AttributeSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(AttributeSyntax), r => new AttributeSyntax(r));
         }
     }
 
@@ -20832,11 +20067,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.openParenToken);
             writer.WriteValue(this.arguments);
             writer.WriteValue(this.closeParenToken);
-        }
-
-        static AttributeArgumentListSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(AttributeArgumentListSyntax), r => new AttributeArgumentListSyntax(r));
         }
     }
 
@@ -20972,11 +20202,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.nameColon);
             writer.WriteValue(this.expression);
         }
-
-        static AttributeArgumentSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(AttributeArgumentSyntax), r => new AttributeArgumentSyntax(r));
-        }
     }
 
     /// <summary>Class representing an identifier name followed by an equals token.</summary>
@@ -21073,11 +20298,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.name);
             writer.WriteValue(this.equalsToken);
-        }
-
-        static NameEqualsSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(NameEqualsSyntax), r => new NameEqualsSyntax(r));
         }
     }
 
@@ -21202,11 +20422,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.lessThanToken);
             writer.WriteValue(this.parameters);
             writer.WriteValue(this.greaterThanToken);
-        }
-
-        static TypeParameterListSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(TypeParameterListSyntax), r => new TypeParameterListSyntax(r));
         }
     }
 
@@ -21342,11 +20557,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.attributeLists);
             writer.WriteValue(this.varianceKeyword);
             writer.WriteValue(this.identifier);
-        }
-
-        static TypeParameterSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(TypeParameterSyntax), r => new TypeParameterSyntax(r));
         }
     }
 
@@ -21710,11 +20920,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.closeBraceToken);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static ClassDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ClassDeclarationSyntax), r => new ClassDeclarationSyntax(r));
-        }
     }
 
     /// <summary>Struct type declaration syntax.</summary>
@@ -22013,11 +21218,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.closeBraceToken);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static StructDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(StructDeclarationSyntax), r => new StructDeclarationSyntax(r));
-        }
     }
 
     /// <summary>Interface type declaration syntax.</summary>
@@ -22315,11 +21515,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.members);
             writer.WriteValue(this.closeBraceToken);
             writer.WriteValue(this.semicolonToken);
-        }
-
-        static InterfaceDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(InterfaceDeclarationSyntax), r => new InterfaceDeclarationSyntax(r));
         }
     }
 
@@ -22691,11 +21886,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.closeBraceToken);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static RecordDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(RecordDeclarationSyntax), r => new RecordDeclarationSyntax(r));
-        }
     }
 
     /// <summary>Enum type declaration syntax.</summary>
@@ -22946,11 +22136,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.closeBraceToken);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static EnumDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(EnumDeclarationSyntax), r => new EnumDeclarationSyntax(r));
-        }
     }
 
     /// <summary>Delegate declaration syntax.</summary>
@@ -23192,11 +22377,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.constraintClauses);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static DelegateDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(DelegateDeclarationSyntax), r => new DelegateDeclarationSyntax(r));
-        }
     }
 
     internal sealed partial class EnumMemberDeclarationSyntax : MemberDeclarationSyntax
@@ -23355,11 +22535,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.identifier);
             writer.WriteValue(this.equalsValue);
         }
-
-        static EnumMemberDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(EnumMemberDeclarationSyntax), r => new EnumMemberDeclarationSyntax(r));
-        }
     }
 
     /// <summary>Base list syntax.</summary>
@@ -23470,11 +22645,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.colonToken);
             writer.WriteValue(this.types);
         }
-
-        static BaseListSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(BaseListSyntax), r => new BaseListSyntax(r));
-        }
     }
 
     /// <summary>Provides the base class from which the classes that represent base type syntax nodes are derived. This is an abstract class.</summary>
@@ -23574,11 +22744,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.type);
         }
-
-        static SimpleBaseTypeSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(SimpleBaseTypeSyntax), r => new SimpleBaseTypeSyntax(r));
-        }
     }
 
     internal sealed partial class PrimaryConstructorBaseTypeSyntax : BaseTypeSyntax
@@ -23673,11 +22838,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.type);
             writer.WriteValue(this.argumentList);
-        }
-
-        static PrimaryConstructorBaseTypeSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(PrimaryConstructorBaseTypeSyntax), r => new PrimaryConstructorBaseTypeSyntax(r));
         }
     }
 
@@ -23816,11 +22976,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.colonToken);
             writer.WriteValue(this.constraints);
         }
-
-        static TypeParameterConstraintClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(TypeParameterConstraintClauseSyntax), r => new TypeParameterConstraintClauseSyntax(r));
-        }
     }
 
     /// <summary>Base type for type parameter constraint syntax.</summary>
@@ -23952,11 +23107,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.openParenToken);
             writer.WriteValue(this.closeParenToken);
         }
-
-        static ConstructorConstraintSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ConstructorConstraintSyntax), r => new ConstructorConstraintSyntax(r));
-        }
     }
 
     /// <summary>Class or struct constraint syntax.</summary>
@@ -24067,11 +23217,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.classOrStructKeyword);
             writer.WriteValue(this.questionToken);
         }
-
-        static ClassOrStructConstraintSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ClassOrStructConstraintSyntax), r => new ClassOrStructConstraintSyntax(r));
-        }
     }
 
     /// <summary>Type constraint syntax.</summary>
@@ -24152,11 +23297,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.type);
         }
-
-        static TypeConstraintSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(TypeConstraintSyntax), r => new TypeConstraintSyntax(r));
-        }
     }
 
     /// <summary>Default constraint syntax.</summary>
@@ -24236,11 +23376,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         {
             base.WriteTo(writer);
             writer.WriteValue(this.defaultKeyword);
-        }
-
-        static DefaultConstraintSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(DefaultConstraintSyntax), r => new DefaultConstraintSyntax(r));
         }
     }
 
@@ -24409,11 +23544,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.declaration);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static FieldDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(FieldDeclarationSyntax), r => new FieldDeclarationSyntax(r));
-        }
     }
 
     internal sealed partial class EventFieldDeclarationSyntax : BaseFieldDeclarationSyntax
@@ -24572,11 +23702,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.declaration);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static EventFieldDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(EventFieldDeclarationSyntax), r => new EventFieldDeclarationSyntax(r));
-        }
     }
 
     internal sealed partial class ExplicitInterfaceSpecifierSyntax : CSharpSyntaxNode
@@ -24671,11 +23796,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.name);
             writer.WriteValue(this.dotToken);
-        }
-
-        static ExplicitInterfaceSpecifierSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ExplicitInterfaceSpecifierSyntax), r => new ExplicitInterfaceSpecifierSyntax(r));
         }
     }
 
@@ -25019,11 +24139,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.expressionBody);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static MethodDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(MethodDeclarationSyntax), r => new MethodDeclarationSyntax(r));
-        }
     }
 
     /// <summary>Operator declaration syntax.</summary>
@@ -25325,11 +24440,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.body);
             writer.WriteValue(this.expressionBody);
             writer.WriteValue(this.semicolonToken);
-        }
-
-        static OperatorDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(OperatorDeclarationSyntax), r => new OperatorDeclarationSyntax(r));
         }
     }
 
@@ -25633,11 +24743,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.expressionBody);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static ConversionOperatorDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ConversionOperatorDeclarationSyntax), r => new ConversionOperatorDeclarationSyntax(r));
-        }
     }
 
     /// <summary>Constructor declaration syntax.</summary>
@@ -25886,11 +24991,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.expressionBody);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static ConstructorDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ConstructorDeclarationSyntax), r => new ConstructorDeclarationSyntax(r));
-        }
     }
 
     /// <summary>Constructor initializer syntax.</summary>
@@ -26001,11 +25101,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.colonToken);
             writer.WriteValue(this.thisOrBaseKeyword);
             writer.WriteValue(this.argumentList);
-        }
-
-        static ConstructorInitializerSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ConstructorInitializerSyntax), r => new ConstructorInitializerSyntax(r));
         }
     }
 
@@ -26243,11 +25338,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.body);
             writer.WriteValue(this.expressionBody);
             writer.WriteValue(this.semicolonToken);
-        }
-
-        static DestructorDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(DestructorDeclarationSyntax), r => new DestructorDeclarationSyntax(r));
         }
     }
 
@@ -26547,11 +25637,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.initializer);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static PropertyDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(PropertyDeclarationSyntax), r => new PropertyDeclarationSyntax(r));
-        }
     }
 
     /// <summary>The syntax for the expression body of an expression-bodied member.</summary>
@@ -26647,11 +25732,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.arrowToken);
             writer.WriteValue(this.expression);
-        }
-
-        static ArrowExpressionClauseSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ArrowExpressionClauseSyntax), r => new ArrowExpressionClauseSyntax(r));
         }
     }
 
@@ -26886,11 +25966,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.identifier);
             writer.WriteValue(this.accessorList);
             writer.WriteValue(this.semicolonToken);
-        }
-
-        static EventDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(EventDeclarationSyntax), r => new EventDeclarationSyntax(r));
         }
     }
 
@@ -27151,11 +26226,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.expressionBody);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static IndexerDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(IndexerDeclarationSyntax), r => new IndexerDeclarationSyntax(r));
-        }
     }
 
     internal sealed partial class AccessorListSyntax : CSharpSyntaxNode
@@ -27275,11 +26345,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.openBraceToken);
             writer.WriteValue(this.accessors);
             writer.WriteValue(this.closeBraceToken);
-        }
-
-        static AccessorListSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(AccessorListSyntax), r => new AccessorListSyntax(r));
         }
     }
 
@@ -27494,11 +26559,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.expressionBody);
             writer.WriteValue(this.semicolonToken);
         }
-
-        static AccessorDeclarationSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(AccessorDeclarationSyntax), r => new AccessorDeclarationSyntax(r));
-        }
     }
 
     /// <summary>Base type for parameter list syntax.</summary>
@@ -27644,11 +26704,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.parameters);
             writer.WriteValue(this.closeParenToken);
         }
-
-        static ParameterListSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ParameterListSyntax), r => new ParameterListSyntax(r));
-        }
     }
 
     /// <summary>Parameter list syntax with surrounding brackets.</summary>
@@ -27771,11 +26826,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.openBracketToken);
             writer.WriteValue(this.parameters);
             writer.WriteValue(this.closeBracketToken);
-        }
-
-        static BracketedParameterListSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(BracketedParameterListSyntax), r => new BracketedParameterListSyntax(r));
         }
     }
 
@@ -27990,11 +27040,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.identifier);
             writer.WriteValue(this.@default);
         }
-
-        static ParameterSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ParameterSyntax), r => new ParameterSyntax(r));
-        }
     }
 
     /// <summary>Parameter syntax.</summary>
@@ -28129,11 +27174,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.attributeLists);
             writer.WriteValue(this.modifiers);
             writer.WriteValue(this.type);
-        }
-
-        static FunctionPointerParameterSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(FunctionPointerParameterSyntax), r => new FunctionPointerParameterSyntax(r));
         }
     }
 
@@ -28279,11 +27319,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.modifiers);
             writer.WriteValue(this.type);
         }
-
-        static IncompleteMemberSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(IncompleteMemberSyntax), r => new IncompleteMemberSyntax(r));
-        }
     }
 
     internal sealed partial class SkippedTokensTriviaSyntax : StructuredTriviaSyntax
@@ -28373,11 +27408,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         {
             base.WriteTo(writer);
             writer.WriteValue(this.tokens);
-        }
-
-        static SkippedTokensTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(SkippedTokensTriviaSyntax), r => new SkippedTokensTriviaSyntax(r));
         }
     }
 
@@ -28486,11 +27516,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.content);
             writer.WriteValue(this.endOfComment);
         }
-
-        static DocumentationCommentTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(DocumentationCommentTriviaSyntax), r => new DocumentationCommentTriviaSyntax(r));
-        }
     }
 
     /// <summary>
@@ -28597,11 +27622,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         {
             base.WriteTo(writer);
             writer.WriteValue(this.type);
-        }
-
-        static TypeCrefSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(TypeCrefSyntax), r => new TypeCrefSyntax(r));
         }
     }
 
@@ -28717,11 +27737,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.container);
             writer.WriteValue(this.dotToken);
             writer.WriteValue(this.member);
-        }
-
-        static QualifiedCrefSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(QualifiedCrefSyntax), r => new QualifiedCrefSyntax(r));
         }
     }
 
@@ -28861,11 +27876,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.name);
             writer.WriteValue(this.parameters);
         }
-
-        static NameMemberCrefSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(NameMemberCrefSyntax), r => new NameMemberCrefSyntax(r));
-        }
     }
 
     /// <summary>
@@ -28976,11 +27986,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.thisKeyword);
             writer.WriteValue(this.parameters);
-        }
-
-        static IndexerMemberCrefSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(IndexerMemberCrefSyntax), r => new IndexerMemberCrefSyntax(r));
         }
     }
 
@@ -29132,11 +28137,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.checkedKeyword);
             writer.WriteValue(this.operatorToken);
             writer.WriteValue(this.parameters);
-        }
-
-        static OperatorMemberCrefSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(OperatorMemberCrefSyntax), r => new OperatorMemberCrefSyntax(r));
         }
     }
 
@@ -29300,11 +28300,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.type);
             writer.WriteValue(this.parameters);
         }
-
-        static ConversionOperatorMemberCrefSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ConversionOperatorMemberCrefSyntax), r => new ConversionOperatorMemberCrefSyntax(r));
-        }
     }
 
     /// <summary>
@@ -29455,11 +28450,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.parameters);
             writer.WriteValue(this.closeParenToken);
         }
-
-        static CrefParameterListSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(CrefParameterListSyntax), r => new CrefParameterListSyntax(r));
-        }
     }
 
     /// <summary>
@@ -29585,11 +28575,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.parameters);
             writer.WriteValue(this.closeBracketToken);
         }
-
-        static CrefBracketedParameterListSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(CrefBracketedParameterListSyntax), r => new CrefBracketedParameterListSyntax(r));
-        }
     }
 
     /// <summary>
@@ -29701,11 +28686,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.refKindKeyword);
             writer.WriteValue(this.type);
-        }
-
-        static CrefParameterSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(CrefParameterSyntax), r => new CrefParameterSyntax(r));
         }
     }
 
@@ -29845,11 +28825,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.content);
             writer.WriteValue(this.endTag);
         }
-
-        static XmlElementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(XmlElementSyntax), r => new XmlElementSyntax(r));
-        }
     }
 
     internal sealed partial class XmlElementStartTagSyntax : CSharpSyntaxNode
@@ -29983,11 +28958,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.attributes);
             writer.WriteValue(this.greaterThanToken);
         }
-
-        static XmlElementStartTagSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(XmlElementStartTagSyntax), r => new XmlElementStartTagSyntax(r));
-        }
     }
 
     internal sealed partial class XmlElementEndTagSyntax : CSharpSyntaxNode
@@ -30095,11 +29065,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.lessThanSlashToken);
             writer.WriteValue(this.name);
             writer.WriteValue(this.greaterThanToken);
-        }
-
-        static XmlElementEndTagSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(XmlElementEndTagSyntax), r => new XmlElementEndTagSyntax(r));
         }
     }
 
@@ -30234,11 +29199,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.attributes);
             writer.WriteValue(this.slashGreaterThanToken);
         }
-
-        static XmlEmptyElementSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(XmlEmptyElementSyntax), r => new XmlEmptyElementSyntax(r));
-        }
     }
 
     internal sealed partial class XmlNameSyntax : CSharpSyntaxNode
@@ -30346,11 +29306,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.prefix);
             writer.WriteValue(this.localName);
         }
-
-        static XmlNameSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(XmlNameSyntax), r => new XmlNameSyntax(r));
-        }
     }
 
     internal sealed partial class XmlPrefixSyntax : CSharpSyntaxNode
@@ -30445,11 +29400,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             base.WriteTo(writer);
             writer.WriteValue(this.prefix);
             writer.WriteValue(this.colonToken);
-        }
-
-        static XmlPrefixSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(XmlPrefixSyntax), r => new XmlPrefixSyntax(r));
         }
     }
 
@@ -30623,11 +29573,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.textTokens);
             writer.WriteValue(this.endQuoteToken);
         }
-
-        static XmlTextAttributeSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(XmlTextAttributeSyntax), r => new XmlTextAttributeSyntax(r));
-        }
     }
 
     internal sealed partial class XmlCrefAttributeSyntax : XmlAttributeSyntax
@@ -30761,11 +29706,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.startQuoteToken);
             writer.WriteValue(this.cref);
             writer.WriteValue(this.endQuoteToken);
-        }
-
-        static XmlCrefAttributeSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(XmlCrefAttributeSyntax), r => new XmlCrefAttributeSyntax(r));
         }
     }
 
@@ -30901,11 +29841,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.identifier);
             writer.WriteValue(this.endQuoteToken);
         }
-
-        static XmlNameAttributeSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(XmlNameAttributeSyntax), r => new XmlNameAttributeSyntax(r));
-        }
     }
 
     internal sealed partial class XmlTextSyntax : XmlNodeSyntax
@@ -30995,11 +29930,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         {
             base.WriteTo(writer);
             writer.WriteValue(this.textTokens);
-        }
-
-        static XmlTextSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(XmlTextSyntax), r => new XmlTextSyntax(r));
         }
     }
 
@@ -31120,11 +30050,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.startCDataToken);
             writer.WriteValue(this.textTokens);
             writer.WriteValue(this.endCDataToken);
-        }
-
-        static XmlCDataSectionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(XmlCDataSectionSyntax), r => new XmlCDataSectionSyntax(r));
         }
     }
 
@@ -31259,11 +30184,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.textTokens);
             writer.WriteValue(this.endProcessingInstructionToken);
         }
-
-        static XmlProcessingInstructionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(XmlProcessingInstructionSyntax), r => new XmlProcessingInstructionSyntax(r));
-        }
     }
 
     internal sealed partial class XmlCommentSyntax : XmlNodeSyntax
@@ -31383,11 +30303,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.lessThanExclamationMinusMinusToken);
             writer.WriteValue(this.textTokens);
             writer.WriteValue(this.minusMinusGreaterThanToken);
-        }
-
-        static XmlCommentSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(XmlCommentSyntax), r => new XmlCommentSyntax(r));
         }
     }
 
@@ -31600,11 +30515,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteBoolean(this.branchTaken);
             writer.WriteBoolean(this.conditionValue);
         }
-
-        static IfDirectiveTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(IfDirectiveTriviaSyntax), r => new IfDirectiveTriviaSyntax(r));
-        }
     }
 
     internal sealed partial class ElifDirectiveTriviaSyntax : ConditionalDirectiveTriviaSyntax
@@ -31747,11 +30657,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteBoolean(this.branchTaken);
             writer.WriteBoolean(this.conditionValue);
         }
-
-        static ElifDirectiveTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ElifDirectiveTriviaSyntax), r => new ElifDirectiveTriviaSyntax(r));
-        }
     }
 
     internal sealed partial class ElseDirectiveTriviaSyntax : BranchingDirectiveTriviaSyntax
@@ -31874,11 +30779,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteBoolean(this.isActive);
             writer.WriteBoolean(this.branchTaken);
         }
-
-        static ElseDirectiveTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ElseDirectiveTriviaSyntax), r => new ElseDirectiveTriviaSyntax(r));
-        }
     }
 
     internal sealed partial class EndIfDirectiveTriviaSyntax : DirectiveTriviaSyntax
@@ -31993,11 +30893,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.endIfKeyword);
             writer.WriteValue(this.endOfDirectiveToken);
             writer.WriteBoolean(this.isActive);
-        }
-
-        static EndIfDirectiveTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(EndIfDirectiveTriviaSyntax), r => new EndIfDirectiveTriviaSyntax(r));
         }
     }
 
@@ -32114,11 +31009,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.endOfDirectiveToken);
             writer.WriteBoolean(this.isActive);
         }
-
-        static RegionDirectiveTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(RegionDirectiveTriviaSyntax), r => new RegionDirectiveTriviaSyntax(r));
-        }
     }
 
     internal sealed partial class EndRegionDirectiveTriviaSyntax : DirectiveTriviaSyntax
@@ -32233,11 +31123,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.endRegionKeyword);
             writer.WriteValue(this.endOfDirectiveToken);
             writer.WriteBoolean(this.isActive);
-        }
-
-        static EndRegionDirectiveTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(EndRegionDirectiveTriviaSyntax), r => new EndRegionDirectiveTriviaSyntax(r));
         }
     }
 
@@ -32354,11 +31239,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.endOfDirectiveToken);
             writer.WriteBoolean(this.isActive);
         }
-
-        static ErrorDirectiveTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ErrorDirectiveTriviaSyntax), r => new ErrorDirectiveTriviaSyntax(r));
-        }
     }
 
     internal sealed partial class WarningDirectiveTriviaSyntax : DirectiveTriviaSyntax
@@ -32474,11 +31354,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.endOfDirectiveToken);
             writer.WriteBoolean(this.isActive);
         }
-
-        static WarningDirectiveTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(WarningDirectiveTriviaSyntax), r => new WarningDirectiveTriviaSyntax(r));
-        }
     }
 
     internal sealed partial class BadDirectiveTriviaSyntax : DirectiveTriviaSyntax
@@ -32593,11 +31468,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.identifier);
             writer.WriteValue(this.endOfDirectiveToken);
             writer.WriteBoolean(this.isActive);
-        }
-
-        static BadDirectiveTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(BadDirectiveTriviaSyntax), r => new BadDirectiveTriviaSyntax(r));
         }
     }
 
@@ -32727,11 +31597,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.endOfDirectiveToken);
             writer.WriteBoolean(this.isActive);
         }
-
-        static DefineDirectiveTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(DefineDirectiveTriviaSyntax), r => new DefineDirectiveTriviaSyntax(r));
-        }
     }
 
     internal sealed partial class UndefDirectiveTriviaSyntax : DirectiveTriviaSyntax
@@ -32859,11 +31724,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.name);
             writer.WriteValue(this.endOfDirectiveToken);
             writer.WriteBoolean(this.isActive);
-        }
-
-        static UndefDirectiveTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(UndefDirectiveTriviaSyntax), r => new UndefDirectiveTriviaSyntax(r));
         }
     }
 
@@ -33040,11 +31900,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.endOfDirectiveToken);
             writer.WriteBoolean(this.isActive);
         }
-
-        static LineDirectiveTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(LineDirectiveTriviaSyntax), r => new LineDirectiveTriviaSyntax(r));
-        }
     }
 
     internal sealed partial class LineDirectivePositionSyntax : CSharpSyntaxNode
@@ -33178,11 +32033,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.commaToken);
             writer.WriteValue(this.character);
             writer.WriteValue(this.closeParenToken);
-        }
-
-        static LineDirectivePositionSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(LineDirectivePositionSyntax), r => new LineDirectivePositionSyntax(r));
         }
     }
 
@@ -33376,11 +32226,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.endOfDirectiveToken);
             writer.WriteBoolean(this.isActive);
         }
-
-        static LineSpanDirectiveTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(LineSpanDirectiveTriviaSyntax), r => new LineSpanDirectiveTriviaSyntax(r));
-        }
     }
 
     internal sealed partial class PragmaWarningDirectiveTriviaSyntax : DirectiveTriviaSyntax
@@ -33546,11 +32391,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.errorCodes);
             writer.WriteValue(this.endOfDirectiveToken);
             writer.WriteBoolean(this.isActive);
-        }
-
-        static PragmaWarningDirectiveTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(PragmaWarningDirectiveTriviaSyntax), r => new PragmaWarningDirectiveTriviaSyntax(r));
         }
     }
 
@@ -33719,11 +32559,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.endOfDirectiveToken);
             writer.WriteBoolean(this.isActive);
         }
-
-        static PragmaChecksumDirectiveTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(PragmaChecksumDirectiveTriviaSyntax), r => new PragmaChecksumDirectiveTriviaSyntax(r));
-        }
     }
 
     internal sealed partial class ReferenceDirectiveTriviaSyntax : DirectiveTriviaSyntax
@@ -33851,11 +32686,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.file);
             writer.WriteValue(this.endOfDirectiveToken);
             writer.WriteBoolean(this.isActive);
-        }
-
-        static ReferenceDirectiveTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ReferenceDirectiveTriviaSyntax), r => new ReferenceDirectiveTriviaSyntax(r));
         }
     }
 
@@ -33985,11 +32815,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.endOfDirectiveToken);
             writer.WriteBoolean(this.isActive);
         }
-
-        static LoadDirectiveTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(LoadDirectiveTriviaSyntax), r => new LoadDirectiveTriviaSyntax(r));
-        }
     }
 
     internal sealed partial class ShebangDirectiveTriviaSyntax : DirectiveTriviaSyntax
@@ -34104,11 +32929,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.exclamationToken);
             writer.WriteValue(this.endOfDirectiveToken);
             writer.WriteBoolean(this.isActive);
-        }
-
-        static ShebangDirectiveTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(ShebangDirectiveTriviaSyntax), r => new ShebangDirectiveTriviaSyntax(r));
         }
     }
 
@@ -34262,11 +33082,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             writer.WriteValue(this.targetToken);
             writer.WriteValue(this.endOfDirectiveToken);
             writer.WriteBoolean(this.isActive);
-        }
-
-        static NullableDirectiveTriviaSyntax()
-        {
-            ObjectBinder.RegisterTypeReader(typeof(NullableDirectiveTriviaSyntax), r => new NullableDirectiveTriviaSyntax(r));
         }
     }
 
@@ -45809,5 +44624,250 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                 typeof(ShebangDirectiveTriviaSyntax),
                 typeof(NullableDirectiveTriviaSyntax),
             };
+    }
+
+    internal static class ModuleInitializer
+    {
+        [System.Runtime.CompilerServices.ModuleInitializer]
+        internal static void Initialize()
+        {
+            ObjectBinder.RegisterTypeReader(typeof(IdentifierNameSyntax), r => new IdentifierNameSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(QualifiedNameSyntax), r => new QualifiedNameSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(GenericNameSyntax), r => new GenericNameSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(TypeArgumentListSyntax), r => new TypeArgumentListSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(AliasQualifiedNameSyntax), r => new AliasQualifiedNameSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(PredefinedTypeSyntax), r => new PredefinedTypeSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ArrayTypeSyntax), r => new ArrayTypeSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ArrayRankSpecifierSyntax), r => new ArrayRankSpecifierSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(PointerTypeSyntax), r => new PointerTypeSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(FunctionPointerTypeSyntax), r => new FunctionPointerTypeSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(FunctionPointerParameterListSyntax), r => new FunctionPointerParameterListSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(FunctionPointerCallingConventionSyntax), r => new FunctionPointerCallingConventionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(FunctionPointerUnmanagedCallingConventionListSyntax), r => new FunctionPointerUnmanagedCallingConventionListSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(FunctionPointerUnmanagedCallingConventionSyntax), r => new FunctionPointerUnmanagedCallingConventionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(NullableTypeSyntax), r => new NullableTypeSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(TupleTypeSyntax), r => new TupleTypeSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(TupleElementSyntax), r => new TupleElementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(OmittedTypeArgumentSyntax), r => new OmittedTypeArgumentSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(RefTypeSyntax), r => new RefTypeSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ParenthesizedExpressionSyntax), r => new ParenthesizedExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(TupleExpressionSyntax), r => new TupleExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(PrefixUnaryExpressionSyntax), r => new PrefixUnaryExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(AwaitExpressionSyntax), r => new AwaitExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(PostfixUnaryExpressionSyntax), r => new PostfixUnaryExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(MemberAccessExpressionSyntax), r => new MemberAccessExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ConditionalAccessExpressionSyntax), r => new ConditionalAccessExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(MemberBindingExpressionSyntax), r => new MemberBindingExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ElementBindingExpressionSyntax), r => new ElementBindingExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(RangeExpressionSyntax), r => new RangeExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ImplicitElementAccessSyntax), r => new ImplicitElementAccessSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(BinaryExpressionSyntax), r => new BinaryExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(AssignmentExpressionSyntax), r => new AssignmentExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ConditionalExpressionSyntax), r => new ConditionalExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ThisExpressionSyntax), r => new ThisExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(BaseExpressionSyntax), r => new BaseExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(LiteralExpressionSyntax), r => new LiteralExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(MakeRefExpressionSyntax), r => new MakeRefExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(RefTypeExpressionSyntax), r => new RefTypeExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(RefValueExpressionSyntax), r => new RefValueExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(CheckedExpressionSyntax), r => new CheckedExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(DefaultExpressionSyntax), r => new DefaultExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(TypeOfExpressionSyntax), r => new TypeOfExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(SizeOfExpressionSyntax), r => new SizeOfExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(InvocationExpressionSyntax), r => new InvocationExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ElementAccessExpressionSyntax), r => new ElementAccessExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ArgumentListSyntax), r => new ArgumentListSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(BracketedArgumentListSyntax), r => new BracketedArgumentListSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ArgumentSyntax), r => new ArgumentSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ExpressionColonSyntax), r => new ExpressionColonSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(NameColonSyntax), r => new NameColonSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(DeclarationExpressionSyntax), r => new DeclarationExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(CastExpressionSyntax), r => new CastExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(AnonymousMethodExpressionSyntax), r => new AnonymousMethodExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(SimpleLambdaExpressionSyntax), r => new SimpleLambdaExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(RefExpressionSyntax), r => new RefExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ParenthesizedLambdaExpressionSyntax), r => new ParenthesizedLambdaExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(InitializerExpressionSyntax), r => new InitializerExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ImplicitObjectCreationExpressionSyntax), r => new ImplicitObjectCreationExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ObjectCreationExpressionSyntax), r => new ObjectCreationExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(WithExpressionSyntax), r => new WithExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(AnonymousObjectMemberDeclaratorSyntax), r => new AnonymousObjectMemberDeclaratorSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(AnonymousObjectCreationExpressionSyntax), r => new AnonymousObjectCreationExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ArrayCreationExpressionSyntax), r => new ArrayCreationExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ImplicitArrayCreationExpressionSyntax), r => new ImplicitArrayCreationExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(StackAllocArrayCreationExpressionSyntax), r => new StackAllocArrayCreationExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ImplicitStackAllocArrayCreationExpressionSyntax), r => new ImplicitStackAllocArrayCreationExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(QueryExpressionSyntax), r => new QueryExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(QueryBodySyntax), r => new QueryBodySyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(FromClauseSyntax), r => new FromClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(LetClauseSyntax), r => new LetClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(JoinClauseSyntax), r => new JoinClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(JoinIntoClauseSyntax), r => new JoinIntoClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(WhereClauseSyntax), r => new WhereClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(OrderByClauseSyntax), r => new OrderByClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(OrderingSyntax), r => new OrderingSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(SelectClauseSyntax), r => new SelectClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(GroupClauseSyntax), r => new GroupClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(QueryContinuationSyntax), r => new QueryContinuationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(OmittedArraySizeExpressionSyntax), r => new OmittedArraySizeExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(InterpolatedStringExpressionSyntax), r => new InterpolatedStringExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(IsPatternExpressionSyntax), r => new IsPatternExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ThrowExpressionSyntax), r => new ThrowExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(WhenClauseSyntax), r => new WhenClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(DiscardPatternSyntax), r => new DiscardPatternSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(DeclarationPatternSyntax), r => new DeclarationPatternSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(VarPatternSyntax), r => new VarPatternSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(RecursivePatternSyntax), r => new RecursivePatternSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(PositionalPatternClauseSyntax), r => new PositionalPatternClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(PropertyPatternClauseSyntax), r => new PropertyPatternClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(SubpatternSyntax), r => new SubpatternSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ConstantPatternSyntax), r => new ConstantPatternSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ParenthesizedPatternSyntax), r => new ParenthesizedPatternSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(RelationalPatternSyntax), r => new RelationalPatternSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(TypePatternSyntax), r => new TypePatternSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(BinaryPatternSyntax), r => new BinaryPatternSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(UnaryPatternSyntax), r => new UnaryPatternSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ListPatternSyntax), r => new ListPatternSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(SlicePatternSyntax), r => new SlicePatternSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(InterpolatedStringTextSyntax), r => new InterpolatedStringTextSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(InterpolationSyntax), r => new InterpolationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(InterpolationAlignmentClauseSyntax), r => new InterpolationAlignmentClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(InterpolationFormatClauseSyntax), r => new InterpolationFormatClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(GlobalStatementSyntax), r => new GlobalStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(BlockSyntax), r => new BlockSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(LocalFunctionStatementSyntax), r => new LocalFunctionStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(LocalDeclarationStatementSyntax), r => new LocalDeclarationStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(VariableDeclarationSyntax), r => new VariableDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(VariableDeclaratorSyntax), r => new VariableDeclaratorSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(EqualsValueClauseSyntax), r => new EqualsValueClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(SingleVariableDesignationSyntax), r => new SingleVariableDesignationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(DiscardDesignationSyntax), r => new DiscardDesignationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ParenthesizedVariableDesignationSyntax), r => new ParenthesizedVariableDesignationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ExpressionStatementSyntax), r => new ExpressionStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(EmptyStatementSyntax), r => new EmptyStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(LabeledStatementSyntax), r => new LabeledStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(GotoStatementSyntax), r => new GotoStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(BreakStatementSyntax), r => new BreakStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ContinueStatementSyntax), r => new ContinueStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ReturnStatementSyntax), r => new ReturnStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ThrowStatementSyntax), r => new ThrowStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(YieldStatementSyntax), r => new YieldStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(WhileStatementSyntax), r => new WhileStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(DoStatementSyntax), r => new DoStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ForStatementSyntax), r => new ForStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ForEachStatementSyntax), r => new ForEachStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ForEachVariableStatementSyntax), r => new ForEachVariableStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(UsingStatementSyntax), r => new UsingStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(FixedStatementSyntax), r => new FixedStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(CheckedStatementSyntax), r => new CheckedStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(UnsafeStatementSyntax), r => new UnsafeStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(LockStatementSyntax), r => new LockStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(IfStatementSyntax), r => new IfStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ElseClauseSyntax), r => new ElseClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(SwitchStatementSyntax), r => new SwitchStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(SwitchSectionSyntax), r => new SwitchSectionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(CasePatternSwitchLabelSyntax), r => new CasePatternSwitchLabelSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(CaseSwitchLabelSyntax), r => new CaseSwitchLabelSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(DefaultSwitchLabelSyntax), r => new DefaultSwitchLabelSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(SwitchExpressionSyntax), r => new SwitchExpressionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(SwitchExpressionArmSyntax), r => new SwitchExpressionArmSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(TryStatementSyntax), r => new TryStatementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(CatchClauseSyntax), r => new CatchClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(CatchDeclarationSyntax), r => new CatchDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(CatchFilterClauseSyntax), r => new CatchFilterClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(FinallyClauseSyntax), r => new FinallyClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(CompilationUnitSyntax), r => new CompilationUnitSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ExternAliasDirectiveSyntax), r => new ExternAliasDirectiveSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(UsingDirectiveSyntax), r => new UsingDirectiveSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(NamespaceDeclarationSyntax), r => new NamespaceDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(FileScopedNamespaceDeclarationSyntax), r => new FileScopedNamespaceDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(AttributeListSyntax), r => new AttributeListSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(AttributeTargetSpecifierSyntax), r => new AttributeTargetSpecifierSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(AttributeSyntax), r => new AttributeSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(AttributeArgumentListSyntax), r => new AttributeArgumentListSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(AttributeArgumentSyntax), r => new AttributeArgumentSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(NameEqualsSyntax), r => new NameEqualsSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(TypeParameterListSyntax), r => new TypeParameterListSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(TypeParameterSyntax), r => new TypeParameterSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ClassDeclarationSyntax), r => new ClassDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(StructDeclarationSyntax), r => new StructDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(InterfaceDeclarationSyntax), r => new InterfaceDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(RecordDeclarationSyntax), r => new RecordDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(EnumDeclarationSyntax), r => new EnumDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(DelegateDeclarationSyntax), r => new DelegateDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(EnumMemberDeclarationSyntax), r => new EnumMemberDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(BaseListSyntax), r => new BaseListSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(SimpleBaseTypeSyntax), r => new SimpleBaseTypeSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(PrimaryConstructorBaseTypeSyntax), r => new PrimaryConstructorBaseTypeSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(TypeParameterConstraintClauseSyntax), r => new TypeParameterConstraintClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ConstructorConstraintSyntax), r => new ConstructorConstraintSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ClassOrStructConstraintSyntax), r => new ClassOrStructConstraintSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(TypeConstraintSyntax), r => new TypeConstraintSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(DefaultConstraintSyntax), r => new DefaultConstraintSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(FieldDeclarationSyntax), r => new FieldDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(EventFieldDeclarationSyntax), r => new EventFieldDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ExplicitInterfaceSpecifierSyntax), r => new ExplicitInterfaceSpecifierSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(MethodDeclarationSyntax), r => new MethodDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(OperatorDeclarationSyntax), r => new OperatorDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ConversionOperatorDeclarationSyntax), r => new ConversionOperatorDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ConstructorDeclarationSyntax), r => new ConstructorDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ConstructorInitializerSyntax), r => new ConstructorInitializerSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(DestructorDeclarationSyntax), r => new DestructorDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(PropertyDeclarationSyntax), r => new PropertyDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ArrowExpressionClauseSyntax), r => new ArrowExpressionClauseSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(EventDeclarationSyntax), r => new EventDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(IndexerDeclarationSyntax), r => new IndexerDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(AccessorListSyntax), r => new AccessorListSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(AccessorDeclarationSyntax), r => new AccessorDeclarationSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ParameterListSyntax), r => new ParameterListSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(BracketedParameterListSyntax), r => new BracketedParameterListSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ParameterSyntax), r => new ParameterSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(FunctionPointerParameterSyntax), r => new FunctionPointerParameterSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(IncompleteMemberSyntax), r => new IncompleteMemberSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(SkippedTokensTriviaSyntax), r => new SkippedTokensTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(DocumentationCommentTriviaSyntax), r => new DocumentationCommentTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(TypeCrefSyntax), r => new TypeCrefSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(QualifiedCrefSyntax), r => new QualifiedCrefSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(NameMemberCrefSyntax), r => new NameMemberCrefSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(IndexerMemberCrefSyntax), r => new IndexerMemberCrefSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(OperatorMemberCrefSyntax), r => new OperatorMemberCrefSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ConversionOperatorMemberCrefSyntax), r => new ConversionOperatorMemberCrefSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(CrefParameterListSyntax), r => new CrefParameterListSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(CrefBracketedParameterListSyntax), r => new CrefBracketedParameterListSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(CrefParameterSyntax), r => new CrefParameterSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(XmlElementSyntax), r => new XmlElementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(XmlElementStartTagSyntax), r => new XmlElementStartTagSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(XmlElementEndTagSyntax), r => new XmlElementEndTagSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(XmlEmptyElementSyntax), r => new XmlEmptyElementSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(XmlNameSyntax), r => new XmlNameSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(XmlPrefixSyntax), r => new XmlPrefixSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(XmlTextAttributeSyntax), r => new XmlTextAttributeSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(XmlCrefAttributeSyntax), r => new XmlCrefAttributeSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(XmlNameAttributeSyntax), r => new XmlNameAttributeSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(XmlTextSyntax), r => new XmlTextSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(XmlCDataSectionSyntax), r => new XmlCDataSectionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(XmlProcessingInstructionSyntax), r => new XmlProcessingInstructionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(XmlCommentSyntax), r => new XmlCommentSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(IfDirectiveTriviaSyntax), r => new IfDirectiveTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ElifDirectiveTriviaSyntax), r => new ElifDirectiveTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ElseDirectiveTriviaSyntax), r => new ElseDirectiveTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(EndIfDirectiveTriviaSyntax), r => new EndIfDirectiveTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(RegionDirectiveTriviaSyntax), r => new RegionDirectiveTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(EndRegionDirectiveTriviaSyntax), r => new EndRegionDirectiveTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ErrorDirectiveTriviaSyntax), r => new ErrorDirectiveTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(WarningDirectiveTriviaSyntax), r => new WarningDirectiveTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(BadDirectiveTriviaSyntax), r => new BadDirectiveTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(DefineDirectiveTriviaSyntax), r => new DefineDirectiveTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(UndefDirectiveTriviaSyntax), r => new UndefDirectiveTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(LineDirectiveTriviaSyntax), r => new LineDirectiveTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(LineDirectivePositionSyntax), r => new LineDirectivePositionSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(LineSpanDirectiveTriviaSyntax), r => new LineSpanDirectiveTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(PragmaWarningDirectiveTriviaSyntax), r => new PragmaWarningDirectiveTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(PragmaChecksumDirectiveTriviaSyntax), r => new PragmaChecksumDirectiveTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ReferenceDirectiveTriviaSyntax), r => new ReferenceDirectiveTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(LoadDirectiveTriviaSyntax), r => new LoadDirectiveTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(ShebangDirectiveTriviaSyntax), r => new ShebangDirectiveTriviaSyntax(r));
+            ObjectBinder.RegisterTypeReader(typeof(NullableDirectiveTriviaSyntax), r => new NullableDirectiveTriviaSyntax(r));
+        }
     }
 }

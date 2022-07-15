@@ -12,9 +12,9 @@ namespace Roslyn.Test.Utilities
 {
     internal static class ModuleInitializer
     {
-#pragma warning disable CA2255
+#pragma warning disable CA2255, CS0436
         [ModuleInitializer]
-#pragma warning restore CA2255
+#pragma warning restore CA2255, CS0436
         internal static void Initialize()
         {
             Trace.Listeners.Clear();

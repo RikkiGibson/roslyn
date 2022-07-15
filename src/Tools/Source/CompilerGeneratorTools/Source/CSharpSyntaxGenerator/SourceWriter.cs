@@ -52,6 +52,7 @@ namespace CSharpSyntaxGenerator
             this.WriteGreenRewriter();
             this.WriteContextualGreenFactories();
             this.WriteStaticGreenFactories();
+            this.WriteObjectBinderModuleInitializer();
             CloseBlock();
         }
 
@@ -362,13 +363,6 @@ namespace CSharpSyntaxGenerator
             }
 
             CloseBlock();
-
-            // IReadable
-            WriteLine();
-            WriteLine($"static {node.Name}()");
-            OpenBlock();
-            WriteLine($"ObjectBinder.RegisterTypeReader(typeof({node.Name}), r => new {node.Name}(r));");
-            CloseBlock();
         }
 
         private string GetWriterMethod(string type)
@@ -598,6 +592,26 @@ namespace CSharpSyntaxGenerator
                 WriteLine();
                 this.WriteGreenFactory(node, withSyntaxFactoryContext);
             }
+        }
+
+        private void WriteObjectBinderModuleInitializer()
+        {
+            var nodes = Tree.Types.Where(n => n is not PredefinedNode and not AbstractNode).ToList();
+            WriteLine();
+            WriteLine("internal static class ModuleInitializer");
+            OpenBlock();
+
+            WriteLine("[System.Runtime.CompilerServices.ModuleInitializer]");
+            WriteLine("internal static void Initialize()");
+            OpenBlock();
+
+            foreach (var node in nodes)
+            {
+                WriteLine($"ObjectBinder.RegisterTypeReader(typeof({node.Name}), r => new {node.Name}(r));");
+            }
+
+            CloseBlock();
+            CloseBlock();
         }
 
         private void WriteGreenTypeList()
