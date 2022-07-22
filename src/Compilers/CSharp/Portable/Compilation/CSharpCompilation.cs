@@ -1017,6 +1017,12 @@ namespace Microsoft.CodeAnalysis.CSharp
             return _syntaxAndDeclarations.GetLazyState().OrdinalMap[tree];
         }
 
+        internal bool HasUniqueFilePath(SyntaxTree tree)
+        {
+            Debug.Assert(this.ContainsSyntaxTree(tree));
+            return !_syntaxAndDeclarations.GetLazyState().NonUniquePaths.Contains(tree.FilePath);
+        }
+
         #endregion
 
         #region References

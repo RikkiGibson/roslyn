@@ -23,6 +23,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             internal readonly ImmutableDictionary<string, SyntaxTree> LoadedSyntaxTreeMap;
             internal readonly ImmutableDictionary<SyntaxTree, Lazy<RootSingleNamespaceDeclaration>> RootNamespaces;
             internal readonly DeclarationTable DeclarationTable;
+            internal readonly ImmutableHashSet<string> NonUniquePaths;
 
             internal State(
                 ImmutableArray<SyntaxTree> syntaxTrees,
@@ -30,7 +31,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                 ImmutableDictionary<SyntaxTree, ImmutableArray<LoadDirective>> loadDirectiveMap,
                 ImmutableDictionary<string, SyntaxTree> loadedSyntaxTreeMap,
                 ImmutableDictionary<SyntaxTree, Lazy<RootSingleNamespaceDeclaration>> rootNamespaces,
-                DeclarationTable declarationTable)
+                DeclarationTable declarationTable,
+                ImmutableHashSet<string> nonUniquePaths)
             {
                 Debug.Assert(syntaxTrees.All(tree => syntaxTrees[syntaxTreeOrdinalMap[tree]] == tree));
                 Debug.Assert(syntaxTrees.SetEquals(rootNamespaces.Keys.AsImmutable(), EqualityComparer<SyntaxTree>.Default));
@@ -41,6 +43,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 this.LoadedSyntaxTreeMap = loadedSyntaxTreeMap;
                 this.RootNamespaces = rootNamespaces;
                 this.DeclarationTable = declarationTable;
+                this.NonUniquePaths = nonUniquePaths;
             }
         }
     }

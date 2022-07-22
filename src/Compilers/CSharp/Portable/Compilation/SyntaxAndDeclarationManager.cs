@@ -41,6 +41,36 @@ namespace Microsoft.CodeAnalysis.CSharp
             return _lazyState;
         }
 
+        private struct NonUniquePathsBuilder
+        {
+            private PooledHashSet<string> AllPaths;
+            private PooledHashSet<string> NonUniquePaths;
+            public static NonUniquePathsBuilder GetInstance()
+            {
+                return new NonUniquePathsBuilder()
+                {
+                    AllPaths = PooledHashSet<string>.GetInstance(),
+                    NonUniquePaths = PooledHashSet<string>.GetInstance()
+                };
+            }
+
+            public void AddPath(string path)
+            {
+                if (!AllPaths.Add(path))
+                {
+                    NonUniquePaths.Add(path);
+                }
+            }
+
+            public ImmutableHashSet<string> ToImmutableAndFree()
+            {
+                var nonUniquePaths = NonUniquePaths.ToImmutableHashSet();
+                AllPaths.Free();
+                NonUniquePaths.Free();
+                return nonUniquePaths;
+            }
+        }
+
         private static State CreateState(
             ImmutableArray<SyntaxTree> externalSyntaxTrees,
             string scriptClassName,
@@ -55,6 +85,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             var declMapBuilder = PooledDictionary<SyntaxTree, Lazy<RootSingleNamespaceDeclaration>>.GetInstance();
             var declTable = DeclarationTable.Empty;
 
+            var nonUniquePaths = NonUniquePathsBuilder.GetInstance();
+
             foreach (var tree in externalSyntaxTrees)
             {
                 AppendAllSyntaxTrees(
@@ -68,7 +100,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                     loadDirectiveMapBuilder,
                     loadedSyntaxTreeMapBuilder,
                     declMapBuilder,
-                    ref declTable);
+                    ref declTable,
+                    nonUniquePaths);
             }
 
             return new State(
@@ -77,7 +110,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                 loadDirectiveMapBuilder.ToImmutableDictionaryAndFree(),
                 loadedSyntaxTreeMapBuilder.ToImmutableDictionaryAndFree(),
                 declMapBuilder.ToImmutableDictionaryAndFree(),
-                declTable);
+                declTable,
+                nonUniquePaths.ToImmutableAndFree());
         }
 
         public SyntaxAndDeclarationManager AddSyntaxTrees(IEnumerable<SyntaxTree> trees)
@@ -105,6 +139,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             foreach (var tree in trees)
             {
+                // incrementally append all the new trees
                 AppendAllSyntaxTrees(
                         treesBuilder,
                         tree,
@@ -116,7 +151,15 @@ namespace Microsoft.CodeAnalysis.CSharp
                         loadDirectiveMapBuilder,
                         loadedSyntaxTreeMapBuilder,
                         declMapBuilder,
-                        ref declTable);
+                        ref declTable,
+                        nonUniquePathsBuilder: null);
+            }
+
+            // non-unique paths have to be determined from scratch because we don't hold onto a set of all paths that we could append to
+            var nonUniquePathsBuilder = NonUniquePathsBuilder.GetInstance();
+            foreach (var tree in trees)
+            {
+                nonUniquePathsBuilder.AddPath(tree.FilePath);
             }
 
             state = new State(
@@ -125,7 +168,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                 loadDirectiveMapBuilder.ToImmutableDictionary(),
                 loadedSyntaxTreeMapBuilder.ToImmutableDictionary(),
                 declMapBuilder.ToImmutableDictionary(),
-                declTable);
+                declTable,
+                nonUniquePathsBuilder.ToImmutableAndFree());
 
             return new SyntaxAndDeclarationManager(
                 newExternalSyntaxTrees,
@@ -150,12 +194,13 @@ namespace Microsoft.CodeAnalysis.CSharp
             IDictionary<SyntaxTree, ImmutableArray<LoadDirective>> loadDirectiveMapBuilder,
             IDictionary<string, SyntaxTree> loadedSyntaxTreeMapBuilder,
             IDictionary<SyntaxTree, Lazy<RootSingleNamespaceDeclaration>> declMapBuilder,
-            ref DeclarationTable declTable)
+            ref DeclarationTable declTable,
+            NonUniquePathsBuilder? nonUniquePathsBuilder)
         {
             var sourceCodeKind = tree.Options.Kind;
             if (sourceCodeKind == SourceCodeKind.Script)
             {
-                AppendAllLoadedSyntaxTrees(treesBuilder, tree, scriptClassName, resolver, messageProvider, isSubmission, ordinalMapBuilder, loadDirectiveMapBuilder, loadedSyntaxTreeMapBuilder, declMapBuilder, ref declTable);
+                AppendAllLoadedSyntaxTrees(treesBuilder, tree, scriptClassName, resolver, messageProvider, isSubmission, ordinalMapBuilder, loadDirectiveMapBuilder, loadedSyntaxTreeMapBuilder, declMapBuilder, ref declTable, nonUniquePathsBuilder);
             }
 
             AddSyntaxTreeToDeclarationMapAndTable(tree, scriptClassName, isSubmission, declMapBuilder, ref declTable);
@@ -163,6 +208,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             treesBuilder.Add(tree);
 
             ordinalMapBuilder.Add(tree, ordinalMapBuilder.Count);
+
+            nonUniquePathsBuilder?.AddPath(tree.FilePath);
         }
 
         private static void AppendAllLoadedSyntaxTrees(
@@ -176,7 +223,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             IDictionary<SyntaxTree, ImmutableArray<LoadDirective>> loadDirectiveMapBuilder,
             IDictionary<string, SyntaxTree> loadedSyntaxTreeMapBuilder,
             IDictionary<SyntaxTree, Lazy<RootSingleNamespaceDeclaration>> declMapBuilder,
-            ref DeclarationTable declTable)
+            ref DeclarationTable declTable,
+            NonUniquePathsBuilder? nonUniquePathsBuilder)
         {
             ArrayBuilder<LoadDirective> loadDirectives = null;
 
@@ -236,7 +284,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                                 loadDirectiveMapBuilder,
                                 loadedSyntaxTreeMapBuilder,
                                 declMapBuilder,
-                                ref declTable);
+                                ref declTable,
+                                nonUniquePathsBuilder);
                         }
                         catch (Exception e)
                         {
@@ -331,13 +380,20 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
             removeSet.Free();
 
+            var nonUniquePathsBuilder = NonUniquePathsBuilder.GetInstance();
+            foreach (var tree in treesBuilder)
+            {
+                nonUniquePathsBuilder.AddPath(tree.FilePath);
+            }
+
             state = new State(
                 treesBuilder.ToImmutableAndFree(),
                 ordinalMapBuilder.ToImmutableDictionaryAndFree(),
                 loadDirectiveMap,
                 loadedSyntaxTreeMap,
                 declMapBuilder.ToImmutableDictionary(),
-                declTable);
+                declTable,
+                nonUniquePathsBuilder.ToImmutableAndFree());
 
             return new SyntaxAndDeclarationManager(
                 newExternalSyntaxTrees,
@@ -508,7 +564,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                     loadDirectiveMapBuilder,
                     loadedSyntaxTreeMapBuilder,
                     declMapBuilder,
-                    ref declTable);
+                    ref declTable,
+                    nonUniquePathsBuilder: null);
 
                 for (var i = oldOrdinal + 1; i < syntaxTrees.Length; i++)
                 {
@@ -550,13 +607,20 @@ namespace Microsoft.CodeAnalysis.CSharp
                 ordinalMap = ordinalMap.SetItem(newTree, oldOrdinal);
             }
 
+            var nonUniquePathsBuilder = NonUniquePathsBuilder.GetInstance();
+            foreach (var tree in newTrees)
+            {
+                nonUniquePathsBuilder.AddPath(tree.FilePath);
+            }
+
             state = new State(
                 newTrees,
                 ordinalMap,
                 loadDirectiveMapBuilder.ToImmutable(),
                 loadedSyntaxTreeMapBuilder.ToImmutable(),
                 declMapBuilder.ToImmutable(),
-                declTable);
+                declTable,
+                nonUniquePathsBuilder.ToImmutableAndFree());
 
             return new SyntaxAndDeclarationManager(
                 newExternalSyntaxTrees,

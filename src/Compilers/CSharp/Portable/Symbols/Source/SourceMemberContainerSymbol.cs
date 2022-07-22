@@ -1764,13 +1764,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 // There may be multiple syntax trees across declarations in error scenarios,
                 // but we're not interested in handling that for the purposes of producing this error.
                 var tree = declaration.Declarations[0].SyntaxReference.SyntaxTree;
-                // TODO2: we probably don't want to linearly search the syntax trees.
-                foreach (var otherTree in DeclaringCompilation.SyntaxTrees)
+                if (!DeclaringCompilation.HasUniqueFilePath(tree))
                 {
-                    if ((object)tree != otherTree && tree.FilePath == otherTree.FilePath)
-                    {
-                        diagnostics.Add(ErrorCode.ERR_FileTypeNonUniquePath, location, this, tree.FilePath);
-                    }
+                    diagnostics.Add(ErrorCode.ERR_FileTypeNonUniquePath, location, this, tree.FilePath);
                 }
 
                 if ((object?)ContainingType != null)
