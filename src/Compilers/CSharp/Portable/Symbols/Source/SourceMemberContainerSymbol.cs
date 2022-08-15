@@ -1770,7 +1770,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 {
                     if ((object)tree != otherTree && tree.FilePath == otherTree.FilePath)
                     {
-                        diagnostics.Add(ErrorCode.ERR_FileTypeNonUniquePath, location, this, tree.FilePath);
+                        //diagnostics.Add(ErrorCode.ERR_FileTypeNonUniquePath, location, this, tree.FilePath);
                     }
                 }
 

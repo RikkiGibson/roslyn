@@ -1769,6 +1769,12 @@ namespace Microsoft.Cci
             out Blob mvidFixup,
             out Blob mvidStringFixup)
         {
+            var allFilePaths = PooledHashSet<string>.GetInstance();
+            foreach (var typeDef in module.GetTopLevelSourceTypeDefinitions(Context))
+            {
+                // todo2: this feels like the wrong place to do this check.
+            }
+
             // Extract information from object model into tables, indices and streams
             CreateIndices();
 

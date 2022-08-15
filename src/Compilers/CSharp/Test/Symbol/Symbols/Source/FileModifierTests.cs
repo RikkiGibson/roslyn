@@ -588,7 +588,8 @@ public class FileModifierTests : CSharpTestBase
         var source1 = SyntaxFactory.ParseSyntaxTree("""
             using System;
 
-            C.M();
+            //C.M();
+            { }
 
             file class C
             {
