@@ -2856,5 +2856,97 @@ public class Class2
                 Diagnostic(ErrorCode.ERR_PropertyLacksGet, "Method").WithArguments("Method").WithLocation(14, 25)
                 );
         }
+
+        [Fact, WorkItem(65306, "https://github.com/dotnet/roslyn/issues/65306")]
+        public void TypeTestAndPropertyTest_01()
+        {
+            var source = @"
+class Base
+{
+    public string? Prop { get; set; }
+}
+
+class Derived : Base { }
+
+class Program
+{
+    void M(Base @base)
+    {
+        if (@base is Derived { Prop: not null } derived)
+        {
+            derived.Prop.ToString();
+            @base.Prop.ToString();
+        }
+
+        if (@base is { Prop: not null } base1)
+        {
+            base1.Prop.ToString();
+            @base.Prop.ToString();
+        }
+
+        if (@base is { Prop: not null })
+        {
+            @base.Prop.ToString();
+        }
+
+        @base.Prop.ToString(); // 1
+    }
+}
+";
+            var comp = CreateNullableCompilation(source);
+            comp.VerifyDiagnostics(
+                // (18,9): warning CS8602: Dereference of a possibly null reference.
+                //         @base.Prop.ToString(); // 1
+                Diagnostic(ErrorCode.WRN_NullReferenceReceiver, "@base.Prop").WithLocation(18, 9)
+                );
+        }
+
+        [Fact, WorkItem(65306, "https://github.com/dotnet/roslyn/issues/65306")]
+        public void TypeTestAndPropertyTest_02()
+        {
+            var source = @"
+class Base
+{
+    public string? Prop1 { get; set; }
+}
+
+class Derived : Base
+{
+    public string? Prop2 { get; set; }
+}
+
+class Program
+{
+    void M(Base @base)
+    {
+        if (@base is Derived { Prop1: not null, Prop2: not null } derived)
+        {
+            derived.Prop1.ToString();
+            derived.Prop2.ToString();
+            @base.Prop1.ToString();
+        }
+
+        if (@base is { Prop1: not null } base1)
+        {
+            base1.Prop1.ToString();
+            @base.Prop1.ToString();
+        }
+
+        if (@base is { Prop1: not null })
+        {
+            @base.Prop1.ToString();
+        }
+
+        @base.Prop1.ToString(); // 1
+    }
+}
+";
+            var comp = CreateNullableCompilation(source);
+            comp.VerifyDiagnostics(
+                // (18,9): warning CS8602: Dereference of a possibly null reference.
+                //         @base.Prop.ToString(); // 1
+                Diagnostic(ErrorCode.WRN_NullReferenceReceiver, "@base.Prop").WithLocation(18, 9)
+                );
+        }
     }
 }
