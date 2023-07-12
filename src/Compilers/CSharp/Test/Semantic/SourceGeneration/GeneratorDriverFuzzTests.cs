@@ -78,9 +78,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Semantic.UnitTests.SourceGeneration
             public abstract void AppendTo(StringBuilder builder); // TODO: depth parameter to improve readability?
         }
 
-        class SelectOperator(Operator Source, bool TransformAs, bool TransformCs) : Operator
+        record class Wrapper<T>(T Value, int tag);
+
+        class SelectOperator<T>(Operator<T> Source, bool TransformAs, bool TransformCs) : Operator<Wrapper<T>>
         {
-            public override IncrementalValuesProvider<AdditionalText> Apply(IncrementalValuesProvider<AdditionalText> provider)
+            public override IncrementalValuesProvider<Wrapper<T>> Apply(IncrementalValuesProvider<AdditionalText> provider)
             {
                 var provider1 = provider.Select((additionalText, _) => (AdditionalText)new InMemoryAdditionalText(additionalText.Path, additionalText.GetText()!.ToString() switch
                 {
@@ -117,6 +119,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Semantic.UnitTests.SourceGeneration
             }
         }
 
+        // todo: should Logics just be 'ImmutableArray<Operator>'?
+        // on each run, we ought to change the number of elements yielded
         class SelectManyOperator(Operator Source, ImmutableArray<(bool TransformAs, bool TransformCs)> Logics) : Operator
         {
             public override IncrementalValuesProvider<AdditionalText> Apply(IncrementalValuesProvider<AdditionalText> provider)
@@ -155,7 +159,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Semantic.UnitTests.SourceGeneration
             }
         }
 
-        class WhereOperator(Operator Source, bool IncludeAs, bool IncludeBs, bool IncludeCs, bool IncludeDs) : Operator
+        // API for Random?
+        // each time we call Generate, reset the Random?
+        // use instance fields on the generator class instead?
+        // have Where filter out different things each run?
+        // could Apply take and return some union of IncrementalValue[s]Provider?
+        // - 
+        class WhereOperator(Operator Source, Random, bool IncludeAs, bool IncludeBs, bool IncludeCs, bool IncludeDs) : Operator
         {
             public override IncrementalValuesProvider<AdditionalText> Apply(IncrementalValuesProvider<AdditionalText> provider)
             {
@@ -204,12 +214,17 @@ namespace Microsoft.CodeAnalysis.CSharp.Semantic.UnitTests.SourceGeneration
             }
         }
 
+        // particular transform function may not matter.
+        // e.g. should Select simply wrap its input and add a tag?
+        // can we parameterize based on input type?
+
         class CombineOperator(Operator Source1, Operator Source2) : Operator
         {
             public override IncrementalValuesProvider<AdditionalText> Apply(IncrementalValuesProvider<AdditionalText> provider)
             {
                 var provider4_1 = Source1.Apply(provider);
                 var provider4_2 = Source2.Apply(provider);
+                // TODO: Combine should not simply return one of the two values.
                 var provider4 = provider4_1.Combine(provider4_2.Collect()).Select((pair, _)
                         => (AdditionalText)new InMemoryAdditionalText(
                             pair.Left.Path,
@@ -272,6 +287,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Semantic.UnitTests.SourceGeneration
             var generators = new[] { new IncrementalGeneratorWrapper(new PipelineCallbackGenerator(registerPipeline)) };
 
             // original input
+            // other input types? not just AdditionalText?
+            // Compilation, options, trees, etc.
+            // lower priority?
             var originalInputsLength = 1 + random.Next(4); // adjust as needed for simpler repro
             var originalInputs = new List<InMemoryAdditionalText>(originalInputsLength);
             for (var i = 0; i < originalInputsLength; i++)
@@ -355,6 +373,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Semantic.UnitTests.SourceGeneration
                 var depth = random.Next(4);
                 var finalProvider = rootOperator.Apply(provider);
 
+                // make sure the graph has enough "width"
+                // we don't just want a linear sequence
+                // can we fork out from the original source several times?
+                // work list of "nodes that need to be wrapped further"
+                // generation could end with work list at any length
+                // could final source output just be a description of the nodes the input traveled through?
+                // 
                 context.RegisterSourceOutput(finalProvider, (context, text) =>
                 {
                     context.AddSource(((InMemoryAdditionalText)text).Path, ((InMemoryAdditionalText)text).GetText()!.ToString());
@@ -368,6 +393,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Semantic.UnitTests.SourceGeneration
                     return @operator;
                 }
 
+                // if ValueProvider...switch...
+                // if ValuesProvider...switch...
                 switch ((OperatorKind)random.Next((int)OperatorKind.MaxValue))
                 {
                     case OperatorKind.Select:
