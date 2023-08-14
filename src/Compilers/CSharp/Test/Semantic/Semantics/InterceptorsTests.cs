@@ -4495,4 +4495,67 @@ partial struct CustomHandler
                 //     [InterceptsLocation("Program.cs", 5, 3)]
                 Diagnostic(ErrorCode.ERR_InterceptorCannotUseUnmanagedCallersOnly, @"InterceptsLocation(""Program.cs"", 5, 3)").WithLocation(14, 6));
     }
+
+    [Fact]
+    public void InterceptorRelativePath_01()
+    {
+        var source = """
+            using System;
+            using System.Runtime.CompilerServices;
+
+            C.Interceptable();
+
+            class C
+            {
+                public static void Interceptable()
+                {
+                    throw null!;
+                }
+            }
+
+            static class D
+            {
+                [InterceptsLocation("Program.cs", 4, 3)]
+                public static void Interceptor()
+                {
+                    Console.Write(1);
+                }
+            }
+            """;
+
+        var verifier = CompileAndVerify(new[] { (source, "/path/to/Program.cs"), s_attributesSource }, parseOptions: RegularWithInterceptors, expectedOutput: "1");
+        verifier.VerifyDiagnostics();
+    }
+
+    [Fact]
+    public void InterceptorRelativePath_02()
+    {
+        // TODO2: much more work needed to properly resolve relative paths.
+        var source = """
+            using System;
+            using System.Runtime.CompilerServices;
+
+            C.Interceptable();
+
+            class C
+            {
+                public static void Interceptable()
+                {
+                    throw null!;
+                }
+            }
+
+            static class D
+            {
+                [InterceptsLocation("./Program.cs", 4, 3)]
+                public static void Interceptor()
+                {
+                    Console.Write(1);
+                }
+            }
+            """;
+
+        var verifier = CompileAndVerify(new[] { (source, "/path/to/Program.cs"), s_attributesSource }, parseOptions: RegularWithInterceptors, expectedOutput: "1");
+        verifier.VerifyDiagnostics();
+    }
 }

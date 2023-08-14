@@ -1040,8 +1040,17 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        internal OneOrMany<SyntaxTree> GetSyntaxTreesByMappedPath(string mappedPath)
+        internal OneOrMany<SyntaxTree> GetSyntaxTreesByMappedPath(string mappedPath, string basePath)
         {
+            // Resolve relative paths to the containing directory of the file the attribute is being used in.
+            if (!Path.IsPathRooted(mappedPath))
+            {
+                var resolver = Options.SourceReferenceResolver;
+                var referencedFromDirectory = Path.GetDirectoryName(basePath) ?? "";
+                var useSiteMappedPath = resolver?.NormalizePath(referencedFromDirectory, baseFilePath: null) ?? referencedFromDirectory;
+                mappedPath = Path.Combine(useSiteMappedPath, mappedPath).Replace(Path.DirectorySeparatorChar, '/');
+            }
+
             // We could consider storing this on SyntaxAndDeclarationManager instead, and updating it incrementally.
             // However, this would make it more difficult for it to be "pay-for-play",
             // i.e. only created in compilations where interceptors are used.
