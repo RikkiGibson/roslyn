@@ -829,5 +829,53 @@ public class [|C|]
                 await GenerateAndVerifySourceAsync(metadataSource, symbolName, LanguageNames.CSharp, languageVersion: "Preview", metadataLanguageVersion: "Preview", expected: expected, signaturesOnly: signaturesOnly);
             }
         }
+
+        [Theory, CombinatorialData]
+        public async Task TestScopedParameter(bool signaturesOnly)
+        {
+            var metadataSource = """
+                public ref struct MySpan<T> { }
+
+                public class C
+                {
+                    public static MySpan<int> M(scoped MySpan<int> span) => default;
+                }
+                """;
+            var symbolName = "C.M";
+
+            var expected = signaturesOnly switch
+            {
+                true => $@"#region {FeaturesResources.Assembly} ReferencedAssembly, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+// {CodeAnalysisResources.InMemoryAssembly}
+#endregion
+
+public class [|C|]
+{{
+    public C();
+
+    public void F();
+}}",
+                false => $@"#region {FeaturesResources.Assembly} ReferencedAssembly, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+// {CodeAnalysisResources.InMemoryAssembly}
+// Decompiled with ICSharpCode.Decompiler {ICSharpCodeDecompilerVersion}
+#endregion
+
+public class [|C|]
+{{
+    public void F()
+    {{
+    }}
+}}
+#if false // {CSharpEditorResources.Decompilation_log}
+{string.Format(CSharpEditorResources._0_items_in_cache, 6)}
+------------------
+{string.Format(CSharpEditorResources.Resolve_0, "mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")}
+{string.Format(CSharpEditorResources.Found_single_assembly_0, "mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")}
+{string.Format(CSharpEditorResources.Load_from_0, "mscorlib.v4_6_1038_0.dll")}
+#endif",
+            };
+
+            await GenerateAndVerifySourceAsync(metadataSource, symbolName, LanguageNames.CSharp, languageVersion: "Preview", metadataLanguageVersion: "Preview", expected: expected, signaturesOnly: signaturesOnly);
+        }
     }
 }
