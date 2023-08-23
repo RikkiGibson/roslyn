@@ -995,7 +995,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
 
             var syntaxTrees = DeclaringCompilation.SyntaxTrees;
-            var matchingTrees = DeclaringCompilation.GetSyntaxTreesByMappedPath(attributeFilePath, this.SyntaxTree.FilePath);
+            (var resolvedFilePath, var matchingTrees) = DeclaringCompilation.GetSyntaxTreesByMappedPath(attributeFilePath, basePath: this.SyntaxTree.FilePath);
             if (matchingTrees.Count == 0)
             {
                 var referenceResolver = DeclaringCompilation.Options.SourceReferenceResolver;

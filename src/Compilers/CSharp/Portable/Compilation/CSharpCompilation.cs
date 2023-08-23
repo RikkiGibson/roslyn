@@ -1040,15 +1040,17 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        internal OneOrMany<SyntaxTree> GetSyntaxTreesByMappedPath(string mappedPath, string basePath)
+        internal (string absolutePath, OneOrMany<SyntaxTree> syntaxTrees) GetSyntaxTreesByMappedPath(string mappedPath, string basePath)
         {
             // Resolve relative paths to the containing directory of the file the attribute is being used in.
             if (!Path.IsPathRooted(mappedPath))
             {
                 var resolver = Options.SourceReferenceResolver;
-                var referencedFromDirectory = Path.GetDirectoryName(basePath) ?? "";
-                var useSiteMappedPath = resolver?.NormalizePath(referencedFromDirectory, baseFilePath: null) ?? referencedFromDirectory;
-                mappedPath = Path.Combine(useSiteMappedPath, mappedPath).Replace(Path.DirectorySeparatorChar, '/');
+                var baseMappedPath = resolver?.NormalizePath(basePath, baseFilePath: null) ?? basePath;
+                var baseMappedDirectory = Path.GetDirectoryName(baseMappedPath) ?? "";
+                mappedPath = Path.Combine(baseMappedDirectory, mappedPath);
+                mappedPath = PathUtilities.NormalizeWithForwardSlash(mappedPath);
+                mappedPath = PathUtilities.ExpandAbsolutePathWithRelativeParts(mappedPath);
             }
 
             // We could consider storing this on SyntaxAndDeclarationManager instead, and updating it incrementally.
@@ -1061,7 +1063,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 mappedPathToSyntaxTree = _mappedPathToSyntaxTree;
             }
 
-            return mappedPathToSyntaxTree.TryGetValue(mappedPath, out var value) ? value : OneOrMany<SyntaxTree>.Empty;
+            return (mappedPath, mappedPathToSyntaxTree.TryGetValue(mappedPath, out var value) ? value : OneOrMany<SyntaxTree>.Empty);
 
             ImmutableSegmentedDictionary<string, OneOrMany<SyntaxTree>> computeMappedPathToSyntaxTree()
             {
@@ -1069,7 +1071,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 var resolver = Options.SourceReferenceResolver;
                 foreach (var tree in SyntaxTrees)
                 {
-                    var path = resolver?.NormalizePath(tree.FilePath, baseFilePath: null) ?? tree.FilePath;
+                    var path = resolver?.NormalizePath(tree.FilePath, baseFilePath: null) ?? PathUtilities.NormalizeWithForwardSlash(tree.FilePath);
                     builder[path] = builder.ContainsKey(path) ? builder[path].Add(tree) : OneOrMany.Create(tree);
                 }
                 return builder.ToImmutable();
