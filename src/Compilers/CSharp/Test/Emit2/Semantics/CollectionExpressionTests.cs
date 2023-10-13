@@ -21818,6 +21818,28 @@ partial class Program
         }
 
         [Fact]
+        public void ImmutableArray_07()
+        {
+            string sourceA = """
+                using System.Collections.Immutable;
+
+                class Program
+                {
+                    static void Main()
+                    {
+                        var arr = new ImmutableArray<int> { 1, 2, 3 };
+                    }
+                }
+                """;
+
+            var comp = CreateCompilation(sourceA, targetFramework: TargetFramework.Net80);
+            comp.VerifyEmitDiagnostics(
+                // (7,43): warning CS9211: 'ImmutableArray<T>' should not be created using a collection initializer. Use a collection expression or 'ImmutableArray.Create' instead.
+                //         var arr = new ImmutableArray<int> { 1, 2, 3 };
+                Diagnostic(ErrorCode.WRN_CollectionInitializerImmutableArray, "{ 1, 2, 3 }").WithArguments("System.Collections.Immutable.ImmutableArray<T>").WithLocation(7, 43));
+        }
+
+        [Fact]
         public void SpanImplicitAllocationWarning_01()
         {
             var source = """

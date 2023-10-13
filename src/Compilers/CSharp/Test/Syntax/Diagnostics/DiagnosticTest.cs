@@ -463,6 +463,7 @@ class X
                             break;
                         case ErrorCode.WRN_AddressOfInAsync:
                         case ErrorCode.WRN_ByValArraySizeConstRequired:
+                        case ErrorCode.WRN_CollectionInitializerImmutableArray:
                             // These are the warnings introduced with the warning "wave" shipped with dotnet 8 and C# 12.
                             Assert.Equal(8, ErrorFacts.GetWarningLevel(errorCode));
                             break;

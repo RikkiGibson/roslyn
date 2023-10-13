@@ -7824,4 +7824,7 @@ To remove the warning, you can use /reference instead (set the Embed Interop Typ
   <data name="ERR_CollectionExpressionImmutableArray" xml:space="preserve">
     <value>'{0}' requires a CollectionBuilderAttribute to be used with collection expressions.</value>
   </data>
+  <data name="WRN_CollectionInitializerImmutableArray" xml:space="preserve">
+    <value>'{0}' should not be created using a collection initializer. Use a collection expression or 'ImmutableArray.Create' instead.</value>
+  </data>
 </root>

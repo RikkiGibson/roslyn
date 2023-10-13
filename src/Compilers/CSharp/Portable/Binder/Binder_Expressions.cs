@@ -5650,6 +5650,11 @@ namespace Microsoft.CodeAnalysis.CSharp
             // SPEC:    with the expression list of the element initializer as argument list, applying normal overload resolution for each invocation.
             // SPEC:    Thus, the collection object must contain an applicable Add method for each element initializer.
 
+            if (initializerType.OriginalDefinition.Equals(Compilation.GetWellKnownType(WellKnownType.System_Collections_Immutable_ImmutableArray_T)))
+            {
+                diagnostics.Add(ErrorCode.WRN_CollectionInitializerImmutableArray, initializerSyntax, initializerType.OriginalDefinition);
+            }
+
             Debug.Assert(initializerSyntax.Kind() == SyntaxKind.CollectionInitializerExpression);
             Debug.Assert(initializerSyntax.Expressions.Any());
             Debug.Assert((object)initializerType != null);

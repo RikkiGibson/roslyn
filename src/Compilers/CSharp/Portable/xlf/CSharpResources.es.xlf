@@ -2527,6 +2527,11 @@
         <target state="new">Collection expression may incur unexpected heap allocations due to use of '..' spreads. Consider explicitly creating an array, then converting to the final type to make the allocation explicit.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WRN_CollectionInitializerImmutableArray">
+        <source>'{0}' should not be created using a collection initializer. Use a collection expression or 'ImmutableArray.Create' instead.</source>
+        <target state="new">'{0}' should not be created using a collection initializer. Use a collection expression or 'ImmutableArray.Create' instead.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WRN_CompileTimeCheckedOverflow">
         <source>The operation may overflow '{0}' at runtime (use 'unchecked' syntax to override)</source>
         <target state="translated">La operación puede desbordar '{0}' en tiempo de ejecución (use la sintaxis "sin activar" para invalidar)</target>

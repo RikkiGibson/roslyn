@@ -337,6 +337,7 @@
                 case ErrorCode.WRN_Experimental:
                 case ErrorCode.WRN_CollectionExpressionRefStructMayAllocate:
                 case ErrorCode.WRN_CollectionExpressionRefStructSpreadMayAllocate:
+                case ErrorCode.WRN_CollectionInitializerImmutableArray:
                     return true;
                 default:
                     return false;
