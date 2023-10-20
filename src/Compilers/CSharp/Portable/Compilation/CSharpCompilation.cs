@@ -368,7 +368,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         {
             CheckSubmissionOptions(options);
             ValidateScriptCompilationParameters(previousScriptCompilation, returnType, ref globalsType);
-
+            
             return Create(
                 assemblyName,
                 options?.WithReferencesSupersedeLowerVersions(true) ?? s_defaultSubmissionOptions,
