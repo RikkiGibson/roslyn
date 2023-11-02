@@ -9407,7 +9407,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        private FlowAnalysisAnnotations GetLValueAnnotations(BoundExpression expr)
+        private FlowAnalysisAnnotations GetLValueAnnotations(BoundExpression? expr)
         {
             Debug.Assert(expr is not BoundObjectInitializerMember);
 
@@ -9899,79 +9899,116 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         public override BoundNode? VisitCompoundAssignmentOperator(BoundCompoundAssignmentOperator node)
         {
-            var left = node.Left;
-            var right = node.Right;
-            Visit(left);
-            TypeWithAnnotations declaredType = LvalueResultType;
-            TypeWithAnnotations leftLValueType = declaredType;
-            TypeWithState leftResultType = ResultType;
+            // for an operator like: TResult operator op(TLeft left, TRight right);
+            // and usage like: x op= y;
+            // expansion is (roughly): x = (TLeft)((TLeft)x op (TRight)y);
 
-            Debug.Assert(!IsConditionalState);
+            var method = node.Operator.Method;
+            Debug.Assert(method is null or { ParameterCount: 2 });
 
-            TypeWithState leftOnRightType = GetAdjustedResult(leftResultType, MakeSlot(node.Left));
+            // visit 'x' in '(TLeft)x'
+            Visit(node.Left);
+            Unsplit();
+            var leftTypeWithState = ResultType;
+            var leftLvalueType = LvalueResultType;
 
-            // https://github.com/dotnet/roslyn/issues/29962 Update operator based on inferred argument types.
-            if ((object)node.Operator.LeftType != null)
+            var leftParameter = method?.Parameters[0];
+            var leftParameterType = getType(leftParameter, node.Operator.LeftType);
+            if (leftParameterType.HasType)
             {
-                // https://github.com/dotnet/roslyn/issues/29962 Ignoring top-level nullability of operator left parameter.
-                leftOnRightType = VisitConversion(
+                // visit '(TLeft)x' in '(TLeft)x op (TRight)y'
+                // NB: the LHS has its conversion+placeholder stored separately because it is read then written, unlike the RHS which is only read.
+                leftTypeWithState = VisitConversion(
                     conversionOpt: null,
                     node.Left,
                     BoundNode.GetConversion(node.LeftConversion, node.LeftPlaceholder),
-                    TypeWithAnnotations.Create(node.Operator.LeftType),
-                    leftOnRightType,
+                    leftParameterType,
+                    leftTypeWithState,
                     checkConversion: true,
                     fromExplicitCast: false,
                     useLegacyWarnings: false,
-                    AssignmentKind.Assignment,
-                    reportTopLevelWarnings: false,
-                    reportRemainingWarnings: true);
-            }
-            else
-            {
-                leftOnRightType = default;
+                    AssignmentKind.Argument,
+                    parameterOpt: leftParameter);
             }
 
-            TypeWithState resultType;
-            TypeWithState rightType = VisitRvalueWithState(right);
-            if ((object)node.Operator.ReturnType != null)
+            // Handle `[DisallowNull]` on operator LHS parameter
+            if (leftParameter != null && CheckDisallowedNullAssignment(leftTypeWithState, leftParameter.FlowAnalysisAnnotations, node.Left.Syntax))
             {
-                if (node.Operator.Kind.IsUserDefined() && (object)node.Operator.Method != null && node.Operator.Method.ParameterCount == 2)
+                LearnFromNonNullTest(node.Left, ref State);
+            }
+
+            var rightParameter = method?.Parameters[1];
+            var rightParameterType = getType(rightParameter, node.Operator.RightType);
+            var (rightConversionOperand, rightConversion) = RemoveConversion(node.Right, includeExplicitConversions: false);
+
+            // visit 'y' in '(TRight)y'
+            var rightTypeWithState = VisitRvalueWithState(rightConversionOperand);
+            if (rightParameterType.HasType)
+            {
+                // visit '(TRight)y' in '(TLeft)x op (TRight)y'
+                rightTypeWithState = VisitConversion(
+                    GetConversionIfApplicable(node.Right, rightConversionOperand),
+                    rightConversionOperand,
+                    rightConversion,
+                    rightParameterType,
+                    rightTypeWithState,
+                    checkConversion: true,
+                    fromExplicitCast: false,
+                    useLegacyWarnings: false,
+                    assignmentKind: AssignmentKind.Argument,
+                    parameterOpt: rightParameter);
+            }
+
+            // Handle `[DisallowNull]` on operator RHS parameter
+            if (rightParameter != null && CheckDisallowedNullAssignment(rightTypeWithState, rightParameter.FlowAnalysisAnnotations, node.Right.Syntax))
+            {
+                LearnFromNonNullTest(node.Right, ref State);
+            }
+
+            // Get the result type of '(TLeft)x op (TRight)y'
+            var resultTypeWithState = node.Operator.ReturnType is { } returnType
+                ? InferResultNullability(node.Operator.Kind, method, returnType, leftTypeWithState, rightTypeWithState)
+                : TypeWithState.Create(node.Type, NullableFlowState.NotNull);
+
+            var leftArgumentAnnotations = GetLValueAnnotations(node.Left);
+            leftLvalueType = ApplyLValueAnnotations(leftLvalueType, leftArgumentAnnotations);
+
+            // visit '(TResult)((TLeft)x op (TRight)y)'
+            resultTypeWithState = VisitConversion(
+                conversionOpt: null,
+                conversionOperand: node,
+                BoundNode.GetConversion(node.FinalConversion, node.FinalPlaceholder),
+                leftLvalueType,
+                resultTypeWithState,
+                checkConversion: true,
+                fromExplicitCast: false,
+                useLegacyWarnings: false,
+                assignmentKind: AssignmentKind.Assignment);
+
+            // visit 'x = (TResult)((TLeft)x op (TRight)y)'
+            // Handle `[DisallowNull]` on LHS operand (final assignment target).
+            if (CheckDisallowedNullAssignment(resultTypeWithState, GetLValueAnnotations(node.Left), node.Right.Syntax))
+            {
+                LearnFromNonNullTest(node.Right, ref State);
+            }
+
+            AdjustSetValue(node.Left, ref resultTypeWithState);
+            TrackNullableStateForAssignment(node, leftLvalueType, MakeSlot(node.Left), resultTypeWithState, MakeSlot(rightConversionOperand));
+
+            SetResultType(node, resultTypeWithState);
+
+            return null;
+
+            TypeWithAnnotations getType(ParameterSymbol? parameter, TypeSymbol type)
+            {
+                if (parameter is null)
                 {
-                    MethodSymbol method = node.Operator.Method;
-                    VisitArguments(node, ImmutableArray.Create(node.Left, right), method.ParameterRefKinds, method.Parameters, argsToParamsOpt: default, defaultArguments: default,
-                        expanded: true, invokedAsExtensionMethod: false, method);
+                    return TypeWithAnnotations.Create(type);
                 }
 
-                resultType = InferResultNullability(node.Operator.Kind, node.Operator.Method, node.Operator.ReturnType, leftOnRightType, rightType);
-
-                FlowAnalysisAnnotations leftAnnotations = GetLValueAnnotations(node.Left);
-                leftLValueType = ApplyLValueAnnotations(leftLValueType, leftAnnotations);
-
-                resultType = VisitConversion(
-                    conversionOpt: null,
-                    node,
-                    BoundNode.GetConversion(node.FinalConversion, node.FinalPlaceholder),
-                    leftLValueType,
-                    resultType,
-                    checkConversion: true,
-                    fromExplicitCast: false,
-                    useLegacyWarnings: false,
-                    AssignmentKind.Assignment);
-
-                // If the LHS has annotations, we perform an additional check for nullable value types
-                CheckDisallowedNullAssignment(resultType, leftAnnotations, node.Syntax);
+                var annotations = GetParameterAnnotations(parameter);
+                return ApplyLValueAnnotations(parameter.TypeWithAnnotations, annotations);
             }
-            else
-            {
-                resultType = TypeWithState.Create(node.Type, NullableFlowState.NotNull);
-            }
-
-            AdjustSetValue(left, ref resultType);
-            TrackNullableStateForAssignment(node, leftLValueType, MakeSlot(node.Left), resultType);
-
-            SetResultType(node, resultType);
-            return null;
         }
 
         public override BoundNode? VisitFixedLocalCollectionInitializer(BoundFixedLocalCollectionInitializer node)
