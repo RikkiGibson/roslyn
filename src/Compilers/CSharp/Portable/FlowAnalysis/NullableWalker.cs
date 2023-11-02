@@ -9987,13 +9987,17 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             // visit 'x = (TResult)((TLeft)x op (TRight)y)'
             // Handle `[DisallowNull]` on LHS operand (final assignment target).
-            if (CheckDisallowedNullAssignment(resultTypeWithState, GetLValueAnnotations(node.Left), node.Right.Syntax))
+            if (CheckDisallowedNullAssignment(resultTypeWithState, leftArgumentAnnotations, node.Right.Syntax))
             {
                 LearnFromNonNullTest(node.Right, ref State);
             }
 
             AdjustSetValue(node.Left, ref resultTypeWithState);
-            TrackNullableStateForAssignment(node, leftLvalueType, MakeSlot(node.Left), resultTypeWithState, MakeSlot(rightConversionOperand));
+            // TODO: this may not be correct. we are not assigning the rhs value, subslots and all, to the lhs. we are assigning the result of an operator.
+            // add a test which assigns a value with sub-slots
+            // A compound assignment is not itself an lvalue, e.g. '(a += b) += c' is not permitted.
+            Debug.Assert(MakeSlot(node) == -1);
+            TrackNullableStateForAssignment(node, leftLvalueType, MakeSlot(node.Left), resultTypeWithState);
 
             SetResultType(node, resultTypeWithState);
 
