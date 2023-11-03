@@ -9903,14 +9903,33 @@ namespace Microsoft.CodeAnalysis.CSharp
             // and usage like: 'x op= y;'
             // expansion is (roughly): 'x = (TResult)((TLeft)x op (TRight)y);'
 
-            var method = node.Operator.Method;
-            Debug.Assert(method is null or { ParameterCount: 2 });
-
+            // visit left, visit right
+            // reinfer operator
+            // convert left to parameter type, convert right to parameter type
             // visit 'x'
             Visit(node.Left);
             Unsplit();
             var leftTypeWithState = ResultType;
             var leftLvalueType = LvalueResultType;
+
+            var (rightConversionOperand, rightConversion) = RemoveConversion(node.Right, includeExplicitConversions: false);
+
+            // visit 'y'
+            var rightTypeWithState = VisitRvalueWithState(rightConversionOperand);
+
+            // TODO: this probably doesn't convert the binary operator result to the left type.
+            // can't we make this return the result type of the binary operator, then convert it?
+            ReinferBinaryOperatorAndSetResult(
+                node.Left,
+                BoundNode.GetConversion(node.LeftConversion, node.LeftPlaceholder),
+                leftTypeWithState,
+                rightConversionOperand,
+                rightConversion,
+                rightTypeWithState,
+                node);
+
+            var method = node.Operator.Method;
+            Debug.Assert(method is null or { ParameterCount: 2 });
 
             var leftParameter = method?.Parameters[0];
             var leftParameterType = getType(leftParameter, node.Operator.LeftType);
@@ -9939,10 +9958,6 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             var rightParameter = method?.Parameters[1];
             var rightParameterType = getType(rightParameter, node.Operator.RightType);
-            var (rightConversionOperand, rightConversion) = RemoveConversion(node.Right, includeExplicitConversions: false);
-
-            // visit 'y'
-            var rightTypeWithState = VisitRvalueWithState(rightConversionOperand);
             if (rightParameterType.HasType)
             {
                 // visit '(TRight)y'
