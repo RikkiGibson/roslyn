@@ -9355,9 +9355,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                 // If the LHS has annotations, we perform an additional check for nullable value types
                 CheckDisallowedNullAssignment(rightState, leftAnnotations, right.Syntax);
 
-                AdjustSetValue(left, ref rightState);
-                TrackNullableStateForAssignment(right, leftLValueType, MakeSlot(left), rightState, MakeSlot(right));
-
                 if (left is BoundDiscardExpression)
                 {
                     var lvalueType = rightState.ToTypeWithAnnotations(compilation);
@@ -9368,6 +9365,9 @@ namespace Microsoft.CodeAnalysis.CSharp
                 {
                     SetResult(node, TypeWithState.Create(leftLValueType.Type, rightState.State), leftLValueType);
                 }
+
+                AdjustSetValue(left, ref rightState);
+                TrackNullableStateForAssignment(right, leftLValueType, MakeSlot(left), rightState, MakeSlot(right));
             }
 
             return null;
@@ -9899,14 +9899,14 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         public override BoundNode? VisitCompoundAssignmentOperator(BoundCompoundAssignmentOperator node)
         {
-            // for an operator like: TResult operator op(TLeft left, TRight right);
-            // and usage like: x op= y;
-            // expansion is (roughly): x = (TResult)((TLeft)x op (TRight)y);
+            // for an operator like: 'TResult operator op(TLeft left, TRight right);'
+            // and usage like: 'x op= y;'
+            // expansion is (roughly): 'x = (TResult)((TLeft)x op (TRight)y);'
 
             var method = node.Operator.Method;
             Debug.Assert(method is null or { ParameterCount: 2 });
 
-            // visit 'x' in '(TLeft)x'
+            // visit 'x'
             Visit(node.Left);
             Unsplit();
             var leftTypeWithState = ResultType;
@@ -9916,14 +9916,14 @@ namespace Microsoft.CodeAnalysis.CSharp
             var leftParameterType = getType(leftParameter, node.Operator.LeftType);
             if (leftParameterType.HasType)
             {
-                // visit '(TLeft)x' in '(TLeft)x op (TRight)y'
+                // visit '(TLeft)x'
                 // NB: the LHS has its conversion+placeholder stored separately because it is read then written, unlike the RHS which is only read.
                 leftTypeWithState = VisitConversion(
                     conversionOpt: null,
                     node.Left,
                     BoundNode.GetConversion(node.LeftConversion, node.LeftPlaceholder),
-                    leftParameterType,
-                    leftTypeWithState,
+                    targetTypeWithNullability: leftParameterType,
+                    operandType: leftTypeWithState,
                     checkConversion: true,
                     fromExplicitCast: false,
                     useLegacyWarnings: false,
@@ -9941,17 +9941,17 @@ namespace Microsoft.CodeAnalysis.CSharp
             var rightParameterType = getType(rightParameter, node.Operator.RightType);
             var (rightConversionOperand, rightConversion) = RemoveConversion(node.Right, includeExplicitConversions: false);
 
-            // visit 'y' in '(TRight)y'
+            // visit 'y'
             var rightTypeWithState = VisitRvalueWithState(rightConversionOperand);
             if (rightParameterType.HasType)
             {
-                // visit '(TRight)y' in '(TLeft)x op (TRight)y'
+                // visit '(TRight)y'
                 rightTypeWithState = VisitConversion(
                     GetConversionIfApplicable(node.Right, rightConversionOperand),
                     rightConversionOperand,
                     rightConversion,
-                    rightParameterType,
-                    rightTypeWithState,
+                    targetTypeWithNullability: rightParameterType,
+                    operandType: rightTypeWithState,
                     checkConversion: true,
                     fromExplicitCast: false,
                     useLegacyWarnings: false,
@@ -9978,8 +9978,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                 conversionOpt: null,
                 conversionOperand: node,
                 BoundNode.GetConversion(node.FinalConversion, node.FinalPlaceholder),
-                leftLvalueType,
-                resultTypeWithState,
+                targetTypeWithNullability: leftLvalueType,
+                operandType: resultTypeWithState,
                 checkConversion: true,
                 fromExplicitCast: false,
                 useLegacyWarnings: false,
@@ -9992,11 +9992,11 @@ namespace Microsoft.CodeAnalysis.CSharp
                 LearnFromNonNullTest(node.Right, ref State);
             }
 
+            SetResultType(node, resultTypeWithState);
+
+            AdjustSetValue(node.Left, ref resultTypeWithState);
             Debug.Assert(MakeSlot(node) == -1);
             TrackNullableStateForAssignment(node, leftLvalueType, MakeSlot(node.Left), resultTypeWithState);
-
-            SetResultType(node, resultTypeWithState);
-            AdjustSetValue(node.Left, ref resultTypeWithState);
 
             return null;
 
