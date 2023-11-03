@@ -4746,6 +4746,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             Conversion rightConversion,
             TypeWithState rightType,
             BoundBinaryOperator binary)
+            // pass operatorKind, method.
+            // should not need binary.Left or binary.Right!
         {
             Debug.Assert(!IsConditionalState);
             // At this point, State.Reachable may be false for
@@ -4765,7 +4767,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                     getTypeIfContainingType(methodContainer, rightUnderlyingType.Type, rightOperand) ?? methodContainer;
                 method = (MethodSymbol)AsMemberOfType(asMemberOfType, method);
 
-                // Analyze operator call properly (honoring [Disallow|Allow|Maybe|NotNull] attribute annotations) https://github.com/dotnet/roslyn/issues/32671
                 var parameters = method.Parameters;
                 visitOperandConversionAndPostConditions(binary.Left, leftOperand, leftConversion, parameters[0], leftUnderlyingType);
                 visitOperandConversionAndPostConditions(binary.Right, rightOperand, rightConversion, parameters[1], rightUnderlyingType);
