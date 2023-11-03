@@ -9965,7 +9965,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 LearnFromNonNullTest(node.Right, ref State);
             }
 
-            // Get the result type of '(TLeft)x op (TRight)y'
+            // visit '(TLeft)x op (TRight)y'
             var resultTypeWithState = node.Operator.ReturnType is { } returnType
                 ? InferResultNullability(node.Operator.Kind, method, returnType, leftTypeWithState, rightTypeWithState)
                 : TypeWithState.Create(node.Type, NullableFlowState.NotNull);
@@ -9987,10 +9987,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             // visit 'x = (TResult)((TLeft)x op (TRight)y)'
             // Handle `[DisallowNull]` on LHS operand (final assignment target).
-            if (CheckDisallowedNullAssignment(resultTypeWithState, leftArgumentAnnotations, node.Right.Syntax))
-            {
-                LearnFromNonNullTest(node.Right, ref State);
-            }
+            CheckDisallowedNullAssignment(resultTypeWithState, leftArgumentAnnotations, node.Syntax);
 
             SetResultType(node, resultTypeWithState);
 
