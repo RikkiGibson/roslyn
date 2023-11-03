@@ -9901,7 +9901,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         {
             // for an operator like: TResult operator op(TLeft left, TRight right);
             // and usage like: x op= y;
-            // expansion is (roughly): x = (TLeft)((TLeft)x op (TRight)y);
+            // expansion is (roughly): x = (TResult)((TLeft)x op (TRight)y);
 
             var method = node.Operator.Method;
             Debug.Assert(method is null or { ParameterCount: 2 });
@@ -9992,14 +9992,11 @@ namespace Microsoft.CodeAnalysis.CSharp
                 LearnFromNonNullTest(node.Right, ref State);
             }
 
-            AdjustSetValue(node.Left, ref resultTypeWithState);
-            // TODO: this may not be correct. we are not assigning the rhs value, subslots and all, to the lhs. we are assigning the result of an operator.
-            // add a test which assigns a value with sub-slots
-            // A compound assignment is not itself an lvalue, e.g. '(a += b) += c' is not permitted.
             Debug.Assert(MakeSlot(node) == -1);
             TrackNullableStateForAssignment(node, leftLvalueType, MakeSlot(node.Left), resultTypeWithState);
 
             SetResultType(node, resultTypeWithState);
+            AdjustSetValue(node.Left, ref resultTypeWithState);
 
             return null;
 
