@@ -4603,7 +4603,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 // Note that we do this visit last to try and make sure that the "visit for public API" overwrites walker state recorded during previous visits where possible.
                 SetState(stateAfterLeft);
                 var rightType = VisitRvalueWithState(rightOperand);
-                ReinferBinaryOperatorAndSetResult(leftOperand, leftConversion, leftType, rightOperand, rightConversion, rightType, binary);
+                ReinferBinaryOperatorAndSetResult(leftOperand, leftConversion, leftType, rightOperand, rightConversion, rightType, binary.OperatorKind, binary.Method);
                 if (isKnownNullOrNotNull(rightOperand, rightType))
                 {
                     var isNullConstant = rightOperand.ConstantValueOpt?.IsNull == true;
@@ -4745,7 +4745,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             BoundExpression rightOperand,
             Conversion rightConversion,
             TypeWithState rightType,
-            BoundBinaryOperator binary)
+            BinaryOperatorKind operatorKind,
+            MethodSymbol? method)
             // pass operatorKind, method.
             // should not need binary.Left or binary.Right!
         {
@@ -4753,14 +4754,12 @@ namespace Microsoft.CodeAnalysis.CSharp
             // At this point, State.Reachable may be false for
             // invalid code such as `s + throw new Exception()`.
 
-            var method = binary.Method;
-
-            if (binary.OperatorKind.IsUserDefined() &&
+            if (operatorKind.IsUserDefined() &&
                 method?.ParameterCount == 2)
             {
                 // Update method based on inferred operand type.
                 TypeSymbol methodContainer = method.ContainingType;
-                bool isLifted = binary.OperatorKind.IsLifted();
+                bool isLifted = operatorKind.IsLifted();
                 TypeWithState leftUnderlyingType = GetNullableUnderlyingTypeIfNecessary(isLifted, leftType);
                 TypeWithState rightUnderlyingType = GetNullableUnderlyingTypeIfNecessary(isLifted, rightType);
                 TypeSymbol asMemberOfType = getTypeIfContainingType(methodContainer, leftUnderlyingType.Type, leftOperand) ??
@@ -4836,10 +4835,10 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
 
             Debug.Assert(!IsConditionalState);
-            if (binary.OperatorKind.IsLifted()
-                && binary.OperatorKind.Operator() is BinaryOperatorKind.GreaterThan or BinaryOperatorKind.GreaterThanOrEqual or BinaryOperatorKind.LessThan or BinaryOperatorKind.LessThanOrEqual)
+            if (operatorKind.IsLifted()
+                && operatorKind.Operator() is BinaryOperatorKind.GreaterThan or BinaryOperatorKind.GreaterThanOrEqual or BinaryOperatorKind.LessThan or BinaryOperatorKind.LessThanOrEqual)
             {
-                Debug.Assert(binary.Type.SpecialType == SpecialType.System_Boolean);
+                Debug.Assert( binary.Type.SpecialType == SpecialType.System_Boolean);
                 SplitAndLearnFromNonNullTest(binary.Left, whenTrue: true);
                 SplitAndLearnFromNonNullTest(binary.Right, whenTrue: true);
             }
@@ -4880,7 +4879,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             VisitRvalue(rightOperand);
 
             var rightType = ResultType;
-            ReinferBinaryOperatorAndSetResult(leftOperand, leftConversion, leftType, rightOperand, rightConversion, rightType, binary);
+            ReinferBinaryOperatorAndSetResult(leftOperand, leftConversion, leftType, rightOperand, rightConversion, rightType, binary.OperatorKind, binary.Method);
 
             BinaryOperatorKind op = binary.OperatorKind.Operator();
 
@@ -9918,6 +9917,9 @@ namespace Microsoft.CodeAnalysis.CSharp
             // visit 'y'
             var rightTypeWithState = VisitRvalueWithState(rightConversionOperand);
 
+            var method = node.Operator.Method;
+            Debug.Assert(method is null or { ParameterCount: 2 });
+
             // TODO: this probably doesn't convert the binary operator result to the left type.
             // can't we make this return the result type of the binary operator, then convert it?
             ReinferBinaryOperatorAndSetResult(
@@ -9927,10 +9929,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                 rightConversionOperand,
                 rightConversion,
                 rightTypeWithState,
-                node);
-
-            var method = node.Operator.Method;
-            Debug.Assert(method is null or { ParameterCount: 2 });
+                node.Operator.Kind,
+                method);
 
             var leftParameter = method?.Parameters[0];
             var leftParameterType = getType(leftParameter, node.Operator.LeftType);
