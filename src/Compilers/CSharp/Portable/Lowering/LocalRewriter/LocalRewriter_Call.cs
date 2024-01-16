@@ -276,11 +276,17 @@ namespace Microsoft.CodeAnalysis.CSharp
                 Debug.Assert(receiverOpt.Type.Equals(interceptor.Parameters[0].Type, TypeCompareKind.AllIgnoreOptions)
                     || (receiverOpt.Type.IsValueType && !interceptor.Parameters[0].Type.IsValueType));
                 receiverOpt = MakeConversionNode(receiverOpt, interceptor.Parameters[0].Type, @checked: false, markAsChecked: true);
+
+                var thisRefKind = methodThisParameter.RefKind;
+                if (thisRefKind == RefKind.Ref)
+                {
+                    // todo: detect an rvalue and error here?
+                }
+
                 arguments = arguments.Insert(0, receiverOpt);
                 receiverOpt = null;
 
                 // CodeGenerator.EmitArguments requires that we have a fully-filled-out argumentRefKindsOpt for any ref/in/out arguments.
-                var thisRefKind = methodThisParameter.RefKind;
                 if (argumentRefKindsOpt.IsDefault && thisRefKind != RefKind.None)
                 {
                     argumentRefKindsOpt = method.Parameters.SelectAsArray(static param => param.RefKind);

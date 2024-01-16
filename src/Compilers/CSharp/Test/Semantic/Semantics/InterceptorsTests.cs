@@ -3423,10 +3423,13 @@ public class InterceptorsTests : CSharpTestBase
             Diagnostic(ErrorCode.ERR_InterceptorSignatureMismatch, @"InterceptsLocation(""Program.cs"", 11, 9)").WithArguments("Program.InterceptableMethod(ref readonly int)", "D.Interceptor(in int)").WithLocation(17, 6));
     }
 
-    [Fact]
-    public void SignatureMismatch_10()
+    [Theory]
+    [InlineData("")]
+    [InlineData("in ")]
+    [InlineData("ref readonly ")]
+    public void SignatureMismatch_10(string refKind)
     {
-        var source = """
+        var source = $$"""
             using System.Runtime.CompilerServices;
             using System;
 
@@ -3443,14 +3446,14 @@ public class InterceptorsTests : CSharpTestBase
             static class D
             {
                 [InterceptsLocation("Program.cs", 10, 23)]
-                public static void Interceptor(this in Program x) => Console.Write("Intercepted");
+                public static void Interceptor(this {{refKind}}Program x) => Console.Write("Intercepted");
             }
             """;
         var comp = CreateCompilation(new[] { (source, "Program.cs"), s_attributesSource }, parseOptions: RegularWithInterceptors);
         comp.VerifyEmitDiagnostics(
             // Program.cs(16,6): error CS9148: Interceptor must have a 'this' parameter matching parameter 'ref Program this' on 'Program.InterceptableMethod()'.
             //     [InterceptsLocation("Program.cs", 10, 23)]
-            Diagnostic(ErrorCode.ERR_InterceptorMustHaveMatchingThisParameter, @"InterceptsLocation(""Program.cs"", 10, 23)").WithArguments("ref Program this", "Program.InterceptableMethod()").WithLocation(16, 6));
+            Diagnostic(ErrorCode.ERR_InterceptorMustHaveMatchingThisParameter, @"InterceptsLocation(""Program.cs"", 10, 23)").WithArguments($"ref Program this", "Program.InterceptableMethod()").WithLocation(16, 6));
     }
 
     [Fact]
@@ -5053,5 +5056,94 @@ partial struct CustomHandler
               IL_000b:  ret
             }
             """);
+    }
+
+    [Fact]
+    public void InterceptStructInstanceMethod_RvalueReceiver()
+    {
+        // TODO2: this test crashes in debug mode due to assert in EmitExpression.cs:722.
+        var source = ($$"""
+            using System;
+
+            struct Program
+            {
+                public void InterceptableMethod() => Console.Write("Original");
+
+                public static void Main()
+                {
+                    new Program().InterceptableMethod();
+                }
+            }
+            """, "Program.cs");
+
+        var interceptor = ("""
+            using System.Runtime.CompilerServices;
+            using System;
+
+            static class D
+            {
+                [InterceptsLocation("Program.cs", 9, 23)]
+                public static void Interceptor(this ref Program x) => Console.Write("Intercepted");
+            }
+            """, "Interceptor.cs");
+
+        var verifier = CompileAndVerify(new[] { source, s_attributesSource }, parseOptions: RegularWithInterceptors);
+        verifier.VerifyDiagnostics();
+        verifier.VerifyIL("Program.Main", """
+            {
+              // Code size       15 (0xf)
+              .maxstack  2
+              .locals init (Program V_0)
+              IL_0000:  ldloca.s   V_0
+              IL_0002:  dup
+              IL_0003:  initobj    "Program"
+              IL_0009:  call       "void Program.InterceptableMethod()"
+              IL_000e:  ret
+            }
+            """);
+
+        verifier = CompileAndVerify(new[] { source, interceptor, s_attributesSource }, parseOptions: RegularWithInterceptors);
+        verifier.VerifyDiagnostics();
+        verifier.VerifyIL("Program.Main", """
+
+            """);
+    }
+
+    [Fact]
+    public void InterceptStructExtensionMethod_RvalueReceiver()
+    {
+        var source = ($$"""
+            using System;
+
+            struct Program
+            {
+                public static void Main()
+                {
+                    new Program().InterceptableMethod();
+                }
+            }
+
+            static class Ext
+            {
+                public static void InterceptableMethod(this ref Program program) => Console.Write("Original");
+            }
+            """, "Program.cs");
+
+        var interceptor = ("""
+            using System.Runtime.CompilerServices;
+            using System;
+
+            static class D
+            {
+                [InterceptsLocation("Program.cs", 7, 23)]
+                public static void Interceptor(this ref Program x) => Console.Write("Intercepted");
+            }
+            """, "Interceptor.cs");
+
+        var comp = CreateCompilation(new[] { source, interceptor, s_attributesSource }, parseOptions: RegularWithInterceptors);
+        comp.VerifyEmitDiagnostics(
+            // Program.cs(7,9): error CS1510: A ref or out value must be an assignable variable
+            //         new Program().InterceptableMethod();
+            Diagnostic(ErrorCode.ERR_RefLvalueExpected, "new Program()").WithLocation(7, 9));
     }
 }
