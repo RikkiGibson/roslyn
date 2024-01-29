@@ -89,6 +89,7 @@ namespace Microsoft.CodeAnalysis
         }
 
         // PROTOTYPE(ndsm): abstract?
+        [Experimental("TODO1")]
         public virtual bool DisableNullableAnalysis
         {
             get { return false; }

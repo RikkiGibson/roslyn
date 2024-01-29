@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#pragma warning disable TODO1 // Internal use of experimental API
 #nullable disable
 
 using System;
@@ -35,20 +36,20 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         private readonly BinderFactory _binderFactory;
         private Func<CSharpSyntaxNode, MemberSemanticModel> _createMemberModelFunction;
-        private readonly bool _ignoresAccessibility;
-        private readonly bool _disableNullableAnalysis;
+        private readonly SemanticModelOptions _options;
         private ScriptLocalScopeBinder.Labels _globalStatementLabels;
 
         private static readonly Func<CSharpSyntaxNode, bool> s_isMemberDeclarationFunction = IsMemberDeclaration;
 
-        internal SyntaxTreeSemanticModel(CSharpCompilation compilation, SyntaxTree syntaxTree, bool ignoreAccessibility = false, bool disableNullableAnalysis = false)
+        internal SyntaxTreeSemanticModel(CSharpCompilation compilation, SyntaxTree syntaxTree, SemanticModelOptions options)
         {
             _compilation = compilation;
             _syntaxTree = syntaxTree;
-            _ignoresAccessibility = ignoreAccessibility;
-            _disableNullableAnalysis = disableNullableAnalysis;
+            _options = options;
 
-            _binderFactory = compilation.GetBinderFactory(SyntaxTree, ignoreAccessibility);
+            // TODO: perhaps it will be better to just use SemanticModelOptions at the entry point
+            // but continue to pass bools down until it moves out of experimental phase.
+            _binderFactory = compilation.GetBinderFactory(SyntaxTree, options);
         }
 
         internal SyntaxTreeSemanticModel(CSharpCompilation parentCompilation, SyntaxTree parentSyntaxTree, SyntaxTree speculatedSyntaxTree, bool ignoreAccessibility)
