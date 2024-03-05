@@ -5,6 +5,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -15,6 +17,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 using Roslyn.Test.Utilities;
 using Roslyn.Test.Utilities.TestGenerators;
+using Roslyn.Utilities;
 using Xunit;
 
 namespace Microsoft.CodeAnalysis.CSharp.Semantic.UnitTests.SourceGeneration
@@ -2152,6 +2155,165 @@ class C
                 : base(tag, callback)
             {
             }
+        }
+
+        [Fact]
+        public void test1()
+        {
+            var source = @"
+class C 
+{
+    void M()
+    {
+        M1();
+    }
+
+    void M1()
+    {
+    }
+}
+";
+            Compilation compilation = CreateCompilation((source, @"C:\BaseDirectory\src\Program.cs"), options: TestOptions.DebugDll);
+            compilation.VerifyDiagnostics();
+
+            Assert.Single(compilation.SyntaxTrees);
+
+            GeneratorDriver driver = CSharpGeneratorDriver.Create([new MyGenerator()]);
+            driver = driver.RunGenerators(compilation);
+
+            var runResult = driver.GetRunResult();
+            Assert.Single(runResult.GeneratedTrees);
+
+            var text = runResult.GeneratedTrees[0].GetText().ToString();
+            AssertEx.Equal("""
+                using System.Runtime.CompilerServices;
+
+                namespace MyInterceptors;
+
+                static class Interceptors
+                {
+                    [InterceptsLocation("v1:../../../src/Program.cs(5,8)")]
+                    public static void Interceptor(this ReceiverType receiverType, ParamType paramType) { }
+                }
+                """, text);
+        }
+
+        private class MyGenerator : IIncrementalGenerator
+        {
+            private IncrementalValueProvider<string> GetHintNameProvider(IncrementalGeneratorInitializationContext context)
+                // Assume the hintName somehow comes from the names/content of additional files
+                => context.AdditionalTextsProvider.Collect().Select((texts, token) => "MyInterceptors.cs");
+
+            private bool ShouldIntercept(GeneratorSyntaxContext context) => true;
+
+            public void Initialize(IncrementalGeneratorInitializationContext context)
+            {
+                var handles = context.SyntaxProvider.CreateSyntaxProvider((node, token) => node is InvocationExpressionSyntax, (context, token) =>
+                {
+                    if (ShouldIntercept(context) && context.TryGetInterceptorHandle((InvocationExpressionSyntax)context.Node, out var handle))
+                    {
+                        return handle;
+                    }
+
+                    return (InterceptorHandle?)null;
+                })
+                .Where(handle => handle != null)
+                .Select((handle, token) => handle!.Value);
+
+                var hintNameProvider = GetHintNameProvider(context);
+
+                var files = handles.Collect()
+                    .Combine(hintNameProvider)
+                    .Select(((ImmutableArray<InterceptorHandle> handles, string hintName) pair, CancellationToken token) =>
+                    {
+                        var (handles, hintName) = pair;
+                        var builder = new StringBuilder();
+                        builder.AppendLine("using System.Runtime.CompilerServices;");
+                        builder.AppendLine("");
+                        builder.AppendLine("namespace MyInterceptors;");
+                        builder.AppendLine("");
+                        builder.AppendLine("static class Interceptors");
+                        builder.AppendLine("{");
+                        foreach (var handle in handles)
+                        {
+                            builder.AppendLine($$"""
+                                [InterceptsLocation({{handle.GetInterceptsLocationAttributeArguments(hintName)}})]
+                                public static void Interceptor(this ReceiverType receiverType, ParamType paramType) { }
+                            """);
+                        }
+                        builder.AppendLine("}");
+                        return (hintName, content: builder.ToString());
+                    });
+
+                context.RegisterSourceOutput(files, (context, file) =>
+                {
+                    context.AddSource(file.hintName, file.content);
+                });
+            }
+        }
+    }
+
+    internal struct InterceptorHandle : IEquatable<InterceptorHandle>
+    {
+        private readonly string _generatedFilesBasePath;
+        private readonly string _containingFilePath;
+        private readonly int _line;
+        private readonly int _character;
+
+        internal InterceptorHandle(string generatedFilesBasePath, string containingFilePath, int line, int character)
+        {
+            _generatedFilesBasePath = generatedFilesBasePath;
+            _containingFilePath = containingFilePath;
+            _line = line;
+            _character = character;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is InterceptorHandle other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return Hash.Combine(_generatedFilesBasePath, Hash.Combine(_containingFilePath.GetHashCode(), Hash.Combine(_line.GetHashCode(), _character.GetHashCode())));
+        }
+
+        public bool Equals(InterceptorHandle other)
+        {
+            return _generatedFilesBasePath == other._generatedFilesBasePath
+                && _containingFilePath == other._containingFilePath
+                && _line == other._line
+                && _character == other._character;
+        }
+
+        public string GetInterceptsLocationAttributeArguments(string interceptorFileHintName)
+        {
+            var relativePath = PathUtilities.NormalizeWithForwardSlash(
+                PathUtilities.GetRelativePath(
+                    Path.GetDirectoryName(Path.Combine(_generatedFilesBasePath, interceptorFileHintName))!,
+                    _containingFilePath));
+
+            return SymbolDisplay.FormatLiteral($"v1:{relativePath}({_line},{_character})", quote: true);
+        }
+    }
+
+    static class CSharpExtensions1
+    {
+        internal static bool TryGetInterceptorHandle(this GeneratorSyntaxContext context, InvocationExpressionSyntax invocation, out InterceptorHandle handle)
+        {
+            if (invocation.GetInterceptableNameSyntax() is not { } nameSyntax)
+            {
+                handle = default;
+                return false;
+            }
+
+            var callLineColumn = nameSyntax.Location.GetLineSpan().Span.Start;
+            handle = new InterceptorHandle(
+                generatedFilesBasePath: /* context.BaseDirectory */ @"C:\BaseDirectory\obj\Microsoft.CodeAnalysis.CSharp.Semantic.UnitTests\Microsoft.CodeAnalysis.CSharp.Semantic.UnitTests.SyntaxAwareGeneratorTests.MyGenerator\",
+                nameSyntax.SyntaxTree.FilePath,
+                callLineColumn.Line,
+                callLineColumn.Character);
+            return true;
         }
     }
 }

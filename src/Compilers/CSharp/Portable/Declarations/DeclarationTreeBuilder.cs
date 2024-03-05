@@ -913,6 +913,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             CSharpSyntaxNode parent,
             CoreInternalSyntax.SyntaxList<Syntax.InternalSyntax.MemberDeclarationSyntax> members,
             ref SingleTypeDeclaration.TypeDeclarationFlags declFlags,
+            ref BitVector interceptors,
             bool skipGlobalStatements = false,
             bool hasPrimaryCtor = false)
         {
@@ -940,6 +941,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                 {
                     anyMemberHasAttributes = true;
                 }
+
+                CheckMemberForInterceptsLocationAttribute(member)
 
                 if (!anyRequiredMembers && checkPropertyOrFieldMemberForRequiredModifier(member))
                 {

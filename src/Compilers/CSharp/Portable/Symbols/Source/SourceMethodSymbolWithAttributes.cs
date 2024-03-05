@@ -940,6 +940,75 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+        //private void CheckPresenceOfTypeIdentifierAttribute()
+        //{
+        //    // Have we already decoded well-known attributes?
+        //    if (_lazyCustomAttributesBag?.IsDecodedWellKnownAttributeDataComputed == true)
+        //    {
+        //        return;
+        //    }
+
+        //    // We want this function to be as cheap as possible, it is called for every top level type
+        //    // and we don't want to bind attributes attached to the declaration unless there is a chance
+        //    // that one of them is TypeIdentifier attribute.
+        //    ImmutableArray<SyntaxList<AttributeListSyntax>> attributeLists = GetAttributeDeclarations(QuickAttributes.TypeIdentifier);
+
+        //    foreach (SyntaxList<AttributeListSyntax> list in attributeLists)
+        //    {
+        //        var syntaxTree = list.Node.SyntaxTree;
+        //        QuickAttributeChecker checker = this.DeclaringCompilation.GetBinderFactory(list.Node.SyntaxTree).GetBinder(list.Node).QuickAttributeChecker;
+
+        //        foreach (AttributeListSyntax attrList in list)
+        //        {
+        //            foreach (AttributeSyntax attr in attrList.Attributes)
+        //            {
+        //                if (checker.IsPossibleMatch(attr, QuickAttributes.TypeIdentifier))
+        //                {
+        //                    // This attribute syntax might be an application of TypeIdentifierAttribute.
+        //                    // Let's bind it.
+        //                    // For simplicity we bind all attributes.
+        //                    GetAttributes();
+        //                    return;
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+
+        /// <summary>
+        /// Gets all the attribute lists for this symbol.  If <paramref name="quickAttributes"/> is provided
+        /// the attribute lists will only be returned if there is reasonable belief that 
+        /// the type has one of the attributes specified by <paramref name="quickAttributes"/> on it.
+        /// This can avoid going back to syntax if we know the type definitely doesn't have an attribute
+        /// on it that could be the one specified by <paramref name="quickAttributes"/>. Pass <see langword="null"/>
+        /// to get all attribute declarations.
+        /// </summary>
+        internal ImmutableArray<SyntaxList<AttributeListSyntax>> GetAttributeDeclarations(QuickAttributes? quickAttributes = null)
+        {
+            // if the compilation has any global aliases to these quick attributes, then we have to return
+            // all the attributes on the decl.  For example, if there is a `global using X = Y;` and 
+            // then we have to return any attributes on the type as they might say `[X]`.
+            if (quickAttributes != null)
+            {
+                foreach (var decl in this.DeclaringCompilation.MergedRootDeclaration.Declarations)
+                {
+                    if (decl is RootSingleNamespaceDeclaration rootNamespaceDecl &&
+                        (rootNamespaceDecl.GlobalAliasedQuickAttributes & quickAttributes) != 0)
+                    {
+                        return declaration.GetAttributeDeclarations(quickAttributes: null);
+                    }
+                }
+            }
+
+            return GetAttributeDeclarations(quickAttributes);
+        }
+
+        internal void DiscoverInterceptors()
+        {
+            ImmutableArray<SyntaxList<AttributeListSyntax>> attributeLists = GetAttributeDeclarations(QuickAttributes.TypeIdentifier);
+            QuickAttributeChecker checker = this.DeclaringCompilation.GetBinderFactory(list.Node.SyntaxTree).GetBinder(list.Node).QuickAttributeChecker;
+        }
+
         private void DecodeInterceptsLocationAttribute(DecodeWellKnownAttributeArguments<AttributeSyntax, CSharpAttributeData, AttributeLocation> arguments)
         {
             Debug.Assert(arguments.AttributeSyntaxOpt is object);
