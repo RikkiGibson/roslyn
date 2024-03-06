@@ -6200,4 +6200,46 @@ partial struct CustomHandler
         interceptor = model.GetInterceptorMethod(call);
         Assert.Equal("void Interceptors.Outer.D.Interceptor1()", interceptor.ToTestDisplayString());
     }
+
+    [Theory]
+    [CombinatorialData]
+    public void GetInterceptorMethod_09(bool featureExists)
+    {
+        // InterceptorsPreviewNamespaces is empty or does not exist
+        var source = ("""
+            C.M();
+
+            class C
+            {
+                public static void M() => throw null;
+            }
+            """, "Program.cs");
+
+        var interceptorSource = ("""
+            using System;
+            using System.Runtime.CompilerServices;
+
+            namespace Interceptors
+            {
+                static class Outer
+                {
+                    public static class D
+                    {
+                        [InterceptsLocation("Program.cs", 1, 3)]
+                        public static void Interceptor1() => Console.Write(1);
+                    }
+                }
+            }
+            """, "Interceptor.cs");
+
+        var comp = CreateCompilation(new[] { source, interceptorSource, s_attributesSource }, parseOptions: featureExists ? TestOptions.Regular.WithFeature("InterceptorsPreviewNamespaces", "") : TestOptions.Regular);
+
+        var tree = comp.SyntaxTrees[0];
+        var model = comp.GetSemanticModel(tree);
+        var call = tree.GetRoot().DescendantNodes().OfType<InvocationExpressionSyntax>().Single();
+
+        Assert.Null(model.GetInterceptorMethod(call));
+        comp.VerifyEmitDiagnostics();
+        Assert.Null(model.GetInterceptorMethod(call));
+    }
 }
