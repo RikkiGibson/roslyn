@@ -6239,7 +6239,10 @@ partial struct CustomHandler
         var call = tree.GetRoot().DescendantNodes().OfType<InvocationExpressionSyntax>().Single();
 
         Assert.Null(model.GetInterceptorMethod(call));
-        comp.VerifyEmitDiagnostics();
+        comp.VerifyEmitDiagnostics(
+            // Interceptor.cs(10,14): error CS9137: The 'interceptors' experimental feature is not enabled in this namespace. Add '<InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);Interceptors</InterceptorsPreviewNamespaces>' to your project.
+            //             [InterceptsLocation("Program.cs", 1, 3)]
+            Diagnostic(ErrorCode.ERR_InterceptorsFeatureNotEnabled, @"InterceptsLocation(""Program.cs"", 1, 3)").WithArguments("<InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);Interceptors</InterceptorsPreviewNamespaces>").WithLocation(10, 14));
         Assert.Null(model.GetInterceptorMethod(call));
     }
 }
