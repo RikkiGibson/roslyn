@@ -107,7 +107,7 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests.Symbols
                 """;
             var comp = CreateCompilation([source, IsExternalInitTypeDefinition]);
             comp.VerifyEmitDiagnostics(
-                // (3,17): error CS9301: Partial property 'C.P' must have an definition part.
+                // (3,17): error CS9301: Partial property 'C.P' must have a definition part.
                 //     partial int P { get => throw null!; set { } }
                 Diagnostic(ErrorCode.ERR_PartialPropertyMissingDefinition, "P").WithArguments("C.P").WithLocation(3, 17)
                 );
@@ -223,7 +223,7 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests.Symbols
                 """;
             var comp = CreateCompilation(source);
             comp.VerifyEmitDiagnostics(
-                // (3,17): error CS9301: Partial property 'C.P' must have an definition part.
+                // (3,17): error CS9301: Partial property 'C.P' must have a definition part.
                 //     partial int P { get => throw null!; set { } }
                 Diagnostic(ErrorCode.ERR_PartialPropertyMissingDefinition, "P").WithArguments("C.P").WithLocation(3, 17),
                 // (4,17): error CS9303: A partial property may not have multiple implementing declarations
@@ -391,7 +391,7 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests.Symbols
                 // (3,24): error CS0102: The type 'C' already contains a definition for 'Item'
                 //     public partial int this[int i] { get; }
                 Diagnostic(ErrorCode.ERR_DuplicateNameInClass, "this").WithArguments("C", "Item").WithLocation(3, 24),
-                // (4,24): error CS9301: Partial property 'C.Item' must have an definition part.
+                // (4,24): error CS9301: Partial property 'C.Item' must have a definition part.
                 //     public partial int Item => 1;
                 Diagnostic(ErrorCode.ERR_PartialPropertyMissingDefinition, "Item").WithArguments("C.Item").WithLocation(4, 24)
                 );
@@ -419,7 +419,7 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests.Symbols
                 // (3,29): error CS1551: Indexers must have at least one parameter
                 //     public partial int this[] { get; }
                 Diagnostic(ErrorCode.ERR_IndexerNeedsParam, "]").WithLocation(3, 29),
-                // (4,24): error CS9301: Partial property 'C.Item' must have an definition part.
+                // (4,24): error CS9301: Partial property 'C.Item' must have a definition part.
                 //     public partial int Item => 1;
                 Diagnostic(ErrorCode.ERR_PartialPropertyMissingDefinition, "Item").WithArguments("C.Item").WithLocation(4, 24)
                 );
@@ -668,7 +668,7 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests.Symbols
                 """;
             var comp = CreateCompilation([source, IsExternalInitTypeDefinition]);
             comp.VerifyEmitDiagnostics(
-                // (3,24): error CS9301: Partial property 'C.P' must have an definition part.
+                // (3,24): error CS9301: Partial property 'C.P' must have a definition part.
                 //     extern partial int P { get; set; }
                 Diagnostic(ErrorCode.ERR_PartialPropertyMissingDefinition, "P").WithArguments("C.P").WithLocation(3, 24),
                 // (4,24): error CS9303: A partial property may not have multiple implementing declarations
@@ -1991,7 +1991,7 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests.Symbols
                 // (3,33): error CS0750: A partial member cannot have the 'abstract' modifier
                 //     public abstract partial int P1 { get; set; }
                 Diagnostic(ErrorCode.ERR_PartialMemberCannotBeAbstract, "P1").WithLocation(3, 33),
-                // (5,33): error CS9301: Partial property 'C.P2' must have an definition part.
+                // (5,33): error CS9301: Partial property 'C.P2' must have a definition part.
                 //     public abstract partial int P2 { get => ""; set { } }
                 Diagnostic(ErrorCode.ERR_PartialPropertyMissingDefinition, "P2").WithArguments("C.P2").WithLocation(5, 33),
                 // (5,33): error CS0750: A partial member cannot have the 'abstract' modifier
@@ -2179,7 +2179,7 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests.Symbols
                 // (14,19): error CS0754: A partial member may not explicitly implement an interface member
                 //     partial int I.P { get; set; }
                 Diagnostic(ErrorCode.ERR_PartialMemberNotExplicit, "P").WithLocation(14, 19),
-                // (19,19): error CS9301: Partial property 'C3.I.P' must have an definition part.
+                // (19,19): error CS9301: Partial property 'C3.I.P' must have a definition part.
                 //     partial int I.P { get => 1; set { } }
                 Diagnostic(ErrorCode.ERR_PartialPropertyMissingDefinition, "P").WithArguments("C3.I.P").WithLocation(19, 19),
                 // (19,19): error CS0754: A partial member may not explicitly implement an interface member
@@ -2213,7 +2213,7 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests.Symbols
                 // (6,17): error CS0751: A partial member must be declared within a partial type
                 //     partial int P2 { get; set; }
                 Diagnostic(ErrorCode.ERR_PartialMemberOnlyInPartialClass, "P2").WithLocation(6, 17),
-                // (8,17): error CS9301: Partial property 'C.P3' must have an definition part.
+                // (8,17): error CS9301: Partial property 'C.P3' must have a definition part.
                 //     partial int P3 { get => 1; set { } }
                 Diagnostic(ErrorCode.ERR_PartialPropertyMissingDefinition, "P3").WithArguments("C.P3").WithLocation(8, 17),
                 // (8,17): error CS0751: A partial member must be declared within a partial type
@@ -2221,10 +2221,289 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests.Symbols
                 Diagnostic(ErrorCode.ERR_PartialMemberOnlyInPartialClass, "P3").WithLocation(8, 17));
         }
 
+        [Fact]
+        public void Semantics_Indexers_01()
+        {
+            var source = """
+                using System;
+
+                partial class C
+                {
+                    public partial int this[int i] { get; set; }
+                    public partial int this[int i]
+                    {
+                        get => i;
+                        set
+                        {
+                            Console.Write(i);
+                            Console.Write(value);
+                        }
+                    }
+
+                    static void Main()
+                    {
+                        var c = new C();
+                        Console.Write(c[1]);
+                        c[2] = 3;
+                    }
+                }
+                """;
+            var verifier = CompileAndVerify(source);
+            verifier.VerifyDiagnostics();
+        }
+
+        [Theory]
+        [InlineData("ref")]
+        [InlineData("out")]
+        public void RefKindDifference_IndexerParameter_01(string refKind)
+        {
+            // byvalue is distinct from byreference for signature matching
+            var source = $$"""
+                partial class C1
+                {
+                    public partial int this[int i] { get; set; }
+                    public partial int this[{{refKind}} int i] { get => i = 0; set => i = 0; }
+                }
+
+                partial class C2
+                {
+                    public partial int this[{{refKind}} int i] { get; set; }
+                    public partial int this[int i] { get => i; set { } }
+                }
+                """;
+
+            var comp = CreateCompilation(source);
+            comp.VerifyEmitDiagnostics(
+                // (3,24): error CS9300: Partial property 'C1.this[int]' must have an implementation part.
+                //     public partial int this[int i] { get; set; }
+                Diagnostic(ErrorCode.ERR_PartialPropertyMissingImplementation, "this").WithArguments("C1.this[int]").WithLocation(3, 24),
+                // (4,24): error CS9301: Partial property 'C1.this[ref int]' must have a definition part.
+                //     public partial int this[ref int i] { get => i; set { } }
+                Diagnostic(ErrorCode.ERR_PartialPropertyMissingDefinition, "this").WithArguments($"C1.this[{refKind} int]").WithLocation(4, 24),
+                // (4,29): error CS0631: ref and out are not valid in this context
+                //     public partial int this[ref int i] { get => i; set { } }
+                Diagnostic(ErrorCode.ERR_IllegalRefParam, refKind).WithLocation(4, 29),
+                // (9,24): error CS9300: Partial property 'C2.this[ref int]' must have an implementation part.
+                //     public partial int this[ref int i] { get; set; }
+                Diagnostic(ErrorCode.ERR_PartialPropertyMissingImplementation, "this").WithArguments($"C2.this[{refKind} int]").WithLocation(9, 24),
+                // (9,29): error CS0631: ref and out are not valid in this context
+                //     public partial int this[ref int i] { get; set; }
+                Diagnostic(ErrorCode.ERR_IllegalRefParam, refKind).WithLocation(9, 29),
+                // (10,24): error CS9301: Partial property 'C2.this[int]' must have a definition part.
+                //     public partial int this[int i] { get => i; set { } }
+                Diagnostic(ErrorCode.ERR_PartialPropertyMissingDefinition, "this").WithArguments("C2.this[int]").WithLocation(10, 24));
+        }
+
+        [Theory]
+        [InlineData("in")]
+        [InlineData("ref readonly")]
+        public void RefKindDifference_IndexerParameter_02(string refKind)
+        {
+            var source = $$"""
+                partial class C1
+                {
+                    public partial int this[int i] { get; set; }
+                    public partial int this[{{refKind}} int i] { get => i; set { } }
+                }
+
+                partial class C2
+                {
+                    public partial int this[{{refKind}} int i] { get; set; }
+                    public partial int this[int i] { get => i; set { } }
+                }
+                """;
+
+            var comp = CreateCompilation(source);
+            comp.VerifyEmitDiagnostics(
+                // (3,24): error CS9300: Partial property 'C1.this[int]' must have an implementation part.
+                //     public partial int this[int i] { get; set; }
+                Diagnostic(ErrorCode.ERR_PartialPropertyMissingImplementation, "this").WithArguments("C1.this[int]").WithLocation(3, 24),
+                // (4,24): error CS9301: Partial property 'C1.this[in int]' must have a definition part.
+                //     public partial int this[in int i] { get => i; set { } }
+                Diagnostic(ErrorCode.ERR_PartialPropertyMissingDefinition, "this").WithArguments($"C1.this[{refKind} int]").WithLocation(4, 24),
+                // (9,24): error CS9300: Partial property 'C2.this[in int]' must have an implementation part.
+                //     public partial int this[in int i] { get; set; }
+                Diagnostic(ErrorCode.ERR_PartialPropertyMissingImplementation, "this").WithArguments($"C2.this[{refKind} int]").WithLocation(9, 24),
+                // (10,24): error CS9301: Partial property 'C2.this[int]' must have a definition part.
+                //     public partial int this[int i] { get => i; set { } }
+                Diagnostic(ErrorCode.ERR_PartialPropertyMissingDefinition, "this").WithArguments("C2.this[int]").WithLocation(10, 24));
+        }
+
+        [Fact]
+        public void RefKindDifference_IndexerParameter_03()
+        {
+            var source = $$"""
+                partial class C1
+                {
+                    public partial int this[ref int i] { get; set; }
+                    public partial int this[out int i] { get => i = 0; set => i = 0; }
+                }
+
+                partial class C2
+                {
+                    public partial int this[out int i] { get; set; }
+                    public partial int this[ref int i] { get => i; set { } }
+                }
+                """;
+
+            var comp = CreateCompilation(source);
+            comp.VerifyEmitDiagnostics(
+                // (3,24): error CS9300: Partial property 'C1.this[ref int]' must have an implementation part.
+                //     public partial int this[ref int i] { get; set; }
+                Diagnostic(ErrorCode.ERR_PartialPropertyMissingImplementation, "this").WithArguments("C1.this[ref int]").WithLocation(3, 24),
+                // (3,29): error CS0631: ref and out are not valid in this context
+                //     public partial int this[ref int i] { get; set; }
+                Diagnostic(ErrorCode.ERR_IllegalRefParam, "ref").WithLocation(3, 29),
+                // (4,24): error CS9301: Partial property 'C1.this[out int]' must have a definition part.
+                //     public partial int this[out int i] { get => i = 0; set => i = 0; }
+                Diagnostic(ErrorCode.ERR_PartialPropertyMissingDefinition, "this").WithArguments("C1.this[out int]").WithLocation(4, 24),
+                // (4,24): error CS0111: Type 'C1' already defines a member called 'this' with the same parameter types
+                //     public partial int this[out int i] { get => i = 0; set => i = 0; }
+                Diagnostic(ErrorCode.ERR_MemberAlreadyExists, "this").WithArguments("this", "C1").WithLocation(4, 24),
+                // (4,29): error CS0631: ref and out are not valid in this context
+                //     public partial int this[out int i] { get => i = 0; set => i = 0; }
+                Diagnostic(ErrorCode.ERR_IllegalRefParam, "out").WithLocation(4, 29),
+                // (9,24): error CS9300: Partial property 'C2.this[out int]' must have an implementation part.
+                //     public partial int this[out int i] { get; set; }
+                Diagnostic(ErrorCode.ERR_PartialPropertyMissingImplementation, "this").WithArguments("C2.this[out int]").WithLocation(9, 24),
+                // (9,29): error CS0631: ref and out are not valid in this context
+                //     public partial int this[out int i] { get; set; }
+                Diagnostic(ErrorCode.ERR_IllegalRefParam, "out").WithLocation(9, 29),
+                // (10,24): error CS9301: Partial property 'C2.this[ref int]' must have a definition part.
+                //     public partial int this[ref int i] { get => i; set { } }
+                Diagnostic(ErrorCode.ERR_PartialPropertyMissingDefinition, "this").WithArguments("C2.this[ref int]").WithLocation(10, 24),
+                // (10,24): error CS0111: Type 'C2' already defines a member called 'this' with the same parameter types
+                //     public partial int this[ref int i] { get => i; set { } }
+                Diagnostic(ErrorCode.ERR_MemberAlreadyExists, "this").WithArguments("this", "C2").WithLocation(10, 24),
+                // (10,29): error CS0631: ref and out are not valid in this context
+                //     public partial int this[ref int i] { get => i; set { } }
+                Diagnostic(ErrorCode.ERR_IllegalRefParam, "ref").WithLocation(10, 29));
+        }
+
+        [Fact]
+        public void RefKindDifference_IndexerParameter_04()
+        {
+            // note: this non-merging behavior in presence of ref kind differences is consistent with partial methods
+            var source = $$"""
+                partial class C1
+                {
+                    public partial int this[in int i] { get; set; }
+                    public partial int this[ref readonly int i] { get => i; set { } }
+                }
+
+                partial class C2
+                {
+                    public partial int this[ref readonly int i] { get; set; }
+                    public partial int this[in int i] { get => i; set { } }
+                }
+                """;
+
+            var comp = CreateCompilation(source);
+            comp.VerifyEmitDiagnostics(
+                // (3,24): error CS9300: Partial property 'C1.this[in int]' must have an implementation part.
+                //     public partial int this[in int i] { get; set; }
+                Diagnostic(ErrorCode.ERR_PartialPropertyMissingImplementation, "this").WithArguments("C1.this[in int]").WithLocation(3, 24),
+                // (4,24): error CS9301: Partial property 'C1.this[ref readonly int]' must have a definition part.
+                //     public partial int this[ref readonly int i] { get => i; set { } }
+                Diagnostic(ErrorCode.ERR_PartialPropertyMissingDefinition, "this").WithArguments("C1.this[ref readonly int]").WithLocation(4, 24),
+                // (4,24): error CS0111: Type 'C1' already defines a member called 'this' with the same parameter types
+                //     public partial int this[ref readonly int i] { get => i; set { } }
+                Diagnostic(ErrorCode.ERR_MemberAlreadyExists, "this").WithArguments("this", "C1").WithLocation(4, 24),
+                // (9,24): error CS9300: Partial property 'C2.this[ref readonly int]' must have an implementation part.
+                //     public partial int this[ref readonly int i] { get; set; }
+                Diagnostic(ErrorCode.ERR_PartialPropertyMissingImplementation, "this").WithArguments("C2.this[ref readonly int]").WithLocation(9, 24),
+                // (10,24): error CS9301: Partial property 'C2.this[in int]' must have a definition part.
+                //     public partial int this[in int i] { get => i; set { } }
+                Diagnostic(ErrorCode.ERR_PartialPropertyMissingDefinition, "this").WithArguments("C2.this[in int]").WithLocation(10, 24),
+                // (10,24): error CS0111: Type 'C2' already defines a member called 'this' with the same parameter types
+                //     public partial int this[in int i] { get => i; set { } }
+                Diagnostic(ErrorCode.ERR_MemberAlreadyExists, "this").WithArguments("this", "C2").WithLocation(10, 24));
+        }
+
+        [Fact]
+        public void TypeDifference_IndexerParameter()
+        {
+            var source = $$"""
+                partial class C
+                {
+                    public partial int this[int i] { get; set; }
+                    public partial int this[string s] { get => 1; set { } }
+                }
+                """;
+
+            var comp = CreateCompilation(source);
+            comp.VerifyEmitDiagnostics(
+                // (3,24): error CS9300: Partial property 'C.this[int]' must have an implementation part.
+                //     public partial int this[int i] { get; set; }
+                Diagnostic(ErrorCode.ERR_PartialPropertyMissingImplementation, "this").WithArguments("C.this[int]").WithLocation(3, 24),
+                // (4,24): error CS9301: Partial property 'C.this[string]' must have a definition part.
+                //     public partial int this[string s] { get => 1; set { } }
+                Diagnostic(ErrorCode.ERR_PartialPropertyMissingDefinition, "this").WithArguments("C.this[string]").WithLocation(4, 24));
+        }
+
+        [Fact]
+        public void NullabilityDifference_IndexerParameter()
+        {
+            var source = $$"""
+                #nullable enable
+                partial class C
+                {
+                    public partial int this[string s] { get; set; }
+                    public partial int this[string? s] { get => 1; set { } }
+                }
+                """;
+
+            var comp = CreateCompilation(source);
+            comp.VerifyEmitDiagnostics(
+                // (5,24): warning CS9308: Partial property declarations 'int C.this[string s]' and 'int C.this[string? s]' have signature differences.
+                //     public partial int this[string? s] { get => 1; set { } }
+                Diagnostic(ErrorCode.WRN_PartialPropertySignatureDifference, "this").WithArguments("int C.this[string s]", "int C.this[string? s]").WithLocation(5, 24));
+        }
+
+        [Fact]
+        public void DynamicDifference_IndexerParameter()
+        {
+            var source = $$"""
+                #nullable enable
+                partial class C
+                {
+                    public partial int this[dynamic[] s] { get; set; }
+                    public partial int this[object[] s] { get => 1; set { } }
+                }
+                """;
+
+            var comp = CreateCompilation(source);
+            comp.VerifyEmitDiagnostics(
+                // (5,24): warning CS9308: Partial property declarations 'int C.this[dynamic[] s]' and 'int C.this[object[] s]' have signature differences.       
+                //     public partial int this[object[] s] { get => 1; set { } }
+                Diagnostic(ErrorCode.WRN_PartialPropertySignatureDifference, "this").WithArguments("int C.this[dynamic[] s]", "int C.this[object[] s]").WithLocation(5, 24));
+        }
+
+        [Fact]
+        public void ParamsDifference_IndexerParameter()
+        {
+            var source = $$"""
+                #nullable enable
+                using System.Collections.Generic;
+
+                partial class C
+                {
+                    public partial int this[params object[] arr] { get; set; }
+                    public partial int this[object[] arr] { get => 1; set { } }
+                    
+                    public partial int this[IEnumerable<object> enumerable] { get; set; }
+                    public partial int this[params IEnumerable<object> enumerable] { get => 1; set { } }
+                }
+
+                """;
+
+            var comp = CreateCompilation(source);
+            comp.VerifyEmitDiagnostics();
+        }
+
         // PROTOTYPE(partial-properties): override partial property where base has modopt
-        // PROTOTYPE(partial-properties): test indexers incl parameters with attributes
-        // PROTOTYPE(partial-properties): indexer parameter 'in' vs 'ref readonly' difference
-        // PROTOTYPE(partial-properties): indexer optional parameters with default values (check methods behavior as starting point)
-        // PROTOTYPE(partial-properties): test merging property attributes
+        //!// PROTOTYPE(partial-properties): test indexers incl parameters with attributes
+        //!// PROTOTYPE(partial-properties): indexer optional parameters with default values (check methods behavior as starting point)
+        //!// PROTOTYPE(partial-properties): test merging property attributes
     }
 }

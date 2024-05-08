@@ -1693,8 +1693,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ERR_PartialPropertyMissingDefinition">
-        <source>Partial property '{0}' must have an definition part.</source>
-        <target state="new">Partial property '{0}' must have an definition part.</target>
+        <source>Partial property '{0}' must have a definition part.</source>
+        <target state="new">Partial property '{0}' must have a definition part.</target>
         <note />
       </trans-unit>
       <trans-unit id="ERR_PartialPropertyMissingImplementation">

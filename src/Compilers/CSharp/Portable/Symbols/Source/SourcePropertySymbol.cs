@@ -599,6 +599,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 hasTypeDifferences = true;
                 diagnostics.Add(ErrorCode.ERR_PartialMemberInconsistentTupleNames, implementation.GetFirstLocation(), this, implementation);
             }
+            // TODO2: figure out how to most expediently compare IsParams on indexers
+            // else if (IsParams != implementation.IsParams)
+            // {
+            // }
 
             if (RefKind != implementation.RefKind)
             {
@@ -635,7 +639,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 diagnostics.Add(ErrorCode.ERR_PartialMemberUnsafeDifference, implementation.GetFirstLocation());
             }
 
-            // PROTOTYPE(partial-properties): test 'params' differences in indexers
+            //!// PROTOTYPE(partial-properties): test 'params' differences in indexers
 
             if (DeclaredAccessibility != implementation.DeclaredAccessibility
                 || HasExplicitAccessModifier != implementation.HasExplicitAccessModifier)
@@ -651,7 +655,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 diagnostics.Add(ErrorCode.ERR_PartialMemberExtendedModDifference, implementation.GetFirstLocation());
             }
 
-            // PROTOTYPE(partial-properties): test 'scoped' differences in indexers
+            //!// PROTOTYPE(partial-properties): test 'scoped' differences in indexers
 
             if (this.GetMethod is { } definitionGetAccessor && implementation.GetMethod is { } implementationGetAccessor)
             {
