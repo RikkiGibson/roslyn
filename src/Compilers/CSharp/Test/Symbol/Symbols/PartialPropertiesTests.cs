@@ -2501,6 +2501,29 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests.Symbols
             comp.VerifyEmitDiagnostics();
         }
 
+        [Fact]
+        public void ScopedDifference_IndexerParameter()
+        {
+            var source = $$"""
+                #nullable enable
+
+                ref struct RS { }
+
+                partial class C
+                {
+                    public partial RS this[scoped RS rs] { get; set; }
+                    public partial RS this[RS rs] { get => default; set { } }
+                    
+                    public partial RS this[RS rs, int _] { get; set; }
+                    public partial RS this[scoped RS rs, int _] { get => default; set { } }
+                }
+
+                """;
+
+            var comp = CreateCompilation(source);
+            comp.VerifyEmitDiagnostics();
+        }
+
         // PROTOTYPE(partial-properties): override partial property where base has modopt
         //!// PROTOTYPE(partial-properties): test indexers incl parameters with attributes
         //!// PROTOTYPE(partial-properties): indexer optional parameters with default values (check methods behavior as starting point)
