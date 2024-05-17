@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Symbols;
+using Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting;
 using Microsoft.CodeAnalysis.CSharp.Test.Utilities;
 using Microsoft.CodeAnalysis.Test.Utilities;
 using Roslyn.Test.Utilities;
@@ -1497,6 +1498,31 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests.Symbols
             var p3 = comp.GetMember<SourcePropertySymbol>("C.P3");
             Assert.True(p3.IsPartialDefinition);
             Assert.Equal(NullableAnnotation.Oblivious, p3.TypeWithAnnotations.NullableAnnotation);
+        }
+
+        [Fact]
+        public void Accessor_IsPartialDefinition_Retargeting()
+        {
+            var source = """
+                public partial class C
+                {
+                    public partial int P { get; }
+                    public partial int P { get => 1; }
+                }
+                """;
+
+            var comp0 = CreateCompilation(source);
+            var accessor0 = (IMethodSymbol)comp0.GetMember("C.get_P").GetPublicSymbol();
+            Assert.True(accessor0.IsPartialDefinition);
+            Assert.NotNull(accessor0.PartialImplementationPart);
+
+            var comp1 = CreateCompilation([], references: [comp0.ToMetadataReference()]);
+            var internalAccessor1 = comp1.GetMember<MethodSymbol>("C.get_P");
+            // TODO2: change the corlib versoin or something
+            Assert.Equal(typeof(RetargetingMethodSymbol), internalAccessor1.GetType());
+            var accessor1 = (IMethodSymbol)comp1.GetMember("C.get_P").GetPublicSymbol();
+            Assert.False(accessor1.IsPartialDefinition);
+            Assert.Null(accessor0.PartialImplementationPart);
         }
 
         [Fact]
