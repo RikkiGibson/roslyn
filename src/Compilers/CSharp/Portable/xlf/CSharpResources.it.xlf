@@ -2522,6 +2522,11 @@
         <target state="translated">ref e unsafe nei metodi asincroni e iteratori</target>
         <note />
       </trans-unit>
+      <trans-unit id="IDS_FeatureRelaxedRefPartialOrdering">
+        <source>relaxed ordering of ref and partial modifiers</source>
+        <target state="new">relaxed ordering of ref and partial modifiers</target>
+        <note />
+      </trans-unit>
       <trans-unit id="IDS_FeatureRelaxedShiftOperator">
         <source>relaxed shift operator</source>
         <target state="translated">operatore di spostamento rilassato</target>
@@ -6584,8 +6589,8 @@ target:module               Compila un modulo che può essere aggiunto ad altro
         <note />
       </trans-unit>
       <trans-unit id="ERR_PartialMisplaced">
-        <source>The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method or property return type.</source>
-        <target state="new">The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method or property return type.</target>
+        <source>The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.</source>
+        <target state="new">The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.</target>
         <note />
       </trans-unit>
       <trans-unit id="ERR_ImportedCircularBase">

@@ -1558,8 +1558,10 @@ class C
             EOF();
         }
 
-        [Fact]
-        public void AsyncPartialEvent()
+        [Theory]
+        [InlineData(LanguageVersion.CSharp12)]
+        [InlineData(LanguageVersion.Preview)]
+        public void AsyncPartialEvent(LanguageVersion version)
         {
             // ... 'async' 'partial' <event> ...
             UsingTree(@"
@@ -1567,9 +1569,7 @@ class C
 {
     async partial event
 ",
-                // (4,19): error CS1519: Invalid token 'event' in class, record, struct, or interface member declaration
-                //     async partial event
-                Diagnostic(ErrorCode.ERR_InvalidMemberDecl, "event").WithArguments("event").WithLocation(4, 19),
+                TestOptions.Regular.WithLanguageVersion(version),
                 // (4,24): error CS1031: Type expected
                 //     async partial event
                 Diagnostic(ErrorCode.ERR_TypeExpected, "").WithLocation(4, 24),
@@ -1582,6 +1582,7 @@ class C
                 // (4,24): error CS1513: } expected
                 //     async partial event
                 Diagnostic(ErrorCode.ERR_RbraceExpected, "").WithLocation(4, 24));
+
             N(SyntaxKind.CompilationUnit);
             {
                 N(SyntaxKind.ClassDeclaration);
@@ -1589,16 +1590,10 @@ class C
                     N(SyntaxKind.ClassKeyword);
                     N(SyntaxKind.IdentifierToken, "C");
                     N(SyntaxKind.OpenBraceToken);
-                    N(SyntaxKind.IncompleteMember);
-                    {
-                        N(SyntaxKind.AsyncKeyword);
-                        N(SyntaxKind.IdentifierName);
-                        {
-                            N(SyntaxKind.IdentifierToken, "partial");
-                        }
-                    }
                     N(SyntaxKind.EventDeclaration);
                     {
+                        N(SyntaxKind.AsyncKeyword);
+                        N(SyntaxKind.PartialKeyword);
                         N(SyntaxKind.EventKeyword);
                         M(SyntaxKind.IdentifierName);
                         {

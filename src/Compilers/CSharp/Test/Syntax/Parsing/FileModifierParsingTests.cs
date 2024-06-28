@@ -98,7 +98,7 @@ public class FileModifierParsingTests : ParsingTests
             """,
             expectedBindingDiagnostics: new[]
             {
-                // (1,19): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+                // (1,19): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
                 // file partial enum C { }
                 Diagnostic(ErrorCode.ERR_PartialMisplaced, "C").WithLocation(1, 19)
             });
@@ -126,47 +126,13 @@ public class FileModifierParsingTests : ParsingTests
     {
         UsingNode($$"""
             partial file {{SyntaxFacts.GetText(typeKeyword)}} C { }
-            """,
-            expectedParsingDiagnostics: new[]
-            {
-                // (1,14): error CS1002: ; expected
-                // partial file {{SyntaxFacts.GetText(typeKeyword)}} C { }
-                Diagnostic(ErrorCode.ERR_SemicolonExpected, SyntaxFacts.GetText(typeKeyword)).WithLocation(1, 14)
-            },
-            expectedBindingDiagnostics: new[]
-            {
-                // (1,1): error CS0246: The type or namespace name 'partial' could not be found (are you missing a using directive or an assembly reference?)
-                // partial file interface C { }
-                Diagnostic(ErrorCode.ERR_SingleTypeNameNotFound, "partial").WithArguments("partial").WithLocation(1, 1),
-                // (1,9): warning CS0168: The variable 'file' is declared but never used
-                // partial file interface C { }
-                Diagnostic(ErrorCode.WRN_UnreferencedVar, "file").WithArguments("file").WithLocation(1, 9),
-                // (1,14): error CS1002: ; expected
-                // partial file {{SyntaxFacts.GetText(typeKeyword)}} C { }
-                Diagnostic(ErrorCode.ERR_SemicolonExpected, SyntaxFacts.GetText(typeKeyword)).WithLocation(1, 14)
-            });
+            """);
         N(SyntaxKind.CompilationUnit);
         {
-            N(SyntaxKind.GlobalStatement);
-            {
-                N(SyntaxKind.LocalDeclarationStatement);
-                {
-                    N(SyntaxKind.VariableDeclaration);
-                    {
-                        N(SyntaxKind.IdentifierName);
-                        {
-                            N(SyntaxKind.IdentifierToken, "partial");
-                        }
-                        N(SyntaxKind.VariableDeclarator);
-                        {
-                            N(SyntaxKind.IdentifierToken, "file");
-                        }
-                    }
-                    M(SyntaxKind.SemicolonToken);
-                }
-            }
             N(SyntaxFacts.GetBaseTypeDeclarationKind(typeKeyword));
             {
+                N(SyntaxKind.PartialKeyword);
+                N(SyntaxKind.FileKeyword);
                 N(typeKeyword);
                 N(SyntaxKind.IdentifierToken, "C");
                 N(SyntaxKind.OpenBraceToken);
@@ -182,27 +148,38 @@ public class FileModifierParsingTests : ParsingTests
     {
         UsingNode("""
             partial file record C { }
+            """);
+        verify();
+
+        UsingNode("""
+            partial file record C { }
             """,
+            options: TestOptions.Regular12,
             expectedBindingDiagnostics: new DiagnosticDescription[]
             {
-                // (1,1): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+                // (1,1): error CS8652: The feature 'relaxed ordering of ref and partial modifiers' is currently in Preview and *unsupported*. To use Preview features, use the 'preview' language version.
                 // partial file record C { }
-                Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(1, 1)
+                Diagnostic(ErrorCode.ERR_FeatureInPreview, "partial").WithArguments("relaxed ordering of ref and partial modifiers").WithLocation(1, 1)
             });
-        N(SyntaxKind.CompilationUnit);
+        verify();
+
+        void verify()
         {
-            N(SyntaxKind.RecordDeclaration);
+            N(SyntaxKind.CompilationUnit);
             {
-                N(SyntaxKind.PartialKeyword);
-                N(SyntaxKind.FileKeyword);
-                N(SyntaxKind.RecordKeyword);
-                N(SyntaxKind.IdentifierToken, "C");
-                N(SyntaxKind.OpenBraceToken);
-                N(SyntaxKind.CloseBraceToken);
+                N(SyntaxKind.RecordDeclaration);
+                {
+                    N(SyntaxKind.PartialKeyword);
+                    N(SyntaxKind.FileKeyword);
+                    N(SyntaxKind.RecordKeyword);
+                    N(SyntaxKind.IdentifierToken, "C");
+                    N(SyntaxKind.OpenBraceToken);
+                    N(SyntaxKind.CloseBraceToken);
+                }
+                N(SyntaxKind.EndOfFileToken);
             }
-            N(SyntaxKind.EndOfFileToken);
+            EOF();
         }
-        EOF();
     }
 
     [Fact]
@@ -233,28 +210,39 @@ public class FileModifierParsingTests : ParsingTests
     {
         UsingNode($$"""
             partial file record struct C { }
+            """);
+        verify();
+
+        UsingNode($$"""
+            partial file record struct C { }
             """,
+            options: TestOptions.Regular12,
             expectedBindingDiagnostics: new DiagnosticDescription[]
             {
-                // (1,1): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+                // (1,1): error CS8652: The feature 'relaxed ordering of ref and partial modifiers' is currently in Preview and *unsupported*. To use Preview features, use the 'preview' language version.
                 // partial file record struct C { }
-                Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(1, 1)
+                Diagnostic(ErrorCode.ERR_FeatureInPreview, "partial").WithArguments("relaxed ordering of ref and partial modifiers").WithLocation(1, 1)
             });
-        N(SyntaxKind.CompilationUnit);
+        verify();
+
+        void verify()
         {
-            N(SyntaxKind.RecordStructDeclaration);
+            N(SyntaxKind.CompilationUnit);
             {
-                N(SyntaxKind.PartialKeyword);
-                N(SyntaxKind.FileKeyword);
-                N(SyntaxKind.RecordKeyword);
-                N(SyntaxKind.StructKeyword);
-                N(SyntaxKind.IdentifierToken, "C");
-                N(SyntaxKind.OpenBraceToken);
-                N(SyntaxKind.CloseBraceToken);
+                N(SyntaxKind.RecordStructDeclaration);
+                {
+                    N(SyntaxKind.PartialKeyword);
+                    N(SyntaxKind.FileKeyword);
+                    N(SyntaxKind.RecordKeyword);
+                    N(SyntaxKind.StructKeyword);
+                    N(SyntaxKind.IdentifierToken, "C");
+                    N(SyntaxKind.OpenBraceToken);
+                    N(SyntaxKind.CloseBraceToken);
+                }
+                N(SyntaxKind.EndOfFileToken);
             }
-            N(SyntaxKind.EndOfFileToken);
+            EOF();
         }
-        EOF();
     }
 
     [Fact]
@@ -388,62 +376,38 @@ public class FileModifierParsingTests : ParsingTests
     {
         UsingNode($$"""
             partial file ref struct C { }
-            """,
-            expectedParsingDiagnostics: new[]
-            {
-                // (1,14): error CS1003: Syntax error, ',' expected
-                // partial file ref struct C { }
-                Diagnostic(ErrorCode.ERR_SyntaxError, "ref").WithArguments(",").WithLocation(1, 14),
-                // (1,18): error CS1002: ; expected
-                // partial file ref struct C { }
-                Diagnostic(ErrorCode.ERR_SemicolonExpected, "struct").WithLocation(1, 18)
-            },
-            expectedBindingDiagnostics: new[]
-            {
-                // (1,1): error CS0246: The type or namespace name 'partial' could not be found (are you missing a using directive or an assembly reference?)
-                // partial file ref struct C { }
-                Diagnostic(ErrorCode.ERR_SingleTypeNameNotFound, "partial").WithArguments("partial").WithLocation(1, 1),
-                // (1,9): warning CS0168: The variable 'file' is declared but never used
-                // partial file ref struct C { }
-                Diagnostic(ErrorCode.WRN_UnreferencedVar, "file").WithArguments("file").WithLocation(1, 9),
-                // (1,14): error CS1003: Syntax error, ',' expected
-                // partial file ref struct C { }
-                Diagnostic(ErrorCode.ERR_SyntaxError, "ref").WithArguments(",").WithLocation(1, 14),
-                // (1,18): error CS1002: ; expected
-                // partial file ref struct C { }
-                Diagnostic(ErrorCode.ERR_SemicolonExpected, "struct").WithLocation(1, 18)
-            });
+            """);
+        verify();
 
-        N(SyntaxKind.CompilationUnit);
+        UsingNode($$"""
+            partial file ref struct C { }
+            """,
+            options: TestOptions.Regular12,
+            expectedBindingDiagnostics: [
+                // (1,1): error CS8652: The feature 'relaxed ordering of ref and partial modifiers' is currently in Preview and *unsupported*. To use Preview features, use the 'preview' language version.
+                // partial file ref struct C { }
+                Diagnostic(ErrorCode.ERR_FeatureInPreview, "partial").WithArguments("relaxed ordering of ref and partial modifiers").WithLocation(1, 1)
+            ]);
+        verify();
+
+        void verify()
         {
-            N(SyntaxKind.GlobalStatement);
+            N(SyntaxKind.CompilationUnit);
             {
-                N(SyntaxKind.LocalDeclarationStatement);
+                N(SyntaxKind.StructDeclaration);
                 {
-                    N(SyntaxKind.VariableDeclaration);
-                    {
-                        N(SyntaxKind.IdentifierName);
-                        {
-                            N(SyntaxKind.IdentifierToken, "partial");
-                        }
-                        N(SyntaxKind.VariableDeclarator);
-                        {
-                            N(SyntaxKind.IdentifierToken, "file");
-                        }
-                    }
-                    M(SyntaxKind.SemicolonToken);
+                    N(SyntaxKind.PartialKeyword);
+                    N(SyntaxKind.FileKeyword);
+                    N(SyntaxKind.RefKeyword);
+                    N(SyntaxKind.StructKeyword);
+                    N(SyntaxKind.IdentifierToken, "C");
+                    N(SyntaxKind.OpenBraceToken);
+                    N(SyntaxKind.CloseBraceToken);
                 }
+                N(SyntaxKind.EndOfFileToken);
             }
-            N(SyntaxKind.StructDeclaration);
-            {
-                N(SyntaxKind.StructKeyword);
-                N(SyntaxKind.IdentifierToken, "C");
-                N(SyntaxKind.OpenBraceToken);
-                N(SyntaxKind.CloseBraceToken);
-            }
-            N(SyntaxKind.EndOfFileToken);
+            EOF();
         }
-        EOF();
     }
 
     [Fact]

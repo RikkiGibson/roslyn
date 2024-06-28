@@ -14093,7 +14093,7 @@ partial class C
 ";
             var comp = CreateCompilation(text);
             comp.VerifyDiagnostics(
-                // (4,5): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method or property return type.
+                // (4,5): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
                 //     partial int f;
                 Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(4, 5),
                 // (5,20): error CS9249: Partial property 'C.P' must have a definition part.
@@ -22097,7 +22097,7 @@ using System.Runtime.CompilerServices;
         [Fact]
         public void PartialConstructor()
         {
-            CreateCompilation(new[]
+            var sources = new[]
             {
                 """
                 public class PartialCtor
@@ -22117,11 +22117,10 @@ using System.Runtime.CompilerServices;
                     partial public PartialPublicCtor() { }
                 }
                 """
-            }).VerifyDiagnostics(
-                // (3,5): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
-                //     partial public PartialPublicCtor() { }
-                Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(3, 5),
-                // (3,5): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+            };
+
+            CreateCompilation(sources).VerifyDiagnostics(
+                // (3,5): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method or property return type.
                 //     partial public PartialPublicCtor() { }
                 Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(3, 5),
                 // (3,5): error CS0246: The type or namespace name 'partial' could not be found (are you missing a using directive or an assembly reference?)
@@ -22142,12 +22141,38 @@ using System.Runtime.CompilerServices;
                 // (3,20): error CS0161: 'PublicPartialCtor.PublicPartialCtor()': not all code paths return a value
                 //     public partial PublicPartialCtor() { }
                 Diagnostic(ErrorCode.ERR_ReturnExpected, "PublicPartialCtor").WithArguments("PublicPartialCtor.PublicPartialCtor()").WithLocation(3, 20));
+
+            CreateCompilation(sources, parseOptions: TestOptions.Regular12).VerifyDiagnostics(
+                // 0.cs(3,5): error CS0246: The type or namespace name 'partial' could not be found (are you missing a using directive or an assembly reference?)
+                //     partial PartialCtor() { }
+                Diagnostic(ErrorCode.ERR_SingleTypeNameNotFound, "partial").WithArguments("partial").WithLocation(3, 5),
+                // 2.cs(3,5): error CS8652: The feature 'relaxed ordering of ref and partial modifiers' is currently in Preview and *unsupported*. To use Preview features, use the 'preview' language version.
+                //     partial public PartialPublicCtor() { }
+                Diagnostic(ErrorCode.ERR_FeatureInPreview, "partial").WithArguments("relaxed ordering of ref and partial modifiers").WithLocation(3, 5),
+                // 2.cs(3,5): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
+                //     partial public PartialPublicCtor() { }
+                Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(3, 5),
+                // 1.cs(3,12): error CS0246: The type or namespace name 'partial' could not be found (are you missing a using directive or an assembly reference?)
+                //     public partial PublicPartialCtor() { }
+                Diagnostic(ErrorCode.ERR_SingleTypeNameNotFound, "partial").WithArguments("partial").WithLocation(3, 12),
+                // 0.cs(3,13): error CS0542: 'PartialCtor': member names cannot be the same as their enclosing type
+                //     partial PartialCtor() { }
+                Diagnostic(ErrorCode.ERR_MemberNameSameAsType, "PartialCtor").WithArguments("PartialCtor").WithLocation(3, 13),
+                // 0.cs(3,13): error CS0161: 'PartialCtor.PartialCtor()': not all code paths return a value
+                //     partial PartialCtor() { }
+                Diagnostic(ErrorCode.ERR_ReturnExpected, "PartialCtor").WithArguments("PartialCtor.PartialCtor()").WithLocation(3, 13),
+                // 1.cs(3,20): error CS0542: 'PublicPartialCtor': member names cannot be the same as their enclosing type
+                //     public partial PublicPartialCtor() { }
+                Diagnostic(ErrorCode.ERR_MemberNameSameAsType, "PublicPartialCtor").WithArguments("PublicPartialCtor").WithLocation(3, 20),
+                // 1.cs(3,20): error CS0161: 'PublicPartialCtor.PublicPartialCtor()': not all code paths return a value
+                //     public partial PublicPartialCtor() { }
+                Diagnostic(ErrorCode.ERR_ReturnExpected, "PublicPartialCtor").WithArguments("PublicPartialCtor.PublicPartialCtor()").WithLocation(3, 20));
         }
 
         [Fact]
         public void PartialStaticConstructor()
         {
-            CreateCompilation(new[]
+            var sources = new[]
             {
                 """
                 public class PartialStaticCtor
@@ -22197,45 +22222,32 @@ using System.Runtime.CompilerServices;
                     partial public static PartialPublicStaticCtor() { }
                 }
                 """,
-            }).VerifyDiagnostics(
-                // (3,5): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+            };
+
+            CreateCompilation(sources).VerifyDiagnostics(
+                // (3,5): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
                 //     partial static PartialStaticCtor() { }
                 Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(3, 5),
-                // (3,5): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
-                //     partial static PartialStaticCtor() { }
-                Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(3, 5),
-                // (3,5): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+                // (3,5): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
                 //     partial public static PartialPublicStaticCtor() { }
                 Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(3, 5),
-                // (3,5): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
-                //     partial public static PartialPublicStaticCtor() { }
-                Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(3, 5),
-                // (3,5): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+                // (3,5): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
                 //     partial static public PartialStaticPublicCtor() { }
                 Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(3, 5),
-                // (3,5): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
-                //     partial static public PartialStaticPublicCtor() { }
-                Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(3, 5),
-                // (3,12): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
-                //     public partial static PublicPartialStaticCtor() { }
-                Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(3, 12),
-                // (3,12): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
-                //     public partial static PublicPartialStaticCtor() { }
-                Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(3, 12),
-                // (3,12): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+                // (3,12): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
                 //     static partial public StaticPartialPublicCtor() { }
                 Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(3, 12),
-                // (3,12): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
-                //     static partial public StaticPartialPublicCtor() { }
+                // (3,12): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
+                //     public partial static PublicPartialStaticCtor() { }
                 Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(3, 12),
                 // (3,12): error CS0246: The type or namespace name 'partial' could not be found (are you missing a using directive or an assembly reference?)
                 //     static partial StaticPartialCtor() { }
                 Diagnostic(ErrorCode.ERR_SingleTypeNameNotFound, "partial").WithArguments("partial").WithLocation(3, 12),
                 // (3,19): error CS0246: The type or namespace name 'partial' could not be found (are you missing a using directive or an assembly reference?)
-                //     public static partial PublicStaticPartialCtor() { }
+                //     static public partial StaticPublicPartialCtor() { }
                 Diagnostic(ErrorCode.ERR_SingleTypeNameNotFound, "partial").WithArguments("partial").WithLocation(3, 19),
                 // (3,19): error CS0246: The type or namespace name 'partial' could not be found (are you missing a using directive or an assembly reference?)
-                //     static public partial StaticPublicPartialCtor() { }
+                //     public static partial PublicStaticPartialCtor() { }
                 Diagnostic(ErrorCode.ERR_SingleTypeNameNotFound, "partial").WithArguments("partial").WithLocation(3, 19),
                 // (3,20): error CS0542: 'StaticPartialCtor': member names cannot be the same as their enclosing type
                 //     static partial StaticPartialCtor() { }
@@ -22267,6 +22279,78 @@ using System.Runtime.CompilerServices;
                 // (3,27): error CS0161: 'PublicStaticPartialCtor.PublicStaticPartialCtor()': not all code paths return a value
                 //     public static partial PublicStaticPartialCtor() { }
                 Diagnostic(ErrorCode.ERR_ReturnExpected, "PublicStaticPartialCtor").WithArguments("PublicStaticPartialCtor.PublicStaticPartialCtor()").WithLocation(3, 27));
+
+            CreateCompilation(sources, parseOptions: TestOptions.Regular12).VerifyDiagnostics(
+                // 0.cs(3,5): error CS8652: The feature 'relaxed ordering of ref and partial modifiers' is currently in Preview and *unsupported*. To use Preview features, use the 'preview' language version.
+                //     partial static PartialStaticCtor() { }
+                Diagnostic(ErrorCode.ERR_FeatureInPreview, "partial").WithArguments("relaxed ordering of ref and partial modifiers").WithLocation(3, 5),
+                // 0.cs(3,5): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
+                //     partial static PartialStaticCtor() { }
+                Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(3, 5),
+                // 7.cs(3,5): error CS8652: The feature 'relaxed ordering of ref and partial modifiers' is currently in Preview and *unsupported*. To use Preview features, use the 'preview' language version.
+                //     partial public static PartialPublicStaticCtor() { }
+                Diagnostic(ErrorCode.ERR_FeatureInPreview, "partial").WithArguments("relaxed ordering of ref and partial modifiers").WithLocation(3, 5),
+                // 7.cs(3,5): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
+                //     partial public static PartialPublicStaticCtor() { }
+                Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(3, 5),
+                // 6.cs(3,5): error CS8652: The feature 'relaxed ordering of ref and partial modifiers' is currently in Preview and *unsupported*. To use Preview features, use the 'preview' language version.
+                //     partial static public PartialStaticPublicCtor() { }
+                Diagnostic(ErrorCode.ERR_FeatureInPreview, "partial").WithArguments("relaxed ordering of ref and partial modifiers").WithLocation(3, 5),
+                // 6.cs(3,5): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
+                //     partial static public PartialStaticPublicCtor() { }
+                Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(3, 5),
+                // 1.cs(3,12): error CS0246: The type or namespace name 'partial' could not be found (are you missing a using directive or an assembly reference?)
+                //     static partial StaticPartialCtor() { }
+                Diagnostic(ErrorCode.ERR_SingleTypeNameNotFound, "partial").WithArguments("partial").WithLocation(3, 12),
+                // 3.cs(3,12): error CS8652: The feature 'relaxed ordering of ref and partial modifiers' is currently in Preview and *unsupported*. To use Preview features, use the 'preview' language version.
+                //     public partial static PublicPartialStaticCtor() { }
+                Diagnostic(ErrorCode.ERR_FeatureInPreview, "partial").WithArguments("relaxed ordering of ref and partial modifiers").WithLocation(3, 12),
+                // 3.cs(3,12): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
+                //     public partial static PublicPartialStaticCtor() { }
+                Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(3, 12),
+                // 5.cs(3,12): error CS8652: The feature 'relaxed ordering of ref and partial modifiers' is currently in Preview and *unsupported*. To use Preview features, use the 'preview' language version.
+                //     static partial public StaticPartialPublicCtor() { }
+                Diagnostic(ErrorCode.ERR_FeatureInPreview, "partial").WithArguments("relaxed ordering of ref and partial modifiers").WithLocation(3, 12),
+                // 5.cs(3,12): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
+                //     static partial public StaticPartialPublicCtor() { }
+                Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(3, 12),
+                // 2.cs(3,19): error CS0246: The type or namespace name 'partial' could not be found (are you missing a using directive or an assembly reference?)
+                //     public static partial PublicStaticPartialCtor() { }
+                Diagnostic(ErrorCode.ERR_SingleTypeNameNotFound, "partial").WithArguments("partial").WithLocation(3, 19),
+                // 4.cs(3,19): error CS0246: The type or namespace name 'partial' could not be found (are you missing a using directive or an assembly reference?)
+                //     static public partial StaticPublicPartialCtor() { }
+                Diagnostic(ErrorCode.ERR_SingleTypeNameNotFound, "partial").WithArguments("partial").WithLocation(3, 19),
+                // 1.cs(3,20): error CS0542: 'StaticPartialCtor': member names cannot be the same as their enclosing type
+                //     static partial StaticPartialCtor() { }
+                Diagnostic(ErrorCode.ERR_MemberNameSameAsType, "StaticPartialCtor").WithArguments("StaticPartialCtor").WithLocation(3, 20),
+                // 1.cs(3,20): error CS0161: 'StaticPartialCtor.StaticPartialCtor()': not all code paths return a value
+                //     static partial StaticPartialCtor() { }
+                Diagnostic(ErrorCode.ERR_ReturnExpected, "StaticPartialCtor").WithArguments("StaticPartialCtor.StaticPartialCtor()").WithLocation(3, 20),
+                // 3.cs(3,27): error CS0515: 'PublicPartialStaticCtor.PublicPartialStaticCtor()': access modifiers are not allowed on static constructors
+                //     public partial static PublicPartialStaticCtor() { }
+                Diagnostic(ErrorCode.ERR_StaticConstructorWithAccessModifiers, "PublicPartialStaticCtor").WithArguments("PublicPartialStaticCtor.PublicPartialStaticCtor()").WithLocation(3, 27),
+                // 2.cs(3,27): error CS0542: 'PublicStaticPartialCtor': member names cannot be the same as their enclosing type
+                //     public static partial PublicStaticPartialCtor() { }
+                Diagnostic(ErrorCode.ERR_MemberNameSameAsType, "PublicStaticPartialCtor").WithArguments("PublicStaticPartialCtor").WithLocation(3, 27),
+                // 4.cs(3,27): error CS0542: 'StaticPublicPartialCtor': member names cannot be the same as their enclosing type
+                //     static public partial StaticPublicPartialCtor() { }
+                Diagnostic(ErrorCode.ERR_MemberNameSameAsType, "StaticPublicPartialCtor").WithArguments("StaticPublicPartialCtor").WithLocation(3, 27),
+                // 7.cs(3,27): error CS0515: 'PartialPublicStaticCtor.PartialPublicStaticCtor()': access modifiers are not allowed on static constructors
+                //     partial public static PartialPublicStaticCtor() { }
+                Diagnostic(ErrorCode.ERR_StaticConstructorWithAccessModifiers, "PartialPublicStaticCtor").WithArguments("PartialPublicStaticCtor.PartialPublicStaticCtor()").WithLocation(3, 27),
+                // 5.cs(3,27): error CS0515: 'StaticPartialPublicCtor.StaticPartialPublicCtor()': access modifiers are not allowed on static constructors
+                //     static partial public StaticPartialPublicCtor() { }
+                Diagnostic(ErrorCode.ERR_StaticConstructorWithAccessModifiers, "StaticPartialPublicCtor").WithArguments("StaticPartialPublicCtor.StaticPartialPublicCtor()").WithLocation(3, 27),
+                // 6.cs(3,27): error CS0515: 'PartialStaticPublicCtor.PartialStaticPublicCtor()': access modifiers are not allowed on static constructors
+                //     partial static public PartialStaticPublicCtor() { }
+                Diagnostic(ErrorCode.ERR_StaticConstructorWithAccessModifiers, "PartialStaticPublicCtor").WithArguments("PartialStaticPublicCtor.PartialStaticPublicCtor()").WithLocation(3, 27),
+                // 4.cs(3,27): error CS0161: 'StaticPublicPartialCtor.StaticPublicPartialCtor()': not all code paths return a value
+                //     static public partial StaticPublicPartialCtor() { }
+                Diagnostic(ErrorCode.ERR_ReturnExpected, "StaticPublicPartialCtor").WithArguments("StaticPublicPartialCtor.StaticPublicPartialCtor()").WithLocation(3, 27),
+                // 2.cs(3,27): error CS0161: 'PublicStaticPartialCtor.PublicStaticPartialCtor()': not all code paths return a value
+                //     public static partial PublicStaticPartialCtor() { }
+                Diagnostic(ErrorCode.ERR_ReturnExpected, "PublicStaticPartialCtor").WithArguments("PublicStaticPartialCtor.PublicStaticPartialCtor()").WithLocation(3, 27)
+                );
         }
     }
 }

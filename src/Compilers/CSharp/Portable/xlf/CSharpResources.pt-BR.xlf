@@ -2522,6 +2522,11 @@
         <target state="translated">ref e unsafe em métodos assíncronos e iteradores</target>
         <note />
       </trans-unit>
+      <trans-unit id="IDS_FeatureRelaxedRefPartialOrdering">
+        <source>relaxed ordering of ref and partial modifiers</source>
+        <target state="new">relaxed ordering of ref and partial modifiers</target>
+        <note />
+      </trans-unit>
       <trans-unit id="IDS_FeatureRelaxedShiftOperator">
         <source>relaxed shift operator</source>
         <target state="translated">operador de deslocamento flexível</target>
@@ -6584,7 +6589,7 @@
         <note />
       </trans-unit>
       <trans-unit id="ERR_PartialMisplaced">
-        <source>The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method or property return type.</source>
+        <source>The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.</source>
         <target state="translated">O modificador "partial" só pode aparecer imediatamente antes de "class", de "record", de "struct", de "interface" ou de um tipo de retorno de método ou propriedade.</target>
         <note />
       </trans-unit>

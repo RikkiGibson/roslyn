@@ -11375,9 +11375,9 @@ public partial interface I1
                 // (10,27): error CS0762: Cannot create delegate from method 'I1.M2()' because it is a partial method without an implementing declaration
                 //         new System.Action(M2).Invoke();
                 Diagnostic(ErrorCode.ERR_PartialMethodToDelegate, "M2").WithArguments("I1.M2()").WithLocation(10, 27),
-                // (13,5): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+                // (13,5): error CS8652: The feature 'relaxed ordering of ref and partial modifiers' is currently in Preview and *unsupported*. To use Preview features, use the 'preview' language version.
                 //     partial static void M4();
-                Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(13, 5)
+                Diagnostic(ErrorCode.ERR_FeatureInPreview, "partial").WithArguments("relaxed ordering of ref and partial modifiers").WithLocation(13, 5)
                 );
         }
 
@@ -44400,10 +44400,10 @@ interface I19
                 // (62,20): error CS0106: The modifier 'virtual' is not valid for this item
                 //     virtual static I13() => throw null;
                 Diagnostic(ErrorCode.ERR_BadMemberFlag, "I13").WithArguments("virtual").WithLocation(62, 20),
-                // (66,5): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+                // (66,5): error CS8652: The feature 'relaxed ordering of ref and partial modifiers' is currently in Preview and *unsupported*. To use Preview features, use the 'preview' language version.
                 //     partial static I14();
-                Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(66, 5),
-                // (66,5): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+                Diagnostic(ErrorCode.ERR_FeatureInPreview, "partial").WithArguments("relaxed ordering of ref and partial modifiers").WithLocation(66, 5),
+                // (66,5): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
                 //     partial static I14();
                 Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(66, 5),
                 // (70,12): error CS0246: The type or namespace name 'partial' could not be found (are you missing a using directive or an assembly reference?)
@@ -44415,10 +44415,10 @@ interface I19
                 // (70,20): error CS0542: 'I15': member names cannot be the same as their enclosing type
                 //     static partial I15();
                 Diagnostic(ErrorCode.ERR_MemberNameSameAsType, "I15").WithArguments("I15").WithLocation(70, 20),
-                // (74,5): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+                // (74,5): error CS8652: The feature 'relaxed ordering of ref and partial modifiers' is currently in Preview and *unsupported*. To use Preview features, use the 'preview' language version.
                 //     partial static I16() {}
-                Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(74, 5),
-                // (74,5): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+                Diagnostic(ErrorCode.ERR_FeatureInPreview, "partial").WithArguments("relaxed ordering of ref and partial modifiers").WithLocation(74, 5),
+                // (74,5): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
                 //     partial static I16() {}
                 Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(74, 5),
                 // (78,12): error CS0246: The type or namespace name 'partial' could not be found (are you missing a using directive or an assembly reference?)

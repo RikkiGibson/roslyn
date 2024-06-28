@@ -1219,6 +1219,14 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                 switch (newMod)
                 {
                     case DeclarationModifiers.Partial:
+                        if ((!IsFeatureEnabled(MessageID.IDS_FeatureRelaxedRefPartialOrdering) || forTopLevelStatements) && !ShouldContextualKeywordBeTreatedAsModifier(parsingStatementNotDeclaration: false))
+                        {
+                            return;
+                        }
+
+                        modTok = ConvertToKeyword(this.EatToken());
+
+                        /*
                         var nextToken = PeekToken(1);
                         if (this.IsPartialType() || this.IsPartialMember())
                         {
@@ -1241,6 +1249,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                         {
                             return;
                         }
+                        */
 
                         break;
 

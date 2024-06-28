@@ -3561,32 +3561,27 @@ class C(int X, int Y)
         public void RecordStructParsing_PartialReadonly()
         {
             var text = "partial readonly record struct S;";
-            UsingTree(text, options: TestOptions.RegularPreview,
-                // (1,9): error CS1585: Member modifier 'readonly' must precede the member type and name
-                // partial readonly record struct S;
-                Diagnostic(ErrorCode.ERR_BadModifierLocation, "readonly").WithArguments("readonly").WithLocation(1, 9)
-                );
+            UsingTree(text, options: TestOptions.RegularPreview);
+            verify();
+            // LangVersion error for modifier ordering reported in binding
 
-            N(SyntaxKind.CompilationUnit);
+            void verify()
             {
-                N(SyntaxKind.IncompleteMember);
+                N(SyntaxKind.CompilationUnit);
                 {
-                    N(SyntaxKind.IdentifierName);
+                    N(SyntaxKind.RecordStructDeclaration);
                     {
-                        N(SyntaxKind.IdentifierToken, "partial");
+                        N(SyntaxKind.PartialKeyword);
+                        N(SyntaxKind.ReadOnlyKeyword);
+                        N(SyntaxKind.RecordKeyword);
+                        N(SyntaxKind.StructKeyword);
+                        N(SyntaxKind.IdentifierToken, "S");
+                        N(SyntaxKind.SemicolonToken);
                     }
+                    N(SyntaxKind.EndOfFileToken);
                 }
-                N(SyntaxKind.RecordStructDeclaration);
-                {
-                    N(SyntaxKind.ReadOnlyKeyword);
-                    N(SyntaxKind.RecordKeyword);
-                    N(SyntaxKind.StructKeyword);
-                    N(SyntaxKind.IdentifierToken, "S");
-                    N(SyntaxKind.SemicolonToken);
-                }
-                N(SyntaxKind.EndOfFileToken);
+                EOF();
             }
-            EOF();
         }
 
         [Fact, CompilerTrait(CompilerFeature.RecordStructs)]

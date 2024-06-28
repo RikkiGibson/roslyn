@@ -843,10 +843,15 @@ class C
         public void PartialPublicDelegate()
         {
             CreateCompilation("partial public delegate void M();").VerifyDiagnostics(
-                // (1,1): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+                // (1,30): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
                 // partial public delegate void M();
-                Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(1, 1),
-                // (1,30): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+                Diagnostic(ErrorCode.ERR_PartialMisplaced, "M").WithLocation(1, 30));
+
+            CreateCompilation("partial public delegate void M();", parseOptions: TestOptions.Regular12).VerifyDiagnostics(
+                // (1,1): error CS8652: The feature 'relaxed ordering of ref and partial modifiers' is currently in Preview and *unsupported*. To use Preview features, use the 'preview' language version.
+                // partial public delegate void M();
+                Diagnostic(ErrorCode.ERR_FeatureInPreview, "partial").WithArguments("relaxed ordering of ref and partial modifiers").WithLocation(1, 1),
+                // (1,30): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
                 // partial public delegate void M();
                 Diagnostic(ErrorCode.ERR_PartialMisplaced, "M").WithLocation(1, 30));
         }
@@ -855,7 +860,7 @@ class C
         public void PublicPartialDelegate()
         {
             CreateCompilation("public partial delegate void M();").VerifyDiagnostics(
-                // (1,30): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+                // (1,30): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
                 // public partial delegate void M();
                 Diagnostic(ErrorCode.ERR_PartialMisplaced, "M").WithLocation(1, 30));
         }
@@ -864,7 +869,7 @@ class C
         public void PartialDelegate()
         {
             CreateCompilation("public partial delegate void M();").VerifyDiagnostics(
-                // (1,30): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+                // (1,30): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
                 // public partial delegate void M();
                 Diagnostic(ErrorCode.ERR_PartialMisplaced, "M").WithLocation(1, 30));
         }

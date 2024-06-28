@@ -2541,7 +2541,7 @@ class C
                 // (8,18): error CS1001: Identifier expected
                 //     partial enum { }
                 Diagnostic(ErrorCode.ERR_IdentifierExpected, "{").WithLocation(8, 18),
-                // (8,18): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+                // (8,18): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
                 //     partial enum { }
                 Diagnostic(ErrorCode.ERR_PartialMisplaced, "").WithLocation(8, 18),
                 // (8,18): error CS0542: '': member names cannot be the same as their enclosing type
@@ -2589,7 +2589,7 @@ class C
                 // (21,18): error CS1001: Identifier expected
                 //     partial enum { }
                 Diagnostic(ErrorCode.ERR_IdentifierExpected, "{").WithLocation(21, 18),
-                // (21,18): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+                // (21,18): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
                 //     partial enum { }
                 Diagnostic(ErrorCode.ERR_PartialMisplaced, "").WithLocation(21, 18),
                 // (21,18): error CS0542: '': member names cannot be the same as their enclosing type

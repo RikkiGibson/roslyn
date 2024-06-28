@@ -11,11 +11,16 @@ using Microsoft.CodeAnalysis.CSharp.Test.Utilities;
 using Microsoft.CodeAnalysis.Text;
 using Roslyn.Test.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.CodeAnalysis.CSharp.UnitTests
 {
-    public class RoundTrippingTests
+    public class RoundTrippingTests : ParsingTests
     {
+        public RoundTrippingTests(ITestOutputHelper output) : base(output)
+        {
+        }
+
         #region Helper
 
         internal static void ParseAndRoundTripping(string text, int errorCount = 0, int memberCount = 0)
@@ -395,7 +400,223 @@ partial class partial
     }
 }
 ";
-            ParseAndRoundTripping(text);
+            ParseAndRoundTripping(text, TestOptions.Regular12);
+            ParseAndRoundTripping(text, errorCount: 11);
+
+            UsingTree(text);
+            N(SyntaxKind.CompilationUnit);
+            {
+                N(SyntaxKind.ClassDeclaration);
+                {
+                    N(SyntaxKind.AttributeList);
+                    {
+                        N(SyntaxKind.OpenBracketToken);
+                        N(SyntaxKind.Attribute);
+                        {
+                            N(SyntaxKind.IdentifierName);
+                            {
+                                N(SyntaxKind.IdentifierToken, "partial");
+                            }
+                        }
+                        N(SyntaxKind.CloseBracketToken);
+                    }
+                    N(SyntaxKind.PartialKeyword);
+                    N(SyntaxKind.ClassKeyword);
+                    N(SyntaxKind.IdentifierToken, "partial");
+                    N(SyntaxKind.OpenBraceToken);
+                    N(SyntaxKind.CloseBraceToken);
+                }
+                N(SyntaxKind.ClassDeclaration);
+                {
+                    N(SyntaxKind.PartialKeyword);
+                    N(SyntaxKind.ClassKeyword);
+                    N(SyntaxKind.IdentifierToken, "partial");
+                    N(SyntaxKind.OpenBraceToken);
+                    N(SyntaxKind.ConstructorDeclaration);
+                    {
+                        N(SyntaxKind.PublicKeyword);
+                        N(SyntaxKind.IdentifierToken, "partial");
+                        N(SyntaxKind.ParameterList);
+                        {
+                            N(SyntaxKind.OpenParenToken);
+                            N(SyntaxKind.CloseParenToken);
+                        }
+                        N(SyntaxKind.Block);
+                        {
+                            N(SyntaxKind.OpenBraceToken);
+                            N(SyntaxKind.ExpressionStatement);
+                            {
+                                N(SyntaxKind.SimpleAssignmentExpression);
+                                {
+                                    N(SyntaxKind.IdentifierName);
+                                    {
+                                        N(SyntaxKind.IdentifierToken, "fld1");
+                                    }
+                                    N(SyntaxKind.EqualsToken);
+                                    N(SyntaxKind.SimpleAssignmentExpression);
+                                    {
+                                        N(SyntaxKind.IdentifierName);
+                                        {
+                                            N(SyntaxKind.IdentifierToken, "fld2");
+                                        }
+                                        N(SyntaxKind.EqualsToken);
+                                        N(SyntaxKind.SimpleAssignmentExpression);
+                                        {
+                                            N(SyntaxKind.IdentifierName);
+                                            {
+                                                N(SyntaxKind.IdentifierToken, "fld3");
+                                            }
+                                            N(SyntaxKind.EqualsToken);
+                                            N(SyntaxKind.SimpleAssignmentExpression);
+                                            {
+                                                N(SyntaxKind.IdentifierName);
+                                                {
+                                                    N(SyntaxKind.IdentifierToken, "fld4");
+                                                }
+                                                N(SyntaxKind.EqualsToken);
+                                                N(SyntaxKind.UnaryMinusExpression);
+                                                {
+                                                    N(SyntaxKind.MinusToken);
+                                                    N(SyntaxKind.NumericLiteralExpression);
+                                                    {
+                                                        N(SyntaxKind.NumericLiteralToken, "1");
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                N(SyntaxKind.SemicolonToken);
+                            }
+                            N(SyntaxKind.CloseBraceToken);
+                        }
+                    }
+                    N(SyntaxKind.CloseBraceToken);
+                }
+                N(SyntaxKind.EndOfFileToken);
+            }
+            EOF();
+
+            UsingTree(text, options: TestOptions.RegularPreview.WithLanguageVersion(LanguageVersion.Preview),
+                // (6,20): error CS8124: Tuple must contain at least two elements.
+                //     public partial()
+                Diagnostic(ErrorCode.ERR_TupleTooFewElements, ")").WithLocation(6, 20),
+                // (7,5): error CS1519: Invalid token '{' in class, record, struct, or interface member declaration
+                //     {
+                Diagnostic(ErrorCode.ERR_InvalidMemberDecl, "{").WithArguments("{").WithLocation(7, 5),
+                // (8,14): error CS1519: Invalid token '=' in class, record, struct, or interface member declaration
+                //         fld1 = fld2 = fld3 = fld4 = -1;
+                Diagnostic(ErrorCode.ERR_InvalidMemberDecl, "=").WithArguments("=").WithLocation(8, 14),
+                // (8,14): error CS1519: Invalid token '=' in class, record, struct, or interface member declaration
+                //         fld1 = fld2 = fld3 = fld4 = -1;
+                Diagnostic(ErrorCode.ERR_InvalidMemberDecl, "=").WithArguments("=").WithLocation(8, 14),
+                // (8,21): error CS1519: Invalid token '=' in class, record, struct, or interface member declaration
+                //         fld1 = fld2 = fld3 = fld4 = -1;
+                Diagnostic(ErrorCode.ERR_InvalidMemberDecl, "=").WithArguments("=").WithLocation(8, 21),
+                // (8,21): error CS1519: Invalid token '=' in class, record, struct, or interface member declaration
+                //         fld1 = fld2 = fld3 = fld4 = -1;
+                Diagnostic(ErrorCode.ERR_InvalidMemberDecl, "=").WithArguments("=").WithLocation(8, 21),
+                // (8,28): error CS1519: Invalid token '=' in class, record, struct, or interface member declaration
+                //         fld1 = fld2 = fld3 = fld4 = -1;
+                Diagnostic(ErrorCode.ERR_InvalidMemberDecl, "=").WithArguments("=").WithLocation(8, 28),
+                // (8,28): error CS1519: Invalid token '=' in class, record, struct, or interface member declaration
+                //         fld1 = fld2 = fld3 = fld4 = -1;
+                Diagnostic(ErrorCode.ERR_InvalidMemberDecl, "=").WithArguments("=").WithLocation(8, 28),
+                // (8,35): error CS1519: Invalid token '=' in class, record, struct, or interface member declaration
+                //         fld1 = fld2 = fld3 = fld4 = -1;
+                Diagnostic(ErrorCode.ERR_InvalidMemberDecl, "=").WithArguments("=").WithLocation(8, 35),
+                // (8,35): error CS1519: Invalid token '=' in class, record, struct, or interface member declaration
+                //         fld1 = fld2 = fld3 = fld4 = -1;
+                Diagnostic(ErrorCode.ERR_InvalidMemberDecl, "=").WithArguments("=").WithLocation(8, 35),
+                // (10,1): error CS1022: Type or namespace definition, or end-of-file expected
+                // }
+                Diagnostic(ErrorCode.ERR_EOFExpected, "}").WithLocation(10, 1));
+            N(SyntaxKind.CompilationUnit);
+            {
+                N(SyntaxKind.ClassDeclaration);
+                {
+                    N(SyntaxKind.AttributeList);
+                    {
+                        N(SyntaxKind.OpenBracketToken);
+                        N(SyntaxKind.Attribute);
+                        {
+                            N(SyntaxKind.IdentifierName);
+                            {
+                                N(SyntaxKind.IdentifierToken, "partial");
+                            }
+                        }
+                        N(SyntaxKind.CloseBracketToken);
+                    }
+                    N(SyntaxKind.PartialKeyword);
+                    N(SyntaxKind.ClassKeyword);
+                    N(SyntaxKind.IdentifierToken, "partial");
+                    N(SyntaxKind.OpenBraceToken);
+                    N(SyntaxKind.CloseBraceToken);
+                }
+                N(SyntaxKind.ClassDeclaration);
+                {
+                    N(SyntaxKind.PartialKeyword);
+                    N(SyntaxKind.ClassKeyword);
+                    N(SyntaxKind.IdentifierToken, "partial");
+                    N(SyntaxKind.OpenBraceToken);
+                    N(SyntaxKind.IncompleteMember);
+                    {
+                        N(SyntaxKind.PublicKeyword);
+                        N(SyntaxKind.PartialKeyword);
+                        N(SyntaxKind.TupleType);
+                        {
+                            N(SyntaxKind.OpenParenToken);
+                            M(SyntaxKind.TupleElement);
+                            {
+                                M(SyntaxKind.IdentifierName);
+                                {
+                                    M(SyntaxKind.IdentifierToken);
+                                }
+                            }
+                            M(SyntaxKind.CommaToken);
+                            M(SyntaxKind.TupleElement);
+                            {
+                                M(SyntaxKind.IdentifierName);
+                                {
+                                    M(SyntaxKind.IdentifierToken);
+                                }
+                            }
+                            N(SyntaxKind.CloseParenToken);
+                        }
+                    }
+                    N(SyntaxKind.IncompleteMember);
+                    {
+                        N(SyntaxKind.IdentifierName);
+                        {
+                            N(SyntaxKind.IdentifierToken, "fld1");
+                        }
+                    }
+                    N(SyntaxKind.IncompleteMember);
+                    {
+                        N(SyntaxKind.IdentifierName);
+                        {
+                            N(SyntaxKind.IdentifierToken, "fld2");
+                        }
+                    }
+                    N(SyntaxKind.IncompleteMember);
+                    {
+                        N(SyntaxKind.IdentifierName);
+                        {
+                            N(SyntaxKind.IdentifierToken, "fld3");
+                        }
+                    }
+                    N(SyntaxKind.IncompleteMember);
+                    {
+                        N(SyntaxKind.IdentifierName);
+                        {
+                            N(SyntaxKind.IdentifierToken, "fld4");
+                        }
+                    }
+                    N(SyntaxKind.CloseBraceToken);
+                }
+                N(SyntaxKind.EndOfFileToken);
+            }
+            EOF();
         }
 
         [Fact]
@@ -511,7 +732,31 @@ partial class PartialPartial
     }
 }
 ";
-            ParseAndRoundTripping(text, -1);
+            ParseAndRoundTripping(text);
+            CreateCompilation(text).VerifyEmitDiagnostics(
+                // (5,13): error CS1004: Duplicate 'partial' modifier
+                //     partial partial void PM();
+                Diagnostic(ErrorCode.ERR_DuplicateModifier, "partial").WithArguments("partial").WithLocation(5, 13),
+                // (6,13): error CS1004: Duplicate 'partial' modifier
+                //     partial partial void PM()
+                Diagnostic(ErrorCode.ERR_DuplicateModifier, "partial").WithArguments("partial").WithLocation(6, 13));
+
+            ParseAndRoundTripping(text, options: TestOptions.Regular12);
+            CreateCompilation(text, parseOptions: TestOptions.Regular12).VerifyEmitDiagnostics(
+                // (5,5): error CS8652: The feature 'relaxed ordering of ref and partial modifiers' is currently in Preview and *unsupported*. To use Preview features, use the 'preview' language version.
+                //     partial partial void PM();
+                Diagnostic(ErrorCode.ERR_FeatureInPreview, "partial").WithArguments("relaxed ordering of ref and partial modifiers").WithLocation(5, 5),
+                // (5,13): error CS1004: Duplicate 'partial' modifier
+                //     partial partial void PM();
+                Diagnostic(ErrorCode.ERR_DuplicateModifier, "partial").WithArguments("partial").WithLocation(5, 13),
+                // (6,5): error CS8652: The feature 'relaxed ordering of ref and partial modifiers' is currently in Preview and *unsupported*. To use Preview features, use the 'preview' language version.
+                //     partial partial void PM()
+                Diagnostic(ErrorCode.ERR_FeatureInPreview, "partial").WithArguments("relaxed ordering of ref and partial modifiers").WithLocation(6, 5),
+                // (6,13): error CS1004: Duplicate 'partial' modifier
+                //     partial partial void PM()
+                Diagnostic(ErrorCode.ERR_DuplicateModifier, "partial").WithArguments("partial").WithLocation(6, 13));
+
+
         }
 
         [Fact]

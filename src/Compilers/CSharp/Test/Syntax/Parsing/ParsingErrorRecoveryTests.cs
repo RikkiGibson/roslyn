@@ -678,13 +678,48 @@ class C
         public void TestPartialNamespace()
         {
             var text = "partial namespace n { }";
-            var file = this.ParseTree(text);
+            var file = UsingTree(text,
+                // (1,9): error CS1001: Identifier expected
+                // partial namespace n { }
+                Diagnostic(ErrorCode.ERR_IdentifierExpected, "namespace").WithLocation(1, 9),
+                // (1,9): error CS1002: ; expected
+                // partial namespace n { }
+                Diagnostic(ErrorCode.ERR_SemicolonExpected, "namespace").WithLocation(1, 9))
+                    .GetCompilationUnitRoot();
 
-            Assert.NotNull(file);
-            Assert.Equal(text, file.ToFullString());
-            Assert.Equal(1, file.Members.Count);
-            Assert.Equal(SyntaxKind.NamespaceDeclaration, file.Members[0].Kind());
-            Assert.Equal(0, file.Errors().Length);
+            N(SyntaxKind.CompilationUnit);
+            {
+                N(SyntaxKind.GlobalStatement);
+                {
+                    N(SyntaxKind.LocalDeclarationStatement);
+                    {
+                        N(SyntaxKind.VariableDeclaration);
+                        {
+                            N(SyntaxKind.IdentifierName);
+                            {
+                                N(SyntaxKind.IdentifierToken, "partial");
+                            }
+                            M(SyntaxKind.VariableDeclarator);
+                            {
+                                M(SyntaxKind.IdentifierToken);
+                            }
+                        }
+                        M(SyntaxKind.SemicolonToken);
+                    }
+                }
+                N(SyntaxKind.NamespaceDeclaration);
+                {
+                    N(SyntaxKind.NamespaceKeyword);
+                    N(SyntaxKind.IdentifierName);
+                    {
+                        N(SyntaxKind.IdentifierToken, "n");
+                    }
+                    N(SyntaxKind.OpenBraceToken);
+                    N(SyntaxKind.CloseBraceToken);
+                }
+                N(SyntaxKind.EndOfFileToken);
+            }
+            EOF();
         }
 
         [Fact]

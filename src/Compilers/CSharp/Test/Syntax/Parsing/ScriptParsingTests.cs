@@ -900,25 +900,24 @@ new T[] this[int a] { get; }
             }
         }
 
-        [Fact]
-        public void NewModifier_PartialIndexer()
+        [Theory]
+        [InlineData(LanguageVersion.CSharp12)]
+        [InlineData(LanguageVersion.Preview)]
+        public void NewModifier_PartialIndexer(LanguageVersion languageVersion)
         {
-            // partial indexers are not allowed, but we should still parse it and report a semantic error
-            // "Only methods, classes, structs, or interfaces may be partial"
-
-            var tree = UsingTree(@"
-new partial partial this[int i] { get; }
-");
-
+            UsingTree(@"
+new partial int this[int i] { get; }
+",
+                TestOptions.Regular.WithLanguageVersion(languageVersion));
             N(SyntaxKind.CompilationUnit);
             {
                 N(SyntaxKind.IndexerDeclaration);
                 {
                     N(SyntaxKind.NewKeyword);
                     N(SyntaxKind.PartialKeyword);
-                    N(SyntaxKind.IdentifierName);
+                    N(SyntaxKind.PredefinedType);
                     {
-                        N(SyntaxKind.IdentifierToken);
+                        N(SyntaxKind.IntKeyword);
                     }
                     N(SyntaxKind.ThisKeyword);
                     N(SyntaxKind.BracketedParameterList);
@@ -930,7 +929,7 @@ new partial partial this[int i] { get; }
                             {
                                 N(SyntaxKind.IntKeyword);
                             }
-                            N(SyntaxKind.IdentifierToken);
+                            N(SyntaxKind.IdentifierToken, "i");
                         }
                         N(SyntaxKind.CloseBracketToken);
                     }
@@ -947,6 +946,312 @@ new partial partial this[int i] { get; }
                 }
                 N(SyntaxKind.EndOfFileToken);
             }
+            EOF();
+        }
+
+        [Theory]
+        [InlineData(LanguageVersion.CSharp12)]
+        [InlineData(LanguageVersion.Preview)]
+        public void NewModifier_RequiredIndexer(LanguageVersion languageVersion)
+        {
+            // indexer can't be 'required' but will still parse it.
+            UsingTree(@"
+new required int this[int i] { get; }
+",
+                TestOptions.Regular.WithLanguageVersion(languageVersion));
+            N(SyntaxKind.CompilationUnit);
+            {
+                N(SyntaxKind.IndexerDeclaration);
+                {
+                    N(SyntaxKind.NewKeyword);
+                    N(SyntaxKind.RequiredKeyword);
+                    N(SyntaxKind.PredefinedType);
+                    {
+                        N(SyntaxKind.IntKeyword);
+                    }
+                    N(SyntaxKind.ThisKeyword);
+                    N(SyntaxKind.BracketedParameterList);
+                    {
+                        N(SyntaxKind.OpenBracketToken);
+                        N(SyntaxKind.Parameter);
+                        {
+                            N(SyntaxKind.PredefinedType);
+                            {
+                                N(SyntaxKind.IntKeyword);
+                            }
+                            N(SyntaxKind.IdentifierToken, "i");
+                        }
+                        N(SyntaxKind.CloseBracketToken);
+                    }
+                    N(SyntaxKind.AccessorList);
+                    {
+                        N(SyntaxKind.OpenBraceToken);
+                        N(SyntaxKind.GetAccessorDeclaration);
+                        {
+                            N(SyntaxKind.GetKeyword);
+                            N(SyntaxKind.SemicolonToken);
+                        }
+                        N(SyntaxKind.CloseBraceToken);
+                    }
+                }
+                N(SyntaxKind.EndOfFileToken);
+            }
+            EOF();
+        }
+
+        [Fact]
+        public void NewModifier_DuplicatePartialModifier_Indexer_CSharp12()
+        {
+            UsingTree(@"
+new partial partial this[int i] { get; }
+",
+                TestOptions.Regular12,
+                // (2,5): error CS1031: Type expected
+                // new partial partial this[int i] { get; }
+                Diagnostic(ErrorCode.ERR_TypeExpected, "partial").WithLocation(2, 5),
+                // (2,5): error CS1525: Invalid expression term 'partial'
+                // new partial partial this[int i] { get; }
+                Diagnostic(ErrorCode.ERR_InvalidExprTerm, "partial").WithArguments("partial").WithLocation(2, 5),
+                // (2,5): error CS1002: ; expected
+                // new partial partial this[int i] { get; }
+                Diagnostic(ErrorCode.ERR_SemicolonExpected, "partial").WithLocation(2, 5),
+                // (2,5): error CS1031: Type expected
+                // new partial partial this[int i] { get; }
+                Diagnostic(ErrorCode.ERR_TypeExpected, "partial").WithLocation(2, 5),
+                // (2,5): error CS1525: Invalid expression term 'partial'
+                // new partial partial this[int i] { get; }
+                Diagnostic(ErrorCode.ERR_InvalidExprTerm, "partial").WithArguments("partial").WithLocation(2, 5),
+                // (2,5): error CS1003: Syntax error, ',' expected
+                // new partial partial this[int i] { get; }
+                Diagnostic(ErrorCode.ERR_SyntaxError, "partial").WithArguments(",").WithLocation(2, 5),
+                // (2,25): error CS1002: ; expected
+                // new partial partial this[int i] { get; }
+                Diagnostic(ErrorCode.ERR_SemicolonExpected, "[").WithLocation(2, 25),
+                // (2,26): error CS1001: Identifier expected
+                // new partial partial this[int i] { get; }
+                Diagnostic(ErrorCode.ERR_IdentifierExpected, "int").WithLocation(2, 26),
+                // (2,26): error CS1003: Syntax error, ',' expected
+                // new partial partial this[int i] { get; }
+                Diagnostic(ErrorCode.ERR_SyntaxError, "int").WithArguments(",").WithLocation(2, 26),
+                // (2,30): error CS1003: Syntax error, ',' expected
+                // new partial partial this[int i] { get; }
+                Diagnostic(ErrorCode.ERR_SyntaxError, "i").WithArguments(",").WithLocation(2, 30));
+
+            N(SyntaxKind.CompilationUnit);
+            {
+                N(SyntaxKind.FieldDeclaration);
+                {
+                    N(SyntaxKind.NewKeyword);
+                    M(SyntaxKind.VariableDeclaration);
+                    {
+                        M(SyntaxKind.IdentifierName);
+                        {
+                            M(SyntaxKind.IdentifierToken);
+                        }
+                        M(SyntaxKind.VariableDeclarator);
+                        {
+                            M(SyntaxKind.IdentifierToken);
+                        }
+                    }
+                    M(SyntaxKind.SemicolonToken);
+                }
+                M(SyntaxKind.GlobalStatement);
+                {
+                    M(SyntaxKind.LocalDeclarationStatement);
+                    {
+                        M(SyntaxKind.VariableDeclaration);
+                        {
+                            M(SyntaxKind.IdentifierName);
+                            {
+                                M(SyntaxKind.IdentifierToken);
+                            }
+                            M(SyntaxKind.VariableDeclarator);
+                            {
+                                M(SyntaxKind.IdentifierToken);
+                            }
+                        }
+                        M(SyntaxKind.SemicolonToken);
+                    }
+                }
+                N(SyntaxKind.GlobalStatement);
+                {
+                    N(SyntaxKind.Block);
+                    {
+                        N(SyntaxKind.AttributeList);
+                        {
+                            N(SyntaxKind.OpenBracketToken);
+                            M(SyntaxKind.Attribute);
+                            {
+                                M(SyntaxKind.IdentifierName);
+                                {
+                                    M(SyntaxKind.IdentifierToken);
+                                }
+                            }
+                            M(SyntaxKind.CommaToken);
+                            N(SyntaxKind.Attribute);
+                            {
+                                N(SyntaxKind.IdentifierName);
+                                {
+                                    N(SyntaxKind.IdentifierToken, "i");
+                                }
+                            }
+                            N(SyntaxKind.CloseBracketToken);
+                        }
+                        N(SyntaxKind.OpenBraceToken);
+                        N(SyntaxKind.ExpressionStatement);
+                        {
+                            N(SyntaxKind.IdentifierName);
+                            {
+                                N(SyntaxKind.IdentifierToken, "get");
+                            }
+                            N(SyntaxKind.SemicolonToken);
+                        }
+                        N(SyntaxKind.CloseBraceToken);
+                    }
+                }
+                N(SyntaxKind.EndOfFileToken);
+            }
+            EOF();
+        }
+
+        [Fact]
+        public void NewModifier_DuplicatePartialModifier_Indexer()
+        {
+            UsingTree(@"
+new partial partial this[int i] { get; }
+",
+                // (2,5): error CS1031: Type expected
+                // new partial partial this[int i] { get; }
+                Diagnostic(ErrorCode.ERR_TypeExpected, "partial").WithLocation(2, 5),
+                // (2,5): error CS1525: Invalid expression term 'partial'
+                // new partial partial this[int i] { get; }
+                Diagnostic(ErrorCode.ERR_InvalidExprTerm, "partial").WithArguments("partial").WithLocation(2, 5),
+                // (2,5): error CS1003: Syntax error, ',' expected
+                // new partial partial this[int i] { get; }
+                Diagnostic(ErrorCode.ERR_SyntaxError, "partial").WithArguments(",").WithLocation(2, 5),
+                // (2,25): error CS1002: ; expected
+                // new partial partial this[int i] { get; }
+                Diagnostic(ErrorCode.ERR_SemicolonExpected, "[").WithLocation(2, 25),
+                // (2,26): error CS1001: Identifier expected
+                // new partial partial this[int i] { get; }
+                Diagnostic(ErrorCode.ERR_IdentifierExpected, "int").WithLocation(2, 26),
+                // (2,26): error CS1003: Syntax error, ',' expected
+                // new partial partial this[int i] { get; }
+                Diagnostic(ErrorCode.ERR_SyntaxError, "int").WithArguments(",").WithLocation(2, 26),
+                // (2,30): error CS1003: Syntax error, ',' expected
+                // new partial partial this[int i] { get; }
+                Diagnostic(ErrorCode.ERR_SyntaxError, "i").WithArguments(",").WithLocation(2, 30));
+
+            N(SyntaxKind.CompilationUnit);
+            {
+                N(SyntaxKind.FieldDeclaration);
+                {
+                    N(SyntaxKind.NewKeyword);
+                    M(SyntaxKind.VariableDeclaration);
+                    {
+                        M(SyntaxKind.IdentifierName);
+                        {
+                            M(SyntaxKind.IdentifierToken);
+                        }
+                        M(SyntaxKind.VariableDeclarator);
+                        {
+                            M(SyntaxKind.IdentifierToken);
+                        }
+                    }
+                    M(SyntaxKind.SemicolonToken);
+                }
+                N(SyntaxKind.IncompleteMember);
+                {
+                    N(SyntaxKind.AttributeList);
+                    {
+                        N(SyntaxKind.OpenBracketToken);
+                        M(SyntaxKind.Attribute);
+                        {
+                            M(SyntaxKind.IdentifierName);
+                            {
+                                M(SyntaxKind.IdentifierToken);
+                            }
+                        }
+                        M(SyntaxKind.CommaToken);
+                        N(SyntaxKind.Attribute);
+                        {
+                            N(SyntaxKind.IdentifierName);
+                            {
+                                N(SyntaxKind.IdentifierToken, "i");
+                            }
+                        }
+                        N(SyntaxKind.CloseBracketToken);
+                    }
+                }
+                N(SyntaxKind.GlobalStatement);
+                {
+                    N(SyntaxKind.Block);
+                    {
+                        N(SyntaxKind.OpenBraceToken);
+                        N(SyntaxKind.ExpressionStatement);
+                        {
+                            N(SyntaxKind.IdentifierName);
+                            {
+                                N(SyntaxKind.IdentifierToken, "get");
+                            }
+                            N(SyntaxKind.SemicolonToken);
+                        }
+                        N(SyntaxKind.CloseBraceToken);
+                    }
+                }
+                N(SyntaxKind.EndOfFileToken);
+            }
+            EOF();
+        }
+
+        [Theory]
+        [InlineData(LanguageVersion.CSharp12)]
+        [InlineData(LanguageVersion.Preview)]
+        public void NewModifier_DuplicateRequiredModifier_Indexer(LanguageVersion languageVersion)
+        {
+            // TODO2: required mod behaves pretty gracefully here. let's figure out how to get partial at parity and preserve compat for langversion 12
+            UsingTree(@"
+new required required this[int i] { get; }
+",
+            options: TestOptions.Regular.WithLanguageVersion(languageVersion));
+            N(SyntaxKind.CompilationUnit);
+            {
+                N(SyntaxKind.IndexerDeclaration);
+                {
+                    N(SyntaxKind.NewKeyword);
+                    N(SyntaxKind.RequiredKeyword);
+                    N(SyntaxKind.IdentifierName);
+                    {
+                        N(SyntaxKind.IdentifierToken, "required");
+                    }
+                    N(SyntaxKind.ThisKeyword);
+                    N(SyntaxKind.BracketedParameterList);
+                    {
+                        N(SyntaxKind.OpenBracketToken);
+                        N(SyntaxKind.Parameter);
+                        {
+                            N(SyntaxKind.PredefinedType);
+                            {
+                                N(SyntaxKind.IntKeyword);
+                            }
+                            N(SyntaxKind.IdentifierToken, "i");
+                        }
+                        N(SyntaxKind.CloseBracketToken);
+                    }
+                    N(SyntaxKind.AccessorList);
+                    {
+                        N(SyntaxKind.OpenBraceToken);
+                        N(SyntaxKind.GetAccessorDeclaration);
+                        {
+                            N(SyntaxKind.GetKeyword);
+                            N(SyntaxKind.SemicolonToken);
+                        }
+                        N(SyntaxKind.CloseBraceToken);
+                    }
+                }
+                N(SyntaxKind.EndOfFileToken);
+            }
+            EOF();
         }
 
         [Fact]
@@ -1042,9 +1347,6 @@ new partial class C { }
         {
             var source = "new partial public class C { }";
             CreateCompilation(source).VerifyDiagnostics(
-                    // (1,5): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
-                    // new partial public class C { }
-                    Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(1, 5),
                     // (1,26): error CS0106: The modifier 'new' is not valid for this item
                     // new partial public class C { }
                     Diagnostic(ErrorCode.ERR_BadMemberFlag, "C").WithArguments("new").WithLocation(1, 26)
@@ -1071,9 +1373,6 @@ new partial class C { }
         {
             var source = "new static partial public class C { }";
             CreateCompilation(source).VerifyDiagnostics(
-                // (1,12): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
-                // new static partial public class C { }
-                Diagnostic(ErrorCode.ERR_PartialMisplaced, "partial").WithLocation(1, 12),
                 // (1,33): error CS0106: The modifier 'new' is not valid for this item
                 // new static partial public class C { }
                 Diagnostic(ErrorCode.ERR_BadMemberFlag, "C").WithArguments("new").WithLocation(1, 33));
@@ -1978,7 +2277,7 @@ partial void Goo(){};
 partial enum @en {};
 ";
             CreateCompilation(test).VerifyDiagnostics(
-                // (2,14): error CS0267: The 'partial' modifier can only appear immediately before 'class', 'record', 'struct', 'interface', or a method return type.
+                // (2,14): error CS0267: The 'partial' modifier can only appear on a 'class', 'record', 'struct', 'interface', or a method or property return type.
                 // partial enum @en {};
                 Diagnostic(ErrorCode.ERR_PartialMisplaced, "@en").WithLocation(2, 14));
         }
