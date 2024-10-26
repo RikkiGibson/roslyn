@@ -1578,7 +1578,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         // TODO2: this seems a strange check to perform.
                         // We already need 'right' lifetime to be convertible to 'left'.
                         // So, requiring 'left' to be convertible to 'right' essentially means they must be equal.
-                        if (!leftEscape.IsConvertibleTo(rightEscape))
+                        if (!leftEscape.Equals(rightEscape))
                         {
                             Debug.Assert(op1.Kind != BoundKind.Parameter); // If the assert fails, add a corresponding test.
 

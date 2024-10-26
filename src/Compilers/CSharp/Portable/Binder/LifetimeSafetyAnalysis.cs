@@ -22,10 +22,31 @@ namespace Microsoft.CodeAnalysis.CSharp
     /// Lifetimes for local scopes are assumed to nest without overlapping.
     /// Thus, a single lifetime value is adequate to describe refs to any variable at a given scope depth.
     /// </remarks>
+    [DebuggerDisplay("{GetDebuggerDisplay(), nq}")]
     internal struct Lifetime
     {
         // TODO2: debugger display
 
+        /// <summary>
+        /// TODO2: update/move this doc to Lifetime declaration.
+        /// For the purpose of escape verification we operate with the depth of local scopes.
+        /// The depth is a uint, with smaller number representing shallower/wider scopes.
+        /// 0, 1 and 2 are special scopes - 
+        /// 0 is the "calling method" scope that is outside of the containing method/lambda. 
+        ///   If something can escape to scope 0, it can escape to any scope in a given method through a ref parameter or return.
+        /// 1 is the "return-only" scope that is outside of the containing method/lambda. 
+        ///   If something can escape to scope 1, it can escape to any scope in a given method or can be returned, but it can't escape through a ref parameter.
+        /// 2 is the "current method" scope that is just inside the containing method/lambda. 
+        ///   If something can escape to scope 1, it can escape to any scope in a given method, but cannot be returned.
+        /// n + 1 corresponds to scopes immediately inside a scope of depth n. 
+        ///   Since sibling scopes do not intersect and a value cannot escape from one to another without 
+        ///   escaping to a wider scope, we can use simple depth numbering without ambiguity.
+        ///
+        /// Generally these values are expressed via the following parameters:
+        ///   - escapeFrom: the scope in which an expression is being evaluated. Usually the current local 
+        ///     scope
+        ///   - escapeTo: the scope to which the values are being escaped to.
+        /// </summary>
         private const uint callingMethod = 0;
         private const uint returnOnly = 1;
         private const uint currentMethod = 2;
@@ -129,6 +150,17 @@ namespace Microsoft.CodeAnalysis.CSharp
                 callingMethod => RefSafetyAnalysis.EscapeLevel.CallingMethod,
                 returnOnly => RefSafetyAnalysis.EscapeLevel.ReturnOnly,
                 _ => null
+            };
+        }
+
+        private string GetDebuggerDisplay()
+        {
+            return value switch
+            {
+                callingMethod => "Lifetime<CallingMethod>",
+                returnOnly => "Lifetime<ReturnOnly>",
+                currentMethod => "Lifetime<CurrentMethod>",
+                _ => $"Lifetime<{value}>"
             };
         }
     }

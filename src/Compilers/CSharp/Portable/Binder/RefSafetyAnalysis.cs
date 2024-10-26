@@ -100,7 +100,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 _analysis._localScopeDepth = _analysis._localScopeDepth.Narrower();
                 foreach (var local in locals)
                 {
-                    _analysis.AddLocalScopes(local, refEscapeScope: _analysis._localScopeDepth, valEscapeScope: CallingMethodScope);
+                    _analysis.AddLocalScopes(local, refEscapeScope: _analysis._localScopeDepth, valEscapeScope: Lifetime.CallingMethod);
                 }
             }
 
@@ -181,7 +181,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             return _localEscapeScopes?.TryGetValue(local, out var scopes) == true
                 ? scopes
-                : (CallingMethodScope, CallingMethodScope);
+                : (Lifetime.CallingMethod, Lifetime.CallingMethod);
         }
 
         private void SetLocalScopes(LocalSymbol local, Lifetime refEscapeScope, Lifetime valEscapeScope)
@@ -219,7 +219,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             return _placeholderScopes?.TryGetValue(placeholder, out var scope) == true
                 ? scope
-                : CallingMethodScope;
+                : Lifetime.CallingMethod;
         }
 
 #if DEBUG
@@ -457,10 +457,10 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 refEscapeScope = scopedModifier == ScopedKind.ScopedRef ?
                     _localScopeDepth :
-                    CurrentMethodScope;
+                    Lifetime.CurrentMethod;
                 valEscapeScope = scopedModifier == ScopedKind.ScopedValue ?
                     _localScopeDepth :
-                    CallingMethodScope;
+                    Lifetime.CallingMethod;
             }
 
             Debug.Assert(_localEscapeScopes?.ContainsKey(local) != true);
@@ -529,7 +529,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             base.VisitReturnStatement(node);
             if (node.ExpressionOpt is { Type: { } } expr)
             {
-                ValidateEscape(expr, ReturnOnlyScope, node.RefKind != RefKind.None, _diagnostics);
+                ValidateEscape(expr, Lifetime.ReturnOnly, node.RefKind != RefKind.None, _diagnostics);
             }
             return null;
         }
@@ -539,7 +539,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             base.VisitYieldReturnStatement(node);
             if (node.Expression is { Type: { } } expr)
             {
-                ValidateEscape(expr, ReturnOnlyScope, isByRef: false, _diagnostics);
+                ValidateEscape(expr, Lifetime.ReturnOnly, isByRef: false, _diagnostics);
             }
             return null;
         }
@@ -580,8 +580,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 // https://github.com/dotnet/roslyn/issues/73551:
                 // We do not have a test that demonstrates the statement below makes a difference
-                // for ref like types. If 'CallingMethodScope' is always returned, not a single test fails.
-                return typeExpression.Type.IsRefLikeOrAllowsRefLikeType() ? valEscape : CallingMethodScope;
+                // for ref like types. If 'Lifetime.CallingMethod' is always returned, not a single test fails.
+                return typeExpression.Type.IsRefLikeOrAllowsRefLikeType() ? valEscape : Lifetime.CallingMethod;
             }
         }
 
@@ -606,7 +606,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 return symbol is null
                     ? valEscape
-                    : symbol.GetTypeOrReturnType().IsRefLikeOrAllowsRefLikeType() ? valEscape : CallingMethodScope;
+                    : symbol.GetTypeOrReturnType().IsRefLikeOrAllowsRefLikeType() ? valEscape : Lifetime.CallingMethod;
             }
         }
 
@@ -619,7 +619,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 if (member is null) return valEscape;
                 valEscape = getMemberValEscape(member.Receiver, valEscape);
-                return member.Type.IsRefLikeOrAllowsRefLikeType() ? valEscape : CallingMethodScope;
+                return member.Type.IsRefLikeOrAllowsRefLikeType() ? valEscape : Lifetime.CallingMethod;
             }
         }
 
@@ -699,7 +699,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         Debug.Assert(receiver != null);
                         if (receiver is null)
                         {
-                            valEscapeScope = CallingMethodScope;
+                            valEscapeScope = Lifetime.CallingMethod;
                         }
                         else
                         {
@@ -721,7 +721,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         else
                         {
                             // Error condition, see ERR_InterpolatedStringHandlerArgumentLocatedAfterInterpolatedString.
-                            valEscapeScope = CallingMethodScope; // Consider skipping this placeholder entirely since CallingMethodScope is the fallback in GetPlaceholderScope().
+                            valEscapeScope = Lifetime.CallingMethod; // Consider skipping this placeholder entirely since Lifetime.CallingMethod is the fallback in GetPlaceholderScope().
                         }
                         break;
                     default:

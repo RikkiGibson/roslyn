@@ -16,10 +16,10 @@ namespace Microsoft.CodeAnalysis.CSharp
 {
     internal partial class RefSafetyAnalysis
     {
-        internal enum EscapeLevel : uint
+        internal enum EscapeLevel
         {
-            CallingMethod = 0, // TODO2: sync these up more nicely with struct Lifetime
-            ReturnOnly = 1,
+            CallingMethod,
+            ReturnOnly
         }
 
         /// <summary>
@@ -216,30 +216,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                 ? p.ToString()
                 : Argument.ToString();
         }
-
-        /// <summary>
-        /// TODO2: update/move this doc to Lifetime declaration.
-        /// For the purpose of escape verification we operate with the depth of local scopes.
-        /// The depth is a uint, with smaller number representing shallower/wider scopes.
-        /// 0, 1 and 2 are special scopes - 
-        /// 0 is the "calling method" scope that is outside of the containing method/lambda. 
-        ///   If something can escape to scope 0, it can escape to any scope in a given method through a ref parameter or return.
-        /// 1 is the "return-only" scope that is outside of the containing method/lambda. 
-        ///   If something can escape to scope 1, it can escape to any scope in a given method or can be returned, but it can't escape through a ref parameter.
-        /// 2 is the "current method" scope that is just inside the containing method/lambda. 
-        ///   If something can escape to scope 1, it can escape to any scope in a given method, but cannot be returned.
-        /// n + 1 corresponds to scopes immediately inside a scope of depth n. 
-        ///   Since sibling scopes do not intersect and a value cannot escape from one to another without 
-        ///   escaping to a wider scope, we can use simple depth numbering without ambiguity.
-        ///
-        /// Generally these values are expressed via the following parameters:
-        ///   - escapeFrom: the scope in which an expression is being evaluated. Usually the current local 
-        ///     scope
-        ///   - escapeTo: the scope to which the values are being escaped to.
-        /// </summary>
-        private static readonly Lifetime CallingMethodScope = Lifetime.CallingMethod;
-        private static readonly Lifetime ReturnOnlyScope = Lifetime.ReturnOnly;
-        private static readonly Lifetime CurrentMethodScope = Lifetime.CurrentMethod;
     }
 #nullable disable
 
@@ -1242,8 +1218,6 @@ namespace Microsoft.CodeAnalysis.CSharp
 
     internal partial class RefSafetyAnalysis
     {
-        private static EscapeLevel? EscapeLevelFromScope(Lifetime scope) => scope.ToEscapeLevel();
-
         private static Lifetime GetParameterValEscape(ParameterSymbol parameter)
         {
             return parameter switch
@@ -1255,7 +1229,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         }
 
         private static EscapeLevel? GetParameterValEscapeLevel(ParameterSymbol parameter) =>
-            EscapeLevelFromScope(GetParameterValEscape(parameter));
+            GetParameterValEscape(parameter).ToEscapeLevel();
 
         private static Lifetime GetParameterRefEscape(ParameterSymbol parameter)
         {
@@ -1270,7 +1244,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         }
 
         private static EscapeLevel? GetParameterRefEscapeLevel(ParameterSymbol parameter) =>
-            EscapeLevelFromScope(GetParameterRefEscape(parameter));
+            GetParameterRefEscape(parameter).ToEscapeLevel();
 
         private bool CheckParameterValEscape(SyntaxNode node, ParameterSymbol parameter, Lifetime escapeTo, BindingDiagnosticBag diagnostics)
         {
@@ -1495,7 +1469,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             // fields that are static or belong to reference types can ref escape anywhere
             if (fieldSymbol.IsStatic || fieldSymbol.ContainingType.IsReferenceType)
             {
-                return CallingMethodScope;
+                return Lifetime.CallingMethod;
             }
 
             if (_useUpdatedEscapeRules)
@@ -2006,7 +1980,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             //•	the safe-to-escape of all argument expressions(including the receiver)
             //
 
-            Lifetime escapeScope = CallingMethodScope;
+            Lifetime escapeScope = Lifetime.CallingMethod;
             var escapeValues = ArrayBuilder<EscapeValue>.GetInstance();
             GetEscapeValuesForOldRules(
                 in methodInfo,
@@ -2074,7 +2048,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             bool isRefEscape)
         {
             //by default it is safe to escape
-            Lifetime escapeScope = CallingMethodScope;
+            Lifetime escapeScope = Lifetime.CallingMethod;
 
             var argsAndParamsAll = ArrayBuilder<EscapeValue>.GetInstance();
             GetFilteredInvocationArgumentsForEscapeWithUpdatedRules(
@@ -2854,7 +2828,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                 // track the widest scope that arguments could safely escape to.
                 // use this scope as the inferred STE of declaration expressions.
-                var inferredDestinationValEscape = CallingMethodScope;
+                var inferredDestinationValEscape = Lifetime.CallingMethod;
                 foreach (var (parameter, argument, _) in escapeArguments)
                 {
                     // in the old rules, we assume that refs cannot escape into ref struct variables.
@@ -2957,7 +2931,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 // find the widest scope that arguments could safely escape to.
                 // use this scope as the inferred STE of declaration expressions.
-                var inferredDestinationValEscape = CallingMethodScope;
+                var inferredDestinationValEscape = Lifetime.CallingMethod;
                 foreach (var (_, fromArg, _, isRefEscape) in escapeValues)
                 {
                     inferredDestinationValEscape = inferredDestinationValEscape.Intersect(isRefEscape
@@ -3347,13 +3321,13 @@ namespace Microsoft.CodeAnalysis.CSharp
             // cannot infer anything from errors
             if (expr.HasAnyErrors)
             {
-                return CallingMethodScope;
+                return Lifetime.CallingMethod;
             }
 
             // cannot infer anything from Void (broken code)
             if (expr.Type?.GetSpecialTypeSafe() == SpecialType.System_Void)
             {
-                return CallingMethodScope;
+                return Lifetime.CallingMethod;
             }
 
             // constants/literals cannot ref-escape current scope
@@ -3370,13 +3344,13 @@ namespace Microsoft.CodeAnalysis.CSharp
                 case BoundKind.PointerIndirectionOperator:
                 case BoundKind.PointerElementAccess:
                     // array elements and pointer dereferencing are readwrite variables
-                    return CallingMethodScope;
+                    return Lifetime.CallingMethod;
 
                 case BoundKind.RefValueOperator:
                     // The undocumented __refvalue(tr, T) expression results in an lvalue of type T.
                     // for compat reasons it is not ref-returnable (since TypedReference is not val-returnable)
                     // it can, however, ref-escape to any other level (since TypedReference can val-escape to any other level)
-                    return CurrentMethodScope;
+                    return Lifetime.CurrentMethod;
 
                 case BoundKind.DiscardExpression:
                     // same as write-only byval local
@@ -3433,7 +3407,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     // field-like events that are static or belong to reference types can ref escape anywhere
                     if (eventSymbol.IsStatic || eventSymbol.ContainingType.IsReferenceType)
                     {
-                        return CallingMethodScope;
+                        return Lifetime.CallingMethod;
                     }
 
                     // for other events defer to the receiver.
@@ -3523,7 +3497,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                         case BoundArrayAccess:
                             // array elements are readwrite variables
-                            return CallingMethodScope;
+                            return Lifetime.CallingMethod;
 
                         case BoundCall call:
                             var methodSymbol = call.Method;
@@ -4050,19 +4024,19 @@ namespace Microsoft.CodeAnalysis.CSharp
             // cannot infer anything from errors
             if (expr.HasAnyErrors)
             {
-                return CallingMethodScope;
+                return Lifetime.CallingMethod;
             }
 
             // constants/literals cannot refer to local state
             if (expr.ConstantValueOpt != null)
             {
-                return CallingMethodScope;
+                return Lifetime.CallingMethod;
             }
 
             // to have local-referring values an expression must have a ref-like type
             if (expr.Type?.IsRefLikeOrAllowsRefLikeType() != true)
             {
-                return CallingMethodScope;
+                return Lifetime.CallingMethod;
             }
 
             // cover case that can refer to local state
@@ -4077,7 +4051,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 case BoundKind.DefaultExpression:
                 case BoundKind.Utf8String:
                     // always returnable
-                    return CallingMethodScope;
+                    return Lifetime.CallingMethod;
 
                 case BoundKind.Parameter:
                     return GetParameterValEscape(((BoundParameter)expr).ParameterSymbol);
@@ -4085,7 +4059,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 case BoundKind.FromEndIndexExpression:
                     // We are going to call a constructor that takes an integer and a bool. Cannot leak any references through them.
                     // always returnable
-                    return CallingMethodScope;
+                    return Lifetime.CallingMethod;
 
                 case BoundKind.TupleLiteral:
                 case BoundKind.ConvertedTupleLiteral:
@@ -4097,10 +4071,10 @@ namespace Microsoft.CodeAnalysis.CSharp
                     // for compat reasons
                     // NB: it also means can`t assign stackalloc spans to a __refvalue
                     //     we are ok with that.
-                    return CallingMethodScope;
+                    return Lifetime.CallingMethod;
 
                 case BoundKind.DiscardExpression:
-                    return CallingMethodScope;
+                    return Lifetime.CallingMethod;
 
                 case BoundKind.DeconstructValuePlaceholder:
                 case BoundKind.InterpolatedStringArgumentPlaceholder:
@@ -4117,7 +4091,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                 case BoundKind.StackAllocArrayCreation:
                 case BoundKind.ConvertedStackAllocExpression:
-                    return CurrentMethodScope;
+                    return Lifetime.CurrentMethod;
 
                 case BoundKind.ConditionalOperator:
                     var conditional = (BoundConditionalOperator)expr;
@@ -4147,7 +4121,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     if (fieldSymbol.IsStatic || !fieldSymbol.ContainingType.IsRefLikeType)
                     {
                         // Already an error state.
-                        return CallingMethodScope;
+                        return Lifetime.CallingMethod;
                     }
 
                     // for ref-like fields defer to the receiver.
@@ -4306,7 +4280,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     {
                         var newT = (BoundNewT)expr;
                         // By default it is safe to escape
-                        var escape = CallingMethodScope;
+                        var escape = Lifetime.CallingMethod;
 
                         var initializerOpt = newT.InitializerExpressionOpt;
                         if (initializerOpt != null)
@@ -4353,8 +4327,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                     if (conversion.ConversionKind == ConversionKind.CollectionExpression)
                     {
                         return HasLocalScope((BoundCollectionExpression)conversion.Operand) ?
-                            CurrentMethodScope :
-                            CallingMethodScope;
+                            Lifetime.CurrentMethod :
+                            Lifetime.CallingMethod;
                     }
 
                     if (conversion.Conversion.IsInlineArray)
@@ -4510,7 +4484,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 case BoundKind.PointerElementAccess:
                 case BoundKind.PointerIndirectionOperator:
                     // Unsafe code will always be allowed to escape.
-                    return CallingMethodScope;
+                    return Lifetime.CallingMethod;
 
                 case BoundKind.AsOperator:
                 case BoundKind.AwaitExpression:
@@ -4603,7 +4577,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// </summary>
         private Lifetime GetValEscapeOfObjectInitializer(BoundObjectInitializerExpression initExpr, Lifetime scopeOfTheContainingExpression)
         {
-            var result = CallingMethodScope;
+            var result = Lifetime.CallingMethod;
             foreach (var expr in initExpr.Initializers)
             {
                 var exprResult = GetValEscapeOfObjectMemberInitializer(expr, scopeOfTheContainingExpression);
@@ -4647,14 +4621,14 @@ namespace Microsoft.CodeAnalysis.CSharp
                 var methodInfo = MethodInfo.Create(indexer, expr.AccessorKind);
                 if (methodInfo.Method is null)
                 {
-                    return CallingMethodScope;
+                    return Lifetime.CallingMethod;
                 }
 
                 // If the indexer is readonly then none of the arguments can contribute to 
                 // the receiver escape
                 if (methodInfo.Method.IsEffectivelyReadOnly)
                 {
-                    return CallingMethodScope;
+                    return Lifetime.CallingMethod;
                 }
 
                 var escapeValues = ArrayBuilder<EscapeValue>.GetInstance();
@@ -4671,7 +4645,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     mixableArguments: null,
                     escapeValues);
 
-                Lifetime receiverEscapeScope = CallingMethodScope;
+                Lifetime receiverEscapeScope = Lifetime.CallingMethod;
                 foreach (var escapeValue in escapeValues)
                 {
                     // This is a call to an indexer so the ref escape scope can only impact the escape value if it
@@ -4699,7 +4673,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 var methodInfo = MethodInfo.Create(property, accessorKind);
                 if (methodInfo.Method is null || methodInfo.Method.IsEffectivelyReadOnly)
                 {
-                    return CallingMethodScope;
+                    return Lifetime.CallingMethod;
                 }
 
                 return rightEscapeScope;
@@ -4814,7 +4788,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                 case BoundKind.StackAllocArrayCreation:
                 case BoundKind.ConvertedStackAllocExpression:
-                    if (!CurrentMethodScope.IsConvertibleTo(escapeTo))
+                    if (!Lifetime.CurrentMethod.IsConvertibleTo(escapeTo))
                     {
                         Error(diagnostics, inUnsafeRegion ? ErrorCode.WRN_EscapeStackAlloc : ErrorCode.ERR_EscapeStackAlloc, node, expr.Type);
                         return inUnsafeRegion;
