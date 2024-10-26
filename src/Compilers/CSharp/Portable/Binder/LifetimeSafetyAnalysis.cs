@@ -34,9 +34,14 @@ namespace Microsoft.CodeAnalysis.CSharp
         // Wider lifetimes are convertible to narrower lifetimes.
         private uint value;
 
-        internal static Lifetime CallingMethod() => new Lifetime { value = callingMethod };
-        internal static Lifetime ReturnOnly() => new Lifetime { value = returnOnly };
-        internal static Lifetime CurrentMethod() => new Lifetime { value = currentMethod };
+        internal static Lifetime CallingMethod => new Lifetime { value = callingMethod };
+        internal static Lifetime ReturnOnly => new Lifetime { value = returnOnly };
+        internal static Lifetime CurrentMethod => new Lifetime { value = currentMethod };
+
+        /// <summary>
+        /// Gets a lifetime which is "empty". i.e. which refers to a variable whose storage is never allocated.
+        ///</summary>
+        internal static Lifetime Empty => new Lifetime { value = uint.MaxValue };
 
         /// <summary>
         /// Gets a lifetime which is narrower than the given lifetime.
@@ -44,22 +49,66 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// </summary>
         internal Lifetime Narrower()
         {
-            Debug.Assert(CurrentMethod().IsConvertibleTo(this));
+            Debug.Assert(CurrentMethod.Wider().IsConvertibleTo(this));
             return new Lifetime { value = this.value + 1 };
         }
 
-        internal bool IsCallingMethod() => value == callingMethod;
+        /// <summary>
+        /// Gets a lifetime which is wider than the given lifetime.
+        /// Used denote a nested local scope.
+        /// </summary>
+        internal Lifetime Wider()
+        {
+            Debug.Assert(CurrentMethod.IsConvertibleTo(this));
+            return new Lifetime { value = this.value - 1 };
+        }
+
+        internal bool IsCallingMethod => value == callingMethod;
+        internal bool IsReturnOnly => value == returnOnly;
+        internal bool IsReturnable => value is callingMethod or returnOnly;
 
         /// <summary>Returns true if a 'ref' with this lifetime can be converted to the 'other' lifetime. Otherwise, returns false.</summary>
+        /// <remarks>Generally, a wider lifetime is convertible to a narrower lifetime.</remarks>
         internal bool IsConvertibleTo(Lifetime other)
         {
             return this.value <= other.value;
+        }
+
+        /// <summary>
+        /// Returns the narrower of two lifetimes.
+        /// </summary>
+        /// <remarks>
+        /// In other words, this method returns the widest lifetime which both 'this' and 'other' are both convertible to.
+        /// If in future we added the concept of unrelated lifetimes (e.g. to implement 'ref scoped'), this method would perhaps return a Nullable,
+        /// for the case that no lifetime exists which both input lifetimes are convertible to.
+        /// </remarks>
+        internal Lifetime Intersect(Lifetime other)
+        {
+            return this.IsConvertibleTo(other) ? other : this;
+        }
+
+        /// <summary>
+        /// Returns the wider of two lifetimes.
+        /// </summary>
+        /// <remarks>In other words, this method returns the narrowest lifetime which can be converted to both 'this' and 'other'.</remarks>
+        internal Lifetime Union(Lifetime other)
+        {
+            return this.IsConvertibleTo(other) ? this : other;
         }
 
         /// <summary>Returns true if this lifetime is the same as 'other' (i.e. for invariant nested conversion).</summary>
         internal bool Equals(Lifetime other)
         {
             return this.value == other.value;
+        }
+
+        internal RefSafetyAnalysis.EscapeLevel? ToEscapeLevel()
+        {
+            return value switch
+            {
+                callingMethod => RefSafetyAnalysis.EscapeLevel.CallingMethod,
+                returnOnly => RefSafetyAnalysis.EscapeLevel.ReturnOnly
+            };
         }
     }
 
@@ -116,7 +165,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             _useUpdatedEscapeRules = useUpdatedEscapeRules;
             _diagnostics = diagnostics;
 
-            _localLifetime = Lifetime.CurrentMethod();
+            _localLifetime = Lifetime.CurrentMethod;
         }
 
         internal static void Analyze(CSharpCompilation compilation, MethodSymbol symbol, BoundNode body, BindingDiagnosticBag diagnostics)
