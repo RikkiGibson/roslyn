@@ -20,7 +20,7 @@ Note that this is not a flow analysis. This means, for example, that a variable'
 In order to achieve a clear, concise, and "verifiably" correct design, we define a theory using types to represent lifetimes. Lifetime types, type parameters, type arguments, and conversions define in what ways `ref`s are permitted to flow through the program.
 
 ### Ref lifetime
-A `ref` itself has exactly one lifetime. This is represented using variations on the same type argument form, depending on the readability/writability of the `ref`.
+A `ref` itself has exactly one lifetime. This is represented using variations on the same type argument form, depending on the readability/writability of the `ref`. For example, the below refs all have lifetime `$a`:
 - `ref<$a> readonly`
 - `in<$a>`
 - `out<$a>`
