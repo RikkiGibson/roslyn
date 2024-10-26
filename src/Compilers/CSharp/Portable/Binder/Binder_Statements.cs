@@ -1572,13 +1572,11 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                         Debug.Assert(leftEscape.Equals(rightEscape) || op1.Type.IsRefLikeOrAllowsRefLikeType());
 
-                        // We only check if the safe-to-escape of e2 is wider than the safe-to-escape of e1 here,
-                        // we don't check for equality. The case where the safe-to-escape of e2 is narrower than
-                        // e1 is handled in the if (op1.Type.IsRefLikeType) { ... } block later.
-                        // TODO2: this seems a strange check to perform.
-                        // We already need 'right' lifetime to be convertible to 'left'.
-                        // So, requiring 'left' to be convertible to 'right' essentially means they must be equal.
-                        if (!leftEscape.Equals(rightEscape))
+                        // We only check if the left lifetime is convertible to the right here
+                        // in order to give a more useful diagnostic.
+                        // Later on we check if right lifetime is convertible to left,
+                        // which effectively means these lifetimes must be equal.
+                        if (!leftEscape.IsConvertibleTo(rightEscape))
                         {
                             Debug.Assert(op1.Kind != BoundKind.Parameter); // If the assert fails, add a corresponding test.
 

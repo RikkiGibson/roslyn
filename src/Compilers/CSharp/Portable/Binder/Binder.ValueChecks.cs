@@ -16,7 +16,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 {
     internal partial class RefSafetyAnalysis
     {
-        internal enum EscapeLevel
+        private enum EscapeLevel
         {
             CallingMethod,
             ReturnOnly
@@ -1218,6 +1218,13 @@ namespace Microsoft.CodeAnalysis.CSharp
 
     internal partial class RefSafetyAnalysis
     {
+        private static EscapeLevel? EscapeLevelFromScope(Lifetime lifetime) => lifetime switch
+        {
+            { IsReturnOnly: true } => EscapeLevel.ReturnOnly,
+            { IsCallingMethod: true } => EscapeLevel.CallingMethod,
+            _ => null,
+        };
+
         private static Lifetime GetParameterValEscape(ParameterSymbol parameter)
         {
             return parameter switch
@@ -1229,7 +1236,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         }
 
         private static EscapeLevel? GetParameterValEscapeLevel(ParameterSymbol parameter) =>
-            GetParameterValEscape(parameter).ToEscapeLevel();
+            EscapeLevelFromScope(GetParameterValEscape(parameter));
 
         private static Lifetime GetParameterRefEscape(ParameterSymbol parameter)
         {
@@ -1244,7 +1251,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         }
 
         private static EscapeLevel? GetParameterRefEscapeLevel(ParameterSymbol parameter) =>
-            GetParameterRefEscape(parameter).ToEscapeLevel();
+            EscapeLevelFromScope(GetParameterRefEscape(parameter));
 
         private bool CheckParameterValEscape(SyntaxNode node, ParameterSymbol parameter, Lifetime escapeTo, BindingDiagnosticBag diagnostics)
         {
