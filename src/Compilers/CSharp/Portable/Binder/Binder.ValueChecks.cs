@@ -4137,8 +4137,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                 case BoundKind.NullCoalescingOperator:
                     var coalescingOp = (BoundNullCoalescingOperator)expr;
 
-                    return Math.Max(GetValEscape(coalescingOp.LeftOperand, scopeOfTheContainingExpression),
-                                    GetValEscape(coalescingOp.RightOperand, scopeOfTheContainingExpression));
+                    return GetValEscape(coalescingOp.LeftOperand, scopeOfTheContainingExpression)
+                        .Intersect(GetValEscape(coalescingOp.RightOperand, scopeOfTheContainingExpression));
 
                 case BoundKind.FieldAccess:
                     var fieldAccess = (BoundFieldAccess)expr;
@@ -4296,7 +4296,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         var initializerOpt = objectCreation.InitializerExpressionOpt;
                         if (initializerOpt != null)
                         {
-                            escape = Math.Max(escape, GetValEscape(initializerOpt, scopeOfTheContainingExpression));
+                            escape = escape.Intersect(GetValEscape(initializerOpt, scopeOfTheContainingExpression));
                         }
 
                         return escape;
@@ -4311,7 +4311,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         var initializerOpt = newT.InitializerExpressionOpt;
                         if (initializerOpt != null)
                         {
-                            escape = Math.Max(escape, GetValEscape(initializerOpt, scopeOfTheContainingExpression));
+                            escape = escape.Intersect(GetValEscape(initializerOpt, scopeOfTheContainingExpression));
                         }
 
                         return escape;
@@ -4320,8 +4320,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                 case BoundKind.WithExpression:
                     var withExpression = (BoundWithExpression)expr;
 
-                    return Math.Max(GetValEscape(withExpression.Receiver, scopeOfTheContainingExpression),
-                                    GetValEscape(withExpression.InitializerExpression, scopeOfTheContainingExpression));
+                    return GetValEscape(withExpression.Receiver, scopeOfTheContainingExpression)
+                        .Intersect(GetValEscape(withExpression.InitializerExpression, scopeOfTheContainingExpression));
 
                 case BoundKind.UnaryOperator:
                     var unaryOperator = (BoundUnaryOperator)expr;
@@ -4424,8 +4424,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                             isRefEscape: false);
                     }
 
-                    return Math.Max(GetValEscape(compound.Left, scopeOfTheContainingExpression),
-                                    GetValEscape(compound.Right, scopeOfTheContainingExpression));
+                    return GetValEscape(compound.Left, scopeOfTheContainingExpression)
+                        .Intersect(GetValEscape(compound.Right, scopeOfTheContainingExpression));
 
                 case BoundKind.BinaryOperator:
                     var binary = (BoundBinaryOperator)expr;
@@ -4444,14 +4444,14 @@ namespace Microsoft.CodeAnalysis.CSharp
                             isRefEscape: false);
                     }
 
-                    return Math.Max(GetValEscape(binary.Left, scopeOfTheContainingExpression),
-                                    GetValEscape(binary.Right, scopeOfTheContainingExpression));
+                    return GetValEscape(binary.Left, scopeOfTheContainingExpression)
+                        .Intersect(GetValEscape(binary.Right, scopeOfTheContainingExpression));
 
                 case BoundKind.RangeExpression:
                     var range = (BoundRangeExpression)expr;
 
-                    return Math.Max((range.LeftOperandOpt is { } left ? GetValEscape(left, scopeOfTheContainingExpression) : CallingMethodScope),
-                                    (range.RightOperandOpt is { } right ? GetValEscape(right, scopeOfTheContainingExpression) : CallingMethodScope));
+                    return (range.LeftOperandOpt is { } left ? GetValEscape(left, scopeOfTheContainingExpression) : Lifetime.CallingMethod)
+                        .Intersect(range.RightOperandOpt is { } right ? GetValEscape(right, scopeOfTheContainingExpression) : Lifetime.CallingMethod);
 
                 case BoundKind.UserDefinedConditionalLogicalOperator:
                     var uo = (BoundUserDefinedConditionalLogicalOperator)expr;
@@ -4589,7 +4589,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             Lifetime narrowestScope = scopeOfTheContainingExpression;
             foreach (var element in elements)
             {
-                narrowestScope = Math.Max(narrowestScope, GetValEscape(element, scopeOfTheContainingExpression));
+                narrowestScope = narrowestScope.Intersect(GetValEscape(element, scopeOfTheContainingExpression));
             }
 
             return narrowestScope;
@@ -4607,7 +4607,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             foreach (var expr in initExpr.Initializers)
             {
                 var exprResult = GetValEscapeOfObjectMemberInitializer(expr, scopeOfTheContainingExpression);
-                result = Math.Max(result, exprResult);
+                result = result.Intersect(exprResult);
             }
 
             return result;
@@ -4684,11 +4684,11 @@ namespace Microsoft.CodeAnalysis.CSharp
                     Lifetime escapeScope = escapeValue.IsRefEscape
                         ? GetRefEscape(escapeValue.Argument, scopeOfTheContainingExpression)
                         : GetValEscape(escapeValue.Argument, scopeOfTheContainingExpression);
-                    receiverEscapeScope = Math.Max(escapeScope, receiverEscapeScope);
+                    receiverEscapeScope = escapeScope.Intersect(receiverEscapeScope);
                 }
 
                 escapeValues.Free();
-                return Math.Max(receiverEscapeScope, rightEscapeScope);
+                return receiverEscapeScope.Intersect(rightEscapeScope);
             }
 
             Lifetime getPropertyEscape(
@@ -4710,10 +4710,10 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         private Lifetime GetValEscape(ImmutableArray<BoundExpression> expressions, Lifetime scopeOfTheContainingExpression)
         {
-            var result = CallingMethodScope;
+            var result = Lifetime.CallingMethod;
             foreach (var expression in expressions)
             {
-                result = Math.Max(result, GetValEscape(expression, scopeOfTheContainingExpression));
+                result = result.Intersect(GetValEscape(expression, scopeOfTheContainingExpression));
             }
 
             return result;

@@ -34,20 +34,20 @@ namespace Microsoft.CodeAnalysis.CSharp
         // Wider lifetimes are convertible to narrower lifetimes.
         private uint value;
 
-        internal static Lifetime CallingMethod => new Lifetime { value = callingMethod };
-        internal static Lifetime ReturnOnly => new Lifetime { value = returnOnly };
-        internal static Lifetime CurrentMethod => new Lifetime { value = currentMethod };
+        public static Lifetime CallingMethod => new Lifetime { value = callingMethod };
+        public static Lifetime ReturnOnly => new Lifetime { value = returnOnly };
+        public static Lifetime CurrentMethod => new Lifetime { value = currentMethod };
 
         /// <summary>
         /// Gets a lifetime which is "empty". i.e. which refers to a variable whose storage is never allocated.
         ///</summary>
-        internal static Lifetime Empty => new Lifetime { value = uint.MaxValue };
+        public static Lifetime Empty => new Lifetime { value = uint.MaxValue };
 
         /// <summary>
         /// Gets a lifetime which is narrower than the given lifetime.
         /// Used denote a nested local scope.
         /// </summary>
-        internal Lifetime Narrower()
+        public Lifetime Narrower()
         {
             Debug.Assert(CurrentMethod.Wider().IsConvertibleTo(this));
             return new Lifetime { value = this.value + 1 };
@@ -57,19 +57,19 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// Gets a lifetime which is wider than the given lifetime.
         /// Used denote a nested local scope.
         /// </summary>
-        internal Lifetime Wider()
+        public Lifetime Wider()
         {
             Debug.Assert(CurrentMethod.IsConvertibleTo(this));
             return new Lifetime { value = this.value - 1 };
         }
 
-        internal bool IsCallingMethod => value == callingMethod;
-        internal bool IsReturnOnly => value == returnOnly;
-        internal bool IsReturnable => value is callingMethod or returnOnly;
+        public bool IsCallingMethod => value == callingMethod;
+        public bool IsReturnOnly => value == returnOnly;
+        public bool IsReturnable => value is callingMethod or returnOnly;
 
         /// <summary>Returns true if a 'ref' with this lifetime can be converted to the 'other' lifetime. Otherwise, returns false.</summary>
         /// <remarks>Generally, a wider lifetime is convertible to a narrower lifetime.</remarks>
-        internal bool IsConvertibleTo(Lifetime other)
+        public bool IsConvertibleTo(Lifetime other)
         {
             return this.value <= other.value;
         }
@@ -82,7 +82,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// If in future we added the concept of unrelated lifetimes (e.g. to implement 'ref scoped'), this method would perhaps return a Nullable,
         /// for the case that no lifetime exists which both input lifetimes are convertible to.
         /// </remarks>
-        internal Lifetime Intersect(Lifetime other)
+        public Lifetime Intersect(Lifetime other)
         {
             return this.IsConvertibleTo(other) ? other : this;
         }
@@ -91,23 +91,44 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// Returns the wider of two lifetimes.
         /// </summary>
         /// <remarks>In other words, this method returns the narrowest lifetime which can be converted to both 'this' and 'other'.</remarks>
-        internal Lifetime Union(Lifetime other)
+        public Lifetime Union(Lifetime other)
         {
             return this.IsConvertibleTo(other) ? this : other;
         }
 
         /// <summary>Returns true if this lifetime is the same as 'other' (i.e. for invariant nested conversion).</summary>
-        internal bool Equals(Lifetime other)
+        public bool Equals(Lifetime other)
         {
             return this.value == other.value;
         }
 
-        internal RefSafetyAnalysis.EscapeLevel? ToEscapeLevel()
+        public override bool Equals(object? obj)
+        {
+            return obj is Lifetime other && this.Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return unchecked((int)this.value);
+        }
+
+        public static bool operator ==(Lifetime lhs, Lifetime rhs)
+        {
+            return lhs.value == rhs.value;
+        }
+
+        public static bool operator !=(Lifetime lhs, Lifetime rhs)
+        {
+            return lhs.value != rhs.value;
+        }
+
+        public RefSafetyAnalysis.EscapeLevel? ToEscapeLevel()
         {
             return value switch
             {
                 callingMethod => RefSafetyAnalysis.EscapeLevel.CallingMethod,
-                returnOnly => RefSafetyAnalysis.EscapeLevel.ReturnOnly
+                returnOnly => RefSafetyAnalysis.EscapeLevel.ReturnOnly,
+                _ => null
             };
         }
     }

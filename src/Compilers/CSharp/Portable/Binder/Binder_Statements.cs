@@ -1575,7 +1575,10 @@ namespace Microsoft.CodeAnalysis.CSharp
                         // We only check if the safe-to-escape of e2 is wider than the safe-to-escape of e1 here,
                         // we don't check for equality. The case where the safe-to-escape of e2 is narrower than
                         // e1 is handled in the if (op1.Type.IsRefLikeType) { ... } block later.
-                        if (!rightEscape.IsConvertibleTo(leftEscape))
+                        // TODO2: this seems a strange check to perform.
+                        // We already need 'right' lifetime to be convertible to 'left'.
+                        // So, requiring 'left' to be convertible to 'right' essentially means they must be equal.
+                        if (!leftEscape.IsConvertibleTo(rightEscape))
                         {
                             Debug.Assert(op1.Kind != BoundKind.Parameter); // If the assert fails, add a corresponding test.
 
