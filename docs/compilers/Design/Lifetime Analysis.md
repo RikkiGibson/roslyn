@@ -4,7 +4,7 @@ This document describes the compiler's system for analyzing safe usage of manage
 Note that this is not a flow analysis. This means, for example, that a variable's lifetime is fixed when it is declared, rather than potentially being different at different locations in a method.
 
 ## Terms
-- `ref`: managed reference. Can refer to refs made using any `ref`/`in`/`out` keyword in argument or assignment positions.
+- `ref`: A managed reference to a variable, usually made using a `ref`/`in`/`out` keyword in an argument or assignment position. Corresponds to the CLR concept of a *managed pointer* or *byref*.
 - writable `ref`: refers only to refs made using the `ref` keyword.
 - `ref readonly`: a `ref` whose referent can be read but not written.
 - `ref struct`: a struct which is assumed to contain one or more `ref` fields.
