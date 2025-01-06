@@ -5916,5 +5916,31 @@ class C
 }
 ");
         }
+
+        [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/76028")]
+        public void CastFromDynamic()
+        {
+            var source = """
+                public class C {
+                    public static bool Test(dynamic o) =>
+                        (((int, int))o) == (2, 3);
+                }
+                """;
+            var comp = CreateCompilation(source);
+            comp.VerifyEmitDiagnostics();
+        }
+
+        [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/76028")]
+        public void CastFromDynamic2()
+        {
+            var source = """
+                public class C {
+                    public static bool Test(dynamic o) =>
+                        (int)o == 2;
+                }
+                """;
+            var comp = CreateCompilation(source);
+            comp.VerifyEmitDiagnostics();
+        }
     }
 }
