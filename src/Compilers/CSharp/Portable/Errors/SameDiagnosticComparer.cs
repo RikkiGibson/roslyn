@@ -1,0 +1,15 @@
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Collections.Generic;
+
+namespace Microsoft.CodeAnalysis.CSharp;
+
+internal sealed class SameDiagnosticComparer : EqualityComparer<Diagnostic>
+{
+    public static readonly SameDiagnosticComparer Instance = new SameDiagnosticComparer();
+    public override bool Equals(Diagnostic x, Diagnostic y) => x.Equals(y);
+    public override int GetHashCode(Diagnostic obj) =>
+        Hash.Combine(Hash.CombineValues(obj.Arguments), Hash.Combine(obj.Location.GetHashCode(), obj.Code));
+}

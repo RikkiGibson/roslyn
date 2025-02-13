@@ -581,7 +581,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 return;
             }
 
-            HashSet<Diagnostic> compatDiagnosticSet = new HashSet<Diagnostic>(compatDiagnostics.AsEnumerable(), SameDiagnosticComparer.Instance);
+            HashSet<Diagnostic> compatDiagnosticSet = new HashSet<Diagnostic>(compatDiagnostics.AsEnumerable(), Errors.SameDiagnosticComparer.Instance);
             compatDiagnostics.Free();
             foreach (var diagnostic in strictDiagnostics.AsEnumerable())
             {
@@ -665,14 +665,6 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 #nullable disable
-
-        private sealed class SameDiagnosticComparer : EqualityComparer<Diagnostic>
-        {
-            public static readonly SameDiagnosticComparer Instance = new SameDiagnosticComparer();
-            public override bool Equals(Diagnostic x, Diagnostic y) => x.Equals(y);
-            public override int GetHashCode(Diagnostic obj) =>
-                Hash.Combine(Hash.CombineValues(obj.Arguments), Hash.Combine(obj.Location.GetHashCode(), obj.Code));
-        }
 
         /// <summary>
         /// Analyze the body, reporting all necessary diagnostics.

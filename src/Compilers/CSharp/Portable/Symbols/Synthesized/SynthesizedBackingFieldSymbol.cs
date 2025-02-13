@@ -214,7 +214,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
 
             // Both Annotated and not NotAnnotated cases had nullable warnings.
-            var notAnnotatedDiagnosticsSet = new HashSet<Diagnostic>(notAnnotatedDiagnostics.AsEnumerable(), SameDiagnosticComparer.Instance);
+            var notAnnotatedDiagnosticsSet = new HashSet<Diagnostic>(notAnnotatedDiagnostics.AsEnumerable(), Errors.SameDiagnosticComparer.Instance);
             notAnnotatedDiagnostics.Free();
 
             foreach (var diagnostic in annotatedDiagnostics.AsEnumerable())
@@ -231,15 +231,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return NullableAnnotation.Annotated;
         }
 #nullable disable
-
-        // TODO2: dedupe
-        private sealed class SameDiagnosticComparer : EqualityComparer<Diagnostic>
-        {
-            public static readonly SameDiagnosticComparer Instance = new SameDiagnosticComparer();
-            public override bool Equals(Diagnostic x, Diagnostic y) => x.Equals(y);
-            public override int GetHashCode(Diagnostic obj) =>
-                Hash.Combine(Hash.CombineValues(obj.Arguments), Hash.Combine(obj.Location.GetHashCode(), obj.Code));
-        }
 
         internal override bool HasPointerType
             => _property.HasPointerType;
