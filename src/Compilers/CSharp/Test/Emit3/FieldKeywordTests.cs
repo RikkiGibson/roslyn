@@ -12349,5 +12349,45 @@ class C<T>
                 //     NonResilient = "b"
                 Diagnostic(ErrorCode.ERR_AssgReadonlyProp, "NonResilient").WithArguments("S.NonResilient").WithLocation(6, 5));
         }
+
+        [Fact]
+        public void Nullable_Cycle_04()
+        {
+            var source = """
+                #nullable enable
+
+                public struct S
+                {
+                    public static int P1 { get => field; set => field = value; } = 1;
+                    public static int P2 { get => field; set => field = value; } = 2;
+                }
+                """;
+
+            var comp = CreateCompilation(source);
+            comp.VerifyEmitDiagnostics();
+        }
+
+        [Fact]
+        public void Nullable_Cycle_05()
+        {
+            var source = """
+                #nullable enable
+
+                public struct S
+                {
+                    public static int P1 { get => field; set => field = value; } = field;
+                    public static int P2 { get => field; set => field = value; } = field;
+                }
+                """;
+
+            var comp = CreateCompilation(source);
+            comp.VerifyEmitDiagnostics(
+                // (5,68): error CS0103: The name 'field' does not exist in the current context
+                //     public static int P1 { get => field; set => field = value; } = field;
+                Diagnostic(ErrorCode.ERR_NameNotInContext, "field").WithArguments("field").WithLocation(5, 68),
+                // (6,68): error CS0103: The name 'field' does not exist in the current context
+                //     public static int P2 { get => field; set => field = value; } = field;
+                Diagnostic(ErrorCode.ERR_NameNotInContext, "field").WithArguments("field").WithLocation(6, 68));
+        }
     }
 }
