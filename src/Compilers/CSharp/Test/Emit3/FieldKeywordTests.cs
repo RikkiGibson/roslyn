@@ -12360,6 +12360,7 @@ class C<T>
                 {
                     public static int P1 { get => field; set => field = value; } = 1;
                     public static int P2 { get => field; set => field = value; } = 2;
+                    public static int P3 { get => field; set => field = value; } = 3;
                 }
                 """;
 
@@ -12390,17 +12391,63 @@ class C<T>
                 Diagnostic(ErrorCode.ERR_NameNotInContext, "field").WithArguments("field").WithLocation(6, 68));
         }
 
-        // test ideas
-        //
-        // 1. simple 2 field-backed case
-        // 2. 2-field backed, one prop assigns the other, no setter (erroneous)
-        // 2b. object initializer with similar prop declarations
-        // 3. constructor, reading both resilient and non-resilient non-nullable props
-        // 4. constructor, chained, reading both resilient and non-resilient non-nullable props
-        //
-        // field initializers
-        // static fields and ctors
-        // TODO2: investigate issue where null resilient props are starting with unexpected maybe-null flow state
-        // - possibly such props should have non-null flow state even without ': this()'?
+        [Fact]
+        public void Nullable_Cycle_06()
+        {
+            var source = """
+                #nullable enable
+
+                public struct S
+                {
+                    public static string P1 { get => field; set => field = value; }
+                    public static string P2 { get => field; set => field = value; }
+
+                    static S()
+                    {
+                        P1 = "a";
+                        P2 = "b";
+                    }
+                }
+                """;
+
+            var comp = CreateCompilation(source);
+            comp.VerifyEmitDiagnostics();
+        }
+
+        [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/77991")]
+        public void Nullable_Resilient_InitialStateInConstructor()
+        {
+            var source = """
+                #nullable enable
+
+                public class C
+                {
+                    public string Prop => field ??= "a";
+
+                    public C(bool ignored)
+                    {
+                        Prop.ToString(); // unexpected warning
+                    }
+
+                    public C() : this(false)
+                    {
+                        Prop.ToString(); // unexpected warning
+                    }
+
+                    public void M()
+                    {
+                        Prop.ToString();
+                    }
+                }
+                """;
+            var comp = CreateCompilation(source);
+            comp.VerifyEmitDiagnostics(
+                // (9,9): warning CS8602: Dereference of a possibly null reference.
+                //         Prop.ToString(); // unexpected warning
+                Diagnostic(ErrorCode.WRN_NullReferenceReceiver, "Prop").WithLocation(9, 9),
+                // (14,9): warning CS8602: Dereference of a possibly null reference.
+                //         Prop.ToString(); // unexpected warning
+                Diagnostic(ErrorCode.WRN_NullReferenceReceiver, "Prop").WithLocation(14, 9));
+        }
     }
 }
