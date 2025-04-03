@@ -12389,5 +12389,18 @@ class C<T>
                 //     public static int P2 { get => field; set => field = value; } = field;
                 Diagnostic(ErrorCode.ERR_NameNotInContext, "field").WithArguments("field").WithLocation(6, 68));
         }
+
+        // test ideas
+        //
+        // 1. simple 2 field-backed case
+        // 2. 2-field backed, one prop assigns the other, no setter (erroneous)
+        // 2b. object initializer with similar prop declarations
+        // 3. constructor, reading both resilient and non-resilient non-nullable props
+        // 4. constructor, chained, reading both resilient and non-resilient non-nullable props
+        //
+        // field initializers
+        // static fields and ctors
+        // TODO2: investigate issue where null resilient props are starting with unexpected maybe-null flow state
+        // - possibly such props should have non-null flow state even without ': this()'?
     }
 }
