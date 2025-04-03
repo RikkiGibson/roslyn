@@ -2243,8 +2243,13 @@ namespace Microsoft.CodeAnalysis.CSharp
                     if (symbol is SynthesizedBackingFieldSymbol { AssociatedSymbol: SourcePropertySymbolBase { UsesFieldKeyword: false } property })
                         symbol = property;
                     // If symbol is a property that uses field keyword, then use field to determine initial state and to own the slot.
-                    else if (symbol is SourcePropertySymbolBase { UsesFieldKeyword: true, BackingField: { } backingField })
-                        symbol = backingField;
+                    else if (symbol is SourcePropertySymbolBase { UsesFieldKeyword: true, BackingField: { InfersNullableAnnotation: true } backingField } property1
+                        && GetTypeOrReturnTypeWithAnnotations(backingField).NullableAnnotation == NullableAnnotation.Annotated)
+                    {
+                        symbol = property1;
+                    }
+                    else if (symbol is SourcePropertySymbolBase { UsesFieldKeyword: true, BackingField: { } backingField1 })
+                        symbol = backingField1;
                     else if (symbol is SourceEventFieldSymbol eventField)
                         symbol = eventField.AssociatedSymbol;
                 }
