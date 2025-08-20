@@ -12860,5 +12860,51 @@ class C<T>
                 base.VisitInvalid(operation);
             }
         }
+
+        [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/79922")]
+        public void DuplicatePropertyInitializerWarning_01()
+        {
+            var source = """
+                #nullable enable
+                class C
+                {
+                    string P2
+                    {
+                        get;
+                        set;
+                    } = default; // here
+
+                    C() { }
+                    C(string s) { }
+                }
+                """;
+
+            var comp = CreateCompilation(source);
+            comp.VerifyEmitDiagnostics();
+        }
+
+        [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/79922")]
+        public void DuplicatePropertyInitializerWarning_02()
+        {
+            var source = """
+                #nullable enable
+                using System.Diagnostics.CodeAnalysis;
+                class C<T>
+                {
+                    [AllowNull]
+                    T P2
+                    {
+                        get => field;
+                        set;
+                    } = default; // 1
+
+                    C([AllowNull] T t) => P2 = t;
+                    C([AllowNull] T t, object? obj) => P2 = t;
+                }
+                """;
+
+            var comp = CreateCompilation([source, AllowNullAttributeDefinition]);
+            comp.VerifyEmitDiagnostics();
+        }
     }
 }
