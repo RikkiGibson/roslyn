@@ -23,6 +23,12 @@
     <NoWarn>$(NoWarn);NU5128</NoWarn>
   </PropertyGroup>
 
+  <!-- TODO2: use PackageReference to Roslyn packages to make things build. -->
+  <ItemGroup>
+    <ProjectReference Include="../../../Compilers/CSharp/Portable/Microsoft.CodeAnalysis.CSharp.csproj" />
+    <ProjectReference Include="../../../Dependencies/Contracts/Microsoft.CodeAnalysis.Contracts.Package.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
   <!-- Make sure the shared source files do not require any global usings -->
   <ItemGroup>
     <Using Remove="@(Using)" />
