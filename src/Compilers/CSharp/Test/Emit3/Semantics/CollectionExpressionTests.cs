@@ -20807,6 +20807,7 @@ partial class Program
                 }
                 """;
             comp = CreateCompilation(sourceB, references: new[] { refA }, targetFramework: TargetFramework.Net80);
+
             comp.VerifyEmitDiagnostics(
                 // (6,34): warning CS0612: 'MyCollectionBuilder.Create<T>(ReadOnlySpan<T>)' is obsolete
                 //         MyCollection<string> x = [];
@@ -20852,7 +20853,9 @@ partial class Program
                     }
                 }
                 """;
+
             comp = CreateCompilation(sourceB, references: new[] { refA }, targetFramework: TargetFramework.Net80);
+
             comp.VerifyEmitDiagnostics(
                 // (6,34): error CS0619: 'MyCollectionBuilder.Create<T>(ReadOnlySpan<T>)' is obsolete: 'message 4'
                 //         MyCollection<string> x = [];
@@ -21825,6 +21828,44 @@ partial class Program
                 // 1.cs(19,34): error CS0656: Missing compiler required member 'System.ReadOnlySpan`1..ctor'
                 //         MyCollection<object> c = [1, 2, 3];
                 Diagnostic(ErrorCode.ERR_MissingPredefinedMember, "[1, 2, 3]").WithArguments("System.ReadOnlySpan`1", ".ctor").WithLocation(19, 34));
+        }
+
+        [Fact]
+        public void Missing_ListType()
+        {
+            string source = """
+                using System;
+                using System.Collections.Generic;
+
+                class Program
+                {
+                    static void Main()
+                    {
+                        IList<int> list = [with(), 1, 2, 3];
+                    }
+                }
+                """;
+            var comp = CreateCompilation(source);
+            comp.MakeTypeMissing(WellKnownType.System_Collections_Generic_List_T);
+            comp.VerifyEmitDiagnostics(
+                // (8,27): error CS0656: Missing compiler required member 'System.Collections.Generic.List`1..ctor'
+                //         IList<int> list = [with(), 1, 2, 3];
+                Diagnostic(ErrorCode.ERR_MissingPredefinedMember, "[with(), 1, 2, 3]").WithArguments("System.Collections.Generic.List`1", ".ctor").WithLocation(8, 27),
+                // (8,27): error CS0656: Missing compiler required member 'System.Collections.Generic.List`1..ctor'
+                //         IList<int> list = [with(), 1, 2, 3];
+                Diagnostic(ErrorCode.ERR_MissingPredefinedMember, "[with(), 1, 2, 3]").WithArguments("System.Collections.Generic.List`1", ".ctor").WithLocation(8, 27),
+                // (8,27): error CS0656: Missing compiler required member 'System.Collections.Generic.List`1.Add'
+                //         IList<int> list = [with(), 1, 2, 3];
+                Diagnostic(ErrorCode.ERR_MissingPredefinedMember, "[with(), 1, 2, 3]").WithArguments("System.Collections.Generic.List`1", "Add").WithLocation(8, 27),
+                // (8,27): error CS0656: Missing compiler required member 'System.Collections.Generic.List`1.ToArray'
+                //         IList<int> list = [with(), 1, 2, 3];
+                Diagnostic(ErrorCode.ERR_MissingPredefinedMember, "[with(), 1, 2, 3]").WithArguments("System.Collections.Generic.List`1", "ToArray").WithLocation(8, 27),
+                // (8,28): error CS1729: 'List<int>' does not contain a constructor that takes 0 arguments
+                //         IList<int> list = [with(), 1, 2, 3];
+                Diagnostic(ErrorCode.ERR_BadCtorArgCount, "with").WithArguments("System.Collections.Generic.List<int>", "0").WithLocation(8, 28),
+                // (8,28): error CS0518: Predefined type 'System.Collections.Generic.List`1' is not defined or imported
+                //         IList<int> list = [with(), 1, 2, 3];
+                Diagnostic(ErrorCode.ERR_PredefinedTypeNotFound, "with()").WithArguments("System.Collections.Generic.List`1").WithLocation(8, 28));
         }
 
         [Fact]
@@ -33502,7 +33543,10 @@ partial class Program
                 Diagnostic(ErrorCode.ERR_ArrayElementCantBeRefAny, "S").WithArguments("S").WithLocation(4, 28),
                 // (15,21): error CS9203: A collection expression of type 'S' cannot be used in this context because it may be exposed outside of the current scope.
                 //     static S F() => [[]];
-                Diagnostic(ErrorCode.ERR_CollectionExpressionEscape, "[[]]").WithArguments("S").WithLocation(15, 21));
+                Diagnostic(ErrorCode.ERR_CollectionExpressionEscape, "[[]]").WithArguments("S").WithLocation(15, 21),
+                // (15,22): error CS9404: Element type of this collection may not be a ref struct or a type parameter allowing ref structs
+                //     static S F() => [[]];
+                Diagnostic(ErrorCode.ERR_CollectionRefLikeElementType, "[]").WithLocation(15, 22));
         }
 
         [WorkItem("https://github.com/dotnet/roslyn/issues/70638")]
@@ -33981,10 +34025,12 @@ partial class Program
                 // (7,28): warning CS8714: The type 'string?' cannot be used as type parameter 'T' in the generic type or method 'MyCollectionBuilder.Create<T>(ReadOnlySpan<T>)'. Nullability of type argument 'string?' doesn't match 'notnull' constraint.
                 // MyCollection<string?> x1 = [null]; // 1
                 Diagnostic(ErrorCode.WRN_NullabilityMismatchInTypeParameterNotNullConstraint, "[null]").WithArguments("MyCollectionBuilder.Create<T>(System.ReadOnlySpan<T>)", "T", "string?").WithLocation(7, 28),
+                // (7,28): warning CS8714: The type 'string?' cannot be used as type parameter 'T' in the generic type or method 'MyCollectionBuilder.Create<T>(ReadOnlySpan<T>)'. Nullability of type argument 'string?' doesn't match 'notnull' constraint.
+                // MyCollection<string?> x1 = [null]; // 1
+                Diagnostic(ErrorCode.WRN_NullabilityMismatchInTypeParameterNotNullConstraint, "[null]").WithArguments("MyCollectionBuilder.Create<T>(System.ReadOnlySpan<T>)", "T", "string?").WithLocation(7, 28),
                 // (8,28): warning CS8625: Cannot convert null literal to non-nullable reference type.
                 // MyCollection<string> x2 = [null]; // 2
-                Diagnostic(ErrorCode.WRN_NullAsNonNullable, "null").WithLocation(8, 28)
-                );
+                Diagnostic(ErrorCode.WRN_NullAsNonNullable, "null").WithLocation(8, 28));
         }
 
         [Fact]
@@ -34027,10 +34073,12 @@ partial class Program
                 // (7,28): warning CS8714: The type 'string?' cannot be used as type parameter 'T' in the generic type or method 'MyCollectionBuilder.Create<T>(ReadOnlySpan<T?>)'. Nullability of type argument 'string?' doesn't match 'notnull' constraint.
                 // MyCollection<string?> x1 = [null];
                 Diagnostic(ErrorCode.WRN_NullabilityMismatchInTypeParameterNotNullConstraint, "[null]").WithArguments("MyCollectionBuilder.Create<T>(System.ReadOnlySpan<T?>)", "T", "string?").WithLocation(7, 28),
+                // (7,28): warning CS8714: The type 'string?' cannot be used as type parameter 'T' in the generic type or method 'MyCollectionBuilder.Create<T>(ReadOnlySpan<T?>)'. Nullability of type argument 'string?' doesn't match 'notnull' constraint.
+                // MyCollection<string?> x1 = [null];
+                Diagnostic(ErrorCode.WRN_NullabilityMismatchInTypeParameterNotNullConstraint, "[null]").WithArguments("MyCollectionBuilder.Create<T>(System.ReadOnlySpan<T?>)", "T", "string?").WithLocation(7, 28),
                 // (8,28): warning CS8625: Cannot convert null literal to non-nullable reference type.
                 // MyCollection<string> x2 = [null];
-                Diagnostic(ErrorCode.WRN_NullAsNonNullable, "null").WithLocation(8, 28)
-                );
+                Diagnostic(ErrorCode.WRN_NullAsNonNullable, "null").WithLocation(8, 28));
         }
 
         [Fact]
