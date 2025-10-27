@@ -84,6 +84,7 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests
         if (o is int i && /*<bind>*/i > 10/*</bind>*/) {}
     }
 }");
+            // TODO2: It is unclear why we consider this to be declaring 'i' now
             Assert.Null(GetSymbolNamesJoined(dataFlowAnalysisResults.VariablesDeclared));
             Assert.Equal("i", GetSymbolNamesJoined(dataFlowAnalysisResults.DataFlowsIn));
             Assert.Null(GetSymbolNamesJoined(dataFlowAnalysisResults.DataFlowsOut));
@@ -206,7 +207,7 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests
                 }
                 """);
             VerifyDataFlowAnalysis("""
-                VariablesDeclared: 
+                VariablesDeclared: x
                 AlwaysAssigned: 
                 Captured: 
                 CapturedInside: 
@@ -338,6 +339,130 @@ namespace Microsoft.CodeAnalysis.CSharp.UnitTests
                 ReadInside: 
                 ReadOutside: doLogic, errorMessage
                 WrittenInside: outer, errorMessage
+                WrittenOutside: doLogic
+                """, dataFlowAnalysisResults);
+        }
+
+        [Fact]
+        public void RegionInIsPattern10()
+        {
+            var dataFlowAnalysisResults = CompileAndAnalyzeDataFlowExpression("""
+                C.Use(doLogic: true);
+
+                class C
+                {
+                    public static string[] M() => [];
+
+                    public static void Use(bool doLogic)
+                    {
+                        if (doLogic)
+                        {
+                            if (/*<bind>*/M() is [var element] array/*</bind>*/)
+                            {
+                                Console.WriteLine(element);
+                                Console.WriteLine(array.Length);
+                            }
+                        }
+                    }
+                }
+
+                """);
+            VerifyDataFlowAnalysis("""
+                VariablesDeclared: element, array
+                AlwaysAssigned: 
+                Captured: 
+                CapturedInside: 
+                CapturedOutside: 
+                DataFlowsIn: 
+                DataFlowsOut: element, array
+                DefinitelyAssignedOnEntry: doLogic
+                DefinitelyAssignedOnExit: doLogic
+                ReadInside: 
+                ReadOutside: doLogic, element, array
+                WrittenInside: element, array
+                WrittenOutside: doLogic
+                """, dataFlowAnalysisResults);
+        }
+
+        [Fact]
+        public void RegionInIsPattern11()
+        {
+            var dataFlowAnalysisResults = CompileAndAnalyzeDataFlowExpression("""
+                C.Use(doLogic: true);
+
+                class C
+                {
+                    public static (string, string[]) M() => [];
+
+                    public static void Use(bool doLogic)
+                    {
+                        if (doLogic)
+                        {
+                            if (/*<bind>*/M() is (var message, [var element] array)/*</bind>*/)
+                            {
+                                Console.WriteLine(message);
+                                Console.WriteLine(element);
+                                Console.WriteLine(array.Length);
+                            }
+                        }
+                    }
+                }
+
+                """);
+            VerifyDataFlowAnalysis("""
+                VariablesDeclared: message, element, array
+                AlwaysAssigned: 
+                Captured: 
+                CapturedInside: 
+                CapturedOutside: 
+                DataFlowsIn: 
+                DataFlowsOut: message, element, array
+                DefinitelyAssignedOnEntry: doLogic
+                DefinitelyAssignedOnExit: doLogic
+                ReadInside: 
+                ReadOutside: doLogic, message, element, array
+                WrittenInside: message, element, array
+                WrittenOutside: doLogic
+                """, dataFlowAnalysisResults);
+        }
+
+        [Fact]
+        public void RegionInIsPattern12()
+        {
+            var dataFlowAnalysisResults = CompileAndAnalyzeDataFlowExpression("""
+                C.Use(doLogic: true);
+
+                class C
+                {
+                    public static (string message, int length) M() => [];
+
+                    public static void Use(bool doLogic)
+                    {
+                        if (doLogic)
+                        {
+                            if (/*<bind>*/M() is (var message, > 0 and var length)/*</bind>*/)
+                            {
+                                Console.WriteLine(message);
+                                Console.WriteLine(length);
+                            }
+                        }
+                    }
+                }
+
+                """);
+            VerifyDataFlowAnalysis("""
+                VariablesDeclared: message, length
+                AlwaysAssigned: 
+                Captured: 
+                CapturedInside: 
+                CapturedOutside: 
+                DataFlowsIn: 
+                DataFlowsOut: message, length
+                DefinitelyAssignedOnEntry: doLogic
+                DefinitelyAssignedOnExit: doLogic
+                ReadInside: 
+                ReadOutside: doLogic, message, length
+                WrittenInside: message, length
                 WrittenOutside: doLogic
                 """, dataFlowAnalysisResults);
         }

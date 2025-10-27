@@ -1500,6 +1500,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                             // promoted to fields for top-level code in scripts and interactive
                             int slot = GetOrCreateSlot(symbol);
                             SetSlotState(slot, assigned: written || !this.State.Reachable);
+                            NotePatternVariable(symbol);
                         }
 
                         if (written) NoteWrite(pattern.VariableAccess, value, read: read, isRef: isRef);
@@ -1631,6 +1632,10 @@ namespace Microsoft.CodeAnalysis.CSharp
                     // or errors that have been reported earlier (e.g. assignment to a unary increment)
                     break;
             }
+        }
+
+        protected virtual void NotePatternVariable(LocalSymbol symbol)
+        {
         }
 
         /// <summary>

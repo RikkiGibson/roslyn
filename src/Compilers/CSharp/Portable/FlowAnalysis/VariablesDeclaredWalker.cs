@@ -18,7 +18,7 @@ namespace Microsoft.CodeAnalysis.CSharp
     /// <summary>
     /// A region analysis walker that records declared variables.
     /// </summary>
-    internal class VariablesDeclaredWalker : AbstractRegionControlFlowPass
+    internal class VariablesDeclaredWalker : AbstractRegionDataFlowPass
     {
         internal static IEnumerable<Symbol> Analyze(CSharpCompilation compilation, Symbol member, BoundNode node, BoundNode firstInRegion, BoundNode lastInRegion)
         {
@@ -48,55 +48,9 @@ namespace Microsoft.CodeAnalysis.CSharp
             _variablesDeclared = null;
         }
 
-        public override void VisitPattern(BoundPattern pattern)
+        protected override void NotePatternVariable(LocalSymbol symbol)
         {
-            base.VisitPattern(pattern);
-            NoteDeclaredPatternVariables(pattern);
-        }
-
-        protected override void VisitSwitchSection(BoundSwitchSection node, bool isLastSection)
-        {
-            foreach (var label in node.SwitchLabels)
-            {
-                NoteDeclaredPatternVariables(label.Pattern);
-            }
-
-            base.VisitSwitchSection(node, isLastSection);
-        }
-
-        /// <summary>
-        /// Record declared variables in the pattern.
-        /// </summary>
-        private void NoteDeclaredPatternVariables(BoundPattern pattern)
-        {
-            if (IsInside)
-            {
-                switch (pattern)
-                {
-                    case BoundRecursivePattern r:
-                        foreach (var subpattern in r.Deconstruction.NullToEmpty())
-                        {
-                            NoteDeclaredPatternVariables(subpattern.Pattern);
-                        }
-
-                        foreach (var subpattern in r.Properties.NullToEmpty())
-                        {
-                            NoteDeclaredPatternVariables(subpattern.Pattern);
-                        }
-                        break;
-                    case BoundObjectPattern p:
-                        {
-                            // The variable may be null if it is a discard designation `_`.
-                            if (p.Variable?.Kind == SymbolKind.Local)
-                            {
-                                // Because this API only returns local symbols and parameters,
-                                // we exclude pattern variables that have become fields in scripts.
-                                _variablesDeclared.Add(p.Variable);
-                            }
-                        }
-                        break;
-                }
-            }
+            _variablesDeclared.Add(symbol);
         }
 
         public override BoundNode VisitLocalDeclaration(BoundLocalDeclaration node)
