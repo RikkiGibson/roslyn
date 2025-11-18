@@ -18,21 +18,23 @@ internal sealed class AddShebangDirectiveDiagnosticAnalyzer()
         descriptors: [s_descriptor],
         generatedCodeAnalysisFlags: GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics)
 {
-    private static readonly LocalizableResourceString s_localizableAddShebangTitle = new(
+    private static readonly LocalizableResourceString s_localizableAddShebang = new(
        nameof(CSharpAnalyzersResources.Add_shebang), AnalyzersResources.ResourceManager, typeof(AnalyzersResources));
 
-    private static readonly LocalizableResourceString s_localizableAddShebangMessage = new(
+    private static readonly LocalizableResourceString s_localizableAddShebangDescription = new(
        nameof(CSharpAnalyzersResources.Add_shebang_to_make_this_a_file_based_app), AnalyzersResources.ResourceManager, typeof(AnalyzersResources));
 
     private static readonly DiagnosticDescriptor s_descriptor = CreateDescriptor(
                 id: IDEDiagnosticIds.AddShebangDirective,
                 enforceOnBuild: EnforceOnBuild.Never,
-                title: s_localizableAddShebangTitle,
-                messageFormat: s_localizableAddShebangMessage,
+                title: s_localizableAddShebang,
+                messageFormat: s_localizableAddShebang,
                 hasAnyCodeStyleOption: false,
                 isUnnecessary: false,
                 isEnabledByDefault: true,
-                isConfigurable: true);
+                isConfigurable: false,
+                description: s_localizableAddShebangDescription,
+                defaultSeverity: DiagnosticSeverity.Error); // TODO2: use info severity, just debugging why the diagnostics are not appearing.
 
     public override DiagnosticAnalyzerCategory GetAnalyzerCategory()
         => DiagnosticAnalyzerCategory.SyntaxTreeWithoutSemanticsAnalysis;
@@ -54,13 +56,13 @@ internal sealed class AddShebangDirectiveDiagnosticAnalyzer()
                 var leadingTriviaList = root.GetLeadingTrivia();
                 foreach (var trivia in leadingTriviaList)
                 {
-                    // Has a '#!' or already. Don't report anything.
-                    if (trivia.Kind() is SyntaxKind.ShebangDirectiveTrivia or SyntaxKind.IgnoredDirectiveTrivia)
+                    // Has a '#!' already. Don't report anything.
+                    if (trivia.Kind() is SyntaxKind.ShebangDirectiveTrivia)
                         return;
                 }
             }
 
-            // Didn't find any '#!' or '#:'. Look for top-level statements, which are a sign that file-based programs editor behavior may be desired.
+            // Didn't find any '#!'. Look for top-level statements, which are a sign that file-based programs editor behavior may be desired.
             if (root is not CompilationUnitSyntax compilationUnit)
                 return;
 
