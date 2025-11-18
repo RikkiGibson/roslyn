@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using Basic.Reference.Assemblies;
 using Microsoft.CodeAnalysis.CSharp.Symbols;
 using Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE;
 using Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting;
@@ -18,7 +19,6 @@ using Microsoft.CodeAnalysis.Test.Utilities;
 using Roslyn.Test.Utilities;
 using Roslyn.Utilities;
 using Xunit;
-using Basic.Reference.Assemblies;
 using static Microsoft.CodeAnalysis.CSharp.Symbols.FlowAnalysisAnnotations;
 
 namespace Microsoft.CodeAnalysis.CSharp.UnitTests.Semantics
@@ -78430,9 +78430,6 @@ void F1(object a, int? b) => throw null!;
                 // (5,8): error CS0103: The name 'ERROR' does not exist in the current context
                 //     F1(ERROR, i switch { 1 => 1, 2 => null, ERROR => 2, _ => 3 });
                 Diagnostic(ErrorCode.ERR_NameNotInContext, "ERROR").WithArguments("ERROR").WithLocation(5, 8),
-                // (5,39): warning CS8619: Nullability of reference types in value of type '<null>' doesn't match target type 'int'.
-                //     F1(ERROR, i switch { 1 => 1, 2 => null, ERROR => 2, _ => 3 });
-                Diagnostic(ErrorCode.WRN_NullabilityMismatchInAssignment, "null").WithArguments("<null>", "int").WithLocation(5, 39),
                 // (5,45): error CS0103: The name 'ERROR' does not exist in the current context
                 //     F1(ERROR, i switch { 1 => 1, 2 => null, ERROR => 2, _ => 3 });
                 Diagnostic(ErrorCode.ERR_NameNotInContext, "ERROR").WithArguments("ERROR").WithLocation(5, 45));
