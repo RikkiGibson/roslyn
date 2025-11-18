@@ -24,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AddInheritdoc\AddInheritdocCodeFixProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AddObsoleteAttribute\CSharpAddObsoleteAttributeCodeFixProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AddParameter\CSharpAddParameterCodeFixProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AddShebangDirective\AddShebangDirectiveCodeFixProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AliasAmbiguousType\CSharpAliasAmbiguousTypeCodeFixProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssignOutParameters\AbstractAssignOutParametersCodeFixProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssignOutParameters\AssignOutParametersAboveReturnCodeFixProvider.cs" />
