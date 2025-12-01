@@ -99,7 +99,8 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
                 && textDocument is Document document
                 && await document.GetSyntaxTreeAsync(cancellationToken) is { } syntaxTree)
             {
-                var newHasAllInformation = await VirtualProjectXmlProvider.HasTopLevelStatementsAsync(syntaxTree, cancellationToken);
+                var currentSolutionPath = _workspaceFactory.HostWorkspace.CurrentSolution.FilePath;
+                var newHasAllInformation = await VirtualProjectXmlProvider.ShouldShowFileBasedProgramSemanticErrorsAsync(currentSolutionPath, syntaxTree, cancellationToken);
                 if (newHasAllInformation != document.Project.State.HasAllInformation)
                 {
                     // TODO: replace this method and the call site in LspWorkspaceManager,

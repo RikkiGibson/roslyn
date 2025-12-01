@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis.LanguageServer.LanguageServer;
 using Microsoft.CodeAnalysis.LanguageServer.Telemetry;
 using Microsoft.Extensions.Logging;
 using Microsoft.ServiceHub.Framework;
+using Roslyn.Utilities;
 using StreamJsonRpc;
 
 namespace Microsoft.CodeAnalysis.LanguageServer.HostWorkspace;
@@ -30,6 +31,25 @@ internal sealed class ProjectInitializationHandler : IDisposable
 
     private IDisposable? _subscription;
 
+    private static readonly Lock s_lock = new();
+    internal static bool IsInitialProjectLoadComplete
+    {
+        get
+        {
+            lock (s_lock)
+            {
+                return field;
+            }
+        }
+        private set
+        {
+            lock (s_lock)
+            {
+                field = value;
+            }
+        }
+    }
+
     [ImportingConstructor]
     [Obsolete(MefConstruction.ImportingConstructorMessage, error: true)]
     public ProjectInitializationHandler(IServiceBrokerProvider serviceBrokerProvider, ILoggerFactory loggerFactory)
@@ -44,6 +64,7 @@ internal sealed class ProjectInitializationHandler : IDisposable
 
     public static async ValueTask SendProjectInitializationCompleteNotificationAsync()
     {
+        IsInitialProjectLoadComplete = true;
         Contract.ThrowIfNull(LanguageServerHost.Instance, "We don't have an LSP channel yet to send this request through.");
         var languageServerManager = LanguageServerHost.Instance.GetRequiredLspService<IClientLanguageServerManager>();
         await languageServerManager.SendNotificationAsync(ProjectInitializationCompleteName, CancellationToken.None);

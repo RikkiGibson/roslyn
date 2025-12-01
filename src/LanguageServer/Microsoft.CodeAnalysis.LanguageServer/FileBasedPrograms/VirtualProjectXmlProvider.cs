@@ -4,6 +4,7 @@
 
 using System.Collections.Immutable;
 using System.Composition;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -15,6 +16,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Host.Mef;
+using Microsoft.CodeAnalysis.LanguageServer.HostWorkspace;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.Logging;
 using Roslyn.Utilities;
@@ -99,7 +101,7 @@ internal class VirtualProjectXmlProvider(DotnetCliHelper dotnetCliHelper)
         => Path.ChangeExtension(documentFilePath, ".csproj");
 
     /// <summary>
-    /// Indicates whether the editor considers the text to be a file-based program.
+    /// Indicates whether the editor considers the file to definitely be a file-based program.
     /// If this returns false, the text is either a miscellaneous file or is part of an ordinary project.
     /// </summary>
     /// <remarks>
@@ -120,8 +122,18 @@ internal class VirtualProjectXmlProvider(DotnetCliHelper dotnetCliHelper)
         return false;
     }
 
-    internal static async Task<bool> HasTopLevelStatementsAsync(SyntaxTree tree, CancellationToken cancellationToken)
+    /// <summary>
+    /// Used when a miscellaneous file may possibly be a file-based program (but might also be part of a project which isn't fully loaded right now).
+    /// </summary>
+    internal static async Task<bool> ShouldShowFileBasedProgramSemanticErrorsAsync(string? currentSolutionPath, SyntaxTree tree, CancellationToken cancellationToken)
     {
+        Debug.Assert(!IsFileBasedProgram(await tree.GetTextAsync(cancellationToken)));
+
+        // In the case we have a real solution or projects, but an initial load hasn't completed yet,
+        // 
+        if (currentSolutionPath is not null && !ProjectInitializationHandler.IsInitialProjectLoadComplete)
+            return false;
+
         var root = await tree.GetRootAsync(cancellationToken);
         if (root is CompilationUnitSyntax compilationUnit)
             return compilationUnit.Members.Any(member => member.IsKind(SyntaxKind.GlobalStatement));
