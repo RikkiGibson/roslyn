@@ -5538,5 +5538,97 @@ class C
                 //         x[0] = null; // 6
                 Diagnostic(ErrorCode.WRN_NullAsNonNullable, "null").WithLocation(41, 16));
         }
+
+        [Fact]
+        public void Repro81843_1()
+        {
+            var source = """
+                #nullable enable
+
+                class C
+                {
+                    public string Prop { get; set; } = null;
+                }
+                """;
+
+            var comp = CreateCompilation(source);
+
+            var tree = comp.SyntaxTrees[0];
+            var model = comp.GetSemanticModel(tree);
+            var propertyDecl = tree.GetRoot().DescendantNodes().OfType<PropertyDeclarationSyntax>().First();
+            model.GetDiagnostics(propertyDecl.Span).Verify(
+                // (5,40): warning CS8625: Cannot convert null literal to non-nullable reference type.
+                //     public string Prop { get; set; } = null;
+                Diagnostic(ErrorCode.WRN_NullAsNonNullable, "null").WithLocation(5, 40));
+
+            comp.VerifyEmitDiagnostics(
+                // (5,40): warning CS8625: Cannot convert null literal to non-nullable reference type.
+                //     public string Prop { get; set; } = null;
+                Diagnostic(ErrorCode.WRN_NullAsNonNullable, "null").WithLocation(5, 40));
+
+            model.GetDiagnostics(propertyDecl.Span).Verify(
+                // (5,40): warning CS8625: Cannot convert null literal to non-nullable reference type.
+                //     public string Prop { get; set; } = null;
+                Diagnostic(ErrorCode.WRN_NullAsNonNullable, "null").WithLocation(5, 40));
+        }
+
+        [Fact]
+        public void Repro81843_2()
+        {
+            var source = """
+                #nullable enable
+
+                class C
+                {
+                    public C() { }
+                    public string Prop { get; set; } = null;
+                }
+                """;
+
+            var comp = CreateCompilation(source);
+
+            var tree = comp.SyntaxTrees[0];
+            var model = comp.GetSemanticModel(tree);
+            var propertyDecl = tree.GetRoot().DescendantNodes().OfType<PropertyDeclarationSyntax>().First();
+            model.GetDiagnostics(propertyDecl.Span).Verify();
+
+            //comp.VerifyEmitDiagnostics(
+            //    // (6,40): warning CS8625: Cannot convert null literal to non-nullable reference type.
+            //    //     public string Prop { get; set; } = null;
+            //    Diagnostic(ErrorCode.WRN_NullAsNonNullable, "null").WithLocation(6, 40));
+
+            //model.GetDiagnostics(propertyDecl.Span).Verify();
+        }
+
+        [Fact]
+        public void Repro81843_3()
+        {
+            var source = """
+                #nullable enable
+
+                class C
+                {
+                    public C() { }
+                    public string Prop { get; set; } = BAD;
+                }
+                """;
+
+            var comp = CreateCompilation(source);
+
+            var tree = comp.SyntaxTrees[0];
+            var model = comp.GetSemanticModel(tree);
+            var propertyDecl = tree.GetRoot().DescendantNodes().OfType<PropertyDeclarationSyntax>().First();
+            model.GetDiagnostics(propertyDecl.Span).Verify(
+                // (6,40): error CS0103: The name 'BAD' does not exist in the current context
+                //     public string Prop { get; set; } = BAD;
+                Diagnostic(ErrorCode.ERR_NameNotInContext, "BAD").WithArguments("BAD").WithLocation(6, 40));
+
+            //comp.VerifyEmitDiagnostics(
+            //    // (6,40): warning CS8625: Cannot convert null literal to non-nullable reference type.
+            //    //     public string Prop { get; set; } = null;
+            //    Diagnostic(ErrorCode.WRN_NullAsNonNullable, "null").WithLocation(6, 40));
+
+            //model.GetDiagnostics(propertyDecl.Span).Verify();
+        }
     }
 }
