@@ -5630,5 +5630,48 @@ class C
 
             //model.GetDiagnostics(propertyDecl.Span).Verify();
         }
+
+        [Fact]
+        public void Repro81843_4()
+        {
+            var source = """
+                #nullable enable
+                using System;
+
+                class C
+                {
+                    public C() { }
+                    public C(int x) { }
+                    public Action Prop { get; set; } = () =>
+                    {
+                        int x;
+                        x.ToString();
+                    };
+                }
+                """;
+
+            var comp = CreateCompilation(source);
+
+            var tree = comp.SyntaxTrees[0];
+            var model = comp.GetSemanticModel(tree);
+            var propertyDecl = tree.GetRoot().DescendantNodes().OfType<PropertyDeclarationSyntax>().First();
+            AssertEx.Equal("""
+                public Action Prop { get; set; } = () =>
+                    {
+                        int x;
+                        x.ToString();
+                    };
+                """,
+                propertyDecl.ToString());
+            model.GetDiagnostics(propertyDecl.Span).Verify();
+
+            comp.VerifyEmitDiagnostics(
+                // (11,9): error CS0165: Use of unassigned local variable 'x'
+                //         x.ToString();
+                Diagnostic(ErrorCode.ERR_UseDefViolation, "x").WithArguments("x").WithLocation(11, 9),
+                // (11,9): error CS0165: Use of unassigned local variable 'x'
+                //         x.ToString();
+                Diagnostic(ErrorCode.ERR_UseDefViolation, "x").WithArguments("x").WithLocation(11, 9));
+        }
     }
 }
