@@ -10710,6 +10710,84 @@ End Class")
             Directory.Delete(dir.Path, True)
         End Sub
 
+        <Theory>
+        <InlineData({"/out:checksum.exe", "/debug:portable", "/checksumAlgorithm:SHA256"})>
+        <InlineData({"/out:checksum.exe", "/debug:portable"})>
+        Public Sub SourceGenerators_ChecksumAlgorithm(ParamArray additionalFlags As String())
+            Dim dir = Temp.CreateDirectory()
+            Dim src = dir.CreateFile("temp.vb")
+            src.WriteAllText("Class C : End Class")
+
+            Dim genPath1 = Path.Combine(dir.Path, "Microsoft.CodeAnalysis.Test.Utilities", "Roslyn.Test.Utilities.TestGenerators.TestSourceGenerator", "hint1.vb")
+            Dim genPath2 = Path.Combine(dir.Path, "Microsoft.CodeAnalysis.Test.Utilities", "Roslyn.Test.Utilities.TestGenerators.TestSourceGenerator", "hint2.vb")
+
+            Dim generator = New TestSourceGenerator() With {
+                .ExecuteImpl = Sub(context)
+                                   context.AddSource("hint1", "Class G1 : Sub F() : End Sub : End Class")
+                                   context.AddSource("hint2", SourceText.From("Class G2 : Sub F() : End Sub : End Class", Encoding.UTF8, checksumAlgorithm:=SourceHashAlgorithm.Sha1))
+                               End Sub
+            }
+
+            VerifyOutput(
+                dir,
+                src,
+                includeCurrentAssemblyAsAnalyzerReference:=False,
+                additionalFlags:=additionalFlags,
+                generators:={generator},
+                analyzers:=Nothing)
+
+            Using peStream As Stream = File.OpenRead(Path.Combine(dir.Path, "checksum.exe")), pdbStream As Stream = File.OpenRead(Path.Combine(dir.Path, "checksum.pdb"))
+                PdbValidation.VerifyPdb(peStream, pdbStream, $"
+<symbols>
+  <files>
+    <file id=""1"" name=""{src.Path}"" language=""VB"" checksumAlgorithm=""SHA256"" checksum=""F0-95-FB-50-21-5C-36-E5-BF-4F-E0-A4-7D-E2-16-EA-A7-64-BF-E2-1C-56-CF-DA-38-71-46-EC-2C-95-47-89"" />
+    <file id=""2"" name=""{genPath1}"" language=""VB"" checksumAlgorithm=""SHA256"" checksum=""AB-00-CB-BF-24-2F-FC-27-86-C1-54-EB-42-4F-4D-A5-92-BD-48-17-91-DD-5B-40-CB-61-41-EE-50-48-7E-DD""><![CDATA[Class G1 : Sub F() : End Sub : End Class]]></file>
+    <file id=""3"" name=""{genPath2}"" language=""VB"" checksumAlgorithm=""SHA256"" checksum=""B0-42-0C-02-C9-EC-5C-24-95-D0-91-7A-F9-76-D8-A4-F2-48-45-A3-78-15-51-69-6C-F8-98-1D-D3-54-DF-C8""><![CDATA[Class G2 : Sub F() : End Sub : End Class]]></file>
+  </files>
+</symbols>", PdbValidationOptions.ExcludeMethods)
+            End Using
+
+            Directory.Delete(dir.Path, True)
+        End Sub
+
+        <Fact>
+        Public Sub SourceGenerators_ChecksumAlgorithm_Sha1()
+            Dim dir = Temp.CreateDirectory()
+            Dim src = dir.CreateFile("temp.vb")
+            src.WriteAllText("Class C : End Class")
+
+            Dim genPath1 = Path.Combine(dir.Path, "Microsoft.CodeAnalysis.Test.Utilities", "Roslyn.Test.Utilities.TestGenerators.TestSourceGenerator", "hint1.vb")
+            Dim genPath2 = Path.Combine(dir.Path, "Microsoft.CodeAnalysis.Test.Utilities", "Roslyn.Test.Utilities.TestGenerators.TestSourceGenerator", "hint2.vb")
+
+            Dim generator = New TestSourceGenerator() With {
+                .ExecuteImpl = Sub(context)
+                                   context.AddSource("hint1", "Class G1 : Sub F() : End Sub : End Class")
+                                   context.AddSource("hint2", SourceText.From("Class G2 : Sub F() : End Sub : End Class", Encoding.UTF8, checksumAlgorithm:=SourceHashAlgorithm.Sha256))
+                               End Sub
+            }
+
+            VerifyOutput(
+                dir,
+                src,
+                includeCurrentAssemblyAsAnalyzerReference:=False,
+                additionalFlags:={"/out:checksum.exe", "/debug:portable", "/checksumAlgorithm:SHA1"},
+                generators:={generator},
+                analyzers:=Nothing)
+
+            Using peStream As Stream = File.OpenRead(Path.Combine(dir.Path, "checksum.exe")), pdbStream As Stream = File.OpenRead(Path.Combine(dir.Path, "checksum.pdb"))
+                PdbValidation.VerifyPdb(peStream, pdbStream, $"
+<symbols>
+  <files>
+    <file id=""1"" name=""{src.Path}"" language=""VB"" checksumAlgorithm=""SHA1"" checksum=""72-47-CE-AE-A6-AE-70-31-FF-55-80-F3-34-1D-AE-EA-07-9A-C1-99"" />
+    <file id=""2"" name=""{genPath1}"" language=""VB"" checksumAlgorithm=""SHA1"" checksum=""A7-9D-37-91-F7-00-39-D8-8A-7C-71-6F-BC-E7-5D-97-49-DE-41-0B""><![CDATA[Class G1 : Sub F() : End Sub : End Class]]></file>
+    <file id=""3"" name=""{genPath2}"" language=""VB"" checksumAlgorithm=""SHA1"" checksum=""CC-01-00-91-1F-0D-46-CA-BF-1B-70-5C-28-6D-7E-1C-34-19-EE-52""><![CDATA[Class G2 : Sub F() : End Sub : End Class]]></file>
+  </files>
+</symbols>", PdbValidationOptions.ExcludeMethods)
+            End Using
+
+            Directory.Delete(dir.Path, True)
+        End Sub
+
         <Fact>
         Public Sub ExperimentalWithWhitespaceDiagnosticID_WarnForInvalidDiagID()
             Dim dir = Temp.CreateDirectory()
