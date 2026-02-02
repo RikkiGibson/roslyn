@@ -4,11 +4,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Completion;
 using Microsoft.CodeAnalysis.CSharp.Completion.Providers;
 using Microsoft.CodeAnalysis.Editor.CSharp.UnitTests.Completion.CompletionProviders;
 using Microsoft.CodeAnalysis.Test.Utilities;
+using Microsoft.CodeAnalysis.Text;
 using Roslyn.Test.Utilities;
 using Xunit;
 
@@ -748,5 +751,41 @@ public sealed class KeywordCompletionProviderTests : AbstractCSharpCompletionPro
         yield return new[] { "sealed" };
         yield return new[] { "static" };
         yield return new[] { "struct" };
+    }
+
+    [Fact, Trait(Traits.Feature, Traits.Features.KeywordRecommending)]
+    [WorkItem("https://github.com/dotnet/roslyn/issues/82221")]
+    public async Task CompletionAfterDeletingAllText()
+    {
+        // Start with a document containing a single character
+        var initialMarkup = "C";
+
+        using var workspace = EditorTestWorkspace.CreateCSharp(initialMarkup);
+        var document = workspace.CurrentSolution.GetDocument(workspace.Documents.Single().Id)!;
+
+        // Get the semantic model to populate the cache (simulating the first completion request)
+        var semanticModel = await document.GetSemanticModelAsync(CancellationToken.None);
+
+        // Now delete all text, simulating the user pressing backspace
+        var emptyText = SourceText.From("");
+        var newSolution = workspace.CurrentSolution.WithDocumentText(document.Id, emptyText);
+        workspace.TryApplyChanges(newSolution);
+
+        // Get the updated document (now empty)
+        var emptyDocument = workspace.CurrentSolution.GetDocument(document.Id)!;
+
+        // Request completion at position 1 (where the cursor was before deletion)
+        // This should not throw, even though position 1 is beyond the end of the empty file
+        var completionService = workspace.Services.GetLanguageServices(LanguageNames.CSharp)
+            .GetRequiredService<CompletionService>();
+
+        // The bug: position 1 is passed but document length is 0
+        var completionList = await completionService.GetCompletionsAsync(
+            emptyDocument,
+            caretPosition: 1  // Invalid position for empty document
+            );
+
+        // Should either return null/empty or return valid completions at position 0
+        // but should NOT throw ArgumentOutOfRangeException
     }
 }

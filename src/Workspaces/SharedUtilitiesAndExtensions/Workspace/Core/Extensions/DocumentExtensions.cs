@@ -130,8 +130,13 @@ internal static partial class DocumentExtensions
         Contract.ThrowIfFalse(document.SupportsSemanticModel);
 
         var root = await document.GetRequiredSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
-        var token = root.FindToken(span.Start);
-        var node = token.Parent!.AncestorsAndSelf().First(a => a.FullSpan.Contains(span));
+        SyntaxNode? node = null;
+        // TODO2: re-enable this condition, once the original bug is reproduced in a test
+        if (root.IntersectsWith(span.Start))
+        {
+            var token = root.FindToken(span.Start);
+            node = token.Parent!.AncestorsAndSelf().First(a => a.FullSpan.Contains(span));
+        }
 
         return await ReuseExistingSpeculativeModelAsync(document, node, cancellationToken).ConfigureAwait(false);
     }
