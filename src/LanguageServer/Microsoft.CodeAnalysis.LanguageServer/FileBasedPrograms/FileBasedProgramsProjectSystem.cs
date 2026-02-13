@@ -31,6 +31,7 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
     private readonly CanonicalMiscFilesProjectLoader _canonicalMiscFilesLoader;
     private readonly IFileChangeWatcher _fileChangeWatcher;
     private IFileChangeContext? _csprojWatcher;
+    private DidChangeWorkspaceFoldersHandler? _didChangeWorkspaceFoldersHandler;
 
     public FileBasedProgramsProjectSystem(
         ILspServices lspServices,
@@ -75,6 +76,7 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
 
     public void Dispose()
     {
+        _didChangeWorkspaceFoldersHandler?.WorkspaceFoldersChanged -= OnWorkspaceFoldersChanged;
         _canonicalMiscFilesLoader.Dispose();
         GlobalOptionService.RemoveOptionChangedHandler(this, OnGlobalOptionChanged);
         _csprojWatcher?.Dispose();
@@ -301,21 +303,35 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
     public Task OnInitializedAsync(ClientCapabilities clientCapabilities, RequestContext context, CancellationToken cancellationToken)
     {
         Contract.ThrowIfFalse(_csprojWatcher == null, "This should be the first notification which can possibly initialize _csprojWatcher");
-        var initializeManager = context.GetRequiredService<IInitializeManager>();
-        if (initializeManager.TryGetInitializeParams() is { WorkspaceFolders: [_, ..] nonEmptyWorkspaceFolders })
-        {
-            var nonOverlappingWorkspacePaths = getNonOverlappingFolderPaths(nonEmptyWorkspaceFolders);
 
-            // TODO2: handle 'workspace/didChangeWorkspaceFolders'
-            _csprojWatcher = _fileChangeWatcher.CreateContext(
-                nonOverlappingWorkspacePaths.SelectAsArray(path => new WatchedDirectory(path, extensionFilters: [".csproj"])));
-            _csprojWatcher.FileChanged += OnCsprojFileChanged;
-            _canonicalMiscFilesLoader.WorkspaceFoldersOpt = nonOverlappingWorkspacePaths;
-        }
+        _didChangeWorkspaceFoldersHandler = context.GetRequiredService<DidChangeWorkspaceFoldersHandler>();
+        _didChangeWorkspaceFoldersHandler.WorkspaceFoldersChanged += OnWorkspaceFoldersChanged;
+
+        var initializeManager = context.GetRequiredService<IInitializeManager>();
+        var initializeParams = initializeManager.TryGetInitializeParams();
+        Contract.ThrowIfNull(initializeParams);
+        OnWorkspaceFoldersChanged(sender: null, initializeParams.WorkspaceFolders);
 
         return Task.CompletedTask;
+    }
 
-        ImmutableArray<string> getNonOverlappingFolderPaths(WorkspaceFolder[] workspaceFolders)
+    private void OnWorkspaceFoldersChanged(object? sender, WorkspaceFolder[]? newWorkspaceFolders)
+    {
+        _csprojWatcher?.Dispose();
+        if (newWorkspaceFolders is null or [])
+        {
+            _csprojWatcher = null;
+            _canonicalMiscFilesLoader.WorkspaceFoldersOpt = default;
+            return;
+        }
+
+        var nonOverlappingWorkspacePaths = GetNonOverlappingFolderPaths(newWorkspaceFolders);
+        _csprojWatcher = _fileChangeWatcher.CreateContext(
+            nonOverlappingWorkspacePaths.SelectAsArray(path => new WatchedDirectory(path, extensionFilters: [".csproj"])));
+        _csprojWatcher.FileChanged += OnCsprojFileChanged;
+        _canonicalMiscFilesLoader.WorkspaceFoldersOpt = nonOverlappingWorkspacePaths;
+
+        static ImmutableArray<string> GetNonOverlappingFolderPaths(WorkspaceFolder[] workspaceFolders)
         {
             var builder = ArrayBuilder<string>.GetInstance(workspaceFolders.Length);
             foreach (var workspaceFolder in workspaceFolders)
