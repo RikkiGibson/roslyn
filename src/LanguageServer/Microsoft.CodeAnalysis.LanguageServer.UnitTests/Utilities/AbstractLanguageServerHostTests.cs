@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Composition;
 using Nerdbank.Streams;
 using Roslyn.LanguageServer.Protocol;
+using Roslyn.Test.Utilities;
 using StreamJsonRpc;
 using Xunit.Abstractions;
 
@@ -27,7 +28,7 @@ public abstract class AbstractLanguageServerHostTests : IDisposable
         MefCacheDirectory = TempRoot.CreateDirectory();
     }
 
-    protected Task<TestLspServer> CreateLanguageServerAsync(bool includeDevKitComponents = true)
+    private protected Task<TestLspServer> CreateLanguageServerAsync(bool includeDevKitComponents = true)
     {
         return TestLspServer.CreateAsync(new ClientCapabilities(), LoggerFactory, MefCacheDirectory.Path, includeDevKitComponents);
     }
@@ -37,7 +38,7 @@ public abstract class AbstractLanguageServerHostTests : IDisposable
         TempRoot.Dispose();
     }
 
-    protected sealed class TestLspServer : ILspClient, IAsyncDisposable
+    internal sealed class TestLspServer : ILspClient, IAsyncDisposable
     {
         private readonly Task _languageServerHostCompletionTask;
         private readonly JsonRpc _clientRpc;
@@ -48,6 +49,20 @@ public abstract class AbstractLanguageServerHostTests : IDisposable
                 loggerFactory, includeDevKitComponents, cacheDirectory, extensionPaths);
             var testLspServer = new TestLspServer(exportProvider, loggerFactory, assemblyLoader);
             var initializeResponse = await testLspServer.ExecuteRequestAsync<InitializeParams, InitializeResult>(Methods.InitializeName, new InitializeParams { Capabilities = clientCapabilities }, CancellationToken.None);
+            Assert.NotNull(initializeResponse?.Capabilities);
+            testLspServer.ServerCapabilities = initializeResponse.Capabilities;
+
+            await testLspServer.ExecuteRequestAsync<InitializedParams, object>(Methods.InitializedName, new InitializedParams(), CancellationToken.None);
+
+            return testLspServer;
+        }
+
+        internal static async Task<TestLspServer> CreateAsync(AbstractLanguageServerProtocolTests.InitializationOptions initializationOptions, ILoggerFactory loggerFactory, string cacheDirectory, bool includeDevKitComponents = true, string[]? extensionPaths = null)
+        {
+            var (exportProvider, assemblyLoader) = await LanguageServerTestComposition.CreateExportProviderAsync(
+                loggerFactory, includeDevKitComponents, cacheDirectory, extensionPaths);
+            var testLspServer = new TestLspServer(exportProvider, loggerFactory, assemblyLoader);
+            var initializeResponse = await testLspServer.ExecuteRequestAsync<InitializeParams, InitializeResult>(Methods.InitializeName, new InitializeParams { InitializationOptions = initializationOptions }, CancellationToken.None);
             Assert.NotNull(initializeResponse?.Capabilities);
             testLspServer.ServerCapabilities = initializeResponse.Capabilities;
 

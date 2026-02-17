@@ -574,7 +574,7 @@ public abstract partial class AbstractLanguageServerProtocolTests
     /// Implementation of <see cref="AbstractTestLspServer{TWorkspace, TDocument, TProject, TSolution}"/>
     /// using the <see cref="LspTestWorkspace"/> workspace.
     /// </summary>
-    internal sealed class TestLspServer : AbstractTestLspServer<LspTestWorkspace, TestHostDocument, TestHostProject, TestHostSolution>
+    internal class TestLspServer : AbstractTestLspServer<LspTestWorkspace, TestHostDocument, TestHostProject, TestHostSolution>
     {
         public TestLspServer(LspTestWorkspace testWorkspace, Dictionary<string, IList<LSP.Location>> locations, InitializationOptions initializationOptions, AbstractLspLogger logger)
             : base(testWorkspace, locations, initializationOptions, logger)

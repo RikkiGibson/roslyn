@@ -948,6 +948,71 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
         Assert.True(document.Project.State.HasAllInformation);
     }
 
+    class MyTestLspServer : TestLspServer
+    {
+        public MyTestLspServer(LspTestWorkspace testWorkspace, Dictionary<string, IList<Roslyn.LanguageServer.Protocol.Location>> locations, InitializationOptions initializationOptions, AbstractLspLogger logger)
+            : base(testWorkspace, locations, initializationOptions, logger)
+        {
+        }
+
+        protected override RoslynLanguageServer CreateLanguageServer(Stream inputStream, Stream outputStream, WellKnownLspServerKinds serverKind, AbstractLspLogger logger)
+        {
+            var server = base.CreateLanguageServer(inputStream, outputStream, serverKind, logger);
+            var host = new LanguageServerHost(inputStream, inputStream, this.
+        }
+    }
+
+    [Theory, CombinatorialData, WorkItem("https://github.com/dotnet/roslyn/issues/81410")]
+    public async Task TestCsprojInCone_10(bool mutatingLspWorkspace)
+    {
+        // Test opening a file, then dropping a csproj on disk and loading it.
+        // Editor should begin treating as project-based app without user needing to close/reopen anything.
+        var tempDir = _tempRoot.CreateDirectory();
+        var fileText = """
+            Console.WriteLine("Hello World");
+            """;
+        var file = tempDir.CreateFile("file.cs").WriteAllText(fileText);
+
+        await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace, new InitializationOptions
+        {
+            ServerKind = WellKnownLspServerKinds.CSharpVisualBasicLspServer,
+            WorkspaceFolders =
+            [
+                new() { DocumentUri = ProtocolConversions.CreateAbsoluteDocumentUri(tempDir.Path), Name = "workspace" }
+            ],
+            YesIWantThisToBeATestLspServerThatCanDoLspThings_NotABullshitHalfwayServerThatCantDoThings = true, 
+        });
+        var languageServerHost = new LanguageServerHost(serverStream, serverStream, exportProvider, loggerFactory, typeRefResolver);
+        Assert.Null(await GetMiscellaneousDocumentAsync(testLspServer));
+
+        var fileUri = ProtocolConversions.CreateAbsoluteDocumentUri(file.Path);
+        await testLspServer.OpenDocumentAsync(fileUri, fileText).ConfigureAwait(false);
+        await WaitForProjectLoad(fileUri, testLspServer);
+
+        var (workspace, document) = await GetRequiredLspWorkspaceAndDocumentAsync(fileUri, testLspServer).ConfigureAwait(false);
+        Assert.Equal(WorkspaceKind.MiscellaneousFiles, workspace.Kind);
+        Assert.True(document.Project.State.HasAllInformation);
+
+        // When user drops a csproj onto disk and loads it, then the project-based document will be used instead.
+        var csprojFile = await tempDir.CreateFile("Project.csproj").WriteAllTextAsync("""
+            <Project Sdk="Microsoft.NET.Sdk">
+              <PropertyGroup>
+                <TargetFramework>net$(BundledNETCoreAppTargetFrameworkVersion)</TargetFramework>
+                <ImplicitUsings>enable</ImplicitUsings>
+                <Nullable>enable</Nullable>
+              </PropertyGroup>
+            </Project>
+            """);
+
+        var projectSystem = testLspServer.TestWorkspace.ExportProvider.GetExportedValue<LanguageServerProjectSystem>();
+        await projectSystem.OpenProjectsAsync([csprojFile.Path]);
+        await WaitForProjectLoad(fileUri, testLspServer);
+
+        (workspace, document) = await GetRequiredLspWorkspaceAndDocumentAsync(fileUri, testLspServer).ConfigureAwait(false);
+        Assert.Equal(WorkspaceKind.Host, workspace.Kind);
+        Assert.True(document.Project.State.HasAllInformation);
+    }
+
     // TODO: Test consistency of the workspace and project system.
     // i.e. we should always end in a state where each project system entry has a corresponding workspaces project and vice-versa.
 }
