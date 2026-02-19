@@ -5,11 +5,13 @@
 using System.Collections.Immutable;
 using System.Composition;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.ErrorReporting;
 using Microsoft.CodeAnalysis.Host;
 using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.LanguageServer.Handler.DebugConfiguration;
 using Microsoft.CodeAnalysis.LanguageServer.Services;
 using Microsoft.CodeAnalysis.ProjectSystem;
+using Microsoft.CodeAnalysis.Shared.TestHooks;
 using Microsoft.CodeAnalysis.Workspaces.AnalyzerRedirecting;
 using Microsoft.CodeAnalysis.Workspaces.ProjectSystem;
 using Microsoft.Extensions.Logging;
@@ -33,6 +35,7 @@ internal sealed class LanguageServerWorkspaceFactory
         ProjectTargetFrameworkManager projectTargetFrameworkManager,
         ExtensionAssemblyManager extensionManager,
         [ImportMany] IEnumerable<IAnalyzerAssemblyRedirector> assemblyRedirectors,
+        IAsynchronousOperationListenerProvider listenerProvider,
         ILoggerFactory loggerFactory)
     {
         _logger = loggerFactory.CreateLogger(nameof(LanguageServerWorkspaceFactory));
@@ -47,9 +50,6 @@ internal sealed class LanguageServerWorkspaceFactory
 
         // Create the workspace and set analyzer references for it
         var workspace = new LanguageServerWorkspace(hostServicesProvider.HostServices, WorkspaceKind.Host);
-        var hostAnalyzerLoaderProvider = workspace.Services.GetRequiredService<IAnalyzerAssemblyLoaderProvider>();
-        var analyzerReferences = CreateSolutionLevelAnalyzerReferences(hostAnalyzerLoaderProvider);
-        workspace.SetCurrentSolution(s => s.WithAnalyzerReferences(analyzerReferences), WorkspaceChangeKind.SolutionChanged);
 
         HostProjectFactory = new ProjectSystemProjectFactory(
             workspace, fileChangeWatcher, static (_, _) => Task.CompletedTask, _ => { },
@@ -59,10 +59,25 @@ internal sealed class LanguageServerWorkspaceFactory
         // https://github.com/dotnet/roslyn/issues/78560: Move this workspace creation to 'FileBasedProgramsWorkspaceProviderFactory'.
         // 'CreateSolutionLevelAnalyzerReferences' needs to be broken out into its own service for us to be able to move this.
         var miscellaneousFilesWorkspace = new LanguageServerWorkspace(hostServicesProvider.HostServices, WorkspaceKind.MiscellaneousFiles);
-        Contract.ThrowIfFalse(
-            object.ReferenceEquals(hostAnalyzerLoaderProvider, miscellaneousFilesWorkspace.Services.GetRequiredService<IAnalyzerAssemblyLoaderProvider>()),
-            "Expected same AnalyzerLoaderProvider to be used for both host and misc workspaces.");
-        miscellaneousFilesWorkspace.SetCurrentSolution(s => s.WithAnalyzerReferences(analyzerReferences), WorkspaceChangeKind.SolutionChanged);
+
+        Task.Run(() =>
+        {
+            using var _ = listenerProvider.GetListener(FeatureAttribute.Workspace).BeginAsyncOperation(nameof(CreateSolutionLevelAnalyzerReferences));
+            try
+            {
+                var hostAnalyzerLoaderProvider = workspace.Services.GetRequiredService<IAnalyzerAssemblyLoaderProvider>();
+                var analyzerReferences = CreateSolutionLevelAnalyzerReferences(hostAnalyzerLoaderProvider);
+                Contract.ThrowIfFalse(
+                    object.ReferenceEquals(hostAnalyzerLoaderProvider, miscellaneousFilesWorkspace.Services.GetRequiredService<IAnalyzerAssemblyLoaderProvider>()),
+                    "Expected same AnalyzerLoaderProvider to be used for both host and misc workspaces.");
+                workspace.SetCurrentSolution(s => s.WithAnalyzerReferences(analyzerReferences), WorkspaceChangeKind.SolutionChanged);
+                miscellaneousFilesWorkspace.SetCurrentSolution(s => s.WithAnalyzerReferences(analyzerReferences), WorkspaceChangeKind.SolutionChanged);
+            }
+            catch (Exception ex) when (FatalError.ReportAndCatch(ex, ErrorSeverity.Diagnostic))
+            {
+                throw ExceptionUtilities.Unreachable();
+            }
+        });
 
         MiscellaneousFilesWorkspaceProjectFactory = new ProjectSystemProjectFactory(
             miscellaneousFilesWorkspace, fileChangeWatcher, static (_, _) => Task.CompletedTask, _ => { }, CancellationToken.None);

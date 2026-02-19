@@ -273,6 +273,7 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
 
         // Wait for project initialization to complete
         await testLspServer.TestWorkspace.GetService<AsynchronousOperationListenerProvider>().GetWaiter(FeatureAttribute.Workspace).ExpeditedWaitAsync();
+        Assert.NotEmpty(miscFilesWorkspace.CurrentSolution.AnalyzerReferences);
 
         // Document is still in a primordial miscellaneous project
         var (_, looseDocumentTwo) = await GetRequiredLspWorkspaceAndDocumentAsync(looseFileUriOne, testLspServer).ConfigureAwait(false);
