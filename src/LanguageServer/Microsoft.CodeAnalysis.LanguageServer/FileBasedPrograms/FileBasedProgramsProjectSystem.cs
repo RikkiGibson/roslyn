@@ -3,6 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Immutable;
+using System.Diagnostics;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.ErrorReporting;
 using Microsoft.CodeAnalysis.Features.Workspaces;
 using Microsoft.CodeAnalysis.LanguageServer.Handler;
@@ -29,6 +32,8 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
     private readonly ILogger<FileBasedProgramsProjectSystem> _logger;
     private readonly VirtualProjectXmlProvider _projectXmlProvider;
     private readonly CanonicalMiscFilesProjectLoader _canonicalMiscFilesLoader;
+
+    public ImmutableArray<string> WorkspaceFoldersOpt { get; private set; }
 
     public FileBasedProgramsProjectSystem(
         ILspServices lspServices,
@@ -110,49 +115,255 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
 
     private string GetDocumentFilePath(DocumentUri uri) => uri.ParsedUri is { } parsedUri ? ProtocolConversions.GetDocumentFilePathFromUri(parsedUri) : uri.UriString;
 
-    public async ValueTask<bool> IsMiscellaneousFilesDocumentAsync(TextDocument textDocument, CancellationToken cancellationToken)
+    public enum LooseDocumentKind
     {
-        // There are a few cases here:
-        //   1.  The document is a primordial document (either not loaded yet or doesn't support design time build) - it will be in the misc files workspace.
-        //   2.  The document is loaded as a canonical misc file - these are always in the misc files workspace.
-        //   3.  The document is loaded as a file based program - then it will be in the main workspace where the project path matches the source file path.
+        ProjectBasedApp,
+        MiscFile,
+        MiscFileWithSemanticErrors,
+        FileBasedApp,
+    }
 
-        // NB: The FileBasedProgramsProjectSystem uses the document file path (the on-disk path) as the projectPath in 'IsProjectLoadedAsync'.
-        var isLoadedAsFileBasedProgram = textDocument.FilePath is { } filePath && await IsProjectLoadedAsync(filePath, cancellationToken);
+    private async ValueTask<LooseDocumentKind> ClassifyDocumentAsync(DocumentUri documentUri, ImmutableDictionary<DocumentUri, TrackedDocumentInfo> trackedDocuments, CancellationToken cancellationToken)
+    {
+        // roslyn/docs/features/file-based-programs-vscode.md
 
-        // If this document has a file-based program syntactic marker, but we aren't loading it in a file-based programs project,
-        // we need the caller to remove and re-add this document, so that it gets put in a file-based programs project instead.
-        // See the check in 'LspWorkspaceManager.GetLspDocumentInfoAsync', which removes a document based on 'IsMiscellaneousFilesDocumentAsync' result,
-        // then calls 'GetLspDocumentInfoAsync' again for the same request.
-        if (!isLoadedAsFileBasedProgram && VirtualProjectXmlProvider.IsFileBasedProgram(await textDocument.GetTextAsync(cancellationToken)))
-            return false;
+        // 1. Is the file in a currently loaded project?
+        // - Yes → Classify as Project-Based App
+        // - No → Continue to next check
+        var hostWorkspace = _workspaceFactory.HostWorkspace;
+        var hostDocuments = await hostWorkspace.CurrentSolution.GetTextDocumentsAsync(documentUri, cancellationToken);
 
-        if (textDocument.Project.Solution.Workspace == _workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory.Workspace)
+        // If a project in the host workspace contains this document, and the project has a file path not ending in `.cs`,
+        // we assume the file has been loaded into an ordinary project (like a `.csproj`).
+        if (hostDocuments.Any(doc => doc.Project.FilePath?.EndsWith(".cs") == false))
         {
-            // Do a check to determine if the misc project needs to be re-created with a new HasAllInformation flag value.
-            if (!isLoadedAsFileBasedProgram
-                && await _canonicalMiscFilesLoader.IsCanonicalProjectLoadedAsync(cancellationToken)
-                && textDocument is Document document
-                && await document.GetSyntaxTreeAsync(cancellationToken) is { } syntaxTree)
-            {
-                if (await _canonicalMiscFilesLoader.GetHasAllInformationAsync(syntaxTree, cancellationToken) is bool newHasAllInformation
-                    && newHasAllInformation != document.Project.State.HasAllInformation)
-                {
-                    // TODO: replace this method and the call site in LspWorkspaceManager,
-                    // with a mechanism for "updating workspace state if needed" based on changes to a document.
-                    // Perhaps this could be based on actually listening for changes to particular documents, rather than whenever an LSP request related to a document comes in.
-                    // We should be able to do more incremental updates in more cases, rather than needing to throw things away and start over.
-                    return false;
-                }
-            }
-
-            return true;
+            return LooseDocumentKind.ProjectBasedApp;
         }
 
-        if (isLoadedAsFileBasedProgram)
-            return true;
+        // TODO2: should probably handle this check in here.
+        // 1.1. Is this a script file or Razor file? If so, classify as 'plain misc file'.
 
-        // Document is not managed by this project system. Caller should unload it.
+        // 2. Is `enableFileBasedPrograms` enabled?
+        //    - No → Classify as Misc File
+        //    - Yes → Continue to next check
+        var enableFileBasedPrograms = GlobalOptionService.GetOption(LanguageServerProjectSystemOptionsStorage.EnableFileBasedPrograms);
+        if (!enableFileBasedPrograms)
+        {
+            return LooseDocumentKind.MiscFile;
+        }
+
+        // 3. Does the file have an absolute path? (i.e. it represents a file on disk, and it is not a "virtual document" created for a new, not-yet-saved file, or similar.)
+        // - Yes → Go to (4)
+        // - No → Go to (5)
+
+        // 4. Does the file have `#:` or `#!` directives?
+        // - Yes → Classify as File-Based App. Restore if needed and show semantic errors.
+        // - No → Continue to next check
+        var filePath = documentUri.ParsedUri?.GetDocumentFilePathFromUri();
+        if (filePath is { }
+            && PathUtilities.IsAbsolute(filePath)
+            && VirtualProjectXmlProvider.HasFileBasedAppDirectives(trackedDocuments[documentUri].SourceText))
+        {
+            return LooseDocumentKind.FileBasedApp;
+        }
+
+        // 5. Is `enableFileBasedProgramsWhenAmbiguous` enabled? (default: `false` in release, `true` in prerelease)
+        // - No → Classify as Misc File
+        // - Yes → Continue to heuristic detection
+        if (!GlobalOptionService.GetOption(LanguageServerProjectSystemOptionsStorage.EnableFileBasedProgramsWhenAmbiguous))
+        {
+            return LooseDocumentKind.MiscFile;
+        }
+
+        // Heuristic Detection:
+
+        // 6. Are top-level statements present?
+        // - No → Classify as Misc File
+        // - Yes → Continue to next check
+
+        // Use an existing syntax tree from misc files workspace, if present.
+        // Otherwise we will have to do a parse (unfortunately).
+        var existingDoc = _workspaceFactory.MiscellaneousFilesWorkspace.CurrentSolution.GetTextDocuments(documentUri).OfType<Document>().FirstOrDefault();
+        var syntaxTree = existingDoc is { } ? await existingDoc.GetSyntaxTreeAsync(cancellationToken) : null;
+        syntaxTree ??= CSharpSyntaxTree.ParseText(trackedDocuments[documentUri].SourceText, cancellationToken: cancellationToken);
+
+        var containsTopLevelStatements = syntaxTree.GetRoot(cancellationToken) is CompilationUnitSyntax compilationUnit
+            && compilationUnit.Members.Any(SyntaxKind.GlobalStatement);
+        if (!containsTopLevelStatements)
+        {
+            return LooseDocumentKind.MiscFile;
+        }
+
+        // 7. Is the file included in a `.csproj` cone?
+        //    - "Cone" means that a containing directory, at some level of nesting, has a `.csproj` file in it.
+        //    - Note that this specific check is only performed at the time the file is opened. We think that the typical case is that the user will load a new project they are creating. Loading the project will cause the file to start being treated as project-based app per (1). If the user does not load the new project, then stale diagnostics may remain present until the file is closed and re-opened.
+        //    - Yes → Classify as Misc File (wait for project to load)
+        //    - No → Classify as Misc File w/ Semantic Errors
+
+        // TODO2: the result of this check should be cached, watched and invalidated appropriately, by a self-contained component
+        if (filePath is { } && CheckIsContainedInCsprojCone(filePath))
+        {
+            return LooseDocumentKind.MiscFile;
+        }
+
+        return LooseDocumentKind.MiscFileWithSemanticErrors;
+    }
+
+    private async ValueTask<TextDocument?> GetOrLoadDocumentCoreAsync(TextDocumentIdentifier textDocumentIdentifier, LooseDocumentKind documentKind, ImmutableDictionary<DocumentUri, TrackedDocumentInfo> trackedDocuments, CancellationToken cancellationToken)
+    {
+        var documentUri = textDocumentIdentifier.DocumentUri;
+        if (documentKind is LooseDocumentKind.ProjectBasedApp)
+        {
+            var documents = await _workspaceFactory.HostWorkspace.CurrentSolution.GetTextDocumentsAsync(documentUri, cancellationToken).ConfigureAwait(false);
+            if (documents is [])
+            {
+                _logger.LogWarning("Classified document '{documentUri}' as project-based, then didn't find a document for it in the host workspace.", documentUri);
+                return null;
+            }
+
+            return documents.FindDocumentInProjectContext(textDocumentIdentifier, (sln, id) => sln.GetRequiredTextDocument(id));
+        }
+        // TODO2: below cases should log when adding a new document as in the original LspWorkspaceManager code
+        else if (documentKind is LooseDocumentKind.FileBasedApp)
+        {
+            return await GetOrLoadFileBasedAppAsync();
+        }
+        else if (documentKind is LooseDocumentKind.MiscFile or LooseDocumentKind.MiscFileWithSemanticErrors)
+        {
+            return await GetOrLoadMiscFileAsync();
+        }
+        else
+        {
+            throw ExceptionUtilities.UnexpectedValue(documentKind);
+        }
+
+        async ValueTask<TextDocument> GetOrLoadFileBasedAppAsync()
+        {
+            var documents = await _workspaceFactory.HostWorkspace.CurrentSolution.GetTextDocumentsAsync(documentUri, cancellationToken).ConfigureAwait(false);
+            var fileBasedDoc = documents.FirstOrDefault(doc => doc.Project.FilePath?.EndsWith(".cs") == true);
+            if (fileBasedDoc is { })
+                return fileBasedDoc;
+
+            var documentInfo = trackedDocuments[documentUri];
+            var languageInfoProvider = _lspServices.GetRequiredService<ILanguageInfoProvider>();
+            if (!languageInfoProvider.TryGetLanguageInformation(documentUri, documentInfo.LanguageId, out var languageInformation))
+            {
+                Contract.Fail($"Could not find language information for '{documentUri}'");
+            }
+
+            var primordialDoc = AddPrimordialDocument(GetDocumentFilePath(documentUri), documentInfo.SourceText, languageInformation);
+            Contract.ThrowIfNull(primordialDoc.FilePath);
+            await BeginLoadingProjectWithPrimordialAsync(primordialDoc.FilePath, _workspaceFactory.HostProjectFactory, primordialProjectId: primordialDoc.Project.Id, doDesignTimeBuild: true);
+            return primordialDoc;
+        }
+
+        async ValueTask<TextDocument> GetOrLoadMiscFileAsync()
+        {
+            var documents = await _workspaceFactory.MiscellaneousFilesWorkspace.CurrentSolution.GetTextDocumentsAsync(documentUri, cancellationToken).ConfigureAwait(false);
+            var miscDoc = documents.SingleOrDefault();
+            if (miscDoc is { })
+                return miscDoc;
+
+            var documentInfo = trackedDocuments[documentUri];
+            var languageInfoProvider = _lspServices.GetRequiredService<ILanguageInfoProvider>();
+            if (!languageInfoProvider.TryGetLanguageInformation(documentUri, documentInfo.LanguageId, out var languageInformation))
+            {
+                Contract.Fail($"Could not find language information for '{documentUri}'");
+            }
+
+            // TODO2: Do not use canonical loader when enableFileBasedPrograms: false.
+            // Perhaps finer-grained classification like 'RichMisc' vs 'Misc' vs 'MiscWithSemanticErrors' is needed
+            return await _canonicalMiscFilesLoader.AddMiscellaneousDocumentAsync(GetDocumentFilePath(documentUri), documentInfo.SourceText, cancellationToken);
+        }
+    }
+
+    private async ValueTask UpdateWorkspaceStateAsync(DocumentUri documentUri, LooseDocumentKind documentKind)
+    {
+        var filePath = documentUri.ParsedUri?.GetDocumentFilePathFromUri();
+        if (documentKind is LooseDocumentKind.ProjectBasedApp)
+        {
+            // Unload any file-based app projects and misc files projects we had for it.
+            if (filePath is { })
+            {
+                await TryUnloadProjectAsync(filePath);
+                await _canonicalMiscFilesLoader.TryUnloadProjectAsync(filePath);
+            }
+        }
+        else if (documentKind is LooseDocumentKind.FileBasedApp)
+        {
+            // Unload any misc files project we had for it.
+            if (filePath is { })
+            {
+                await _canonicalMiscFilesLoader.TryUnloadProjectAsync(filePath);
+            }
+        }
+        else if (documentKind is LooseDocumentKind.MiscFile)
+        {
+            // Ensure HasAllInformation is disabled.
+            var miscDocument = _workspaceFactory.MiscellaneousFilesWorkspace.CurrentSolution.GetTextDocuments(documentUri).SingleOrDefault();
+            if (miscDocument is { Project: { State.HasAllInformation: true, Id: var projectId } })
+            {
+                _workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory.ApplyChangeToWorkspace(
+                    workspace => workspace.OnHasAllInformationChanged(projectId, hasAllInformation: false));
+            }
+        }
+        else if (documentKind is LooseDocumentKind.MiscFileWithSemanticErrors)
+        {
+            // Ensure HasAllInformation is enabled
+            var miscDocument = _workspaceFactory.MiscellaneousFilesWorkspace.CurrentSolution.GetTextDocuments(documentUri).SingleOrDefault();
+            if (miscDocument is { Project: { State.HasAllInformation: false, Id: var projectId } })
+            {
+                _workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory.ApplyChangeToWorkspace(
+                    workspace => workspace.OnHasAllInformationChanged(projectId, hasAllInformation: true));
+            }
+        }
+        else
+        {
+            throw ExceptionUtilities.UnexpectedValue(documentKind);
+        }
+    }
+
+    public bool ManagesWorkspace(Workspace workspace)
+    {
+        return workspace == _workspaceFactory.HostWorkspace || workspace == _workspaceFactory.MiscellaneousFilesWorkspace;
+    }
+
+    public async ValueTask<TextDocument?> GetOrLoadDocumentAsync(TextDocumentIdentifier textDocumentIdentifier, ImmutableDictionary<DocumentUri, TrackedDocumentInfo> trackedDocuments, CancellationToken cancellationToken)
+    {
+        var documentUri = textDocumentIdentifier.DocumentUri;
+        var documentKind = await ClassifyDocumentAsync(documentUri, trackedDocuments, cancellationToken);
+        await UpdateWorkspaceStateAsync(documentUri, documentKind);
+        return await GetOrLoadDocumentCoreAsync(textDocumentIdentifier, documentKind, trackedDocuments, cancellationToken);
+    }
+
+    private bool CheckIsContainedInCsprojCone(string csFilePath)
+    {
+        // We only do csproj-in-cone checks if the file is contained in a currently opened workspace folder
+        if (WorkspaceFoldersOpt.IsDefaultOrEmpty)
+            return false;
+
+        // When the path is not absolute (for virtual documents, etc), we can't perform this search.
+        // Optimistically assume there is no csproj in cone.
+        if (!PathUtilities.IsAbsolute(csFilePath))
+            return false;
+
+        // Precondition: opened workspace folder paths, have already been deduplicated to remove folders in the same hierarchy.
+        // e.g. 'workspaceFolderPaths' will not contain both `C:\src\roslyn`, and `C:\src\roslyn\docs`.
+        var containingWorkspacePath = WorkspaceFoldersOpt.FirstOrDefault(
+            (workspacePath, csFilePath) => PathUtilities.IsSameDirectoryOrChildOf(child: csFilePath, parent: workspacePath), arg: csFilePath);
+        if (containingWorkspacePath is null)
+            return false;
+
+        var directoryName = PathUtilities.GetDirectoryName(csFilePath);
+        while (PathUtilities.IsSameDirectoryOrChildOf(child: directoryName, parent: containingWorkspacePath))
+        {
+            var containsCsproj = Directory.EnumerateFiles(directoryName, "*.csproj").Any();
+            if (containsCsproj)
+                return true;
+
+            directoryName = PathUtilities.GetDirectoryName(directoryName);
+        }
+
         return false;
     }
 
@@ -173,42 +384,42 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
         if (supportsDesignTimeBuild)
         {
             // For virtual (non-file) URIs or non-file-based programs, use the canonical loader
-            if (uri.ParsedUri is null || !uri.ParsedUri.IsFile || !VirtualProjectXmlProvider.IsFileBasedProgram(documentText))
+            if (uri.ParsedUri is null || !uri.ParsedUri.IsFile || !VirtualProjectXmlProvider.HasFileBasedAppDirectives(documentText))
             {
                 return await _canonicalMiscFilesLoader.AddMiscellaneousDocumentAsync(documentFilePath, documentText, CancellationToken.None);
             }
         }
 
         // Use the original file-based programs logic
-        var primordialDoc = AddPrimordialDocument(uri, documentText, languageId);
+        var primordialDoc = AddPrimordialDocument(documentFilePath, documentText, languageInformation);
         Contract.ThrowIfNull(primordialDoc.FilePath);
 
         var doDesignTimeBuild = uri.ParsedUri?.IsFile is true && supportsDesignTimeBuild;
         await BeginLoadingProjectWithPrimordialAsync(primordialDoc.FilePath, _workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory, primordialProjectId: primordialDoc.Project.Id, doDesignTimeBuild);
 
         return primordialDoc;
+    }
 
-        TextDocument AddPrimordialDocument(DocumentUri uri, SourceText documentText, string languageId)
+    private TextDocument AddPrimordialDocument(string documentFilePath, SourceText documentText, LanguageInformation languageInformation)
+    {
+        var workspace = _workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory.Workspace;
+        var sourceTextLoader = new SourceTextLoader(documentText, documentFilePath);
+        var enableFileBasedPrograms = GlobalOptionService.GetOption(LanguageServerProjectSystemOptionsStorage.EnableFileBasedPrograms);
+        var projectInfo = MiscellaneousFileUtilities.CreateMiscellaneousProjectInfoForDocument(
+            workspace, documentFilePath, sourceTextLoader, languageInformation, documentText.ChecksumAlgorithm, workspace.Services.SolutionServices, [], enableFileBasedPrograms);
+
+        _workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory.ApplyChangeToWorkspace(workspace => workspace.OnProjectAdded(projectInfo));
+
+        // https://github.com/dotnet/roslyn/pull/78267
+        // Work around an issue where opening a Razor file in the misc workspace causes a crash.
+        if (languageInformation.LanguageName == LanguageInfoProvider.RazorLanguageName)
         {
-            var workspace = _workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory.Workspace;
-            var sourceTextLoader = new SourceTextLoader(documentText, documentFilePath);
-            var enableFileBasedPrograms = GlobalOptionService.GetOption(LanguageServerProjectSystemOptionsStorage.EnableFileBasedPrograms);
-            var projectInfo = MiscellaneousFileUtilities.CreateMiscellaneousProjectInfoForDocument(
-                workspace, documentFilePath, sourceTextLoader, languageInformation, documentText.ChecksumAlgorithm, workspace.Services.SolutionServices, [], enableFileBasedPrograms);
-
-            _workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory.ApplyChangeToWorkspace(workspace => workspace.OnProjectAdded(projectInfo));
-
-            // https://github.com/dotnet/roslyn/pull/78267
-            // Work around an issue where opening a Razor file in the misc workspace causes a crash.
-            if (languageInformation.LanguageName == LanguageInfoProvider.RazorLanguageName)
-            {
-                var docId = projectInfo.AdditionalDocuments.Single().Id;
-                return workspace.CurrentSolution.GetRequiredAdditionalDocument(docId);
-            }
-
-            var id = projectInfo.Documents.Single().Id;
-            return workspace.CurrentSolution.GetRequiredDocument(id);
+            var docId = projectInfo.AdditionalDocuments.Single().Id;
+            return workspace.CurrentSolution.GetRequiredAdditionalDocument(docId);
         }
+
+        var id = projectInfo.Documents.Single().Id;
+        return workspace.CurrentSolution.GetRequiredDocument(id);
     }
 
     public async ValueTask<bool> TryRemoveMiscellaneousDocumentAsync(DocumentUri uri)
@@ -277,7 +488,7 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
         if (initializeManager.TryGetInitializeParams() is { WorkspaceFolders: [_, ..] nonEmptyWorkspaceFolders })
         {
             var nonOverlappingWorkspacePaths = getNonOverlappingFolderPaths(nonEmptyWorkspaceFolders);
-            _canonicalMiscFilesLoader.WorkspaceFoldersOpt = nonOverlappingWorkspacePaths;
+            this.WorkspaceFoldersOpt = nonOverlappingWorkspacePaths;
         }
 
         return Task.CompletedTask;

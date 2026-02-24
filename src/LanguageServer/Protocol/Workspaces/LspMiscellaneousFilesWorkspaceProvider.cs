@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,22 +33,20 @@ internal sealed class LspMiscellaneousFilesWorkspaceProvider(ILspServices lspSer
 {
     public bool SupportsMutation => true;
 
-    public async ValueTask<bool> IsMiscellaneousFilesDocumentAsync(TextDocument document, CancellationToken cancellationToken)
+    public bool ManagesWorkspace(Workspace workspace) => this == workspace;
+
+    public async ValueTask<TextDocument?> GetOrLoadDocumentAsync(TextDocumentIdentifier textDocumentIdentifier, ImmutableDictionary<DocumentUri, TrackedDocumentInfo> trackedDocuments, CancellationToken cancellationToken)
     {
-        // In this case, the only documents ever created live in the Miscellaneous Files workspace (which is this object directly), so we can just compare to 'this'.
-        return document.Project.Solution.Workspace == this;
+        var documentUri = textDocumentIdentifier.DocumentUri;
+        var documents = await CurrentSolution.GetTextDocumentsAsync(documentUri, cancellationToken).ConfigureAwait(false);
+        if (documents.SingleOrDefault() is { } existingDoc)
+            return existingDoc;
+
+        var trackedDocumentInfo = trackedDocuments[documentUri];
+        return AddMiscellaneousDocument(documentUri, trackedDocumentInfo.SourceText, trackedDocumentInfo.LanguageId, logger: null);
     }
 
-    /// <summary>
-    /// Takes in a file URI and text and creates a misc project and document for the file.
-    /// 
-    /// Calls to this method and <see cref="TryRemoveMiscellaneousDocumentAsync(DocumentUri)"/> are made
-    /// from LSP text sync request handling which do not run concurrently.
-    /// </summary>
-    public async ValueTask<TextDocument?> AddMiscellaneousDocumentAsync(DocumentUri uri, SourceText documentText, string languageId, ILspLogger logger)
-        => AddMiscellaneousDocument(uri, documentText, languageId, logger);
-
-    private TextDocument? AddMiscellaneousDocument(DocumentUri uri, SourceText documentText, string languageId, ILspLogger logger)
+    private TextDocument? AddMiscellaneousDocument(DocumentUri uri, SourceText documentText, string languageId, ILspLogger? logger)
     {
         var documentFilePath = uri.UriString;
         if (uri.ParsedUri is not null)
@@ -59,7 +58,8 @@ internal sealed class LspMiscellaneousFilesWorkspaceProvider(ILspServices lspSer
         if (!languageInfoProvider.TryGetLanguageInformation(uri, languageId, out var languageInformation))
         {
             // Only log here since throwing here could take down the LSP server.
-            logger.LogError($"Could not find language information for {uri} with absolute path {documentFilePath}");
+            // TODO2: put the logger back
+            logger?.LogError($"Could not find language information for {uri} with absolute path {documentFilePath}");
             return null;
         }
 

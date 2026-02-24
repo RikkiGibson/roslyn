@@ -71,6 +71,7 @@ internal sealed class LanguageServerWorkspaceFactory
     }
 
     public Workspace HostWorkspace => HostProjectFactory.Workspace;
+    public Workspace MiscellaneousFilesWorkspace => MiscellaneousFilesWorkspaceProjectFactory.Workspace;
 
     public ProjectSystemProjectFactory HostProjectFactory { get; }
     public ProjectSystemProjectFactory MiscellaneousFilesWorkspaceProjectFactory { get; }

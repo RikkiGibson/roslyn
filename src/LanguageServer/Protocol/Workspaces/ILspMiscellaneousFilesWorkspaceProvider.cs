@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Text;
@@ -19,16 +20,9 @@ namespace Microsoft.CodeAnalysis.LanguageServer;
 /// </remarks>
 internal interface ILspMiscellaneousFilesWorkspaceProvider : ILspService, IOnInitialized
 {
-    /// <summary>
-    /// Returns whether the document is one that came from a previous call to <see cref="AddMiscellaneousDocumentAsync"/>.
-    /// </summary>
-    ValueTask<bool> IsMiscellaneousFilesDocumentAsync(TextDocument document, CancellationToken cancellationToken);
+    bool ManagesWorkspace(Workspace workspace);
 
-    /// <summary>
-    /// Adds a document to the workspace. Note that the implementation of this method should not depend on anything expensive such as RPC calls.
-    /// async is used here to allow taking locks asynchronously and "relatively fast" stuff like that.
-    /// </summary>
-    ValueTask<TextDocument?> AddMiscellaneousDocumentAsync(DocumentUri uri, SourceText documentText, string languageId, ILspLogger logger);
+    ValueTask<TextDocument?> GetOrLoadDocumentAsync(TextDocumentIdentifier textDocumentIdentifier, ImmutableDictionary<DocumentUri, TrackedDocumentInfo> trackedDocuments, CancellationToken cancellationToken);
 
     /// <summary>
     /// Removes the document with the given <paramref name="uri"/> from the workspace.

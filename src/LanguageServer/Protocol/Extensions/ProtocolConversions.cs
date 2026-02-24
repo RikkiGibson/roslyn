@@ -184,7 +184,7 @@ internal static partial class ProtocolConversions
         }
     }
 
-    public static string GetDocumentFilePathFromUri(Uri uri)
+    public static string GetDocumentFilePathFromUri(this Uri uri)
     {
         return uri.IsFile ? uri.LocalPath : uri.AbsoluteUri;
     }
