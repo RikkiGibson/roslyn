@@ -115,14 +115,6 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
 
     private static string GetDocumentFilePath(DocumentUri uri) => uri.ParsedUri is { } parsedUri ? ProtocolConversions.GetDocumentFilePathFromUri(parsedUri) : uri.UriString;
 
-    public enum LooseDocumentKind
-    {
-        ProjectBasedApp,
-        MiscFile,
-        MiscFileWithSemanticErrors,
-        FileBasedApp,
-    }
-
     private async ValueTask<LooseDocumentKind> ClassifyDocumentAsync(DocumentUri documentUri, ImmutableDictionary<DocumentUri, TrackedDocumentInfo> trackedDocuments, CancellationToken cancellationToken)
     {
         // roslyn/docs/features/file-based-programs-vscode.md
@@ -172,7 +164,7 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
         // - Yes → Continue to heuristic detection
         if (!GlobalOptionService.GetOption(LanguageServerProjectSystemOptionsStorage.EnableFileBasedProgramsWhenAmbiguous))
         {
-            return LooseDocumentKind.MiscFile;
+            return LooseDocumentKind.RichMiscFile;
         }
 
         // Heuristic Detection:
@@ -191,7 +183,7 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
             && compilationUnit.Members.Any(SyntaxKind.GlobalStatement);
         if (!containsTopLevelStatements)
         {
-            return LooseDocumentKind.MiscFile;
+            return LooseDocumentKind.RichMiscFile;
         }
 
         // 7. Is the file included in a `.csproj` cone?
@@ -203,10 +195,10 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
         // TODO2: the result of this check should be cached, watched and invalidated appropriately, by a self-contained component
         if (filePath is { } && CheckIsContainedInCsprojCone(filePath))
         {
-            return LooseDocumentKind.MiscFile;
+            return LooseDocumentKind.RichMiscFile;
         }
 
-        return LooseDocumentKind.MiscFileWithSemanticErrors;
+        return LooseDocumentKind.RichMiscFileWithSemanticErrors;
     }
 
     private async ValueTask<TextDocument?> GetOrLoadDocumentCoreAsync(TextDocumentIdentifier textDocumentIdentifier, LooseDocumentKind documentKind, ImmutableDictionary<DocumentUri, TrackedDocumentInfo> trackedDocuments, CancellationToken cancellationToken)
@@ -228,7 +220,7 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
         {
             return await GetOrLoadFileBasedAppAsync();
         }
-        else if (documentKind is LooseDocumentKind.MiscFile or LooseDocumentKind.MiscFileWithSemanticErrors)
+        else if (documentKind is LooseDocumentKind.MiscFile or LooseDocumentKind.RichMiscFile or LooseDocumentKind.RichMiscFileWithSemanticErrors)
         {
             return await GetOrLoadMiscFileAsync();
         }
@@ -239,6 +231,7 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
 
         async ValueTask<TextDocument> GetOrLoadFileBasedAppAsync()
         {
+            Contract.ThrowIfFalse(documentKind is LooseDocumentKind.FileBasedApp);
             var documents = await _workspaceFactory.HostWorkspace.CurrentSolution.GetTextDocumentsAsync(documentUri, cancellationToken).ConfigureAwait(false);
             // TODO2: We need to test a file based app which sets `#:property TargetFrameworks=...`
             // which could violate this SingleOrDefault assumption (and require us to pass a full TextDocumentIdentifier to select the right project).
@@ -262,6 +255,7 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
 
         async ValueTask<TextDocument> GetOrLoadMiscFileAsync()
         {
+            Contract.ThrowIfFalse(documentKind is LooseDocumentKind.MiscFile);
             var documents = await _workspaceFactory.MiscellaneousFilesWorkspace.CurrentSolution.GetTextDocumentsAsync(documentUri, cancellationToken).ConfigureAwait(false);
             var miscDoc = documents.SingleOrDefault();
             if (miscDoc is { })
@@ -274,9 +268,27 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
                 Contract.Fail($"Could not find language information for '{documentUri}'");
             }
 
-            // TODO2: Do not use canonical loader when enableFileBasedPrograms: false.
-            // Perhaps finer-grained classification like 'RichMisc' vs 'Misc' vs 'MiscWithSemanticErrors' is needed
-            return await _canonicalMiscFilesLoader.AddMiscellaneousDocumentAsync(GetDocumentFilePath(documentUri), documentInfo.SourceText, cancellationToken);
+            var hasAllInformation = documentKind is LooseDocumentKind.RichMiscFileWithSemanticErrors;
+            return await _canonicalMiscFilesLoader.AddMiscellaneousDocumentAsync(GetDocumentFilePath(documentUri), documentInfo.SourceText, hasAllInformation, cancellationToken);
+        }
+
+        async ValueTask<TextDocument> GetOrLoadMiscFileAsync()
+        {
+            Contract.ThrowIfFalse(documentKind is LooseDocumentKind.RichMiscFile or LooseDocumentKind.RichMiscFileWithSemanticErrors);
+            var documents = await _workspaceFactory.MiscellaneousFilesWorkspace.CurrentSolution.GetTextDocumentsAsync(documentUri, cancellationToken).ConfigureAwait(false);
+            var miscDoc = documents.SingleOrDefault();
+            if (miscDoc is { })
+                return miscDoc;
+
+            var documentInfo = trackedDocuments[documentUri];
+            var languageInfoProvider = _lspServices.GetRequiredService<ILanguageInfoProvider>();
+            if (!languageInfoProvider.TryGetLanguageInformation(documentUri, documentInfo.LanguageId, out var languageInformation))
+            {
+                Contract.Fail($"Could not find language information for '{documentUri}'");
+            }
+
+            var hasAllInformation = documentKind is LooseDocumentKind.RichMiscFileWithSemanticErrors;
+            return await _canonicalMiscFilesLoader.AddMiscellaneousDocumentAsync(GetDocumentFilePath(documentUri), documentInfo.SourceText, hasAllInformation, cancellationToken);
         }
     }
 
@@ -300,7 +312,7 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
                 await _canonicalMiscFilesLoader.TryUnloadProjectAsync(filePath);
             }
         }
-        else if (documentKind is LooseDocumentKind.MiscFile)
+        else if (documentKind is LooseDocumentKind.RichMiscFile)
         {
             // Ensure HasAllInformation is disabled.
             var miscDocument = _workspaceFactory.MiscellaneousFilesWorkspace.CurrentSolution.GetTextDocuments(documentUri).SingleOrDefault();
@@ -310,7 +322,7 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
                     workspace => workspace.OnHasAllInformationChanged(projectId, hasAllInformation: false));
             }
         }
-        else if (documentKind is LooseDocumentKind.MiscFileWithSemanticErrors)
+        else if (documentKind is LooseDocumentKind.RichMiscFileWithSemanticErrors)
         {
             // Ensure HasAllInformation is enabled
             var miscDocument = _workspaceFactory.MiscellaneousFilesWorkspace.CurrentSolution.GetTextDocuments(documentUri).SingleOrDefault();

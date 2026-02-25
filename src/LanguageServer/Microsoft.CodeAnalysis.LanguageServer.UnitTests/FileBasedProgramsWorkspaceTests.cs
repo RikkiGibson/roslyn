@@ -29,7 +29,7 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
 
     public FileBasedProgramsWorkspaceTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _loggerProvider = new TestOutputLoggerProvider(testOutputHelper, LogLevel.None);
+        _loggerProvider = new TestOutputLoggerProvider(testOutputHelper, LogLevel.Debug);
         _loggerFactory = new LoggerFactory([_loggerProvider]);
         _tempRoot = new();
         _mefCacheDirectory = _tempRoot.CreateDirectory();
@@ -82,7 +82,7 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
         await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace, new InitializationOptions { ServerKind = WellKnownLspServerKinds.CSharpVisualBasicLspServer });
         Assert.Null(await GetMiscellaneousDocumentAsync(testLspServer));
 
-        var looseFileUriOne = ProtocolConversions.CreateAbsoluteDocumentUri(@"C:\SomeFile.cs");
+        var looseFileUriOne = ProtocolConversions.CreateAbsoluteDocumentUri(CreateAbsolutePath("SomeFile.cs"));
         await testLspServer.OpenDocumentAsync(looseFileUriOne, """
             class A
             {
@@ -173,7 +173,7 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
         await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace, new InitializationOptions { ServerKind = WellKnownLspServerKinds.CSharpVisualBasicLspServer });
         Assert.Null(await GetMiscellaneousDocumentAsync(testLspServer));
 
-        var nonFileUri = ProtocolConversions.CreateAbsoluteDocumentUri(@"C:\script.csx");
+        var nonFileUri = ProtocolConversions.CreateAbsoluteDocumentUri(CreateAbsolutePath("script.csx"));
         await testLspServer.OpenDocumentAsync(nonFileUri, """
             #:sdk Microsoft.Net.Sdk
             Console.WriteLine("Hello World");
@@ -208,7 +208,7 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
         await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace, new InitializationOptions { ServerKind = WellKnownLspServerKinds.CSharpVisualBasicLspServer });
         Assert.Null(await GetMiscellaneousDocumentAsync(testLspServer));
 
-        var looseFileUriOne = ProtocolConversions.CreateAbsoluteDocumentUri(@"C:\SomeFile.cs");
+        var looseFileUriOne = ProtocolConversions.CreateAbsoluteDocumentUri(CreateAbsolutePath("SomeFile.cs"));
         await testLspServer.OpenDocumentAsync(looseFileUriOne, """
             class C { }
             """).ConfigureAwait(false);
@@ -257,7 +257,7 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
         });
 
         Assert.Null(await GetMiscellaneousDocumentAsync(testLspServer));
-        var looseFileUriOne = ProtocolConversions.CreateAbsoluteDocumentUri(@"C:\SomeFile.cs");
+        var looseFileUriOne = ProtocolConversions.CreateAbsoluteDocumentUri(CreateAbsolutePath("SomeFile.cs"));
         await testLspServer.OpenDocumentAsync(looseFileUriOne, """
             #:sdk Microsoft.Net.Sdk
             Console.WriteLine("Hello World!");
@@ -304,7 +304,7 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
         });
 
         Assert.Null(await GetMiscellaneousDocumentAsync(testLspServer));
-        var looseFileUriOne = ProtocolConversions.CreateAbsoluteDocumentUri(@"C:\SomeFile.cs");
+        var looseFileUriOne = ProtocolConversions.CreateAbsoluteDocumentUri(CreateAbsolutePath("SomeFile.cs"));
         await testLspServer.OpenDocumentAsync(looseFileUriOne, """
             Console.WriteLine("Hello World!");
             class C { }
@@ -337,7 +337,7 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
         await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace, new InitializationOptions { ServerKind = WellKnownLspServerKinds.CSharpVisualBasicLspServer });
 
         Assert.Null(await GetMiscellaneousDocumentAsync(testLspServer));
-        var looseFileUri = ProtocolConversions.CreateAbsoluteDocumentUri(@"C:\SomeFile.cs");
+        var looseFileUri = ProtocolConversions.CreateAbsoluteDocumentUri(CreateAbsolutePath("SomeFile.cs"));
         await testLspServer.OpenDocumentAsync(looseFileUri, """
             #:sdk Microsoft.Net.Sdk
             Console.WriteLine("Hello World!");
@@ -384,7 +384,7 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
         await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace, new InitializationOptions { ServerKind = WellKnownLspServerKinds.CSharpVisualBasicLspServer });
 
         Assert.Null(await GetMiscellaneousDocumentAsync(testLspServer));
-        var looseFileUri = ProtocolConversions.CreateAbsoluteDocumentUri(@"C:\SomeFile.cs");
+        var looseFileUri = ProtocolConversions.CreateAbsoluteDocumentUri(CreateAbsolutePath("SomeFile.cs"));
         await testLspServer.OpenDocumentAsync(looseFileUri, """
             #:sdk Microsoft.Net.Sdk
             Console.WriteLine("Hello World!");
@@ -422,7 +422,7 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
         await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace, new InitializationOptions { ServerKind = WellKnownLspServerKinds.CSharpVisualBasicLspServer });
 
         Assert.Null(await GetMiscellaneousDocumentAsync(testLspServer));
-        var looseFileUri = ProtocolConversions.CreateAbsoluteDocumentUri(@"C:\SomeFile.cs");
+        var looseFileUri = ProtocolConversions.CreateAbsoluteDocumentUri(CreateAbsolutePath("SomeFile.cs"));
         await testLspServer.OpenDocumentAsync(looseFileUri, """
             Console.WriteLine("Hello World!");
             """).ConfigureAwait(false);
@@ -459,7 +459,7 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
         await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace, new InitializationOptions { ServerKind = WellKnownLspServerKinds.CSharpVisualBasicLspServer });
 
         Assert.Null(await GetMiscellaneousDocumentAsync(testLspServer));
-        var looseFileUri = ProtocolConversions.CreateAbsoluteDocumentUri(@"C:\SomeFile.csx");
+        var looseFileUri = ProtocolConversions.CreateAbsoluteDocumentUri(CreateAbsolutePath("SomeFile.csx"));
         await testLspServer.OpenDocumentAsync(looseFileUri, """
             #:sdk Microsoft.Net.Sdk
             Console.WriteLine("Hello World!");
@@ -503,7 +503,7 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
         await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace, new InitializationOptions { ServerKind = WellKnownLspServerKinds.CSharpVisualBasicLspServer });
         Assert.Null(await GetMiscellaneousDocumentAsync(testLspServer));
 
-        var looseFileUriOne = ProtocolConversions.CreateAbsoluteDocumentUri(@"C:\SomeFile.cs");
+        var looseFileUriOne = ProtocolConversions.CreateAbsoluteDocumentUri(CreateAbsolutePath("SomeFile.cs"));
         await testLspServer.OpenDocumentAsync(looseFileUriOne, """
             Console.WriteLine("Hello World!");
             """).ConfigureAwait(false);
@@ -579,7 +579,7 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
         Assert.Contains(canonicalDocument.Project.Documents, d => d.Name == "Canonical.AssemblyInfo.cs");
 
         // File was saved to disk. Simulate this by opening the document under its new name and closing it under its old name.
-        var fileUri = ProtocolConversions.CreateAbsoluteDocumentUri(@"C:\MyFile.cs");
+        var fileUri = ProtocolConversions.CreateAbsoluteDocumentUri(CreateAbsolutePath("MyFile.cs"));
         await testLspServer.OpenDocumentAsync(fileUri, """
             Console.WriteLine("Hello World");
             """).ConfigureAwait(false);

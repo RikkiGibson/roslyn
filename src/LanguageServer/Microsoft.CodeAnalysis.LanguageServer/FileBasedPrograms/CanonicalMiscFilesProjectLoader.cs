@@ -69,7 +69,7 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
         });
     }
 
-    public async ValueTask<TextDocument> AddMiscellaneousDocumentAsync(string documentPath, SourceText documentText, CancellationToken cancellationToken)
+    public async ValueTask<TextDocument> AddMiscellaneousDocumentAsync(string documentPath, SourceText documentText, bool hasAllInformation, CancellationToken cancellationToken)
     {
         return await ExecuteUnderGateAsync(async loadedProjects =>
         {

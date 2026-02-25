@@ -58,12 +58,18 @@ The implementation strategy is: the editor creates a "canonical misc files proje
 A C# file has multiple possible *classifications* in the editor:
 - **Project-Based App**. The file is part of an ordinary `.csproj` project.
 - **File-Based App**. The file is part of a "file-based app" project, i.e. it is either the entry point of a file-based app or it is `#:include`d by the entry point of the same.
-- **Misc File w/ Semantic Errors**. The file is a valid entry point for either a file-based app, but lacks the `#:`/`#!` directives which give us high certainty that this is the user's intent.
+- **Rich Misc File w/ Semantic Errors**. The file is a valid entry point for either a file-based app, but lacks the `#:`/`#!` directives which give us high certainty that this is the user's intent.
    - Tooling will light up accordingly, showing syntax errors, semantic errors, semantic info for the core library, etc. See *Rich miscellaneous files* section above.
    - These files will not be restored.
-- **Misc File**. The file isn't part of any project, and heuristics indicate it's not intended to be a file-based app.
+- **Rich Misc File**. The file isn't part of any project, and heuristics indicate it's not intended to be a file-based app.
    - Syntax errors and semantic info for the core library will appear in these files.
    - Semantic errors will not appear in these files.
+- **Bare Misc File**. The file isn't part of any project. It may even be a `.csx`, `.razor`, or other non-.cs type.
+   - These files do not have any references to the core library, and do not show semantic errors.
+   - Syntax errors, go-to-def on declarations in the same file, etc., may work.
+   - When `enableFileBasedPrograms` is disabled, this classification is generally used instead of one of the *rich misc* or *file-based app* classifications above.
+
+**NOTE:** This is intended to be a living document, and for the set of possible classifications to possibly change over time depending on our needs.
 
 This is the decision tree for determining how to classify a C# file:
 
@@ -72,7 +78,11 @@ This is the decision tree for determining how to classify a C# file:
    - **No** → Continue to next check
 
 2. **Is `enableFileBasedPrograms` enabled?** (default: `true` in release)
-   - **No** → Classify as **Misc File**
+   - **No** → Classify as **Bare Misc File**
+   - **Yes** → Continue to next check
+
+2.1. **Does the file have languageId `csharp`?**
+   - **No** → Classify as **Bare Misc File**
    - **Yes** → Continue to next check
 
 3. **Does the file have an absolute path?** (i.e. it represents a file on disk, and it is not a "virtual document" created for a new, not-yet-saved file, or similar.)
@@ -84,20 +94,20 @@ This is the decision tree for determining how to classify a C# file:
    - **No** → Continue to next check
 
 5. **Is `enableFileBasedProgramsWhenAmbiguous` enabled?** (default: `false` in release, `true` in prerelease)
-   - **No** → Classify as **Misc File**
+   - **No** → Classify as **Rich Misc File**
    - **Yes** → Continue to heuristic detection
 
 **Heuristic Detection (when `enableFileBasedProgramsWhenAmbiguous: true`):**
 
 6. **Are top-level statements present?**
-   - **No** → Classify as **Misc File**
+   - **No** → Classify as **Rich Misc File**
    - **Yes** → Continue to next check
 
 7. **Is the file included in a `.csproj` cone?**
    - "Cone" means that a containing directory, at some level of nesting, has a `.csproj` file in it.
    - Note that this specific check is only performed at the time the file is opened. We think that the typical case is that the user will load a new project they are creating. Loading the project will cause the file to start being treated as project-based app per (1). If the user does not load the new project, then stale diagnostics may remain present until the file is closed and re-opened.
-   - **Yes** → Classify as **Misc File** (wait for project to load)
-   - **No** → Classify as **Misc File w/ Semantic Errors**
+   - **Yes** → Classify as **Rich Misc File** (wait for project to load)
+   - **No** → Classify as **Rich Misc File w/ Semantic Errors**
 
 ### Opt-out
 
