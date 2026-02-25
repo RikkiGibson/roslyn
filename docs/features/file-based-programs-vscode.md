@@ -81,29 +81,29 @@ This is the decision tree for determining how to classify a C# file:
    - **No** → Classify as **Bare Misc File**
    - **Yes** → Continue to next check
 
-2.1. **Does the file have languageId `csharp`?**
+3. **Is the file a regular C# file? (i.e. not a `.csx` script, and not a file using a language besides C#)**
    - **No** → Classify as **Bare Misc File**
    - **Yes** → Continue to next check
 
-3. **Does the file have an absolute path?** (i.e. it represents a file on disk, and it is not a "virtual document" created for a new, not-yet-saved file, or similar.)
-   - **Yes** → Go to (4)
-   - **No** → Go to (5)
+4. **Does the file have an absolute path?** (i.e. it represents a file on disk, and it is not a "virtual document" created for a new, not-yet-saved file, or similar.)
+   - **Yes** → Go to (5)
+   - **No** → Go to (6)
 
-4. **Does the file have `#:` or `#!` directives?**
+5. **Does the file have `#:` or `#!` directives?**
    - **Yes** → Classify as **File-Based App**. Restore if needed and show semantic errors.
    - **No** → Continue to next check
 
-5. **Is `enableFileBasedProgramsWhenAmbiguous` enabled?** (default: `false` in release, `true` in prerelease)
+6. **Is `enableFileBasedProgramsWhenAmbiguous` enabled?** (default: `false` in release, `true` in prerelease)
    - **No** → Classify as **Rich Misc File**
    - **Yes** → Continue to heuristic detection
 
 **Heuristic Detection (when `enableFileBasedProgramsWhenAmbiguous: true`):**
 
-6. **Are top-level statements present?**
+7. **Are top-level statements present?**
    - **No** → Classify as **Rich Misc File**
    - **Yes** → Continue to next check
 
-7. **Is the file included in a `.csproj` cone?**
+8. **Is the file included in a `.csproj` cone?**
    - "Cone" means that a containing directory, at some level of nesting, has a `.csproj` file in it.
    - Note that this specific check is only performed at the time the file is opened. We think that the typical case is that the user will load a new project they are creating. Loading the project will cause the file to start being treated as project-based app per (1). If the user does not load the new project, then stale diagnostics may remain present until the file is closed and re-opened.
    - **Yes** → Classify as **Rich Misc File** (wait for project to load)

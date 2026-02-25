@@ -418,7 +418,7 @@ internal abstract class LanguageServerProjectLoader
         }
     }
 
-    protected async ValueTask<bool> IsProjectLoadedAsync(string projectPath, CancellationToken cancellationToken)
+    internal async ValueTask<bool> IsProjectLoadedAsync(string projectPath, CancellationToken cancellationToken)
     {
         using (await _gate.DisposableWaitAsync(cancellationToken))
         {

@@ -69,10 +69,17 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
         });
     }
 
-    public async ValueTask<TextDocument> AddMiscellaneousDocumentAsync(string documentPath, SourceText documentText, bool hasAllInformation, CancellationToken cancellationToken)
+    public async ValueTask<TextDocument> AddMiscellaneousDocumentAsync(string documentPath, SourceText documentText, LooseDocumentKind documentKind, LanguageInformation languageInformation, CancellationToken cancellationToken)
     {
         return await ExecuteUnderGateAsync(async loadedProjects =>
         {
+            if (documentKind == LooseDocumentKind.BareMiscFile)
+            {
+                // Do not fork or load a canonical project, instead use a primordial misc files project which lacks references, etc.
+                return AddPrimordialMiscProject_NoLock(loadedProjects, documentPath, documentText, languageInformation);
+            }
+
+            Contract.ThrowIfTrue(MiscellaneousFileUtilities.IsScriptFile(languageInformation, documentPath));
             var canonicalDocumentPath = _canonicalDocumentPath.Value;
             if (loadedProjects.TryGetValue(canonicalDocumentPath, out var canonicalLoadState))
             {
@@ -81,7 +88,8 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
                 {
                     var canonicalProject = GetRequiredCanonicalProject();
                     var syntaxTree = CSharpSyntaxTree.ParseText(text: documentText, (CSharpParseOptions?)canonicalProject.ParseOptions, path: documentPath, cancellationToken);
-                    return await AddForkedCanonicalProject_NoLockAsync(canonicalProject, loadedProjects, documentPath, syntaxTree, cancellationToken);
+                    var hasAllInformation = documentKind == LooseDocumentKind.RichMiscFileWithSemanticErrors;
+                    return await AddForkedCanonicalProject_NoLockAsync(canonicalProject, loadedProjects, documentPath, syntaxTree, hasAllInformation, cancellationToken);
                 }
             }
             else
@@ -90,11 +98,11 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
             }
 
             // Not ready to fork the canonical project. Create a primordial project instead.
-            return AddPrimordialMiscProject_NoLock(loadedProjects, documentPath, documentText);
+            return AddPrimordialMiscProject_NoLock(loadedProjects, documentPath, documentText, languageInformation);
         }, cancellationToken);
     }
 
-    private async ValueTask<TextDocument> AddForkedCanonicalProject_NoLockAsync(Project canonicalProject, Dictionary<string, ProjectLoadState> loadedProjects, string documentPath, SyntaxTree syntaxTree, CancellationToken cancellationToken)
+    private async ValueTask<TextDocument> AddForkedCanonicalProject_NoLockAsync(Project canonicalProject, Dictionary<string, ProjectLoadState> loadedProjects, string documentPath, SyntaxTree syntaxTree, bool hasAllInformation, CancellationToken cancellationToken)
     {
         var newProjectId = ProjectId.CreateNewId(debugName: $"Forked Misc Project for '{documentPath}'");
         var documentText = await syntaxTree.GetTextAsync(cancellationToken);
@@ -106,7 +114,6 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
 
         var forkedProjectId = ProjectId.CreateNewId(debugName: $"Forked Misc Project for '{documentPath}'");
 
-        // TODO2: we should probably pass down the classification here to save work and get a correct answer straight away.
         var forkedProjectAttributes = new ProjectInfo.ProjectAttributes(
             newDocumentInfo.Id.ProjectId,
             version: VersionStamp.Create(),
@@ -118,7 +125,7 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
             filePath: documentPath,
             outputFilePath: canonicalProject.OutputFilePath,
             outputRefFilePath: canonicalProject.OutputRefFilePath,
-            hasAllInformation: false);
+            hasAllInformation: hasAllInformation);
 
         var forkedProjectInfo = ProjectInfo.Create(
             attributes: forkedProjectAttributes,
@@ -163,13 +170,13 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
     }
 
     /// <returns>The single document in the misc project.</returns>
-    private Document AddPrimordialMiscProject_NoLock(Dictionary<string, ProjectLoadState> loadedProjects, string documentPath, SourceText documentText)
+    private Document AddPrimordialMiscProject_NoLock(Dictionary<string, ProjectLoadState> loadedProjects, string documentPath, SourceText documentText, LanguageInformation languageInformation)
     {
         var miscWorkspace = _workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory.Workspace;
         var sourceTextLoader = new SourceTextLoader(documentText, documentPath);
         var enableFileBasedPrograms = GlobalOptionService.GetOption(LanguageServerProjectSystemOptionsStorage.EnableFileBasedPrograms);
         var projectInfo = MiscellaneousFileUtilities.CreateMiscellaneousProjectInfoForDocument(
-            miscWorkspace, documentPath, sourceTextLoader, new LanguageInformation(LanguageNames.CSharp, scriptExtension: null), documentText.ChecksumAlgorithm, miscWorkspace.Services.SolutionServices, [], enableFileBasedPrograms);
+            miscWorkspace, documentPath, sourceTextLoader, languageInformation, documentText.ChecksumAlgorithm, miscWorkspace.Services.SolutionServices, [], enableFileBasedPrograms);
 
         _workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory.ApplyChangeToWorkspace(workspace => workspace.OnProjectAdded(projectInfo));
         loadedProjects.Add(documentPath, new ProjectLoadState.Primordial(_workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory, projectInfo.Id));
@@ -260,27 +267,19 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
 
         // Remove the primordial canonical project
         // Note: we are assuming the caller already added the fully loaded canonical project to the workspace.
-        // TODO2: It feels like these changes should probably be atomic (occur within single ApplyChangeToWorkspace call).
-        // This call happens on the DTB thread. So otherwise, an LSP req could be issued between TryUnloadProject and AddForkedCanonicalProject below.
+        // TODO2: It feels like this workspace change should probably be atomic with the insertion of the fully loaded canonical project.
+        // Otherwise the LSP queue thread may observe an intermediate state where both the fully loaded and the primordial canonical projects are present.
         await canonicalProjectState.PrimordialProjectFactory.ApplyChangeToWorkspaceAsync(workspace =>
             workspace.OnProjectRemoved(canonicalProjectState.PrimordialProjectId),
             cancellationToken);
 
-        // Replace all primordial projects in 'loadedProjects' with forked canonical projects
+        // Unload primordial projects for user files.
+        // When new requests come in for those projects, we will create the appropriate kind of project,
+        // based on LooseDocumentKind (either rich or bare miscellaneous project).
         foreach (var (projectPath, projectLoadState) in entriesToReplace)
         {
-            // Get the text from the primordial project
-            var primordial = (ProjectLoadState.Primordial)projectLoadState;
-            var solution = primordial.PrimordialProjectFactory.Workspace.CurrentSolution;
-            var document = solution.GetRequiredProject(primordial.PrimordialProjectId).Documents.Single();
-            var syntaxTree = await document.GetRequiredSyntaxTreeAsync(cancellationToken);
-
-            // Remove the primordial project
             var wasUnloaded = await TryUnloadProject_NoLockAsync(projectPath);
             Contract.ThrowIfFalse(wasUnloaded);
-
-            // Replace with a forked canonical project
-            await AddForkedCanonicalProject_NoLockAsync(GetRequiredCanonicalProject(), loadedProjects, projectPath, syntaxTree, cancellationToken);
         }
     }
 

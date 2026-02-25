@@ -9,7 +9,7 @@ public enum LooseDocumentKind
     ProjectBasedApp,
 
     /// <summary>Bare miscellaneous file with no references.</summary>
-    MiscFile,
+    BareMiscFile,
 
     /// <summary>Miscellaneous file with references to standard library.</summary>
     RichMiscFile,
