@@ -257,6 +257,8 @@ internal sealed class LspWorkspaceManager : IDocumentChangeTracker, ILspService
             return (document.Project.Solution.Workspace, document.Project.Solution, document);
         }
 
+        return default;
+
         async Task<(TextDocument, bool isForked)?> GetLspDocumentInfoCoreAsync()
         {
             // First search LSP solutions, which aren't managed by the _lspMiscellaneousFilesWorkspaceProvider.
@@ -283,8 +285,6 @@ internal sealed class LspWorkspaceManager : IDocumentChangeTracker, ILspService
 
             return null;
         }
-
-        return default;
     }
 
     /// <summary>
@@ -292,16 +292,7 @@ internal sealed class LspWorkspaceManager : IDocumentChangeTracker, ILspService
     /// </summary>
     private async Task<ImmutableArray<(Workspace workspace, Solution Solution, bool IsForked)>> GetLspSolutionsAsync(CancellationToken cancellationToken)
     {
-        // Ensure that the loose files workspace is searched last.
         var registeredWorkspaces = _lspWorkspaceRegistrationService.GetAllRegistrations();
-        registeredWorkspaces =
-        [
-            .. registeredWorkspaces
-                        .Where(workspace => workspace.Kind != WorkspaceKind.MiscellaneousFiles)
-,
-            .. registeredWorkspaces.Where(workspace => workspace.Kind == WorkspaceKind.MiscellaneousFiles),
-        ];
-
         var solutions = new FixedSizeArrayBuilder<(Workspace, Solution, bool)>(registeredWorkspaces.Length);
         foreach (var workspace in registeredWorkspaces)
         {

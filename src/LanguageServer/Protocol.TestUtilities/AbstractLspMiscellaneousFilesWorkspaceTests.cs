@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Composition;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -130,7 +131,8 @@ public abstract class AbstractLspMiscellaneousFilesWorkspaceTests : AbstractLang
         Assert.Null(await GetMiscellaneousDocumentAsync(testLspServer));
 
         // Open a file that is part of a registered workspace and verify it is not present in the misc workspace.
-        var document = await AddDocumentAsync(testLspServer, "C:\\SomeFile.cs", markup).ConfigureAwait(false);
+        var filePath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? @"C:\SomeFile.cs" : "/tmp/SomeFile.cs";
+        var document = await AddDocumentAsync(testLspServer, filePath, markup).ConfigureAwait(false);
         var fileInWorkspaceUri = document.GetURI();
         await testLspServer.OpenDocumentAsync(fileInWorkspaceUri, markup).ConfigureAwait(false);
         Assert.Null(await GetMiscellaneousDocumentAsync(testLspServer));
@@ -155,7 +157,8 @@ public abstract class AbstractLspMiscellaneousFilesWorkspaceTests : AbstractLang
 
         // Open an empty loose file and make a request to verify it gets added to the misc workspace.
         // Include some Unicode characters to test URL handling.
-        var looseFileUri = ProtocolConversions.CreateAbsoluteDocumentUri("C:\\\ue25b\ud86d\udeac.cs");
+        var filePath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "C:\\\ue25b\ud86d\udeac.cs" : "/tmp/\ue25b\ud86d\udeac.cs";
+        var looseFileUri = ProtocolConversions.CreateAbsoluteDocumentUri(filePath);
         var looseFileTextDocumentIdentifier = new LSP.TextDocumentIdentifier { DocumentUri = looseFileUri };
         await testLspServer.OpenDocumentAsync(looseFileUri, source).ConfigureAwait(false);
 

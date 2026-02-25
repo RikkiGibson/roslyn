@@ -89,6 +89,7 @@ internal static class MiscellaneousFileUtilities
                 language: languageName,
                 compilationOutputInfo: default,
                 checksumAlgorithm: checksumAlgorithm,
+                filePath: filePath,
                 // Miscellaneous files projects are never fully loaded since, by definition, it won't know
                 // what the full set of information is except when the file is script code.
                 hasAllInformation: sourceCodeKind == SourceCodeKind.Script),

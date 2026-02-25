@@ -33,8 +33,6 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
     /// </summary>
     protected override bool EnableProgressReporting => false;
 
-    internal ImmutableArray<string> WorkspaceFoldersOpt { private get; set; }
-
     public CanonicalMiscFilesProjectLoader(
         LanguageServerWorkspaceFactory workspaceFactory,
         IFileChangeWatcher fileChangeWatcher,
@@ -107,9 +105,8 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
             filePath: documentPath);
 
         var forkedProjectId = ProjectId.CreateNewId(debugName: $"Forked Misc Project for '{documentPath}'");
-        var containedInCsprojCone = CalcIsContainedInCsprojCone(documentPath);
-        var hasAllInformation = await CalcHasAllInformationAsync(containedInCsprojCone, syntaxTree, cancellationToken);
 
+        // TODO2: we should probably pass down the classification here to save work and get a correct answer straight away.
         var forkedProjectAttributes = new ProjectInfo.ProjectAttributes(
             newDocumentInfo.Id.ProjectId,
             version: VersionStamp.Create(),
@@ -121,7 +118,7 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
             filePath: documentPath,
             outputFilePath: canonicalProject.OutputFilePath,
             outputRefFilePath: canonicalProject.OutputRefFilePath,
-            hasAllInformation: hasAllInformation);
+            hasAllInformation: false);
 
         var forkedProjectInfo = ProjectInfo.Create(
             attributes: forkedProjectAttributes,
@@ -138,7 +135,7 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
         {
             workspace.OnProjectAdded(forkedProjectInfo);
         }, cancellationToken);
-        loadedProjects.Add(documentPath, new ProjectLoadState.CanonicalForked(forkedProjectInfo.Id, containedInCsprojCone));
+        loadedProjects.Add(documentPath, new ProjectLoadState.CanonicalForked(forkedProjectInfo.Id));
 
         var miscWorkspace = _workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory.Workspace;
         var addedDocument = miscWorkspace.CurrentSolution.GetRequiredDocument(newDocumentInfo.Id);
@@ -153,77 +150,6 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
                 loader: TextLoader.From(TextAndVersion.Create(await document.GetTextAsync(cancellationToken).ConfigureAwait(false), VersionStamp.Create())),
                 filePath: documentPath);
         }
-    }
-
-    private async ValueTask<bool> CalcHasAllInformationAsync(bool isInCsprojCone, SyntaxTree tree, CancellationToken cancellationToken)
-    {
-        if (isInCsprojCone
-            || !GlobalOptionService.GetOption(LanguageServerProjectSystemOptionsStorage.EnableFileBasedPrograms)
-            || !GlobalOptionService.GetOption(LanguageServerProjectSystemOptionsStorage.EnableFileBasedProgramsWhenAmbiguous))
-        {
-            return false;
-        }
-
-        var root = await tree.GetRootAsync(cancellationToken);
-        if (root is not CompilationUnitSyntax compilationUnit)
-            return false;
-
-        return compilationUnit.Members.Any(SyntaxKind.GlobalStatement);
-    }
-
-    internal async ValueTask<bool> GetHasAllInformationAsync(SyntaxTree tree, CancellationToken cancellationToken)
-    {
-        return await ExecuteUnderGateAsync(async loadedProjects =>
-        {
-            if (!loadedProjects.TryGetValue(tree.FilePath, out var loadState) || loadState is not ProjectLoadState.CanonicalForked forkedState)
-                return false;
-
-            return await CalcHasAllInformationAsync(forkedState.ContainedInCsprojCone, tree, cancellationToken);
-        }, cancellationToken);
-    }
-
-    /// <summary>
-    /// Determine if this file is contained in the same directory as a .csproj file.
-    /// </summary>
-    /// <remarks>
-    /// The result of this method influences whether semantic errors are displayed in loose files which have top-level statements but no '#:' directives.
-    /// The projects for such files are *forked canonical projects*. Displaying semantic errors is controlled by the 'HasAllInformation' flag on the project.
-    /// The inputs to the HasAllInformation flag value are effectively the following:
-    /// 1. File has top-level statements, and
-    /// 2. File is not contained in a .csproj cone
-    ///
-    /// This is only checked when a document is initially opened.
-    /// In cases where a new csproj is dropped onto disk, the user will typically load the project, which will cause any kind of misc project for this file to unload.
-    /// </remarks>
-    internal bool CalcIsContainedInCsprojCone(string csFilePath)
-    {
-        // We only do csproj-in-cone checks if the file is contained in a currently opened workspace folder
-        if (WorkspaceFoldersOpt.IsDefaultOrEmpty)
-            return false;
-
-        // When the path is not absolute (for virtual documents, etc), we can't perform this search.
-        // Optimistically assume there is no csproj in cone.
-        if (!PathUtilities.IsAbsolute(csFilePath))
-            return false;
-
-        // Precondition: opened workspace folder paths, have already been deduplicated to remove folders in the same hierarchy.
-        // e.g. 'workspaceFolderPaths' will not contain both `C:\src\roslyn`, and `C:\src\roslyn\docs`.
-        var containingWorkspacePath = WorkspaceFoldersOpt.FirstOrDefault(
-            (workspacePath, csFilePath) => PathUtilities.IsSameDirectoryOrChildOf(child: csFilePath, parent: workspacePath), arg: csFilePath);
-        if (containingWorkspacePath is null)
-            return false;
-
-        var directoryName = PathUtilities.GetDirectoryName(csFilePath);
-        while (PathUtilities.IsSameDirectoryOrChildOf(child: directoryName, parent: containingWorkspacePath))
-        {
-            var containsCsproj = Directory.EnumerateFiles(directoryName, "*.csproj").Any();
-            if (containsCsproj)
-                return true;
-
-            directoryName = PathUtilities.GetDirectoryName(directoryName);
-        }
-
-        return false;
     }
 
     internal async ValueTask<bool> IsCanonicalProjectLoadedAsync(CancellationToken cancellationToken)
@@ -332,6 +258,14 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
             .Where(entry => entry.Key != canonicalProjectPath && entry.Value is ProjectLoadState.Primordial)
             .ToArray();
 
+        // Remove the primordial canonical project
+        // Note: we are assuming the caller already added the fully loaded canonical project to the workspace.
+        // TODO2: It feels like these changes should probably be atomic (occur within single ApplyChangeToWorkspace call).
+        // This call happens on the DTB thread. So otherwise, an LSP req could be issued between TryUnloadProject and AddForkedCanonicalProject below.
+        await canonicalProjectState.PrimordialProjectFactory.ApplyChangeToWorkspaceAsync(workspace =>
+            workspace.OnProjectRemoved(canonicalProjectState.PrimordialProjectId),
+            cancellationToken);
+
         // Replace all primordial projects in 'loadedProjects' with forked canonical projects
         foreach (var (projectPath, projectLoadState) in entriesToReplace)
         {
@@ -348,11 +282,6 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
             // Replace with a forked canonical project
             await AddForkedCanonicalProject_NoLockAsync(GetRequiredCanonicalProject(), loadedProjects, projectPath, syntaxTree, cancellationToken);
         }
-
-        // Now remove the primordial canonical project
-        await canonicalProjectState.PrimordialProjectFactory.ApplyChangeToWorkspaceAsync(workspace =>
-            workspace.OnProjectRemoved(canonicalProjectState.PrimordialProjectId),
-            cancellationToken);
     }
 
     private Project GetRequiredCanonicalProject()

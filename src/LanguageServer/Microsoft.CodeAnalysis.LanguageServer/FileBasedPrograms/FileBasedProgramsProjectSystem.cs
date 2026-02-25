@@ -113,7 +113,7 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
         }
     }
 
-    private string GetDocumentFilePath(DocumentUri uri) => uri.ParsedUri is { } parsedUri ? ProtocolConversions.GetDocumentFilePathFromUri(parsedUri) : uri.UriString;
+    private static string GetDocumentFilePath(DocumentUri uri) => uri.ParsedUri is { } parsedUri ? ProtocolConversions.GetDocumentFilePathFromUri(parsedUri) : uri.UriString;
 
     public enum LooseDocumentKind
     {
@@ -133,9 +133,10 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
         var hostWorkspace = _workspaceFactory.HostWorkspace;
         var hostDocuments = await hostWorkspace.CurrentSolution.GetTextDocumentsAsync(documentUri, cancellationToken);
 
-        // If a project in the host workspace contains this document, and the project has a file path not ending in `.cs`,
-        // we assume the file has been loaded into an ordinary project (like a `.csproj`).
-        if (hostDocuments.Any(doc => doc.Project.FilePath?.EndsWith(".cs") == false))
+        // Determine whether an entity separate from FileBasedProgramsProjectSystem, such as CPS or LanguageServerProjectSystem,
+        // has loaded a project containing this document into the host workspace.
+        var filePath = GetDocumentFilePath(documentUri);
+        if (hostDocuments.Any(static (doc, filePath) => doc.Project.FilePath != filePath, filePath))
         {
             return LooseDocumentKind.ProjectBasedApp;
         }
@@ -159,7 +160,6 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
         // 4. Does the file have `#:` or `#!` directives?
         // - Yes → Classify as File-Based App. Restore if needed and show semantic errors.
         // - No → Continue to next check
-        var filePath = documentUri.ParsedUri?.GetDocumentFilePathFromUri();
         if (filePath is { }
             && PathUtilities.IsAbsolute(filePath)
             && VirtualProjectXmlProvider.HasFileBasedAppDirectives(trackedDocuments[documentUri].SourceText))
@@ -240,7 +240,9 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
         async ValueTask<TextDocument> GetOrLoadFileBasedAppAsync()
         {
             var documents = await _workspaceFactory.HostWorkspace.CurrentSolution.GetTextDocumentsAsync(documentUri, cancellationToken).ConfigureAwait(false);
-            var fileBasedDoc = documents.FirstOrDefault(doc => doc.Project.FilePath?.EndsWith(".cs") == true);
+            // TODO2: We need to test a file based app which sets `#:property TargetFrameworks=...`
+            // which could violate this SingleOrDefault assumption (and require us to pass a full TextDocumentIdentifier to select the right project).
+            var fileBasedDoc = documents.SingleOrDefault(doc => doc.Project.FilePath == GetDocumentFilePath(documentUri));
             if (fileBasedDoc is { })
                 return fileBasedDoc;
 
@@ -251,7 +253,8 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
                 Contract.Fail($"Could not find language information for '{documentUri}'");
             }
 
-            var primordialDoc = AddPrimordialDocument(GetDocumentFilePath(documentUri), documentInfo.SourceText, languageInformation);
+            // Note: for simplicity, the file-based app projects are always put in the host workspace, even when in the primordial state.
+            var primordialDoc = AddPrimordialDocument(_workspaceFactory.HostProjectFactory, GetDocumentFilePath(documentUri), documentInfo.SourceText, languageInformation);
             Contract.ThrowIfNull(primordialDoc.FilePath);
             await BeginLoadingProjectWithPrimordialAsync(primordialDoc.FilePath, _workspaceFactory.HostProjectFactory, primordialProjectId: primordialDoc.Project.Id, doDesignTimeBuild: true);
             return primordialDoc;
@@ -279,7 +282,7 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
 
     private async ValueTask UpdateWorkspaceStateAsync(DocumentUri documentUri, LooseDocumentKind documentKind)
     {
-        var filePath = documentUri.ParsedUri?.GetDocumentFilePathFromUri();
+        var filePath = GetDocumentFilePath(documentUri);
         if (documentKind is LooseDocumentKind.ProjectBasedApp)
         {
             // Unload any file-based app projects and misc files projects we had for it.
@@ -332,6 +335,7 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
     {
         var documentUri = textDocumentIdentifier.DocumentUri;
         var documentKind = await ClassifyDocumentAsync(documentUri, trackedDocuments, cancellationToken);
+        _logger.LogDebug("Classified '{documentUri}' as '{documentKind}'", documentUri, documentKind);
         await UpdateWorkspaceStateAsync(documentUri, documentKind);
         return await GetOrLoadDocumentCoreAsync(textDocumentIdentifier, documentKind, trackedDocuments, cancellationToken);
     }
@@ -391,7 +395,7 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
         }
 
         // Use the original file-based programs logic
-        var primordialDoc = AddPrimordialDocument(documentFilePath, documentText, languageInformation);
+        var primordialDoc = AddPrimordialDocument(_workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory, documentFilePath, documentText, languageInformation);
         Contract.ThrowIfNull(primordialDoc.FilePath);
 
         var doDesignTimeBuild = uri.ParsedUri?.IsFile is true && supportsDesignTimeBuild;
@@ -400,15 +404,15 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
         return primordialDoc;
     }
 
-    private TextDocument AddPrimordialDocument(string documentFilePath, SourceText documentText, LanguageInformation languageInformation)
+    private TextDocument AddPrimordialDocument(ProjectSystemProjectFactory projectFactory, string documentFilePath, SourceText documentText, LanguageInformation languageInformation)
     {
-        var workspace = _workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory.Workspace;
+        var workspace = projectFactory.Workspace;
         var sourceTextLoader = new SourceTextLoader(documentText, documentFilePath);
         var enableFileBasedPrograms = GlobalOptionService.GetOption(LanguageServerProjectSystemOptionsStorage.EnableFileBasedPrograms);
         var projectInfo = MiscellaneousFileUtilities.CreateMiscellaneousProjectInfoForDocument(
             workspace, documentFilePath, sourceTextLoader, languageInformation, documentText.ChecksumAlgorithm, workspace.Services.SolutionServices, [], enableFileBasedPrograms);
 
-        _workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory.ApplyChangeToWorkspace(workspace => workspace.OnProjectAdded(projectInfo));
+        projectFactory.ApplyChangeToWorkspace(workspace => workspace.OnProjectAdded(projectInfo));
 
         // https://github.com/dotnet/roslyn/pull/78267
         // Work around an issue where opening a Razor file in the misc workspace causes a crash.

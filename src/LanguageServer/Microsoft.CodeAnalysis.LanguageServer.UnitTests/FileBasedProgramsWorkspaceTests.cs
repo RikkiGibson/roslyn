@@ -242,8 +242,6 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
             """,
             (await canonicalDocumentTwo.GetSyntaxRootAsync())!.ToFullString());
         Assert.Equal(WorkspaceKind.MiscellaneousFiles, workspace.Kind);
-        // When presence of top-level statements changes, the misc project is forked again in order to change attributes.
-        Assert.NotEqual(canonicalDocumentOne.Project.Id, canonicalDocumentTwo.Project.Id);
         // Now that it has top-level statements, it should be considered to have all information.
         Assert.True(canonicalDocumentTwo.Project.State.HasAllInformation);
     }
