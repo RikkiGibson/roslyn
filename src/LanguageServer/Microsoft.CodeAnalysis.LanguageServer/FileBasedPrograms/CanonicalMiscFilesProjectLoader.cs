@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Immutable;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Features.Workspaces;
 using Microsoft.CodeAnalysis.LanguageServer.HostWorkspace;
 using Microsoft.CodeAnalysis.LanguageServer.HostWorkspace.ProjectTelemetry;
@@ -87,9 +85,8 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
                 if (canonicalLoadState is ProjectLoadState.LoadedTargets)
                 {
                     var canonicalProject = GetRequiredCanonicalProject();
-                    var syntaxTree = CSharpSyntaxTree.ParseText(text: documentText, (CSharpParseOptions?)canonicalProject.ParseOptions, path: documentPath, cancellationToken);
                     var hasAllInformation = documentKind == LooseDocumentKind.RichMiscFileWithSemanticErrors;
-                    return await AddForkedCanonicalProject_NoLockAsync(canonicalProject, loadedProjects, documentPath, syntaxTree, hasAllInformation, cancellationToken);
+                    return await AddForkedCanonicalProject_NoLockAsync(canonicalProject, loadedProjects, documentPath, documentText, hasAllInformation, cancellationToken);
                 }
             }
             else
@@ -102,10 +99,9 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
         }, cancellationToken);
     }
 
-    private async ValueTask<TextDocument> AddForkedCanonicalProject_NoLockAsync(Project canonicalProject, Dictionary<string, ProjectLoadState> loadedProjects, string documentPath, SyntaxTree syntaxTree, bool hasAllInformation, CancellationToken cancellationToken)
+    private async ValueTask<TextDocument> AddForkedCanonicalProject_NoLockAsync(Project canonicalProject, Dictionary<string, ProjectLoadState> loadedProjects, string documentPath, SourceText documentText, bool hasAllInformation, CancellationToken cancellationToken)
     {
         var newProjectId = ProjectId.CreateNewId(debugName: $"Forked Misc Project for '{documentPath}'");
-        var documentText = await syntaxTree.GetTextAsync(cancellationToken);
         var newDocumentInfo = DocumentInfo.Create(
             DocumentId.CreateNewId(newProjectId),
             name: Path.GetFileName(documentPath),
