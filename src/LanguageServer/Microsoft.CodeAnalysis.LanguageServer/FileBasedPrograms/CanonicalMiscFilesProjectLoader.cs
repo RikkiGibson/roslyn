@@ -108,31 +108,7 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
             loader: TextLoader.From(TextAndVersion.Create(documentText, VersionStamp.Create())),
             filePath: documentPath);
 
-        var forkedProjectId = ProjectId.CreateNewId(debugName: $"Forked Misc Project for '{documentPath}'");
-
-        var forkedProjectAttributes = new ProjectInfo.ProjectAttributes(
-            newDocumentInfo.Id.ProjectId,
-            version: VersionStamp.Create(),
-            name: canonicalProject.Name,
-            assemblyName: canonicalProject.AssemblyName,
-            language: canonicalProject.Language,
-            compilationOutputInfo: default,
-            checksumAlgorithm: SourceHashAlgorithm.Sha1,
-            filePath: documentPath,
-            outputFilePath: canonicalProject.OutputFilePath,
-            outputRefFilePath: canonicalProject.OutputRefFilePath,
-            hasAllInformation: hasAllInformation);
-
-        var forkedProjectInfo = ProjectInfo.Create(
-            attributes: forkedProjectAttributes,
-            compilationOptions: canonicalProject.CompilationOptions,
-            parseOptions: canonicalProject.ParseOptions,
-            documents: [newDocumentInfo, .. await Task.WhenAll(canonicalProject.Documents.Select(document => GetDocumentInfoAsync(document)))],
-            projectReferences: canonicalProject.ProjectReferences,
-            metadataReferences: canonicalProject.MetadataReferences,
-            analyzerReferences: canonicalProject.AnalyzerReferences,
-            analyzerConfigDocuments: await canonicalProject.AnalyzerConfigDocuments.SelectAsArrayAsync(async document => await GetDocumentInfoAsync(document)),
-            additionalDocuments: await canonicalProject.AdditionalDocuments.SelectAsArrayAsync(async document => await GetDocumentInfoAsync(document)));
+        var forkedProjectInfo = await GetForkedProjectInfoAsync(canonicalProject, newDocumentInfo, hasAllInformation, cancellationToken);
 
         await _workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory.ApplyChangeToWorkspaceAsync(workspace =>
         {
@@ -143,16 +119,6 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
         var miscWorkspace = _workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory.Workspace;
         var addedDocument = miscWorkspace.CurrentSolution.GetRequiredDocument(newDocumentInfo.Id);
         return addedDocument;
-
-        async Task<DocumentInfo> GetDocumentInfoAsync(TextDocument document)
-        {
-            var documentPath = document.FilePath;
-            return DocumentInfo.Create(
-                DocumentId.CreateNewId(forkedProjectId),
-                name: Path.GetFileName(documentPath) ?? "",
-                loader: TextLoader.From(TextAndVersion.Create(await document.GetTextAsync(cancellationToken).ConfigureAwait(false), VersionStamp.Create())),
-                filePath: documentPath);
-        }
     }
 
     internal async ValueTask<bool> IsCanonicalProjectLoadedAsync(CancellationToken cancellationToken)
@@ -277,6 +243,49 @@ internal sealed class CanonicalMiscFilesProjectLoader : LanguageServerProjectLoa
             var wasUnloaded = await TryUnloadProject_NoLockAsync(projectPath);
             Contract.ThrowIfFalse(wasUnloaded);
         }
+    }
+
+    /// <summary>
+    /// Creates a new project based on the canonical project with a new document added.
+    /// This should only be called when the canonical project is in the FullyLoaded state.
+    /// </summary>
+    private static async Task<ProjectInfo> GetForkedProjectInfoAsync(Project canonicalProject, DocumentInfo newDocumentInfo, bool hasAllInformation, CancellationToken cancellationToken)
+    {
+        var newDocumentPath = newDocumentInfo.FilePath;
+        Contract.ThrowIfNull(newDocumentPath);
+
+        var forkedProjectId = ProjectId.CreateNewId(debugName: $"Forked Misc Project for '{newDocumentPath}'");
+        var forkedProjectAttributes = new ProjectInfo.ProjectAttributes(
+            newDocumentInfo.Id.ProjectId,
+            version: VersionStamp.Create(),
+            name: canonicalProject.Name,
+            assemblyName: canonicalProject.AssemblyName,
+            language: canonicalProject.Language,
+            compilationOutputInfo: default,
+            checksumAlgorithm: SourceHashAlgorithm.Sha1,
+            filePath: newDocumentPath,
+            outputFilePath: canonicalProject.OutputFilePath,
+            outputRefFilePath: canonicalProject.OutputRefFilePath,
+            hasAllInformation: hasAllInformation);
+
+        var forkedProjectInfo = ProjectInfo.Create(
+            attributes: forkedProjectAttributes,
+            compilationOptions: canonicalProject.CompilationOptions,
+            parseOptions: canonicalProject.ParseOptions,
+            documents: [newDocumentInfo, .. await Task.WhenAll(canonicalProject.Documents.Select(document => GetDocumentInfoAsync(document, document.FilePath)))],
+            projectReferences: canonicalProject.ProjectReferences,
+            metadataReferences: canonicalProject.MetadataReferences,
+            analyzerReferences: canonicalProject.AnalyzerReferences,
+            analyzerConfigDocuments: await canonicalProject.AnalyzerConfigDocuments.SelectAsArrayAsync(async document => await GetDocumentInfoAsync(document, document.FilePath)),
+            additionalDocuments: await canonicalProject.AdditionalDocuments.SelectAsArrayAsync(async document => await GetDocumentInfoAsync(document, document.FilePath)));
+        return forkedProjectInfo;
+
+        async Task<DocumentInfo> GetDocumentInfoAsync(TextDocument document, string? documentPath) =>
+            DocumentInfo.Create(
+                DocumentId.CreateNewId(forkedProjectId),
+                name: Path.GetFileName(documentPath) ?? "",
+                loader: TextLoader.From(TextAndVersion.Create(await document.GetTextAsync(cancellationToken).ConfigureAwait(false), VersionStamp.Create())),
+                filePath: documentPath);
     }
 
     private Project GetRequiredCanonicalProject()
