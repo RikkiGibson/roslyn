@@ -418,14 +418,6 @@ internal abstract class LanguageServerProjectLoader
         }
     }
 
-    internal async ValueTask<bool> IsProjectLoadedAsync(string projectPath, CancellationToken cancellationToken)
-    {
-        using (await _gate.DisposableWaitAsync(cancellationToken))
-        {
-            return _loadedProjects.ContainsKey(projectPath);
-        }
-    }
-
     /// <summary>
     /// Executes an async action with access to the loaded project state under the _gate.
     /// This allows subclasses to safely query or modify project state.

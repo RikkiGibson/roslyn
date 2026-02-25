@@ -69,7 +69,7 @@ A C# file has multiple possible *classifications* in the editor:
    - Syntax errors, go-to-def on declarations in the same file, etc., may work.
    - When `enableFileBasedPrograms` is disabled, this classification is generally used instead of one of the *rich misc* or *file-based app* classifications above.
 
-**NOTE:** This is intended to be a living document, and for the set of possible classifications to possibly change over time depending on our needs.
+**NOTE:** This is intended to be a living document, and for the set of checks and classifications to possibly change over time depending on our needs.
 
 This is the decision tree for determining how to classify a C# file:
 

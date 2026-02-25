@@ -99,14 +99,6 @@ internal class VirtualProjectXmlProvider(DotnetCliHelper dotnetCliHelper)
     internal static string? GetVirtualProjectPath(string? documentFilePath)
         => Path.ChangeExtension(documentFilePath, ".csproj");
 
-    /// <summary>
-    /// Indicates whether the editor considers the text to be a file-based program.
-    /// If this returns false, the text is either a miscellaneous file or is part of an ordinary project.
-    /// </summary>
-    /// <remarks>
-    /// The editor considers the text to be a file-based program if it has any '#!' or '#:' directives at the top.
-    /// Note that a file with top-level statements but no directives can still work with 'dotnet app.cs' etc. on the CLI, but will be treated as a misc file in the editor.
-    /// </remarks>
     internal static bool HasFileBasedAppDirectives(SourceText text)
     {
         var tokenizer = SyntaxFactory.CreateTokenParser(text, CSharpParseOptions.Default.WithFeatures([new("FileBasedProgram", "true")]));
