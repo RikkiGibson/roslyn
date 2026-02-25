@@ -6,14 +6,18 @@ namespace Microsoft.CodeAnalysis.LanguageServer.FileBasedPrograms;
 
 public enum LooseDocumentKind
 {
+    /// <summary>Part of an ordinary project.</summary>
     ProjectBasedApp,
 
     /// <summary>Bare miscellaneous file with no references.</summary>
     BareMiscFile,
 
-    /// <summary>Miscellaneous file with references to standard library.</summary>
+    /// <summary>Miscellaneous file with references to standard library, but does not display semantic errors. Likely not a file-based app.</summary>
     RichMiscFile,
+
+    /// <summary>Miscellaneous file with references to standard library and displays semantic errors. May be a file-based app.</summary>
     RichMiscFileWithSemanticErrors,
 
+    /// <summary>Definitely a file-based app. Gets its own design-time build, restore etc.</summary>
     FileBasedApp,
 }
