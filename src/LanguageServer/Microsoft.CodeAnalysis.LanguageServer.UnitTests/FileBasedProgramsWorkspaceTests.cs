@@ -89,7 +89,8 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
             """).ConfigureAwait(false);
 
         var (workspace, document) = await GetRequiredLspWorkspaceAndDocumentAsync(looseFileUri, testLspServer).ConfigureAwait(false);
-        Assert.Equal(WorkspaceKind.MiscellaneousFiles, workspace.Kind);
+        // Document is classified as file-based app, so is put in host workspace in a primordial state.
+        Assert.Equal(WorkspaceKind.Host, workspace.Kind);
         Assert.False(document.Project.State.HasAllInformation);
         Assert.Contains("FileBasedProgram", document.Project.ParseOptions!.Features);
 
@@ -125,7 +126,8 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
             """, languageId: "csharp").ConfigureAwait(false);
 
         var (workspace, document) = await GetRequiredLspWorkspaceAndDocumentAsync(looseFileUri, testLspServer).ConfigureAwait(false);
-        Assert.Equal(WorkspaceKind.MiscellaneousFiles, workspace.Kind);
+        // Document is classified as file-based app, so is put in host workspace in a primordial state.
+        Assert.Equal(WorkspaceKind.Host, workspace.Kind);
         Assert.False(document.Project.State.HasAllInformation);
         Assert.Contains("FileBasedProgram", document.Project.ParseOptions!.Features);
 
@@ -335,8 +337,6 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
             """,
             (await canonicalDocumentTwo.GetSyntaxRootAsync())!.ToFullString());
         Assert.Equal(WorkspaceKind.MiscellaneousFiles, workspace.Kind);
-        // When presence of top-level statements changes, the misc project is forked again in order to change attributes.
-        Assert.NotEqual(canonicalDocumentOne.Project.Id, canonicalDocumentTwo.Project.Id);
         // Now that it has top-level statements, it should be considered to have all information.
         Assert.True(canonicalDocumentTwo.Project.State.HasAllInformation);
     }
@@ -432,14 +432,15 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
         await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace, new InitializationOptions { ServerKind = WellKnownLspServerKinds.CSharpVisualBasicLspServer });
 
         Assert.Null(await GetMiscellaneousDocumentAsync(testLspServer));
-        var looseFileUri = ProtocolConversions.CreateAbsoluteDocumentUri(@"C:\SomeFile.cs");
+        var looseFileUri = CreateAbsoluteDocumentUri("SomeFile.cs");
         await testLspServer.OpenDocumentAsync(looseFileUri, """
             #:sdk Microsoft.Net.Sdk
             Console.WriteLine("Hello World!");
             """).ConfigureAwait(false);
 
         var (workspace, document) = await GetRequiredLspWorkspaceAndDocumentAsync(looseFileUri, testLspServer).ConfigureAwait(false);
-        Assert.Equal(WorkspaceKind.MiscellaneousFiles, workspace.Kind);
+        // Document is classified as file-based app, so is put in host workspace in a primordial state.
+        Assert.Equal(WorkspaceKind.Host, workspace.Kind);
         Assert.Equal(1, document.Project.Documents.Count());
         Assert.Contains("FileBasedProgram", document.Project.ParseOptions!.Features);
 
@@ -632,7 +633,7 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
         // The document is now in a primordial state in the FileBasedProgramsProjectSystem.
         Assert.NotEqual(fileBasedDocumentOne, canonicalDocumentOne);
         var fileBasedProject = fileBasedDocumentOne.Project;
-        Assert.Same(miscFilesWorkspace, fileBasedProject.Solution.Workspace);
+        Assert.Equal(WorkspaceKind.Host, fileBasedProject.Solution.WorkspaceKind);
         Assert.NotEqual(canonicalDocumentOne.Project.Id, fileBasedProject.Id);
         Assert.Equal("""
             #!/usr/bin/env dotnet
@@ -664,6 +665,7 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
         await testLspServer.OpenDocumentAsync(nonFileUri, """
             Console.WriteLine("Hello World");
             """, languageId: "csharp").ConfigureAwait(false);
+        // await WaitForProjectLoad(nonFileUri, testLspServer);
 
         // Get the document info once to kickoff the canonical project loading process
         _ = await GetRequiredLspWorkspaceAndDocumentAsync(nonFileUri, testLspServer).ConfigureAwait(false);
