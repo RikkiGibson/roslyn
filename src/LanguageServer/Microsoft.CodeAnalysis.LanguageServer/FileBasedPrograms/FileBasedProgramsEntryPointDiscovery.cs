@@ -114,12 +114,15 @@ internal sealed class FileBasedProgramsEntryPointDiscovery(LanguageServerWorkspa
 
             _logger.LogDebug("Starting file-based app entry point discovery in '{folder}'", folder);
             // Note: the common case by far is that there is a single workspace folder.
-            foreach (var csFilePath in EnumeratePossibleEntryPoints(folder))
+            await Parallel.ForEachAsync(EnumeratePossibleEntryPoints(folder), new ParallelOptions { MaxDegreeOfParallelism = 16 }, async (csFilePath, cancellationToken) =>
             {
                 using var fileStream = File.OpenRead(csFilePath);
+                // Note: we have arbitrarily decided that if your file has '#:'/'#!' but it's after the first 4k of the file, we won't discover it.
+                var bytes = new byte[Math.Min(4096, fileStream.Length)];
+                await fileStream.ReadExactlyAsync(bytes, cancellationToken);
                 // TODO2: would using a workspace text loader help here at all?
-                if (!VirtualProjectXmlProvider.HasFileBasedAppDirectives(SourceText.From(fileStream)))
-                    continue;
+                if (!VirtualProjectXmlProvider.HasFileBasedAppDirectives(SourceText.From(bytes, bytes.Length)))
+                    return;
 
                 _logger.LogInformation("Discovered file-based app entry point: {csFilePath}", csFilePath);
                 Interlocked.Increment(ref discoveredCount);
@@ -128,7 +131,7 @@ internal sealed class FileBasedProgramsEntryPointDiscovery(LanguageServerWorkspa
                 // TODO2: Address threading issues.
                 // Maybe this would be made simpler by eliminating Primordial state.
                 _ = await fileBasedProgramsProjectSystem.BeginLoadingFileBasedAppAsync(csFilePath, textLoader, languageInfo);
-            }
+            });
         }
         stopwatch.Stop();
         _logger.LogInformation("MAGIC Discovered {discoveredCount} file-based app entry points in {stopwatch.ElapsedMilliseconds} milliseconds.", discoveredCount, stopwatch.ElapsedMilliseconds);
