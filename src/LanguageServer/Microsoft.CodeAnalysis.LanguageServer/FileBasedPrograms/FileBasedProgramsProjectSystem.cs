@@ -209,38 +209,37 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
 
     private async ValueTask<(TextDocument document, bool alreadyExists)?> GetOrLoadDocumentCoreAsync(DocumentUri documentUri, LooseDocumentKind documentKind, TrackedDocumentInfo documentInfo, LanguageInformation languageInformation, CancellationToken cancellationToken)
     {
+        var documentFilePath = GetDocumentFilePath(documentUri);
         if (documentKind is LooseDocumentKind.FileBasedApp)
         {
-            return (await BeginLoadingFileBasedAppAsync(), alreadyExists: false);
+            return (await BeginLoadingFileBasedAppAsync(
+                documentFilePath, new SourceTextLoader(documentInfo.SourceText, documentFilePath), languageInformation
+            ), alreadyExists: false);
         }
         else if (documentKind is LooseDocumentKind.MiscellaneousFileWithNoReferences
             or LooseDocumentKind.MiscellaneousFileWithStandardReferences
             or LooseDocumentKind.MiscellaneousFileWithStandardReferencesAndSemanticErrors)
         {
             return await _canonicalMiscFilesLoader.GetOrAddMiscellaneousDocumentAsync(
-                documentUri, GetDocumentFilePath(documentUri), documentInfo.SourceText, documentKind, languageInformation, cancellationToken);
+                documentUri, documentFilePath, documentInfo.SourceText, documentKind, languageInformation, cancellationToken);
         }
         else
         {
             throw ExceptionUtilities.UnexpectedValue(documentKind);
         }
+    }
 
-        async ValueTask<TextDocument> BeginLoadingFileBasedAppAsync()
-        {
-            Contract.ThrowIfFalse(documentKind is LooseDocumentKind.FileBasedApp);
-            var documentFilePath = GetDocumentFilePath(documentUri);
-            Contract.ThrowIfFalse(languageInformation.LanguageName == LanguageNames.CSharp && !MiscellaneousFileUtilities.IsScriptFile(languageInformation, documentFilePath));
-            // Note: for simplicity, the file-based app projects are always put in the host workspace, even when in the primordial state.
-            var workspace = _workspaceFactory.HostWorkspace;
-            var sourceTextLoader = new SourceTextLoader(documentInfo.SourceText, documentFilePath);
-            var projectInfo = MiscellaneousFileUtilities.CreateMiscellaneousProjectInfoForDocument(
-                workspace, documentFilePath, sourceTextLoader, languageInformation, documentInfo.SourceText.ChecksumAlgorithm, workspace.Services.SolutionServices, [], enableFileBasedPrograms: true);
-            _workspaceFactory.HostProjectFactory.ApplyChangeToWorkspace(workspace => workspace.OnProjectAdded(projectInfo));
-            var id = projectInfo.Documents.Single().Id;
-            var primordialDoc = workspace.CurrentSolution.GetRequiredDocument(id);
-            await BeginLoadingProjectWithPrimordialAsync(documentFilePath, _workspaceFactory.HostProjectFactory, primordialProjectId: primordialDoc.Project.Id, doDesignTimeBuild: true);
-            return primordialDoc;
-        }
+    internal async ValueTask<TextDocument> BeginLoadingFileBasedAppAsync(string documentFilePath, TextLoader textLoader, LanguageInformation languageInformation)
+    {
+        // Note: for simplicity, the file-based app projects are always put in the host workspace, even when in the primordial state.
+        var workspace = _workspaceFactory.HostWorkspace;
+        var projectInfo = MiscellaneousFileUtilities.CreateMiscellaneousProjectInfoForDocument(
+            workspace, documentFilePath, textLoader, languageInformation, SourceHashAlgorithms.Default, workspace.Services.SolutionServices, [], enableFileBasedPrograms: true);
+        _workspaceFactory.HostProjectFactory.ApplyChangeToWorkspace(workspace => workspace.OnProjectAdded(projectInfo));
+        var id = projectInfo.Documents.Single().Id;
+        var primordialDoc = workspace.CurrentSolution.GetRequiredDocument(id);
+        await BeginLoadingProjectWithPrimordialAsync(documentFilePath, _workspaceFactory.HostProjectFactory, primordialProjectId: primordialDoc.Project.Id, doDesignTimeBuild: true);
+        return primordialDoc;
     }
 
     public async ValueTask<bool> TryRemoveMiscellaneousDocumentAsync(DocumentUri uri)
