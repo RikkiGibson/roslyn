@@ -1353,4 +1353,39 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
         Assert.Equal(WorkspaceKind.MiscellaneousFiles, workspace.Kind);
         Assert.True(document.Project.State.HasAllInformation);
     }
+
+    [Theory, CombinatorialData, WorkItem("https://github.com/dotnet/roslyn/issues/81410")]
+    public async Task TestRspFile_01(bool mutatingLspWorkspace)
+    {
+        var tempDir = _tempRoot.CreateDirectory();
+        var fileText = """
+            #:sdk Microsoft.Net.SDK
+            Console.WriteLine("Hello World");
+            """;
+        var file = tempDir.CreateFile("RspTest1.cs").WriteAllText(fileText);
+
+        await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace, new InitializationOptions
+        {
+            ServerKind = WellKnownLspServerKinds.CSharpVisualBasicLspServer,
+            WorkspaceFolders =
+            [
+                new() { DocumentUri = CreateAbsoluteDocumentUri(tempDir.Path), Name = "workspace1" }
+            ]
+        });
+        Assert.Null(await GetMiscellaneousDocumentAsync(testLspServer));
+
+        var dotnetHelper = testLspServer.TestWorkspace.ExportProvider.GetExportedValue<DotnetCliHelper>();
+        var process = dotnetHelper.Run(["build", file.Path], workingDirectory: tempDir.Path, shouldLocalizeOutput: false);
+        await process.WaitForExitAsync();
+
+        process = dotnetHelper.Run(["build", file.Path], workingDirectory: tempDir.Path, shouldLocalizeOutput: false);
+        await process.WaitForExitAsync();
+
+        var fileUri = CreateAbsoluteDocumentUri(file.Path);
+        await testLspServer.OpenDocumentAsync(fileUri, fileText).ConfigureAwait(false);
+
+        var (workspace, document) = await GetRequiredLspWorkspaceAndDocumentAsync(fileUri, testLspServer).ConfigureAwait(false);
+        Assert.Equal(WorkspaceKind.Host, workspace.Kind);
+        Assert.True(document.Project.State.HasAllInformation);
+    }
 }
