@@ -83795,9 +83795,6 @@ class C
                 // (13,13): warning CS8604: Possible null reference argument for parameter 'a' in 'A.implicit operator C(A a)'.
                 //         c = x; // (ImplicitTuple)(ImplicitUserDefined)(ImplicitReference)
                 Diagnostic(ErrorCode.WRN_NullReferenceArgument, "x").WithArguments("a", "A.implicit operator C(A a)").WithLocation(13, 13),
-                // (13,13): warning CS8619: Nullability of reference types in value of type '(B?, B)' doesn't match target type '(C, C?)'.
-                //         c = x; // (ImplicitTuple)(ImplicitUserDefined)(ImplicitReference)
-                Diagnostic(ErrorCode.WRN_NullabilityMismatchInAssignment, "x").WithArguments("(B?, B)", "(C, C?)").WithLocation(13, 13),
                 // (14,13): warning CS8604: Possible null reference argument for parameter 'a' in 'A.implicit operator C(A a)'.
                 //         c = y; // (ImplicitTuple)(ImplicitUserDefined)(ImplicitReference)
                 Diagnostic(ErrorCode.WRN_NullReferenceArgument, "y").WithArguments("a", "A.implicit operator C(A a)").WithLocation(14, 13));
@@ -96293,8 +96290,8 @@ class Program
         t.Item1.FB.ToString(); // 2
         t.Item2.Item1.FA.ToString();
         t = ((B, (A, A)))(b, (b, b));
-        t.Item1.FB.ToString();
-        t.Item2.Item1.FA.ToString(); // 3
+        t.Item1.FB.ToString(); // 3
+        t.Item2.Item1.FA.ToString();
         (A, (B, B)) u;
         u = t; // 4
         u.Item1.FA.ToString(); // 5
@@ -96312,9 +96309,9 @@ class Program
                 // (16,9): warning CS8602: Dereference of a possibly null reference.
                 //         t.Item1.FB.ToString(); // 2
                 Diagnostic(ErrorCode.WRN_NullReferenceReceiver, "t.Item1.FB").WithLocation(16, 9),
-                // (20,9): warning CS8602: Dereference of a possibly null reference.
-                //         t.Item2.Item1.FA.ToString(); // 3
-                Diagnostic(ErrorCode.WRN_NullReferenceReceiver, "t.Item2.Item1.FA").WithLocation(20, 9),
+                // (19,9): warning CS8602: Dereference of a possibly null reference.
+                //         t.Item1.FB.ToString(); // 3
+                Diagnostic(ErrorCode.WRN_NullReferenceReceiver, "t.Item1.FB").WithLocation(19, 9),
                 // (22,13): error CS0266: Cannot implicitly convert type '(B, (A, A))' to '(A, (B, B))'. An explicit conversion exists (are you missing a cast?)
                 //         u = t; // 4
                 Diagnostic(ErrorCode.ERR_NoImplicitConvCast, "t").WithArguments("(B, (A, A))", "(A, (B, B))").WithLocation(22, 13),
@@ -96598,12 +96595,6 @@ class Program
                 // (17,9): warning CS8602: Dereference of a possibly null reference.
                 //         t1.Item1.F.ToString(); // 3
                 Diagnostic(ErrorCode.WRN_NullReferenceReceiver, "t1.Item1.F").WithLocation(17, 9),
-                // (23,9): warning CS8629: Nullable value type may be null.
-                //         t2.Item1.Value.F.ToString(); // 4, 5
-                Diagnostic(ErrorCode.WRN_NullableValueTypeMayBeNull, "t2.Item1").WithLocation(23, 9),
-                // (23,9): warning CS8602: Dereference of a possibly null reference.
-                //         t2.Item1.Value.F.ToString(); // 4, 5
-                Diagnostic(ErrorCode.WRN_NullReferenceReceiver, "t2.Item1.Value.F").WithLocation(23, 9),
                 // (28,18): warning CS8619: Nullability of reference types in value of type '(S?, B?)' doesn't match target type '(S?, B)'.
                 //         var t3 = ((S?, B))(new S() { F = 3 }, new A()); // 6, 7
                 Diagnostic(ErrorCode.WRN_NullabilityMismatchInAssignment, "((S?, B))(new S() { F = 3 }, new A())").WithArguments("(S?, B?)", "(S?, B)").WithLocation(28, 18),
