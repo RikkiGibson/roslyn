@@ -242,6 +242,27 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
         return primordialDoc;
     }
 
+    // TODO2: now all callers need to account for possibility that something else swooped in and begin loading the project from under them.
+    internal async ValueTask<TextDocument?> TryBeginLoadingFileBasedAppAsync(string documentFilePath, TextLoader textLoader, LanguageInformation languageInformation)
+    {
+        // Note: for simplicity, the file-based app projects are always put in the host workspace, even when in the primordial state.
+        var workspace = _workspaceFactory.HostWorkspace;
+        var projectInfo = MiscellaneousFileUtilities.CreateMiscellaneousProjectInfoForDocument(
+            workspace, documentFilePath, textLoader, languageInformation, SourceHashAlgorithms.Default, workspace.Services.SolutionServices, [], enableFileBasedPrograms: true);
+
+        return await ExecuteUnderGateAsync(async loadedProjects =>
+        {
+            if (loadedProjects.ContainsKey(documentFilePath))
+                return null;
+
+            _workspaceFactory.HostProjectFactory.ApplyChangeToWorkspace(workspace => workspace.OnProjectAdded(projectInfo));
+            var id = projectInfo.Documents.Single().Id;
+            var primordialDoc = workspace.CurrentSolution.GetRequiredDocument(id);
+            await BeginLoadingProjectWithPrimordialAsync(documentFilePath, _workspaceFactory.HostProjectFactory, primordialProjectId: primordialDoc.Project.Id, doDesignTimeBuild: true);
+            return primordialDoc;
+        }, CancellationToken.None);
+    }
+
     public async ValueTask<bool> TryRemoveMiscellaneousDocumentAsync(DocumentUri uri)
     {
         // Note: we intentionally do not unload file-based apps in this path.
