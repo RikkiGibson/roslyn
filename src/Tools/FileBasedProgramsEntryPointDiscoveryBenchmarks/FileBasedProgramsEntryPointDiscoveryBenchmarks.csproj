@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>$(NetRoslyn)</TargetFramework>
+    <IsShipping>false</IsShipping>
+    <LangVersion>preview</LangVersion>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <ExcludeFromDotNetBuild Condition="'$(DotNetBuildTests)' != 'true'">true</ExcludeFromDotNetBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Compilers\CSharp\Portable\Microsoft.CodeAnalysis.CSharp.csproj" />
+  </ItemGroup>
+</Project>

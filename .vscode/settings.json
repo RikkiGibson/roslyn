@@ -48,5 +48,10 @@
         "Unregistration",
         "Unregistrations",
         "Xunit"
-    ]
+    ],
+    
+    "dotnet.server.path": "/Users/rikkigibson/src/roslyn/artifacts/bin/Microsoft.CodeAnalysis.LanguageServer/Release/net10.0/Microsoft.CodeAnalysis.LanguageServer.dll",
+    // "dotnet.server.waitForDebugger": true,
+    // "dotnet.projects.enableFileBasedProgramsWhenAmbiguous": true
+
 }

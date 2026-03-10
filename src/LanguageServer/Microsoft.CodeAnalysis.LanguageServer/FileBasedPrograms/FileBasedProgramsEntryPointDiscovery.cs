@@ -117,8 +117,8 @@ internal sealed class FileBasedProgramsEntryPointDiscovery(LanguageServerWorkspa
             await Parallel.ForEachAsync(EnumeratePossibleEntryPoints(folder), new ParallelOptions { MaxDegreeOfParallelism = 16 }, async (csFilePath, cancellationToken) =>
             {
                 using var fileStream = File.OpenRead(csFilePath);
-                // Note: we have arbitrarily decided that if your file has '#:'/'#!' but it's after the first 4k of the file, we won't discover it.
-                var bytes = new byte[Math.Min(4096, fileStream.Length)];
+                // Note: we have arbitrarily decided that if an entry point has '#:'/'#!' but it's after the first 1k of the file, we won't discover it.
+                var bytes = new byte[Math.Min(1024, fileStream.Length)];
                 await fileStream.ReadExactlyAsync(bytes, cancellationToken);
                 // TODO2: would using a workspace text loader help here at all?
                 if (!VirtualProjectXmlProvider.HasFileBasedAppDirectives(SourceText.From(bytes, bytes.Length)))

@@ -287,6 +287,13 @@
     <File Path=".editorconfig" />
     <File Path=".vsconfig" />
   </Folder>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Compilers/" />
+  <Folder Name="/src/Compilers/CSharp/" />
+  <Folder Name="/src/Compilers/CSharp/Portable/" />
+  <Folder Name="/src/Tools/">
+    <Project Path="src/Tools/FileBasedProgramsEntryPointDiscoveryBenchmarks/FileBasedProgramsEntryPointDiscoveryBenchmarks.csproj" />
+  </Folder>
   <Folder Name="/Test/" />
   <Folder Name="/Test/Perf/">
     <File Path="src/Test/Perf/readme.md" />
