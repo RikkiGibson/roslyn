@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#define COUNTFILES
-
 using System.Collections.Immutable;
 using System.Composition;
 using System.Diagnostics;
@@ -41,6 +39,16 @@ internal sealed class FileBasedProgramsEntryPointDiscoveryFactory(LanguageServer
 internal sealed partial class FileBasedProgramsEntryPointDiscovery(LanguageServerWorkspaceFactory workspaceFactory, ILoggerFactory loggerFactory, LspServices lspServices) : ILspService, IOnInitialized
 {
     private static readonly StringComparer s_pathComparison = StringComparer.OrdinalIgnoreCase;
+
+    /// <summary>Directories which are ignored per convention.</summary>
+    /// <remarks>Some conventional directories like '.git' and '.vs' are expected to be marked hidden and will be automatically ignored by discovery.</remarks>
+    private static readonly ImmutableArray<string> s_ignoredDirectories = [
+        "artifacts",
+        "bin",
+        "obj",
+        "node_modules"
+    ];
+
     private readonly ILogger _logger = loggerFactory.CreateLogger<FileBasedProgramsEntryPointDiscovery>();
     private ImmutableArray<string> _workspaceFolders;
 
@@ -223,6 +231,12 @@ internal sealed partial class FileBasedProgramsEntryPointDiscovery(LanguageServe
 
         protected override bool ShouldRecurseIntoEntry(ref FileSystemEntry entry)
         {
+            foreach (var ignored in s_ignoredDirectories)
+            {
+                if (entry.FileName.Equals(ignored, StringComparison.OrdinalIgnoreCase))
+                    return false;
+            }
+
             var fullPath = entry.ToFullPath();
             if (entry.LastWriteTimeUtc <= cache.LastWalkTimeUtc)
             {
