@@ -183,6 +183,26 @@ Note that in a previous section, we stated that a file becomes a file-based app 
 
 This project system has the responsibility of unloading the file implicitly, if it notices all the directives were deleted from it. This allows us to proceed with a "simple" lookup behavior in `GetLspDocumentInfoAsync()`, while still catching cases where files changed classification from file-based app to something else.
 
+## Automatic discovery
+
+The Roslyn LSP will automatically discover and load file-based apps in the opened workspace folders. The user can opt out of this discovery process by setting `"dotnet.projects.enableFileBasedProgramsAutomaticDiscovery": false`.
+
+Certain subfolders in a workspace are excluded from this discovery process:
+- Any folders which contain a `.csproj` file.
+- Any folders with names conventionally reserved for build artifacts, such as `artifacts`, `bin`, and `obj`.
+- Any folders marked "hidden" in the file system. `.git` and `.vs` typically fall into this.
+
+The first time discovery is performed in a workspace, the LSP will read all `.cs` files in the opened workspace folders which are not excluded by the above conditions. If the file has `#!` or `#:` directives, it is marked as a file-based app and loaded.
+
+A cache file is created after each discovery pass and stored in the user temp directory. This file holds:
+- The time that the previous discovery pass started.
+- Paths of file-based apps found during the last discovery pass.
+- Paths of folders that were found to contain `.csproj` files during the last discovery pass.
+
+The cache data allows the following optimizations in subsequent discovery passes:
+- Allows not reading any C# files whose last write time is older than the cached time.
+- Allows reducing the number of times we list files in directories whose last write time is older than the cached time.
+
 ## Future considerations
 
 This section is not intended to serve as permanent documentation but as more of a roadmap for a series of changes we may make in this area in the near future. It should not be necessary to read/understand this in order to evaluate a PR currently under review. i.e. anything that the current PR is actually implementing is covered in previous sections.
