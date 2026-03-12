@@ -17,7 +17,6 @@ namespace Microsoft.CodeAnalysis.CSharp
         internal struct ProcessedFieldInitializers
         {
             internal ImmutableArray<BoundInitializer> BoundInitializers { get; set; }
-            internal NullableWalker.VariableState? AfterInitializersNullableState { get; set; }
             internal BoundStatement? LoweredInitializers { get; set; }
             internal bool HasErrors { get; set; }
             internal ImportChain? FirstImportChain { get; set; }
@@ -26,16 +25,21 @@ namespace Microsoft.CodeAnalysis.CSharp
         internal static void BindFieldInitializers(
             CSharpCompilation compilation,
             SynthesizedInteractiveInitializerMethod? scriptInitializerOpt,
-            NamedTypeSymbol containingType,
+            SourceMemberContainerTypeSymbol containingType,
             ImmutableArray<ImmutableArray<FieldOrPropertyInitializer>> fieldInitializers,
             BindingDiagnosticBag diagnostics,
             ref ProcessedFieldInitializers processedInitializers)
         {
             var diagsForInstanceInitializers = BindingDiagnosticBag.GetInstance(withDiagnostics: true, diagnostics.AccumulatesDependencies);
+            Debug.Assert(diagsForInstanceInitializers.DiagnosticBag is not null);
             ImportChain? firstImportChain;
             processedInitializers.BoundInitializers = BindFieldInitializers(compilation, scriptInitializerOpt, fieldInitializers, diagsForInstanceInitializers, out firstImportChain);
-            var nodeToAnalyze = InitializerRewriter.RewriteInitializers(processedInitializers.BoundInitializers, containingType.GetNonNullSyntaxNode());
-            processedInitializers.AfterInitializersNullableState = NullableWalker.GetAfterInitializersState(compilation, containingType, nodeToAnalyze, constructorBody: null, diagnostics);
+
+            var syntax = containingType.GetNonNullSyntaxNode();
+            var nodeToAnalyze = InitializerRewriter.RewriteInitializers(processedInitializers.BoundInitializers, syntax);
+            var nullableBinder = compilation.GetBinder(syntax);
+            NullableWalker.AnalyzeIfNeeded(nullableBinder, nodeToAnalyze, syntax, diagsForInstanceInitializers.DiagnosticBag, symbolAndGetterNullResilienceData: null);
+
             processedInitializers.HasErrors = diagsForInstanceInitializers.HasAnyErrors();
             processedInitializers.FirstImportChain = firstImportChain;
             diagnostics.AddRange(diagsForInstanceInitializers);

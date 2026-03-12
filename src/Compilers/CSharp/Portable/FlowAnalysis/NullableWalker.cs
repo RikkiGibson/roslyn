@@ -1445,7 +1445,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// </summary>
         internal static void AnalyzeIfNeeded(
             CSharpCompilation compilation,
-            Symbol symbol,
+            MethodSymbol method,
             BoundNode node,
             DiagnosticBag diagnostics,
             bool useConstructorExitWarnings,
@@ -1454,25 +1454,25 @@ namespace Microsoft.CodeAnalysis.CSharp
             MethodSymbol? baseOrThisInitializer,
             out VariableState? finalNullableState)
         {
-            if (!HasRequiredLanguageVersion(compilation) || !compilation.IsNullableAnalysisEnabledIn(symbol))
+            if (!HasRequiredLanguageVersion(compilation) || !compilation.IsNullableAnalysisEnabledIn(method))
             {
                 if (compilation.IsNullableAnalysisEnabledAlways)
                 {
                     // Once we address https://github.com/dotnet/roslyn/issues/46579 we should also always pass `getFinalNullableState: true` in debug mode.
                     // We will likely always need to write a 'null' out for the out parameter in this code path, though, because
                     // we don't want to introduce behavior differences between debug and release builds
-                    Analyze(compilation, symbol, node, new DiagnosticBag(), useConstructorExitWarnings: false, initialNullableState: null, getFinalNullableState: false, baseOrThisInitializer, out _, requiresAnalysis: false);
+                    Analyze(compilation, method, node, new DiagnosticBag(), useConstructorExitWarnings: false, initialNullableState: null, getFinalNullableState: false, baseOrThisInitializer, out _, requiresAnalysis: false);
                 }
                 finalNullableState = null;
                 return;
             }
 
-            Analyze(compilation, symbol, node, diagnostics, useConstructorExitWarnings, initialNullableState, getFinalNullableState, baseOrThisInitializer, out finalNullableState);
+            Analyze(compilation, method, node, diagnostics, useConstructorExitWarnings, initialNullableState, getFinalNullableState, baseOrThisInitializer, out finalNullableState);
         }
 
         private static void Analyze(
             CSharpCompilation compilation,
-            Symbol symbol,
+            MethodSymbol method,
             BoundNode node,
             DiagnosticBag diagnostics,
             bool useConstructorExitWarnings,
@@ -1482,18 +1482,18 @@ namespace Microsoft.CodeAnalysis.CSharp
             out VariableState? finalNullableState,
             bool requiresAnalysis = true)
         {
-            if (symbol is MethodSymbol method && method.IsImplicitlyDeclared && !method.IsImplicitConstructor && !method.IsScriptInitializer)
+            if (method.IsImplicitlyDeclared && !method.IsImplicitConstructor && !method.IsScriptInitializer)
             {
                 finalNullableState = null;
                 return;
             }
             Debug.Assert(node.SyntaxTree is object);
-            var binder = symbol is SynthesizedSimpleProgramEntryPointSymbol entryPoint ?
+            var binder = method is SynthesizedSimpleProgramEntryPointSymbol entryPoint ?
                              entryPoint.GetBodyBinder(ignoreAccessibility: false) :
                              compilation.GetBinderFactory(node.SyntaxTree).GetBinder(node.Syntax);
             var conversions = binder.Conversions;
             Analyze(compilation,
-                symbol,
+                method,
                 node,
                 binder,
                 conversions,
@@ -1531,9 +1531,9 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// Gets the "after initializers state" which should be used at the beginning of nullable analysis
         /// of certain constructors.
         /// </summary>
-        internal static VariableState? GetAfterInitializersState(CSharpCompilation compilation, Symbol symbol, BoundNode nodeToAnalyze, BoundNode? constructorBody, BindingDiagnosticBag diagnostics)
+        internal static VariableState? GetAfterInitializersState(CSharpCompilation compilation, MethodSymbol method, BoundNode nodeToAnalyze, BoundNode? constructorBody, BindingDiagnosticBag diagnostics)
         {
-            Debug.Assert(symbol is NamedTypeSymbol || symbol is MethodSymbol method && method.IsConstructor());
+            Debug.Assert(method.IsConstructor());
             bool ownsDiagnostics;
             DiagnosticBag diagnosticsBag;
             if (diagnostics.DiagnosticBag == null)
@@ -1552,7 +1552,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             NullableWalker.AnalyzeIfNeeded(
                 compilation,
-                symbol,
+                method,
                 nodeToAnalyze,
                 diagnosticsBag,
                 useConstructorExitWarnings: false,
