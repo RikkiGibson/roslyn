@@ -486,10 +486,12 @@ namespace Microsoft.CodeAnalysis.CSharp
             if ((object)sourceTypeSymbol != null)
             {
                 _cancellationToken.ThrowIfCancellationRequested();
-                Binder.BindFieldInitializers(_compilation, scriptInitializer, sourceTypeSymbol.StaticInitializers, _diagnostics, ref processedStaticInitializers);
+                Binder.BindFieldInitializers(_compilation, scriptInitializer, sourceTypeSymbol, sourceTypeSymbol.StaticInitializers, _diagnostics, ref processedStaticInitializers);
+                Debug.Assert(processedStaticInitializers.AfterInitializersNullableState is not null);
 
                 _cancellationToken.ThrowIfCancellationRequested();
-                Binder.BindFieldInitializers(_compilation, scriptInitializer, sourceTypeSymbol.InstanceInitializers, _diagnostics, ref processedInstanceInitializers);
+                Binder.BindFieldInitializers(_compilation, scriptInitializer, sourceTypeSymbol, sourceTypeSymbol.InstanceInitializers, _diagnostics, ref processedInstanceInitializers);
+                Debug.Assert(processedInstanceInitializers.AfterInitializersNullableState is not null);
 
                 if (compilationState.Emitting)
                 {

@@ -5538,5 +5538,36 @@ class C
                 //         x[0] = null; // 6
                 Diagnostic(ErrorCode.WRN_NullAsNonNullable, "null").WithLocation(41, 16));
         }
+
+        [Fact]
+        public void NullableFieldInitializerDiagnostic_01()
+        {
+            var source = """
+                #nullable enable
+                class C
+                {
+                    public C() { }
+                    public string S { get; set; } = null;
+                    public string S2 { get; set; } = BAD;
+                }
+                """;
+            var comp = CreateCompilation(source);
+            var tree = comp.SyntaxTrees[0];
+            var model = comp.GetSemanticModel(tree);
+
+            var initializers = tree.GetRoot().DescendantNodes().OfType<EqualsValueClauseSyntax>().ToArray();
+            Assert.Equal(2, initializers.Length);
+            Assert.Equal("= null", initializers[0].ToFullString());
+            model.GetDiagnostics(initializers[0].Location.SourceSpan).Verify(
+                // (5,37): warning CS8625: Cannot convert null literal to non-nullable reference type.
+                //     public string S { get; set; } = null;
+                Diagnostic(ErrorCode.WRN_NullAsNonNullable, "null").WithLocation(5, 37));
+
+            Assert.Equal("= BAD", initializers[1].ToFullString());
+            model.GetDiagnostics(initializers[1].Location.SourceSpan).Verify(
+                // (6,38): error CS0103: The name 'BAD' does not exist in the current context
+                //     public string S2 { get; set; } = BAD;
+                Diagnostic(ErrorCode.ERR_NameNotInContext, "BAD").WithArguments("BAD").WithLocation(6, 38));
+        }
     }
 }

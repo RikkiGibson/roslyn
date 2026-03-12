@@ -299,10 +299,10 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// uses the cached value calculated during binding (from potentially several spans)
         /// from <see cref="IsNullableAnalysisEnabledIn(CSharpSyntaxTree, TextSpan)"/>.
         /// </remarks>
-        internal bool IsNullableAnalysisEnabledIn(MethodSymbol method)
+        internal bool IsNullableAnalysisEnabledIn(Symbol symbol)
         {
             return GetNullableAnalysisValue() ??
-                method.IsNullableAnalysisEnabled();
+                symbol is NamedTypeSymbol || (symbol is MethodSymbol method && method.IsNullableAnalysisEnabled());
         }
 
         /// <summary>
