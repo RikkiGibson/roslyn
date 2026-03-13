@@ -5569,5 +5569,50 @@ class C
                 //     public string S2 { get; set; } = BAD;
                 Diagnostic(ErrorCode.ERR_NameNotInContext, "BAD").WithArguments("BAD").WithLocation(6, 38));
         }
+
+        [Fact]
+        public void NullableFieldInitializerDiagnostic_02()
+        {
+            var source = """
+                #nullable enable
+                class C
+                {
+                    static C() { }
+                    public static string S0 { get; set; } = "a";
+                    public static string S1 { get; set; } = S0.ToString();
+                    public static string S2 { get; set; } = null; // 1
+                    public static string S3 { get; set; } = S2.ToString(); // 2
+                    public static string S4 { get; set; }
+                    public static string S5 { get; set; } = S4.ToString(); // 3
+                }
+                """;
+            var comp = CreateCompilation(source);
+            var tree = comp.SyntaxTrees[0];
+            var model = comp.GetSemanticModel(tree);
+
+            var initializers = tree.GetRoot().DescendantNodes().OfType<EqualsValueClauseSyntax>().ToArray();
+            Assert.Equal(5, initializers.Length);
+            Assert.Equal(@"= ""a""", initializers[0].ToFullString());
+            model.GetDiagnostics(initializers[0].Location.SourceSpan).Verify();
+
+            Assert.Equal("= S0.ToString()", initializers[1].ToFullString());
+            model.GetDiagnostics(initializers[1].Location.SourceSpan).Verify();
+
+            Assert.Equal("= null", initializers[2].ToFullString());
+            model.GetDiagnostics(initializers[2].Location.SourceSpan).Verify(
+                // (7,45): warning CS8625: Cannot convert null literal to non-nullable reference type.
+                //     public static string S3 { get; set; } = null;
+                Diagnostic(ErrorCode.WRN_NullAsNonNullable, "null").WithLocation(7, 45));
+
+            // TODO2: nullable warning is missing
+            Assert.Equal("= S2.ToString()", initializers[3].ToFullString());
+            model.GetDiagnostics(initializers[3].Location.SourceSpan).Verify();
+
+            // No initializer for S4
+
+            // TODO2: nullable warning is missing
+            Assert.Equal("= S4.ToString()", initializers[4].ToFullString());
+            model.GetDiagnostics(initializers[4].Location.SourceSpan).Verify();
+        }
     }
 }
