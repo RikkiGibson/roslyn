@@ -39,7 +39,7 @@ internal sealed class FileBasedProgramsEntryPointDiscoveryFactory(LanguageServer
 internal sealed partial class FileBasedProgramsEntryPointDiscovery(
     LanguageServerWorkspaceFactory workspaceFactory, IGlobalOptionService globalOptionService, ILoggerFactory loggerFactory, LspServices lspServices) : ILspService, IOnInitialized
 {
-    private static readonly StringComparer s_pathComparison = StringComparer.OrdinalIgnoreCase;
+    private static readonly StringComparer s_pathComparer = StringComparer.OrdinalIgnoreCase;
 
     /// <summary>Directories which are ignored per convention.</summary>
     /// <remarks>Some conventional directories like '.git' and '.vs' are expected to be marked hidden and will be automatically ignored by discovery.</remarks>
@@ -59,9 +59,6 @@ internal sealed partial class FileBasedProgramsEntryPointDiscovery(
         if (initializeManager.TryGetInitializeParams() is { WorkspaceFolders: [_, ..] nonEmptyWorkspaceFolders })
         {
             _workspaceFolders = GetFolderPaths(nonEmptyWorkspaceFolders);
-
-            if (!globalOptionService.GetOption(LanguageServerProjectSystemOptionsStorage.EnableFileBasedPrograms))
-                return Task.CompletedTask;
 
             _ = Task.Run(async () =>
             {
@@ -96,6 +93,9 @@ internal sealed partial class FileBasedProgramsEntryPointDiscovery(
 
     internal async Task FindAndLoadEntryPointsAsync()
     {
+        if (!globalOptionService.GetOption(LanguageServerProjectSystemOptionsStorage.EnableFileBasedPrograms))
+            return;
+
         if (_workspaceFolders.IsDefaultOrEmpty)
         {
             _logger.LogDebug("No workspace folders to search for file-based apps.");
@@ -162,7 +162,7 @@ internal sealed partial class FileBasedProgramsEntryPointDiscovery(
         // so that changes that happen concurrently with this walk, are caught by the next walk
         var walkStartTimeUtc = DateTimeOffset.UtcNow;
 
-        // Load known file-based apps from cache
+        // Initial cache loop: load known file-based apps
         var newFileBasedAppsBuilder = ArrayBuilder<string>.GetInstance(cache.FileBasedAppFullPaths.Length);
         foreach (var fileBasedAppPath in cache.FileBasedAppFullPaths)
         {
@@ -185,7 +185,7 @@ internal sealed partial class FileBasedProgramsEntryPointDiscovery(
         }
 
         // Search for changes since our last walk.
-        var directoriesContainingCsprojBuilder = ArrayBuilder<string>.GetInstance(cache.FileBasedAppFullPaths.Length);
+        var directoriesContainingCsprojBuilder = ArrayBuilder<string>.GetInstance(cache.DirectoriesContainingCsproj.Length);
         var enumerator = new IncrementalEntryPointEnumerator(cache, directoriesContainingCsprojBuilder);
         while (enumerator.MoveNext())
         {
@@ -197,8 +197,8 @@ internal sealed partial class FileBasedProgramsEntryPointDiscovery(
 
         stopwatch.Stop();
         _logger.LogInformation("MAGIC Finished discovery in {workspaceFolder} in {stopwatch.ElapsedMilliseconds} milliseconds", workspaceFolder, stopwatch.ElapsedMilliseconds);
-        newFileBasedAppsBuilder.Sort(s_pathComparison);
-        directoriesContainingCsprojBuilder.Sort(s_pathComparison);
+        newFileBasedAppsBuilder.Sort(s_pathComparer);
+        directoriesContainingCsprojBuilder.Sort(s_pathComparer);
         var newCache = new Cache(workspaceFolder, walkStartTimeUtc, newFileBasedAppsBuilder.ToImmutableAndFree(), directoriesContainingCsprojBuilder.ToImmutableAndFree());
 
         IOUtilities.PerformIO(() =>
@@ -217,11 +217,42 @@ internal sealed partial class FileBasedProgramsEntryPointDiscovery(
         return isFileBasedApp;
     }
 
-    private class IncrementalEntryPointEnumerator(Cache cache, ArrayBuilder<string> directoriesContainingCsprojBuilder)
-        : FileSystemEnumerator<string>(cache.WorkspacePath, options: new EnumerationOptions { RecurseSubdirectories = true })
+    private class IncrementalEntryPointEnumerator : FileSystemEnumerator<string>
     {
+        private readonly Cache _cache;
+        private readonly ArrayBuilder<string> _directoriesContainingCsprojBuilder;
+
+        /// <summary>
+        /// Directories under the workspace folder which have a newer create/modify timestamp than the last walk time, and their subdirectories.
+        /// In this case, items may have been moved into the directory since the last walk.
+        /// </summary>
+        private readonly HashSet<string> _newerDirectories = new HashSet<string>(s_pathComparer);
+
+        public IncrementalEntryPointEnumerator(Cache cache, ArrayBuilder<string> directoriesContainingCsprojBuilder)
+            : base(cache.WorkspacePath, options: new EnumerationOptions { RecurseSubdirectories = true })
+        {
+            _cache = cache;
+            _directoriesContainingCsprojBuilder = directoriesContainingCsprojBuilder;
+
+            // Note: a creation time can be newer than the last write time when a file is copied or moved.
+            var workspaceDirectoryInfo = new DirectoryInfo(_cache.WorkspacePath);
+            if (workspaceDirectoryInfo.CreationTimeUtc > cache.LastWalkTimeUtc
+                || workspaceDirectoryInfo.LastWriteTimeUtc > cache.LastWalkTimeUtc)
+            {
+                _newerDirectories.Add(workspaceDirectoryInfo.FullName);
+            }
+        }
+
         protected override string TransformEntry(ref FileSystemEntry entry)
             => entry.ToFullPath();
+
+        private bool IsCacheUpToDate(ref FileSystemEntry entry)
+        {
+            // Note: the create timestamp can be newer than the modify timestamp when a file is copied or moved.
+            return !_newerDirectories.GetAlternateLookup<ReadOnlySpan<char>>().Contains(entry.Directory)
+                && entry.CreationTimeUtc <= _cache.LastWalkTimeUtc
+                && entry.LastWriteTimeUtc <= _cache.LastWalkTimeUtc;
+        }
 
         protected override bool ShouldIncludeEntry(ref FileSystemEntry entry)
         {
@@ -231,19 +262,14 @@ internal sealed partial class FileBasedProgramsEntryPointDiscovery(
                 return false;
             }
 
-            // Note: both a creation time can be newer than write time if the file was moved/renamed.
-            if (entry.CreationTimeUtc <= cache.LastWalkTimeUtc && entry.LastWriteTimeUtc <= cache.LastWalkTimeUtc)
+            if (IsCacheUpToDate(ref entry))
             {
                 // Already up to date. If it is an FBA, it was visited by the initial cache loop.
-
-                // TODO2: this is buggy. We might have skipped opening this last time due to having a csproj-in-cone.
-                // We might want to store some state when entering a directory, to indicate we need to crack files within even if they are old
-                // e.g. if a directory timestamp changes, it might have been renamed from `artifacts/` to `src/` or something.
                 return false;
             }
 
             var fullPath = entry.ToFullPath();
-            if (cache.FileBasedAppFullPaths.BinarySearch(fullPath, s_pathComparison) >= 0)
+            if (_cache.FileBasedAppFullPaths.BinarySearch(fullPath, s_pathComparer) >= 0)
             {
                 // File has changed since our last walk, but it's under a cached file-based app path.
                 // The initial cache loop already handled it.
@@ -262,33 +288,30 @@ internal sealed partial class FileBasedProgramsEntryPointDiscovery(
             }
 
             var fullPath = entry.ToFullPath();
-
-            // TODO2: when a directory name is changed, its 'create' time is updated, but its 'write' time is not.
-            // But, this might have caused the directory name to change from a skipped to included directory.
-            // Also, our cached information about whether csproj is in cone depends on the name.
-            // So, we had better not enter this 'if' when the creation time is newer than cached time.
-            if (entry.LastWriteTimeUtc <= cache.LastWalkTimeUtc)
+            if (IsCacheUpToDate(ref entry))
             {
-                // Directory timestamps update when the directory contents are changed (i.e. directly contained files are added/deleted/renamed).
-                // If our last walk time is newer than the directory last write time, then we know our cached result of whether the directory contains a csproj is still applicable.
-                if (cache.DirectoriesContainingCsproj.BinarySearch(fullPath, s_pathComparison) >= 0)
+                if (_cache.DirectoriesContainingCsproj.BinarySearch(fullPath, s_pathComparer) >= 0)
                 {
-                    // Still contains a csproj. Do not descend.
-                    directoriesContainingCsprojBuilder.Add(fullPath);
+                    // Still contains a csproj. Do not recurse.
+                    _directoriesContainingCsprojBuilder.Add(fullPath);
                     return false;
                 }
 
                 return true;
             }
 
-            // Directory contents changed since last walk, see if it contains a csproj file.
+            // Directory contents changed since last walk.
+            // Check again if it contains a csproj file.
             var containsCsproj = Directory.EnumerateFiles(fullPath, "*.csproj").Any();
             if (containsCsproj)
             {
-                directoriesContainingCsprojBuilder.Add(fullPath);
+                _directoriesContainingCsprojBuilder.Add(fullPath);
                 return false;
             }
 
+            // Changed since last walk, and doesn't contain a csproj file.
+            // User may have moved new folders or files into this directory since last walk.
+            _newerDirectories.Add(fullPath);
             return true;
         }
     }

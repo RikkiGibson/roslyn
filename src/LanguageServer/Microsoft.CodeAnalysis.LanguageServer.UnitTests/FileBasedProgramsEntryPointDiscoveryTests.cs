@@ -68,6 +68,12 @@ public sealed class FileBasedProgramsEntryPointDiscoveryTests : AbstractLanguage
         //   Ordinary.cs
 
         var tempDir = _tempRoot.CreateDirectory();
+
+        // Delete artifacts from possible previous runs of this test
+        var cacheDirectory = VirtualProjectXmlProvider.GetDiscoveryCacheDirectory(tempDir.Path);
+        if (Directory.Exists(cacheDirectory))
+            Directory.Delete(cacheDirectory, recursive: true);
+
         var appText = """
             #:sdk Microsoft.Net.SDK
             Console.WriteLine("Hello World");
@@ -117,9 +123,6 @@ public sealed class FileBasedProgramsEntryPointDiscoveryTests : AbstractLanguage
         // Changed and again has '#:'
         appFile.WriteAllText(appText);
         AssertEx.SequenceEqual([appFile.Path], discovery.FindEntryPoints(tempDir.Path));
-
-        // Ensure cache file does not influence the next run of the test
-        Directory.Delete(VirtualProjectXmlProvider.GetDiscoveryCacheDirectory(tempDir.Path), recursive: true);
     }
 
     [Fact]
@@ -131,6 +134,12 @@ public sealed class FileBasedProgramsEntryPointDiscoveryTests : AbstractLanguage
         //   App2.cs
 
         var tempDir = _tempRoot.CreateDirectory();
+
+        // Delete artifacts from possible previous runs of this test
+        var cacheDirectory = VirtualProjectXmlProvider.GetDiscoveryCacheDirectory(tempDir.Path);
+        if (Directory.Exists(cacheDirectory))
+            Directory.Delete(cacheDirectory, recursive: true);
+
         var artifactsDir = tempDir.CreateDirectory("artifacts");
         var app1Text = """
             #:sdk Microsoft.Net.SDK
@@ -155,9 +164,6 @@ public sealed class FileBasedProgramsEntryPointDiscoveryTests : AbstractLanguage
 
         // Verify stability
         AssertEx.SequenceEqual([app2File.Path], discovery.FindEntryPoints(tempDir.Path));
-
-        // Ensure cache file does not influence the next run of the test
-        Directory.Delete(VirtualProjectXmlProvider.GetDiscoveryCacheDirectory(tempDir.Path), recursive: true);
     }
 
     [Fact]
@@ -171,6 +177,12 @@ public sealed class FileBasedProgramsEntryPointDiscoveryTests : AbstractLanguage
         //   App.cs
 
         var tempDir = _tempRoot.CreateDirectory();
+
+        // Delete artifacts from possible previous runs of this test
+        var cacheDirectory = VirtualProjectXmlProvider.GetDiscoveryCacheDirectory(tempDir.Path);
+        if (Directory.Exists(cacheDirectory))
+            Directory.Delete(cacheDirectory, recursive: true);
+
         var projectDir = tempDir.CreateDirectory("Project");
         var csprojFile = projectDir.CreateFile("Project.csproj");
 
@@ -202,16 +214,20 @@ public sealed class FileBasedProgramsEntryPointDiscoveryTests : AbstractLanguage
 
         // Verify stability
         AssertEx.SequenceEqual([appFile.Path, programFile.Path], discovery.FindEntryPoints(tempDir.Path));
-
-        // Ensure cache file does not influence the next run of the test
-        Directory.Delete(VirtualProjectXmlProvider.GetDiscoveryCacheDirectory(tempDir.Path), recursive: true);
     }
 
     [Fact]
     public async Task TestDiscovery_04()
     {
-        // Ensure discovery doesn't occur when relevant options are disabled
+        // Ensure discovery occurs when relevant options are enabled
+        // Note: the option is checked in the higher level API, so we need to verify the effects in project system.
         var tempDir = _tempRoot.CreateDirectory();
+
+        // Delete artifacts from possible previous runs of this test
+        var cacheDirectory = VirtualProjectXmlProvider.GetDiscoveryCacheDirectory(tempDir.Path);
+        if (Directory.Exists(cacheDirectory))
+            Directory.Delete(cacheDirectory, recursive: true);
+
         var appText = """
             #:sdk Microsoft.Net.SDK
             Console.WriteLine("Hello World");
@@ -221,6 +237,7 @@ public sealed class FileBasedProgramsEntryPointDiscoveryTests : AbstractLanguage
         await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace: false, new InitializationOptions
         {
             ServerKind = WellKnownLspServerKinds.CSharpVisualBasicLspServer,
+            OptionUpdater = options => options.SetGlobalOption(LanguageServerProjectSystemOptionsStorage.EnableFileBasedPrograms, true),
             WorkspaceFolders =
             [
                 new() { DocumentUri = CreateAbsoluteDocumentUri(tempDir.Path), Name = "workspace1" }
@@ -228,13 +245,61 @@ public sealed class FileBasedProgramsEntryPointDiscoveryTests : AbstractLanguage
         });
 
         var discovery = testLspServer.GetRequiredLspService<FileBasedProgramsEntryPointDiscovery>();
-        AssertEx.Empty(discovery.FindEntryPoints(tempDir.Path));
+        await discovery.FindAndLoadEntryPointsAsync();
+        await testLspServer.TestWorkspace.GetService<AsynchronousOperationListenerProvider>().GetWaiter(FeatureAttribute.Workspace).ExpeditedWaitAsync();
+        var (workspace, document) = await GetRequiredLspWorkspaceAndDocumentAsync(CreateAbsoluteDocumentUri(appFile.Path), testLspServer);
+        Assert.Equal(WorkspaceKind.Host, workspace.Kind);
+        Assert.NotNull(document);
+    }
 
-        // Verify stability
-        AssertEx.Empty(discovery.FindEntryPoints(tempDir.Path));
+    [Fact]
+    public async Task TestDiscovery_05()
+    {
+        // Ensure discovery doesn't occur when relevant options are disabled
+        // Note: the option is checked in the higher level API, so we need to verify the effects in project system.
+        var tempDir = _tempRoot.CreateDirectory();
 
-        // Ensure cache file does not influence the next run of the test
-        Directory.Delete(VirtualProjectXmlProvider.GetDiscoveryCacheDirectory(tempDir.Path), recursive: true);
+        // Delete artifacts from possible previous runs of this test
+        var cacheDirectory = VirtualProjectXmlProvider.GetDiscoveryCacheDirectory(tempDir.Path);
+        if (Directory.Exists(cacheDirectory))
+            Directory.Delete(cacheDirectory, recursive: true);
+
+        var appText = """
+            #:sdk Microsoft.Net.SDK
+            Console.WriteLine("Hello World");
+            """;
+        var appFile = tempDir.CreateFile("App1.cs").WriteAllText(appText);
+
+        await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace: false, new InitializationOptions
+        {
+            ServerKind = WellKnownLspServerKinds.CSharpVisualBasicLspServer,
+            OptionUpdater = options => options.SetGlobalOption(LanguageServerProjectSystemOptionsStorage.EnableFileBasedPrograms, false),
+            WorkspaceFolders =
+            [
+                new() { DocumentUri = CreateAbsoluteDocumentUri(tempDir.Path), Name = "workspace1" }
+            ]
+        });
+
+        var discovery = testLspServer.GetRequiredLspService<FileBasedProgramsEntryPointDiscovery>();
+        await discovery.FindAndLoadEntryPointsAsync();
+        await testLspServer.TestWorkspace.GetService<AsynchronousOperationListenerProvider>().GetWaiter(FeatureAttribute.Workspace).ExpeditedWaitAsync();
+        var (workspace, document) = await GetLspWorkspaceAndDocumentAsync(CreateAbsoluteDocumentUri(appFile.Path), testLspServer);
+        Assert.Null(workspace);
+        Assert.Null(document);
+    }
+
+    private static async Task<(Workspace? workspace, Document? document)> GetLspWorkspaceAndDocumentAsync(DocumentUri uri, TestLspServer testLspServer)
+    {
+        var (workspace, _, document) = await testLspServer.GetManager().GetLspDocumentInfoAsync(CreateTextDocumentIdentifier(uri), CancellationToken.None).ConfigureAwait(false);
+        return (workspace, document as Document);
+    }
+
+    private static async Task<(Workspace workspace, Document document)> GetRequiredLspWorkspaceAndDocumentAsync(DocumentUri uri, TestLspServer testLspServer)
+    {
+        var (workspace, document) = await GetLspWorkspaceAndDocumentAsync(uri, testLspServer);
+        Assert.NotNull(workspace);
+        Assert.NotNull(document);
+        return (workspace, document);
     }
 
     // TODO2: test discovery->moving a file->rediscovery
