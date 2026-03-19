@@ -185,6 +185,7 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
             : LooseDocumentKind.MiscellaneousFileWithStandardReferences;
     }
 
+    // TODO2: rationalize TryBeginLoadingProjectWithPrimordialAsync given that both LSP queue and discovery will call it
     public async ValueTask<TextDocument?> AddDocumentAsync(DocumentUri documentUri, TrackedDocumentInfo documentInfo)
     {
         var languageInfoProvider = _lspServices.GetRequiredService<ILanguageInfoProvider>();
@@ -194,23 +195,20 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
         }
 
         var documentFilePath = GetDocumentFilePath(documentUri);
-
+        var sourceTextLoader = new SourceTextLoader(documentInfo.SourceText, documentFilePath);
         var doDesignTimeBuild = !ClassifyAsMiscellaneousFileWithNoReferences(documentFilePath, languageInformation);
-        var primordialProjectId = await TryBeginLoadingProjectWithPrimordialAsync(documentFilePath, _workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory, CreatePrimordialProject, doDesignTimeBuild);
-        if (primordialProjectId is null)
-        {
-            // We must have lost a race to begin loading this project.
-            // At this point, we may or may not find a primordial project already present. We might find a fully loaded project present instead.
-            // TODO2: do we need to call GetLspDocumentInfoAsync over again? lookup in the workspace again?
-            return null;
-        }
+        var primordialProjectId = await TryBeginLoadingProjectWithPrimordialAsync(documentFilePath, sourceTextLoader, doDesignTimeBuild);
 
         var primordialProject = _workspaceFactory.MiscellaneousFilesWorkspace.CurrentSolution.GetRequiredProject(primordialProjectId);
         return primordialProject.Documents.Single();
+    }
+
+    public async ValueTask<ProjectId?> TryBeginLoadingProjectWithPrimordialAsync(string documentFilePath, SourceTextLoader sourceTextLoader, bool doDesignTimeBuild)
+    {
+        return await TryBeginLoadingProjectWithPrimordialAsync(documentFilePath, _workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory, CreatePrimordialProject, doDesignTimeBuild);
 
         ProjectId CreatePrimordialProject(ProjectSystemProjectFactory projectFactory)
         {
-            var sourceTextLoader = new SourceTextLoader(documentInfo.SourceText, documentFilePath);
             var enableFileBasedPrograms = GlobalOptionService.GetOption(LanguageServerProjectSystemOptionsStorage.EnableFileBasedPrograms);
             var projectInfo = MiscellaneousFileUtilities.CreateMiscellaneousProjectInfoForDocument(
                 projectFactory.Workspace, documentFilePath, sourceTextLoader, languageInformation, documentInfo.SourceText.ChecksumAlgorithm, projectFactory.Workspace.Services.SolutionServices, [], enableFileBasedPrograms);

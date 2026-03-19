@@ -130,7 +130,7 @@ internal sealed partial class FileBasedProgramsEntryPointDiscovery(
         async ValueTask BeginLoadingAsync(string csFilePath)
         {
             var textLoader = new WorkspaceFileTextLoader(solutionServices, csFilePath, defaultEncoding: null);
-            _ = await fileBasedProgramsProjectSystem.BeginLoadingFileBasedAppAsync(csFilePath, textLoader, languageInfo);
+            _ = await fileBasedProgramsProjectSystem.AddDocumentAsync(csFilePath, textLoader, languageInfo);
         }
     }
 
