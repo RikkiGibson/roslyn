@@ -20,27 +20,26 @@ namespace Microsoft.CodeAnalysis.LanguageServer;
 /// </remarks>
 internal interface ILspMiscellaneousFilesWorkspaceProvider : ILspService
 {
-    bool ManagesWorkspace(Workspace workspace);
-
     /// <summary>
-    /// Gets or adds a document to the appropriate workspace potentially based on the document's contents.
+    /// Adds the document to an appropriate workspace. May initiate work to load a project for the document.
     /// Note that the implementation of this method should not depend on anything expensive such as RPC calls.
     /// async is used here to allow taking locks asynchronously and "relatively fast" stuff like that.
     /// </summary>
-    ValueTask<(TextDocument document, bool alreadyExists)?> GetOrAddDocumentAsync(DocumentUri documentUri, TrackedDocumentInfo trackedDocumentInfo, CancellationToken cancellationToken);
+    ValueTask<TextDocument?> AddDocumentAsync(DocumentUri documentUri, TrackedDocumentInfo trackedDocumentInfo);
 
     /// <summary>
     /// Removes the document with the given <paramref name="uri"/> from the miscellaneous files workspace.
-    /// If the miscellaneous files workspace already does not contain such a document, does nothing.
-    /// Note that the implementation of this method should not depend on anything expensive such as RPC calls.
-    /// async is used here to allow taking locks asynchronously and "relatively fast" stuff like that.
+    /// Used to remove unneeded documents from the miscellaneous files workspace,
+    /// when a document is found in a non-miscellaneous files workspace.
     /// </summary>
     /// <returns><see langword="true"/> when a document was found and removed</returns>
     ValueTask<bool> TryRemoveMiscellaneousDocumentAsync(DocumentUri uri);
 
     /// <summary>
-    /// Notify this provider that a document was closed.
-    /// This may result in unloading the document from the miscellaneous files workspace or from the host workspace.
+    /// Signals to this provider that the document with the given <paramref name="uri"/> was closed.
+    /// Separate from 'TryRemoveMiscellaneousDocumentAsync' because it can either remove documents from the miscellaneous files or host workspace.
+    /// For example, for file-based apps, we wouldn't want to unload them just because we found a document in a non-miscellaneous files workspace,
+    /// but we may want to unload the file-based app if its entry point file is closed.
     /// </summary>
     ValueTask CloseDocumentAsync(DocumentUri uri);
 }
