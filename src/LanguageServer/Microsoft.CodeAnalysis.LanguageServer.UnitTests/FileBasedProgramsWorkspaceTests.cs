@@ -1381,6 +1381,43 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
         Assert.True(document.Project.State.HasAllInformation);
     }
 
+    [Theory, CombinatorialData]
+    public async Task TestLooseFile_NoRestorePerformed(bool mutatingLspWorkspace)
+    {
+        // Verify that opening a loose file (not a file-based program) does not cause a restore to run.
+        // We detect this by placing a Directory.Build.props that redirects obj/ to a custom location,
+        // then verifying that the custom obj directory is never created on disk.
+        await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace, new InitializationOptions { ServerKind = WellKnownLspServerKinds.CSharpVisualBasicLspServer });
+        Assert.Null(await GetMiscellaneousDocumentAsync(testLspServer));
+
+        var tempDir = _tempRoot.CreateDirectory();
+        var customObjDir = Path.Combine(tempDir.Path, "customobj");
+
+        // Write a Directory.Build.props that redirects BaseIntermediateOutputPath
+        tempDir.CreateFile("Directory.Build.props").WriteAllText($$"""
+            <Project>
+                <PropertyGroup>
+                    <BaseIntermediateOutputPath>{{customObjDir}}</BaseIntermediateOutputPath>
+                </PropertyGroup>
+            </Project>
+            """);
+
+        var sourceText = """
+            class C { }
+            """;
+        var sourceFile = tempDir.CreateFile("SomeFile.cs").WriteAllText(sourceText);
+        var looseFileUri = ProtocolConversions.CreateAbsoluteDocumentUri(sourceFile.Path);
+        await testLspServer.OpenDocumentAsync(looseFileUri, sourceText).ConfigureAwait(false);
+        await WaitForProjectLoad(looseFileUri, testLspServer);
+
+        // Verify the document is found in a forked canonical project.
+        var (_, canonicalDocument) = await GetRequiredLspWorkspaceAndDocumentAsync(looseFileUri, testLspServer).ConfigureAwait(false);
+        Assert.Contains(canonicalDocument.Project.Documents, d => d.Name == "Canonical.AssemblyInfo.cs");
+
+        // The custom obj directory should not have been created, because no restore should run for loose files.
+        Assert.False(Directory.Exists(customObjDir), $"Expected custom obj directory to not exist, but it was created at: {customObjDir}");
+    }
+
     /// <remarks>
     /// Test needed to be copy-pasted from the base type in order to properly handle the MEF composition, and meaningfully exercise FileBasedProgramsProjectSystem.
     /// </remarks>

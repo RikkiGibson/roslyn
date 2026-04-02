@@ -263,7 +263,7 @@ internal sealed class LoadedProject : IDisposable
 
         WatchProjectAssetsFile(newProjectInfo);
 
-        var needsRestore = ProjectDependencyHelper.NeedsRestore(newProjectInfo, _mostRecentFileInfo, logger);
+        var needsRestore = !isMiscellaneousFile && ProjectDependencyHelper.NeedsRestore(newProjectInfo, _mostRecentFileInfo, logger);
 
         _mostRecentFileMatchers = new Lazy<ImmutableArray<Matcher>>(() =>
         {
