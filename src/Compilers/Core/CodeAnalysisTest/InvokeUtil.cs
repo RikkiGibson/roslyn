@@ -64,27 +64,28 @@ namespace Microsoft.CodeAnalysis.UnitTests
 
             var loader = new AnalyzerAssemblyLoader(pathResolvers, assemblyResolvers, compilerLoadContext: null);
 
-            // Ensure that test infrastructure assemblies (e.g. DiffPlex and its transitive
-            // dependencies such as Microsoft.Win32.Registry) are already loaded before we
-            // take the snapshot below.  AssertEx has static fields that initialize DiffPlex
-            // on first use; if that first use happens *after* the snapshot is taken then
-            // those assemblies show up as unexpected additions and the assertion at the end
-            // of this method fails intermittently (most visibly in the LoadStream variant).
-            RuntimeHelpers.RunClassConstructor(typeof(AssertEx).TypeHandle);
-
-            var compilerContextAssemblies = loader.CompilerLoadContext.Assemblies.SelectAsArray(a => a.FullName);
+            var compilerContextAssemblies = loader.CompilerLoadContext.Assemblies.Select(a => a.FullName).ToHashSet();
             try
             {
                 Exec(testOutputHelper, fixture, loader, typeName, methodName, state);
             }
             finally
             {
-                // When using the actual compiler load context (the one shared by all of our unit tests) the test
-                // did not load any additional assemblies that could interfere with later tests.
-                AssertEx.SetEqual(compilerContextAssemblies, loader.CompilerLoadContext.Assemblies.SelectAsArray(a => a.FullName));
+                // Verify the test did not leak any test fixture assemblies into the compiler
+                // load context. We check only for fixture assemblies rather than requiring the
+                // full set to be unchanged because any work occurring ambiently
+                // in the process can cause more assemblies to get loaded in this context.
+                var leakedAssemblies = loader.CompilerLoadContext.Assemblies
+                    .Where(a => !compilerContextAssemblies.Contains(a.FullName) &&
+                                a.Location.StartsWith(fixture.TempDirectory, StringComparison.OrdinalIgnoreCase))
+                    .Select(a => a.FullName)
+                    .ToArray();
+                Assert.Empty(leakedAssemblies);
             }
         }
 
+        // TODO2: remove link before merging. Helix log showing the flaky failure this change addresses:
+        // https://helix.dot.net/api/2019-06-17/jobs/acddef87-dfd0-4007-b05a-89dffbfdd6e9/workitems/workitem_4/console
         internal void Exec(
             ITestOutputHelper testOutputHelper,
             AssemblyLoadTestFixture fixture,
@@ -93,12 +94,7 @@ namespace Microsoft.CodeAnalysis.UnitTests
             string methodName,
             object? state = null)
         {
-            // Ensure that the test did not load any of the test fixture assemblies into 
-            // the default load context. That should never happen. Assemblies should either 
-            // load into the compiler or directory load context.
-            //
-            // Not only is this bad behavior it also pollutes future test results.
-            var defaultContextAssemblies = AssemblyLoadContext.Default.Assemblies.SelectAsArray(a => a.FullName);
+            var defaultContextAssemblies = AssemblyLoadContext.Default.Assemblies.Select(a => a.FullName).ToHashSet();
             using var tempRoot = new TempRoot();
 
             try
@@ -129,7 +125,16 @@ namespace Microsoft.CodeAnalysis.UnitTests
                     testOutputHelper.WriteLine($"\t{pair.OriginalAssemblyPath} -> {pair.ResolvedAssemblyPath}");
                 }
 
-                AssertEx.SetEqual(defaultContextAssemblies, AssemblyLoadContext.Default.Assemblies.SelectAsArray(a => a.FullName));
+                // Verify the test did not leak any test fixture assemblies into the
+                // default load context. We check only for fixture assemblies rather than
+                // requiring the full set to be unchanged because other test collections run
+                // in parallel and can trigger ambient assembly loads at any time.
+                var leakedAssemblies = AssemblyLoadContext.Default.Assemblies
+                    .Where(a => !defaultContextAssemblies.Contains(a.FullName) &&
+                                a.Location.StartsWith(fixture.TempDirectory, StringComparison.OrdinalIgnoreCase))
+                    .Select(a => a.FullName)
+                    .ToArray();
+                Assert.Empty(leakedAssemblies);
             }
         }
     }
