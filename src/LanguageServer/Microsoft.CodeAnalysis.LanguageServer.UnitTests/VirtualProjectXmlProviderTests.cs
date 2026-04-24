@@ -189,4 +189,10 @@ public sealed class VirtualProjectXmlProviderTests : AbstractLanguageServerHostT
         // Address when implementing editor squiggles. https://github.com/dotnet/roslyn/issues/78688
         Assert.Equal("(0,0)-(0,0)", diagnostic.Location.Span.ToString());
     }
+
+    [Fact]
+    public void CacheTest1()
+    {
+        
+    }
 }
