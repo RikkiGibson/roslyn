@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Text.Json;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.ErrorReporting;
@@ -256,8 +257,9 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
 
     public async ValueTask<TextDocument?> GetOrLoadEntryPointDocumentAsync(string documentFilePath, TextLoader textLoader, LanguageInformation languageInformation, SourceHashAlgorithm checksumAlgorithm, bool doDesignTimeBuild)
     {
-        // TODO2: right here, let's look for the csc arguments on disk.
-        
+        if (doDesignTimeBuild && TryLoadFromCache())
+        {
+        }
 
         var project = await base.GetOrLoadProjectAsync(documentFilePath, _workspaceFactory.MiscellaneousFilesWorkspaceProjectFactory, CreatePrimordialProjectInfo, doDesignTimeBuild);
         return project is null ? null : LookupExistingDocument(project);
@@ -279,6 +281,33 @@ internal sealed class FileBasedProgramsProjectSystem : LanguageServerProjectLoad
             var enableFileBasedPrograms = GlobalOptionService.GetOption(LanguageServerProjectSystemOptionsStorage.EnableFileBasedPrograms);
             return MiscellaneousFileUtilities.CreateMiscellaneousProjectInfoForDocument(
                 projectFactory.Workspace, documentFilePath, textLoader, languageInformation, checksumAlgorithm, projectFactory.Workspace.Services.SolutionServices, [], enableFileBasedPrograms);
+        }
+
+        bool TryLoadFromCache()
+        {
+            var artifactsPath = VirtualProjectXmlProvider.GetArtifactsPath(documentFilePath);
+            var cacheFilePath = Path.Combine(artifactsPath, "build-success.cache");
+            if (!File.Exists(cacheFilePath))
+                return false;
+
+            var dotnetBuildCache = IOUtilities.PerformIO(() =>
+            {
+                using var fileStream = File.OpenRead(cacheFilePath);
+                return JsonSerializer.Deserialize(fileStream, RunFileApiJsonSerializerContext.Default.RunFileBuildCacheEntry);
+            });
+
+            // existence check + csc arguments sanity check
+            if (dotnetBuildCache == null || !dotnetBuildCache.CscArguments.Contains(documentFilePath))
+                return false;
+
+            var projectFileInfo = new ProjectFileInfo()
+            {
+                Language = LanguageNames.CSharp,
+                CommandLineArgs = dotnetBuildCache.CscArguments,
+                OutputFilePath = dotnetBuildCache.BuildResultFile
+            };
+
+            return false;
         }
     }
 

@@ -7,8 +7,10 @@
 //#define RoslynTestRunApi
 
 using System.Text;
+using System.Text.Json;
 using Microsoft.CodeAnalysis.LanguageServer.FileBasedPrograms;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.Composition;
 using Roslyn.Test.Utilities;
 using Xunit.Abstractions;
 
@@ -41,10 +43,16 @@ public sealed class VirtualProjectXmlProviderTests : AbstractLanguageServerHostT
         public override string SkipReason => $"Compilation symbol 'RoslynTestRunApi' is not defined.";
     }
 
-    private async Task<VirtualProjectXmlProvider> GetProjectXmlProviderAsync()
+    private async Task<ExportProvider> GetExportProviderAsync()
     {
         var (exportProvider, _) = await LanguageServerTestComposition.CreateExportProviderAsync(
             LoggerFactory, includeDevKitComponents: false, MefCacheDirectory.Path, extensionPaths: null);
+        return exportProvider;
+    }
+
+    private async Task<VirtualProjectXmlProvider> GetProjectXmlProviderAsync()
+    {
+        var exportProvider = await GetExportProviderAsync();
         return exportProvider.GetExportedValue<VirtualProjectXmlProvider>();
     }
 
@@ -191,8 +199,35 @@ public sealed class VirtualProjectXmlProviderTests : AbstractLanguageServerHostT
     }
 
     [Fact]
-    public void CacheTest1()
+    public async Task CacheTest1()
     {
-        
+        var exportProvider = await GetExportProviderAsync();
+        var cliHelper = exportProvider.GetExportedValue<DotnetCliHelper>();
+
+        var tempDir = TempRoot.CreateDirectory();
+        var appFile = tempDir.CreateFile("app.cs");
+        await appFile.WriteAllTextAsync("""
+            #:sdk Microsoft.Net.Sdk
+            Console.WriteLine("Hello, world!");
+            """);
+
+        // TODO2: Seems like just 'dotnet build' is not enough.
+        // How do we bridge the gap and ensure this information is cached when just doing a DTB of a file-based app etc?
+        // This would speed up reloads for next time.
+        var process = cliHelper.Run(["run", appFile.Path], workingDirectory: null, shouldLocalizeOutput: true);
+        await process.WaitForExitAsync();
+        if (process.ExitCode != 0)
+        {
+            Assert.Fail($"""
+                {await process.StandardOutput.ReadToEndAsync()}
+                {await process.StandardError.ReadToEndAsync()}
+                """);
+        }
+
+        var artifactsPath = VirtualProjectXmlProvider.GetArtifactsPath(appFile.Path);
+        using var fileStream = File.OpenRead(Path.Combine(artifactsPath, "build-success.cache"));
+        var cacheFile = JsonSerializer.Deserialize(fileStream, RunFileApiJsonSerializerContext.Default.RunFileBuildCacheEntry);
+        Assert.NotNull(cacheFile);
+        Assert.Contains(appFile.Path, cacheFile.CscArguments);
     }
 }

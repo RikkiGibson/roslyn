@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis.LanguageServer.FileBasedPrograms;
 using Microsoft.CodeAnalysis.LanguageServer.HostWorkspace;
 using Microsoft.CodeAnalysis.LanguageServer.UnitTests.Miscellaneous;
@@ -1620,5 +1621,42 @@ public sealed class FileBasedProgramsWorkspaceTests : AbstractLspMiscellaneousFi
         await testLspServer.CloseDocumentAsync(looseFileUri).ConfigureAwait(false);
         Assert.Null(await GetMiscellaneousDocumentAsync(testLspServer));
         Assert.Null(await GetMiscellaneousAdditionalDocumentAsync(testLspServer));
+    }
+
+    [Theory, CombinatorialData]
+    public async Task CacheTest1(bool mutatingLspWorkspace)
+    {
+        var tempDir = _tempRoot.CreateDirectory();
+        var appFile = tempDir.CreateFile("app.cs");
+        var appFileText = """
+            #:sdk Microsoft.Net.Sdk
+            Console.WriteLine("Hello, world!");
+            """;
+        await appFile.WriteAllTextAsync(appFileText);
+
+        await using var testLspServer = await CreateTestLspServerAsync(string.Empty, mutatingLspWorkspace, new InitializationOptions { ServerKind = WellKnownLspServerKinds.CSharpVisualBasicLspServer });
+
+        // TODO2: Seems like just 'dotnet build' is not enough.
+        // How do we bridge the gap and ensure this information is cached when just doing a DTB of a file-based app etc?
+        // This would speed up reloads for next time.
+        var cliHelper = testLspServer.TestWorkspace.ExportProvider.GetExportedValue<DotnetCliHelper>();
+        var process = cliHelper.Run(["run", appFile.Path], workingDirectory: null, shouldLocalizeOutput: true);
+        await process.WaitForExitAsync();
+        if (process.ExitCode != 0)
+        {
+            Assert.Fail($"""
+                {await process.StandardOutput.ReadToEndAsync()}
+                {await process.StandardError.ReadToEndAsync()}
+                """);
+        }
+
+        var fileUri = CreateAbsoluteDocumentUri(appFile.Path);
+        await testLspServer.OpenDocumentAsync(fileUri, appFileText).ConfigureAwait(false);
+
+        // don't need to wait for DTB, instead we just jump straight into host workspace with all information.
+        // We do queue a DTB to make sure we get things right though.
+        var (workspace, document) = await GetRequiredLspWorkspaceAndDocumentAsync(fileUri, testLspServer).ConfigureAwait(false);
+        Assert.Equal(WorkspaceKind.Host, workspace.Kind);
+        Assert.True(document.Project.State.HasAllInformation);
     }
 }

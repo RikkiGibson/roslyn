@@ -84,5 +84,12 @@ namespace Microsoft.CodeAnalysis.LanguageServer.FileBasedPrograms
     [JsonSerializable(typeof(RunApiInput))]
     [JsonSerializable(typeof(RunApiOutput))]
     [JsonSerializable(typeof(LinePositionSpanInternal))]
+    [JsonSerializable(typeof(RunFileBuildCacheEntry))]
     internal partial class RunFileApiJsonSerializerContext : JsonSerializerContext;
+
+    internal sealed record RunFileBuildCacheEntry
+    {
+        public ImmutableArray<string> CscArguments { get; init; }
+        public string? BuildResultFile { get; init; }
+    }
 }
