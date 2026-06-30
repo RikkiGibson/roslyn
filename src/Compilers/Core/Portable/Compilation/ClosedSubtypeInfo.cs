@@ -26,6 +26,7 @@ namespace Microsoft.CodeAnalysis
 
         internal ClosedSubtypeInfo(ImmutableArray<INamedTypeSymbol> closedSubtypes, bool isComplete)
         {
+            Debug.Assert(!closedSubtypes.IsDefault);
             ClosedSubtypes = closedSubtypes;
             IsComplete = isComplete;
         }
