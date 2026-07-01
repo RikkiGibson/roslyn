@@ -1425,7 +1425,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             ILBuilder builder = new ILBuilder(_moduleBeingBuiltOpt, new LocalSlotManager(slotAllocator: null), _diagnostics.DiagnosticBag, OptimizationLevel.Release, areLocalsZeroed: false);
             CSharpSyntaxNode syntax = methodSymbol.GetNonNullSyntaxNode();
-            var ctor = (MethodSymbol)Binder.GetWellKnownTypeMember(_compilation, WellKnownMember.System_NotSupportedException__ctor, _diagnostics, syntax: syntax, isOptional: false);
+            var ctor = (MethodSymbol?)Binder.GetWellKnownTypeMember(_compilation, WellKnownMember.System_NotSupportedException__ctor, _diagnostics, syntax: syntax, isOptional: false);
 
             if (ctor is not null)
             {

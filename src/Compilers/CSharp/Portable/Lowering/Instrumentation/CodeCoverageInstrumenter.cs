@@ -60,13 +60,13 @@ namespace Microsoft.CodeAnalysis.CSharp
                 return false;
             }
 
-            MethodSymbol createPayloadForMethodsSpanningSingleFile = GetCreatePayloadOverload(
+            MethodSymbol? createPayloadForMethodsSpanningSingleFile = GetCreatePayloadOverload(
                 methodBodyFactory.Compilation,
                 WellKnownMember.Microsoft_CodeAnalysis_Runtime_Instrumentation__CreatePayloadForMethodsSpanningSingleFile,
                 methodBody.Syntax,
                 diagnostics);
 
-            MethodSymbol createPayloadForMethodsSpanningMultipleFiles = GetCreatePayloadOverload(
+            MethodSymbol? createPayloadForMethodsSpanningMultipleFiles = GetCreatePayloadOverload(
                 methodBodyFactory.Compilation,
                 WellKnownMember.Microsoft_CodeAnalysis_Runtime_Instrumentation__CreatePayloadForMethodsSpanningMultipleFiles,
                 methodBody.Syntax,
@@ -561,9 +561,9 @@ namespace Microsoft.CodeAnalysis.CSharp
             return syntaxForSpan;
         }
 
-        private static MethodSymbol GetCreatePayloadOverload(CSharpCompilation compilation, WellKnownMember overload, SyntaxNode syntax, BindingDiagnosticBag diagnostics)
+        private static MethodSymbol? GetCreatePayloadOverload(CSharpCompilation compilation, WellKnownMember overload, SyntaxNode syntax, BindingDiagnosticBag diagnostics)
         {
-            return (MethodSymbol)Binder.GetWellKnownTypeMember(compilation, overload, diagnostics, syntax: syntax);
+            return (MethodSymbol?)Binder.GetWellKnownTypeMember(compilation, overload, diagnostics, syntax: syntax);
         }
 
         private static SyntaxNode MethodDeclarationIfAvailable(SyntaxNode body)
