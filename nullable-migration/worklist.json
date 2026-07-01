@@ -20,8 +20,8 @@
       "toggles": 1,
       "totalLines": 1203,
       "disabledLines": 2,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Debug.Assert(method.Name is not null): definitions always have a name; behavior-preserving",
       "order": 2
     },
     {
