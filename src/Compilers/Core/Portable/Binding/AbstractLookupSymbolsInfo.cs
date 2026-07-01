@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.CodeAnalysis.Symbols;
 using Roslyn.Utilities;
@@ -156,6 +157,7 @@ namespace Microsoft.CodeAnalysis
                 AddArity(arity);
             }
 
+            [MemberNotNullWhen(true, nameof(_uniqueSymbolOrArities))]
             private bool HasUniqueSymbol => _uniqueSymbolOrArities != null && !(_uniqueSymbolOrArities is HashSet<int>);
 
             private void AddArity(int arity)
@@ -189,9 +191,7 @@ namespace Microsoft.CodeAnalysis
                 if (this.HasUniqueSymbol)
                 {
                     arities = null;
-#nullable disable // Can '_uniqueSymbolOrArities' be null? https://github.com/dotnet/roslyn/issues/39166
                     uniqueSymbol = (TSymbol)_uniqueSymbolOrArities;
-#nullable enable
                 }
                 else
                 {

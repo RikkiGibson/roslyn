@@ -9,8 +9,8 @@
       "toggles": 1,
       "totalLines": 308,
       "disabledLines": 2,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "MemberNotNullWhen(true, _uniqueSymbolOrArities) on HasUniqueSymbol; resolves issue #39166 question",
       "order": 1
     },
     {

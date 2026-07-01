@@ -15,6 +15,7 @@ regions piecemeal. This effort finishes that job, one file at a time.
 - `LOOP.md` — the exact per-iteration instructions the agent follows.
 - `pick-next.py` — prints the next `pending` file (lowest `order`).
 - `mark-status.py` — safely updates an item's `status`/`note`.
+- `found-bugs.md` — log of real nullability bugs uncovered during the migration (fixed separately).
 
 Statuses: `pending` → `in-progress` → `done` | `deferred` | `blocked`.
 
@@ -39,9 +40,16 @@ Each file ends in one of:
   and record why in `note`. Revisit later.
 - **blocked** — couldn't even baseline-build; record the error.
 
-No runtime semantic changes are permitted. Nullable **attributes** (`[NotNullWhen]`, `[MaybeNullWhen]`,
-`[MemberNotNull]`, `[NotNullIfNotNull]`, `[DisallowNull]`, `[AllowNull]`, ...) are the preferred tool
-for preserving behavior while satisfying the analyzer.
+No runtime semantic changes are permitted. When a warning stems from a null check that already exists
+but the compiler can't see (a guard property/method, a preceding assert, a `TryGet` pattern), **teach
+the compiler about it with an attribute** rather than silencing it: `[MemberNotNull]` /
+`[MemberNotNullWhen]`, `[NotNullWhen]` / `[MaybeNullWhen]`, `[NotNullIfNotNull]`, `[DisallowNull]`,
+`[AllowNull]`. The null-forgiving operator `!` is a last resort, not the default tool.
+
+The migration will sometimes uncover a **real** nullability bug (a genuinely missing null check). Do
+not fix it inline — record it in `found-bugs.md`, keep the migration commit behavior-preserving
+(defer the file or land a documented, behavior-preserving guard), and fix the bug in a separate change
+so the semantic change gets its own review.
 
 ## Running the loop
 Drive it however you invoke your agent. The minimal shell driver:
@@ -64,9 +72,10 @@ print(c, "of", d["count"])
 PY
 ```
 
-## Build note
-Nullable (CS8xxx) warnings only surface on the .NET Core TFM (`net10.0`); the `netstandard2.0` leg
-suppresses them via `DisableNullableWarnings`. Always verify with:
-```
-dotnet build <project.csproj> -f net10.0 -p:RunAnalyzersDuringBuild=false -tl:off
-```
+## Feedback: language server, not builds
+Use live Roslyn language-server diagnostics (`get_errors`) for near-instant feedback instead of full
+builds. The catch: nullable (CS8xxx) warnings only surface when the file's **active project context**
+is a .NET Core TFM (`net10.0`), not `netstandard2.0` (which `NoWarn`s Nullable via `DisableNullableWarnings`).
+Set the context once per project with the VS Code command `csharp.changeProjectContext` → pick the
+`net10.0` context. A full `dotnet build <csproj> -f net10.0 -p:RunAnalyzersDuringBuild=false -tl:off`
+is only needed as an optional heavier confirmation.
