@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -67,7 +65,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
             protected abstract IEnumerable<TPropertySymbol> GetPropertiesToEmit();
             protected abstract bool IsPublic { get; }
             protected abstract bool IsAbstract { get; }
-            protected abstract Cci.ITypeReference GetBaseClass(TPEModuleBuilder moduleBuilder, TSyntaxNode syntaxNodeOpt, DiagnosticBag diagnostics);
+            protected abstract Cci.ITypeReference GetBaseClass(TPEModuleBuilder moduleBuilder, TSyntaxNode? syntaxNodeOpt, DiagnosticBag diagnostics);
             protected abstract IEnumerable<Cci.TypeReferenceWithAttributes> GetInterfaces(EmitContext context);
             protected abstract bool IsBeforeFieldInit { get; }
             protected abstract bool IsComImport { get; }
@@ -79,17 +77,17 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
             protected abstract bool IsSealed { get; }
             protected abstract TypeLayout? GetTypeLayoutIfStruct();
             protected abstract System.Runtime.InteropServices.CharSet StringFormat { get; }
-            protected abstract TAttributeData CreateTypeIdentifierAttribute(bool hasGuid, TSyntaxNode syntaxNodeOpt, DiagnosticBag diagnostics);
-            protected abstract void EmbedDefaultMembers(string defaultMember, TSyntaxNode syntaxNodeOpt, DiagnosticBag diagnostics);
+            protected abstract TAttributeData CreateTypeIdentifierAttribute(bool hasGuid, TSyntaxNode? syntaxNodeOpt, DiagnosticBag diagnostics);
+            protected abstract void EmbedDefaultMembers(string defaultMember, TSyntaxNode? syntaxNodeOpt, DiagnosticBag diagnostics);
             protected abstract IEnumerable<TAttributeData> GetCustomAttributesToEmit(TPEModuleBuilder moduleBuilder);
-            protected abstract void ReportMissingAttribute(AttributeDescription description, TSyntaxNode syntaxNodeOpt, DiagnosticBag diagnostics);
+            protected abstract void ReportMissingAttribute(AttributeDescription description, TSyntaxNode? syntaxNodeOpt, DiagnosticBag diagnostics);
 
             private bool IsTargetAttribute(TAttributeData attrData, AttributeDescription description, out int signatureIndex)
             {
                 return TypeManager.IsTargetAttribute(attrData, description, out signatureIndex);
             }
 
-            private ImmutableArray<TAttributeData> GetAttributes(TPEModuleBuilder moduleBuilder, TSyntaxNode syntaxNodeOpt, DiagnosticBag diagnostics)
+            private ImmutableArray<TAttributeData> GetAttributes(TPEModuleBuilder moduleBuilder, TSyntaxNode? syntaxNodeOpt, DiagnosticBag diagnostics)
             {
                 var builder = ArrayBuilder<TAttributeData>.GetInstance();
 
@@ -166,7 +164,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
                             builder.AddIfNotNull(TypeManager.CreateSynthesizedAttribute(WellKnownMember.System_Reflection_DefaultMemberAttribute__ctor, constructorArguments, namedArguments, syntaxNodeOpt, diagnostics));
 
                             // Embed members matching default member name.
-                            string defaultMember = constructorArguments[0].ValueInternal as string;
+                            string? defaultMember = constructorArguments[0].ValueInternal as string;
                             if (defaultMember != null)
                             {
                                 EmbedDefaultMembers(defaultMember, syntaxNodeOpt, diagnostics);
@@ -245,7 +243,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
 
             Cci.ITypeReference Cci.ITypeDefinition.GetBaseClass(EmitContext context)
             {
-                return GetBaseClass((TPEModuleBuilder)context.Module, (TSyntaxNode)context.SyntaxNode, context.Diagnostics);
+                return GetBaseClass((TPEModuleBuilder)context.Module, (TSyntaxNode?)context.SyntaxNode, context.Diagnostics);
             }
 
             IEnumerable<Cci.IEventDefinition> Cci.ITypeDefinition.GetEvents(EmitContext context)
@@ -258,9 +256,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
 
                     foreach (var e in GetEventsToEmit())
                     {
-                        TEmbeddedEvent embedded;
-
-                        if (TypeManager.EmbeddedEventsMap.TryGetValue(e, out embedded))
+                        if (TypeManager.EmbeddedEventsMap.TryGetValue(e, out var embedded))
                         {
                             builder.Add(embedded);
                         }
@@ -287,9 +283,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
 
                     foreach (var f in GetFieldsToEmit())
                     {
-                        TEmbeddedField embedded;
-
-                        if (TypeManager.EmbeddedFieldsMap.TryGetValue(f, out embedded))
+                        if (TypeManager.EmbeddedFieldsMap.TryGetValue(f, out var embedded))
                         {
                             builder.Add(embedded);
                         }
@@ -461,9 +455,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
                     {
                         if ((object)method != null)
                         {
-                            TEmbeddedMethod embedded;
-
-                            if (TypeManager.EmbeddedMethodsMap.TryGetValue(method, out embedded))
+                            if (TypeManager.EmbeddedMethodsMap.TryGetValue(method, out var embedded))
                             {
                                 if (gapSize > 0)
                                 {
@@ -506,9 +498,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
 
                     foreach (var p in GetPropertiesToEmit())
                     {
-                        TEmbeddedProperty embedded;
-
-                        if (TypeManager.EmbeddedPropertiesMap.TryGetValue(p, out embedded))
+                        if (TypeManager.EmbeddedPropertiesMap.TryGetValue(p, out var embedded))
                         {
                             builder.Add(embedded);
                         }
@@ -542,7 +532,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
                 if (_lazyAttributes.IsDefault)
                 {
                     var diagnostics = DiagnosticBag.GetInstance();
-                    var attributes = GetAttributes((TPEModuleBuilder)context.Module, (TSyntaxNode)context.SyntaxNode, diagnostics);
+                    var attributes = GetAttributes((TPEModuleBuilder)context.Module, (TSyntaxNode?)context.SyntaxNode, diagnostics);
 
                     if (ImmutableInterlocked.InterlockedInitialize(ref _lazyAttributes, attributes))
                     {
@@ -566,7 +556,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
                 return this;
             }
 
-            CodeAnalysis.Symbols.ISymbolInternal Cci.IReference.GetInternalSymbol() => null;
+            CodeAnalysis.Symbols.ISymbolInternal? Cci.IReference.GetInternalSymbol() => null;
 
             bool Cci.ITypeReference.IsEnum
             {
@@ -605,7 +595,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
                 }
             }
 
-            Cci.IGenericMethodParameterReference Cci.ITypeReference.AsGenericMethodParameterReference
+            Cci.IGenericMethodParameterReference? Cci.ITypeReference.AsGenericMethodParameterReference
             {
                 get
                 {
@@ -613,7 +603,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
                 }
             }
 
-            Cci.IGenericTypeInstanceReference Cci.ITypeReference.AsGenericTypeInstanceReference
+            Cci.IGenericTypeInstanceReference? Cci.ITypeReference.AsGenericTypeInstanceReference
             {
                 get
                 {
@@ -621,7 +611,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
                 }
             }
 
-            Cci.IGenericTypeParameterReference Cci.ITypeReference.AsGenericTypeParameterReference
+            Cci.IGenericTypeParameterReference? Cci.ITypeReference.AsGenericTypeParameterReference
             {
                 get
                 {
@@ -642,12 +632,12 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
                 }
             }
 
-            Cci.INestedTypeDefinition Cci.ITypeReference.AsNestedTypeDefinition(EmitContext context)
+            Cci.INestedTypeDefinition? Cci.ITypeReference.AsNestedTypeDefinition(EmitContext context)
             {
                 return null;
             }
 
-            Cci.INestedTypeReference Cci.ITypeReference.AsNestedTypeReference
+            Cci.INestedTypeReference? Cci.ITypeReference.AsNestedTypeReference
             {
                 get
                 {
@@ -655,7 +645,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
                 }
             }
 
-            Cci.ISpecializedNestedTypeReference Cci.ITypeReference.AsSpecializedNestedTypeReference
+            Cci.ISpecializedNestedTypeReference? Cci.ITypeReference.AsSpecializedNestedTypeReference
             {
                 get
                 {
@@ -684,7 +674,6 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
                 }
             }
 
-#nullable enable
             string? Cci.INamedTypeReference.AssociatedFileIdentifier
             {
                 get
@@ -692,9 +681,8 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
                     return UnderlyingNamedType.AssociatedFileIdentifier;
                 }
             }
-#nullable disable
 
-            string Cci.INamedEntity.Name
+            string? Cci.INamedEntity.Name
             {
                 get
                 {
@@ -720,10 +708,10 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
             /// </remarks>
             public override string ToString()
             {
-                return UnderlyingNamedType.GetInternalSymbol().GetISymbol().ToDisplayString(SymbolDisplayFormat.ILVisualizationFormat);
+                return UnderlyingNamedType.GetInternalSymbol()!.GetISymbol().ToDisplayString(SymbolDisplayFormat.ILVisualizationFormat);
             }
 
-            public sealed override bool Equals(object obj)
+            public sealed override bool Equals(object? obj)
             {
                 // It is not supported to rely on default equality of these Cci objects, an explicit way to compare and hash them should be used.
                 throw ExceptionUtilities.Unreachable();

@@ -999,8 +999,8 @@
       "toggles": 2,
       "totalLines": 739,
       "disabledLines": 727,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed #nullable disable; annotated syntaxNodeOpt params TSyntaxNode?, matched Cci interface nullability for null-returning members (AsGeneric*/AsNested*/GetInternalSymbol/Name), string? defaultMember, out var in TryGetValue loops, object? Equals, GetInternalSymbol()! in test-only ToString.",
       "order": 91
     },
     {
