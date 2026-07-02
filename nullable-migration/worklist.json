@@ -482,8 +482,8 @@
       "toggles": 5,
       "totalLines": 350,
       "disabledLines": 280,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed #nullable directives; annotated AssemblyVersionPattern as Version? and DeclaringCompilation as CSharpCompilation? to match sibling overrides",
       "order": 44
     },
     {
