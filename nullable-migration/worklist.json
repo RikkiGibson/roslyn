@@ -955,8 +955,8 @@
       "toggles": 7,
       "totalLines": 1782,
       "disabledLines": 660,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable-enable: nullable lazy attribute bags + syntaxReferenceOpt field; captured non-null attributeSyntax local across ref-arg resets; nullable ObsoleteAttributeData override; ! on inherited nullable field in 4 derived files",
       "order": 87
     },
     {

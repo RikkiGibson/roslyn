@@ -31,7 +31,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         protected sealed override void MethodChecks(BindingDiagnosticBag diagnostics)
         {
-            var syntax = (CSharpSyntaxNode)syntaxReferenceOpt.GetSyntax();
+            var syntax = (CSharpSyntaxNode)syntaxReferenceOpt!.GetSyntax();
             var binderFactory = this.DeclaringCompilation.GetBinderFactory(syntax.SyntaxTree);
             ParameterListSyntax parameterList = GetParameterList();
 
@@ -178,7 +178,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             TextSpan span;
 
             // local/lambda/closure defined within the body of the constructor:
-            var ctorSyntax = (CSharpSyntaxNode)syntaxReferenceOpt.GetSyntax();
+            var ctorSyntax = (CSharpSyntaxNode)syntaxReferenceOpt!.GetSyntax();
             if (tree == ctorSyntax.SyntaxTree)
             {
                 if (IsWithinExpressionOrBlockBody(position, out int offset))

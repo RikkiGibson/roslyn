@@ -263,7 +263,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get
             {
-                return ImmutableArray.Create<SyntaxReference>(syntaxReferenceOpt);
+                return ImmutableArray.Create<SyntaxReference>(syntaxReferenceOpt!);
             }
         }
 
