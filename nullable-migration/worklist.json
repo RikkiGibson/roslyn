@@ -42,8 +42,8 @@
       "toggles": 1,
       "totalLines": 192,
       "disabledLines": 2,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "DeclaringCompilation genuinely nullable (null for metadata/error/assembly/module); annotated Compilation?; internal interface; Compilers.slnf build clean 0 warnings",
       "order": 4
     },
     {

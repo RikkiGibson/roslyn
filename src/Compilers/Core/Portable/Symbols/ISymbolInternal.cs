@@ -42,9 +42,7 @@ namespace Microsoft.CodeAnalysis.Symbols
         /// </summary>
         Cci.TypeMemberVisibility MetadataVisibility { get; }
 
-#nullable disable // Skipped for now https://github.com/dotnet/roslyn/issues/39166
-        Compilation DeclaringCompilation { get; }
-#nullable enable
+        Compilation? DeclaringCompilation { get; }
 
         /// <summary>
         /// Allows a symbol to support comparisons that involve child type symbols
