@@ -724,8 +724,8 @@
       "toggles": 3,
       "totalLines": 592,
       "disabledLines": 438,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed #nullable directives; annotated nullable overrides (BaseTypeNoUseSiteDiagnostics/GetDeclaredBaseType/EnumUnderlyingType/ComImportCoClass/NativeIntegerUnderlyingType/DeclaringCompilation/AssociatedFileIdentifier/ExtensionParameter/TryGetCorrespondingExtensionImplementationMethod), nullable lazy backing fields, StrongBox<ParameterSymbol?>, (object?) casts, yield null! for vtable gap",
       "order": 66
     },
     {
