@@ -427,8 +427,8 @@
       "toggles": 4,
       "totalLines": 247,
       "disabledLines": 236,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed directives; (object?) idiom in Equals, nullable as-cast locals, covariant ModuleMetadata? GetMetadata override",
       "order": 39
     },
     {
