@@ -515,8 +515,8 @@
       "toggles": 4,
       "totalLines": 376,
       "disabledLines": 305,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed nullable directives; annotated genuinely-nullable members (ContainingCompilation, ContainingType, ContainingModule, ObsoleteAttributeData, ImplicitType, GetNestedNamespace(NameSyntax)) and _lazyQualifiedName cache; (object?) idiom fix",
       "order": 47
     },
     {
