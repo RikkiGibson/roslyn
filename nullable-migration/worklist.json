@@ -284,8 +284,8 @@
       "toggles": 2,
       "totalLines": 218,
       "disabledLines": 196,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Made private GetNearestLocalFunctionOpt return nullable (CS8603)",
       "order": 26
     },
     {
