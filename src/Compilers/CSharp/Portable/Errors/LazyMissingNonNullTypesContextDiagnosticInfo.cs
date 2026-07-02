@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System.Diagnostics;
 using System.Threading;
 using Microsoft.CodeAnalysis.CSharp.Symbols;
@@ -37,7 +35,6 @@ namespace Microsoft.CodeAnalysis.CSharp
             return new LazyMissingNonNullTypesContextDiagnosticInfo(this, severity);
         }
 
-#nullable enable
         /// <summary>
         /// A `?` annotation on a type that isn't a value type causes:
         /// - an error before C# 8.0
@@ -78,12 +75,11 @@ namespace Microsoft.CodeAnalysis.CSharp
                 infos.Add(new CSDiagnosticInfo(code));
             }
         }
-#nullable disable
 
         internal static bool IsNullableReference(TypeSymbol type)
             => type is null || !(type.IsValueType || type.IsErrorType());
 
-        protected override DiagnosticInfo ResolveInfo() => IsNullableReference(_type.Type) ? _info : null;
+        protected override DiagnosticInfo? ResolveInfo() => IsNullableReference(_type.Type) ? _info : null;
     }
 }
 

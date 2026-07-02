@@ -75,8 +75,8 @@
       "toggles": 2,
       "totalLines": 89,
       "disabledLines": 44,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed 3 directives; ResolveInfo override annotated DiagnosticInfo? to match base abstract (protected on internal sealed class, not public API). Build clean.",
       "order": 7
     },
     {
