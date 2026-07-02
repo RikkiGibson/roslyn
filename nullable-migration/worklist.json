@@ -1087,8 +1087,8 @@
       "toggles": 4,
       "totalLines": 1039,
       "disabledLines": 1031,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed 5 directives. Ctor explicitInterfaceType param -> nullable (matches nullable _explicitInterfaceType field, fixes synthesized record-op subclass passing null). FindExplicitlyImplementedMethod return -> MethodSymbol? (matches base) + nullable explicitInterfaceSpecifier local. location.SourceTree! x3, syntaxReferenceOpt! x2, (object?) idiom x1. No cross-project ripple.",
       "order": 99
     },
     {
