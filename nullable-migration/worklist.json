@@ -823,8 +823,8 @@
       "toggles": 2,
       "totalLines": 575,
       "disabledLines": 568,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable-enable SwitchBinder.cs: nullable backing fields, SwitchGoverningType Debug.Assert, (object?) idiom, nullable label-lookup returns/params, NotNull-known invariants via ! / Debug.Assert",
       "order": 75
     },
     {
