@@ -1021,8 +1021,8 @@
       "toggles": 6,
       "totalLines": 807,
       "disabledLines": 756,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Annotated Scope/NestedFunction/ClosureEnvironment optional links (Parent, ContainingFunctionOpt, BlockSyntax) as nullable; null! for late-init Synthesized* fields; BoundNode? visitor overrides; Debug.Assert invariants; GetScopeParent->Scope? ripple in Analysis.cs",
       "order": 93
     },
     {

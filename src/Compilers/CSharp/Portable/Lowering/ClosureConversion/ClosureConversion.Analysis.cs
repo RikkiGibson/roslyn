@@ -605,7 +605,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             /// Find the parent <see cref="Scope"/> of the <see cref="Scope"/> corresponding to
             /// the given <see cref="BoundNode"/>.
             /// </summary>
-            public static Scope GetScopeParent(Scope treeRoot, BoundNode scopeNode)
+            public static Scope? GetScopeParent(Scope treeRoot, BoundNode scopeNode)
             {
                 var correspondingScope = GetScopeWithMatchingBoundNode(treeRoot, scopeNode);
                 return correspondingScope.Parent;

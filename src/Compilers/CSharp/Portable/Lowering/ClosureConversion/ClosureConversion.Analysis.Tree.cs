@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -30,7 +28,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             [DebuggerDisplay("{ToString(), nq}")]
             public sealed class Scope
             {
-                public readonly Scope Parent;
+                public readonly Scope? Parent;
 
                 public readonly ArrayBuilder<Scope> NestedScopes = ArrayBuilder<Scope>.GetInstance();
 
@@ -64,9 +62,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 /// The nested function that this scope is nested inside. Null if this scope is not nested
                 /// inside a nested function.
                 /// </summary>
-                public readonly NestedFunction ContainingFunctionOpt;
-
-#nullable enable
+                public readonly NestedFunction? ContainingFunctionOpt;
 
                 /// <summary>
                 /// Environment created in this scope to hold <see cref="DeclaredVariables"/>.
@@ -75,9 +71,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 /// </summary>
                 public ClosureEnvironment? DeclaredEnvironment = null;
 
-#nullable disable
-
-                public Scope(Scope parent, BoundNode boundNode, NestedFunction containingFunction)
+                public Scope(Scope? parent, BoundNode boundNode, NestedFunction? containingFunction)
                 {
                     Debug.Assert(boundNode != null);
 
@@ -129,15 +123,13 @@ namespace Microsoft.CodeAnalysis.CSharp
                 /// <summary>
                 /// Syntax for the block of the nested function.
                 /// </summary>
-                public readonly SyntaxReference BlockSyntax;
+                public readonly SyntaxReference? BlockSyntax;
 
                 public readonly PooledHashSet<Symbol> CapturedVariables = PooledHashSet<Symbol>.GetInstance();
 
                 public readonly ArrayBuilder<ClosureEnvironment> CapturedEnvironments
                     = ArrayBuilder<ClosureEnvironment>.GetInstance();
-#nullable enable
                 public ClosureEnvironment? ContainingEnvironmentOpt;
-#nullable disable
                 private bool _capturesThis;
 
                 /// <summary>
@@ -155,9 +147,9 @@ namespace Microsoft.CodeAnalysis.CSharp
                     }
                 }
 
-                public SynthesizedClosureMethod SynthesizedLoweredMethod;
+                public SynthesizedClosureMethod SynthesizedLoweredMethod = null!;
 
-                public NestedFunction(MethodSymbol symbol, SyntaxReference blockSyntax)
+                public NestedFunction(MethodSymbol symbol, SyntaxReference? blockSyntax)
                 {
                     Debug.Assert(symbol != null);
                     OriginalMethodSymbol = symbol;
@@ -179,10 +171,10 @@ namespace Microsoft.CodeAnalysis.CSharp
                 /// <summary>
                 /// Assigned by <see cref="ComputeLambdaScopesAndFrameCaptures()"/>.
                 /// </summary>
-                public ClosureEnvironment Parent;
+                public ClosureEnvironment? Parent;
 
                 public readonly bool IsStruct;
-                internal SynthesizedClosureEnvironment SynthesizedEnvironment;
+                internal SynthesizedClosureEnvironment SynthesizedEnvironment = null!;
 
                 public ClosureEnvironment(IEnumerable<Symbol> capturedVariables, bool isStruct)
                 {
@@ -296,7 +288,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 /// <summary>
                 /// Null if we're not inside a nested function, otherwise the nearest nested function.
                 /// </summary>
-                private NestedFunction _currentFunction = null;
+                private NestedFunction? _currentFunction = null;
                 private bool _inExpressionTree = false;
 
                 /// <summary>
@@ -389,7 +381,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     // Set up the current method locals
                     DeclareLocals(_currentScope, _topLevelMethod.Parameters);
                     // Treat 'this' as a formal parameter of the top-level method
-                    if (_topLevelMethod.TryGetThisParameter(out var thisParam) && (object)thisParam != null)
+                    if (_topLevelMethod.TryGetThisParameter(out var thisParam) && (object?)thisParam != null)
                     {
                         DeclareLocals(_currentScope, ImmutableArray.Create<Symbol>(thisParam));
                     }
@@ -410,10 +402,10 @@ namespace Microsoft.CodeAnalysis.CSharp
                     _labelsInScope.Free();
                 }
 
-                public override BoundNode VisitMethodGroup(BoundMethodGroup node)
+                public override BoundNode? VisitMethodGroup(BoundMethodGroup node)
                     => throw ExceptionUtilities.Unreachable();
 
-                public override BoundNode VisitBlock(BoundBlock node)
+                public override BoundNode? VisitBlock(BoundBlock node)
                 {
                     var oldScope = _currentScope;
                     PushOrReuseScope(node, node.Locals);
@@ -422,7 +414,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return result;
                 }
 
-                public override BoundNode VisitCatchBlock(BoundCatchBlock node)
+                public override BoundNode? VisitCatchBlock(BoundCatchBlock node)
                 {
                     var oldScope = _currentScope;
                     PushOrReuseScope(node, node.Locals);
@@ -431,7 +423,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return result;
                 }
 
-                public override BoundNode VisitSequence(BoundSequence node)
+                public override BoundNode? VisitSequence(BoundSequence node)
                 {
                     var oldScope = _currentScope;
                     PushOrReuseScope(node, node.Locals);
@@ -440,9 +432,10 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return result;
                 }
 
-                public override BoundNode VisitLambda(BoundLambda node)
+                public override BoundNode? VisitLambda(BoundLambda node)
                 {
                     var oldInExpressionTree = _inExpressionTree;
+                    Debug.Assert(node.Type is not null);
                     _inExpressionTree |= node.Type.IsExpressionTree();
 
                     _methodsConvertedToDelegates.Add(node.Symbol.OriginalDefinition);
@@ -452,7 +445,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return result;
                 }
 
-                public override BoundNode VisitLocalFunctionStatement(BoundLocalFunctionStatement node)
+                public override BoundNode? VisitLocalFunctionStatement(BoundLocalFunctionStatement node)
                     => VisitNestedFunction(node.Symbol.OriginalDefinition, node.Body);
 
                 protected override void VisitArguments(BoundCall node)
@@ -466,7 +459,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     base.VisitArguments(node);
                 }
 
-                public override BoundNode VisitDelegateCreationExpression(BoundDelegateCreationExpression node)
+                public override BoundNode? VisitDelegateCreationExpression(BoundDelegateCreationExpression node)
                 {
                     if (node.MethodOpt?.MethodKind == MethodKind.LocalFunction)
                     {
@@ -478,25 +471,27 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return base.VisitDelegateCreationExpression(node);
                 }
 
-                public override BoundNode VisitParameter(BoundParameter node)
+                public override BoundNode? VisitParameter(BoundParameter node)
                 {
                     AddIfCaptured(node.ParameterSymbol, node.Syntax);
                     return base.VisitParameter(node);
                 }
 
-                public override BoundNode VisitLocal(BoundLocal node)
+                public override BoundNode? VisitLocal(BoundLocal node)
                 {
                     AddIfCaptured(node.LocalSymbol, node.Syntax);
                     return base.VisitLocal(node);
                 }
 
-                public override BoundNode VisitBaseReference(BoundBaseReference node)
+                public override BoundNode? VisitBaseReference(BoundBaseReference node)
                 {
-                    AddIfCaptured(_topLevelMethod.ThisParameter, node.Syntax);
+                    var thisParam = _topLevelMethod.ThisParameter;
+                    Debug.Assert(thisParam is not null);
+                    AddIfCaptured(thisParam, node.Syntax);
                     return base.VisitBaseReference(node);
                 }
 
-                public override BoundNode VisitThisReference(BoundThisReference node)
+                public override BoundNode? VisitThisReference(BoundThisReference node)
                 {
                     var thisParam = _topLevelMethod.ThisParameter;
                     if (thisParam != null)
@@ -519,21 +514,21 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return base.VisitThisReference(node);
                 }
 
-                public override BoundNode VisitLabelStatement(BoundLabelStatement node)
+                public override BoundNode? VisitLabelStatement(BoundLabelStatement node)
                 {
                     _labelsInScope.Peek().Add(node.Label);
                     _scopesAfterLabel.Add(node.Label, ArrayBuilder<Scope>.GetInstance());
                     return base.VisitLabelStatement(node);
                 }
 
-                public override BoundNode VisitGotoStatement(BoundGotoStatement node)
+                public override BoundNode? VisitGotoStatement(BoundGotoStatement node)
                 {
                     CheckCanMergeWithParent(node.Label);
 
                     return base.VisitGotoStatement(node);
                 }
 
-                public override BoundNode VisitConditionalGoto(BoundConditionalGoto node)
+                public override BoundNode? VisitConditionalGoto(BoundConditionalGoto node)
                 {
                     CheckCanMergeWithParent(node.Label);
 
@@ -565,7 +560,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                     }
                 }
 
-#nullable enable
                 private BoundNode? VisitNestedFunction(MethodSymbol functionSymbol, BoundBlock? body)
                 {
                     RoslynDebug.Assert(functionSymbol is object);
@@ -601,7 +595,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                     _currentFunction = oldFunction;
                     return result;
                 }
-#nullable disable
 
                 private void AddIfCaptured(Symbol symbol, SyntaxNode syntax)
                 {
@@ -645,6 +638,9 @@ namespace Microsoft.CodeAnalysis.CSharp
                             // Also mark captured in enclosing scopes
                             while (scope.ContainingFunctionOpt == function)
                             {
+                                // A scope whose ContainingFunctionOpt is a (non-null) nested function
+                                // is never the root scope, so it always has a parent.
+                                Debug.Assert(scope.Parent is not null);
                                 scope = scope.Parent;
                             }
                             function = scope.ContainingFunctionOpt;
@@ -740,7 +736,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                     _currentScope = scope;
 
-                    Scope CreateNestedScope(Scope parentScope, NestedFunction currentFunction)
+                    Scope CreateNestedScope(Scope parentScope, NestedFunction? currentFunction)
                     {
                         Debug.Assert(parentScope.BoundNode != node);
 
