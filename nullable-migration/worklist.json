@@ -229,8 +229,8 @@
       "toggles": 1,
       "totalLines": 207,
       "disabledLines": 170,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "field nullable + MemberNotNull on AssertReferencesInitialized; nullable param default",
       "order": 21
     },
     {

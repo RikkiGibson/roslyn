@@ -2,11 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Symbols;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
@@ -26,7 +25,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// <remarks>
         /// The contents are provided by ReferenceManager and may not be modified.
         /// </remarks>
-        private ModuleReferences<AssemblySymbol> _moduleReferences;
+        private ModuleReferences<AssemblySymbol>? _moduleReferences;
 
         /// <summary>
         /// Does this symbol represent a missing module.
@@ -151,7 +150,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// A helper method for ReferenceManager to set assembly identities for assemblies 
         /// referenced by this module and corresponding AssemblySymbols.
         /// </summary>
-        internal override void SetReferences(ModuleReferences<AssemblySymbol> moduleReferences, SourceAssemblySymbol originatingSourceAssemblyDebugOnly = null)
+        internal override void SetReferences(ModuleReferences<AssemblySymbol> moduleReferences, SourceAssemblySymbol? originatingSourceAssemblyDebugOnly = null)
         {
             Debug.Assert(moduleReferences != null);
 
@@ -167,12 +166,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         }
 
         [Conditional("DEBUG")]
+        [MemberNotNull(nameof(_moduleReferences))]
         internal void AssertReferencesInitialized()
         {
             Debug.Assert(_moduleReferences != null);
         }
-
-#nullable enable 
 
         /// <summary>
         /// Lookup a top level type referenced from metadata, names should be
