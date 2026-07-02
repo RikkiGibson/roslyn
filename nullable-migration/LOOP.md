@@ -39,14 +39,24 @@ inherits the project default, then resolving the resulting warnings.
 - Follow repo conventions: `_camelCase` private fields, `Contract.ThrowIfNull` only where a null check
   already exists, blank lines must contain no whitespace, no trailing whitespace, no `TODO` (use `TODO2`).
 
-## Feedback loop: use the language server, not full builds
-Live diagnostics from the Roslyn language server (`get_errors`) are near-instant and are the primary
-feedback mechanism. **Critical:** nullable (CS8xxx) warnings only appear when the file's *active
-project context* is a .NET Core TFM (e.g. `net10.0`), NOT `netstandard2.0` (which `NoWarn`s Nullable).
-Before relying on diagnostics for a file, set the context once by running the VS Code command
-`csharp.changeProjectContext` and selecting the `net10.0` context for the project. Verify by confirming
-a known nullable issue surfaces. A full `dotnet build <csproj> -f net10.0` is only needed as an
-optional final/CI-level check.
+## Feedback loop: build the project (LSP context is unreliable)
+The ideal fast path is the Roslyn language server (`get_errors`), but nullable (CS8xxx) warnings only
+appear when the file's *active project context* is a .NET Core TFM (e.g. `net10.0`). In practice **that
+context does NOT stick** — it keeps reverting to `netstandard2.0`, where Nullable is `NoWarn`'d, so
+`get_errors` reports a misleading "clean" result (zero warnings even for a file that still has disabled
+regions). Only the user can reset the context, and it reverts again quickly.
+
+**Therefore: use a real build as the feedback mechanism.** Build the containing project for `net10.0`
+with analyzers disabled (fast, no analyzer cost):
+```
+dotnet build <csproj> -f net10.0 -p:RunAnalyzersDuringBuild=false -p:GenerateFullPaths=true -tl:off
+```
+Filter output with `grep -E "warning CS|error CS|Warning\(s\)|Error\(s\)"`. The `warning CS8###` lines
+are your work items; iterate until `0 Warning(s)  0 Error(s)`.
+
+If you *do* try `get_errors` and it shows no CS8xxx after removing a `#nullable disable`, DO NOT trust
+it — verify with a throwaway `string x = null;` (must warn CS8600); if it doesn't warn, the context is
+wrong and you must build instead.
 
 ## Procedure
 
@@ -54,22 +64,22 @@ optional final/CI-level check.
    done — stop. Otherwise take the printed `<order>` and `<path>`. Mark it in-progress:
    `python3 nullable-migration/mark-status.py --order <order> --status in-progress`.
 
-2. **Set the active project context to `net10.0`** (once per project) via the `csharp.changeProjectContext`
-   command, so the language server surfaces nullable warnings. Project mapping (for the optional build):
+2. **Identify the containing project** (needed for the build feedback loop):
    - `src/Compilers/CSharp/Portable/...` → `src/Compilers/CSharp/Portable/Microsoft.CodeAnalysis.CSharp.csproj`
    - `src/Compilers/Core/Portable/...` → `src/Compilers/Core/Portable/Microsoft.CodeAnalysis.csproj`
    - `src/Compilers/VisualBasic/Portable/...` → `src/Compilers/VisualBasic/Portable/Microsoft.CodeAnalysis.VisualBasic.vbproj`
 
-3. **Baseline check.** Confirm the file currently reports no diagnostics via `get_errors`.
+3. **Baseline build.** Optionally build the project once (command below) to confirm it is warning-clean
+   before you start, so any new warnings are attributable to your change.
 
 4. **Remove the directives.** In the target file, delete the leading `#nullable disable` and every
    interior `#nullable enable` / `#nullable disable` / `#nullable restore` line. Leave the license
    header intact. Do NOT remove qualified directives such as `#nullable disable warnings` or
    `#nullable enable annotations` without understanding them — if present, inspect and treat with care.
 
-5. **Read warnings from the LSP.** Call `get_errors` on the file. The reported CS8### items are your
-   work items. (If nothing surfaces after removing a `#nullable disable`, re-check the active project
-   context is `net10.0`, not `netstandard2.0`.)
+5. **Build to read warnings.** Build the containing project for `net10.0`:
+   `dotnet build <csproj> -f net10.0 -p:RunAnalyzersDuringBuild=false -p:GenerateFullPaths=true -tl:off`
+   The reported `warning CS8###` items (in the target file) are your work items.
 
 6. **Fix warnings** per the constraints above. In priority order:
    - **Express an existing, untracked invariant with an attribute** (`[MemberNotNullWhen]`,
@@ -77,7 +87,7 @@ optional final/CI-level check.
    - Add `?` to parameters/fields/locals/returns that can legitimately be null.
    - Add a local null check or `Debug.Assert(x is not null)` where that reflects the real invariant.
    - Only as a last resort, `!` (ideally with a `Debug.Assert`).
-   Re-run `get_errors` until there are zero CS8 warnings and zero errors for the file.
+   Re-build the project until there are zero CS8 warnings and zero errors for the file.
 
    **If a warning reveals a REAL bug** (a genuinely missing null check — null can actually flow to a
    dereference/cast at runtime), do NOT fix the bug here. Semantic changes need higher scrutiny than a
@@ -97,14 +107,13 @@ optional final/CI-level check.
      `python3 nullable-migration/mark-status.py --order <order> --status deferred --note "<why; link found-bugs.md entry if applicable>"`.
      Commit nothing for a deferral except the worklist update (step 9). Stop.
 
-8. **Final verification.** `get_errors` on the file must be clean. **`get_errors` only validates the
-   single open file** — it does NOT catch warnings introduced in *other* files (or in the VB compiler,
-   or in TFMs other than the active context). So when the change can **ripple across files** — changing
-   the nullability of an interface/base member signature, or of a widely-used type/field — you MUST fall
-   back to a real build before committing:
+8. **Final verification.** The containing project must build clean for `net10.0`:
+   `dotnet build <csproj> -f net10.0 -p:RunAnalyzersDuringBuild=false -p:GenerateFullPaths=true -tl:off`
+   → require `0 Warning(s)  0 Error(s)`. If your change touched an **interface/base member signature**
+   or a **widely-used type/field**, warnings can appear in *other* projects (incl. the VB compiler) or
+   *other* TFMs, so verify with the whole compilers filter instead:
    `dotnet build -p:RunAnalyzersDuringBuild=false -p:GenerateFullPaths=true -tl:off Compilers.slnf`
-   (~3 min). Require `0 Warning(s)  0 Error(s)`. For purely local, single-file fixes a clean `get_errors`
-   is sufficient. When in doubt, build.
+   (~3 min). When in doubt, build the filter.
 
 9. **Record + commit** (one file per commit):
    - `python3 nullable-migration/mark-status.py --order <order> --status done`
