@@ -61,7 +61,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// Note that there is a dispatch occurring at every try-finally statement, so this
         /// variable takes on a new set of values inside each try block.
         /// </summary>
-        private Dictionary<LabelSymbol, List<StateMachineState>> _dispatches = new Dictionary<LabelSymbol, List<StateMachineState>>();
+        private Dictionary<LabelSymbol, List<StateMachineState>>? _dispatches = new Dictionary<LabelSymbol, List<StateMachineState>>();
 
         /// <summary>
         /// A pool of fields used to hoist locals. They appear in this set when not in scope,
@@ -166,7 +166,6 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             _refInitializationHoister = new RefInitializationHoister<StateMachineFieldSymbol, BoundFieldAccess>(F, OriginalMethod, TypeMap);
         }
-#nullable disable
 
         protected abstract StateMachineState FirstIncreasingResumableState { get; }
         protected abstract HotReloadExceptionCode EncMissingStateErrorCode { get; }
@@ -184,12 +183,12 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         protected override TypeMap TypeMap
         {
-            get { return ((SynthesizedContainer)F.CurrentType).TypeMap; }
+            get { return ((SynthesizedContainer)F.CurrentType!).TypeMap; }
         }
 
         protected override MethodSymbol CurrentMethod
         {
-            get { return F.CurrentFunction; }
+            get { return F.CurrentFunction!; }
         }
 
         protected override NamedTypeSymbol ContainingType
@@ -214,7 +213,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             F.Syntax = oldSyntax;
             return result;
         }
-#nullable enable
+
         protected void AddResumableState(SyntaxNode awaitOrYieldReturnSyntax, AwaitDebugId awaitId, out StateMachineState state, out GeneratedLabelSymbol resumeLabel)
             => AddResumableState(_resumableStateAllocator, awaitOrYieldReturnSyntax, awaitId, out state, out resumeLabel);
 
@@ -249,6 +248,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// </param>
         protected BoundStatement Dispatch(bool isOutermost)
         {
+            Debug.Assert(_dispatches is not null);
             var sections = from kv in _dispatches
                            orderby kv.Value[0]
                            select F.SwitchSection(kv.Value.SelectAsArray(state => (int)state), F.Goto(kv.Key));
@@ -276,9 +276,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         protected virtual BoundStatement? GenerateMissingStateDispatch()
             => _resumableStateAllocator.GenerateThrowMissingStateDispatch(F, F.Local(cachedState), EncMissingStateErrorCode);
 
-#nullable disable
 #if DEBUG
-        public override BoundNode VisitSequence(BoundSequence node)
+        public override BoundNode? VisitSequence(BoundSequence node)
         {
             // Spilled local temps do not appear here in a sequence expression, because any temps in a
             // sequence expression that need to be spilled would have been moved up to the
@@ -321,7 +320,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     continue;
                 }
 
-                CapturedSymbolReplacement proxy;
+                CapturedSymbolReplacement? proxy;
                 bool reused = false;
                 if (!proxies.TryGetValue(local, out proxy))
                 {
@@ -351,7 +350,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             // as well as all proxies allocated by VisitAssignmentOperator within this block:
             foreach (var local in locals)
             {
-                CapturedSymbolReplacement proxy;
+                CapturedSymbolReplacement? proxy;
                 if (!proxies.TryGetValue(local, out proxy))
                 {
                     continue;
@@ -446,7 +445,6 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-#nullable enable
         protected BoundBlock GenerateAllHoistedLocalsCleanup()
         {
             var variableCleanup = ArrayBuilder<BoundExpression>.GetInstance();
@@ -491,11 +489,10 @@ namespace Microsoft.CodeAnalysis.CSharp
             _fieldsForCleanup.Add(createdField);
             return createdField;
         }
-#nullable disable
 
         private void FreeReusableHoistedField(StateMachineFieldSymbol field)
         {
-            ArrayBuilder<StateMachineFieldSymbol> fields;
+            ArrayBuilder<StateMachineFieldSymbol>? fields;
             if (_lazyAvailableReusableHoistedFields == null || !_lazyAvailableReusableHoistedFields.TryGetValue(field.Type, out fields))
             {
                 if (_lazyAvailableReusableHoistedFields == null)
@@ -511,7 +508,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         #region Visitors
 
-        public override BoundNode Visit(BoundNode node)
+        public override BoundNode? Visit(BoundNode? node)
         {
             if (node == null) return node;
             var oldSyntax = F.Syntax;
@@ -526,14 +523,14 @@ namespace Microsoft.CodeAnalysis.CSharp
             if (node.Instrumentation != null)
             {
                 // Stash away the instrumentation node, it will be used when generating MoveNext method.
-                instrumentation = (BoundBlockInstrumentation)Visit(node.Instrumentation);
+                instrumentation = (BoundBlockInstrumentation?)Visit(node.Instrumentation);
             }
 
             return PossibleIteratorScope(node.Locals, () => VisitBlock(node, removeInstrumentation: true));
         }
 
         public override BoundNode VisitStateMachineInstanceId(BoundStateMachineInstanceId node)
-            => F.Field(F.This(), instanceIdField);
+            => F.Field(F.This(), instanceIdField!);
 
         public override BoundNode VisitScope(BoundScope node)
         {
@@ -548,7 +545,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     (local.ScopeDesignatorOpt?.Kind() == SyntaxKind.SwitchSection ||
                      local.ScopeDesignatorOpt?.Kind() == SyntaxKind.SwitchExpressionArm));
 
-                LocalSymbol localToUse;
+                LocalSymbol? localToUse;
                 if (TryRewriteLocal(local, out localToUse))
                 {
                     newLocalsBuilder.Add(localToUse);
@@ -607,15 +604,15 @@ namespace Microsoft.CodeAnalysis.CSharp
             throw ExceptionUtilities.Unreachable(); // using statements have been lowered away by now
         }
 
-        public override BoundNode VisitExpressionStatement(BoundExpressionStatement node)
+        public override BoundNode? VisitExpressionStatement(BoundExpressionStatement node)
         {
             // ref assignments might be translated away (into nothing).  If so just
             // return no statement.  The enclosing statement list will just omit it.
-            BoundExpression expression = (BoundExpression)this.Visit(node.Expression);
+            BoundExpression? expression = (BoundExpression?)this.Visit(node.Expression);
             return (expression == null) ? null : node.Update(expression);
         }
 
-        public override BoundNode VisitAssignmentOperator(BoundAssignmentOperator node)
+        public override BoundNode? VisitAssignmentOperator(BoundAssignmentOperator node)
         {
             if (node.Left.Kind != BoundKind.Local)
             {
@@ -647,7 +644,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             // We have an assignment to a variable that has not yet been assigned a proxy.
             // So we assign the proxy before translating the assignment.
-            var visitedRight = (BoundExpression)Visit(node.Right);
+            var visitedRight = (BoundExpression)Visit(node.Right)!;
             return _refInitializationHoister.HoistRefInitialization(
                 leftLocal,
                 visitedRight,
@@ -687,10 +684,10 @@ namespace Microsoft.CodeAnalysis.CSharp
                     if (@this.slotAllocator == null ||
                         !@this.slotAllocator.TryGetPreviousHoistedLocalSlotIndex(
                             awaitSyntax,
-                            @this.F.ModuleBuilderOpt.Translate(type, awaitSyntax, @this.Diagnostics.DiagnosticBag),
+                            @this.F.ModuleBuilderOpt!.Translate(type, awaitSyntax, @this.Diagnostics.DiagnosticBag!),
                             kind,
                             id,
-                            @this.Diagnostics.DiagnosticBag,
+                            @this.Diagnostics.DiagnosticBag!,
                             out slotIndex))
                     {
                         slotIndex = @this._nextFreeHoistedLocalSlot++;
@@ -732,8 +729,8 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             _dispatches = null;
 
-            BoundBlock tryBlock = F.Block((BoundStatement)this.Visit(node.TryBlock));
-            GeneratedLabelSymbol dispatchLabel = null;
+            BoundBlock tryBlock = F.Block((BoundStatement)this.Visit(node.TryBlock)!);
+            GeneratedLabelSymbol? dispatchLabel = null;
             if (_dispatches != null)
             {
                 dispatchLabel = F.GenerateLabel("tryDispatch");
@@ -751,7 +748,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             ImmutableArray<BoundCatchBlock> catchBlocks = this.VisitList(node.CatchBlocks);
 
-            BoundBlock finallyBlockOpt = node.FinallyBlockOpt == null ? null : F.Block(
+            BoundBlock? finallyBlockOpt = node.FinallyBlockOpt == null ? null : F.Block(
                 F.HiddenSequencePoint(),
                 F.If(
                     condition: ShouldEnterFinallyBlock(),
@@ -761,7 +758,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             BoundStatement result = node.Update(tryBlock, catchBlocks, finallyBlockOpt, node.FinallyLabelOpt, node.PreferFaultHandler);
 
-            if ((object)dispatchLabel != null)
+            if ((object?)dispatchLabel != null)
             {
                 result = F.Block(
                     F.HiddenSequencePoint(),
@@ -774,7 +771,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         protected virtual BoundBlock VisitFinally(BoundBlock finallyBlock)
         {
-            return (BoundBlock)this.Visit(finallyBlock);
+            return (BoundBlock)this.Visit(finallyBlock)!;
         }
 
         protected virtual BoundBinaryOperator ShouldEnterFinallyBlock()
@@ -794,9 +791,9 @@ namespace Microsoft.CodeAnalysis.CSharp
         protected BoundStatement CacheThisIfNeeded()
         {
             // restore "this" cache, if there is a cache
-            if ((object)this.cachedThis != null)
+            if ((object?)this.cachedThis != null)
             {
-                CapturedSymbolReplacement proxy = proxies[this.OriginalMethod.ThisParameter];
+                CapturedSymbolReplacement proxy = proxies[this.OriginalMethod.ThisParameter!];
                 var fetchThis = proxy.Replacement(F.Syntax, static (frameType, F) => F.This(), F);
                 return F.Assignment(F.Local(this.cachedThis), fetchThis);
             }
@@ -808,14 +805,14 @@ namespace Microsoft.CodeAnalysis.CSharp
         public sealed override BoundNode VisitThisReference(BoundThisReference node)
         {
             // if "this" is cached, return it.
-            if ((object)this.cachedThis != null)
+            if ((object?)this.cachedThis != null)
             {
                 return F.Local(this.cachedThis);
             }
 
             var thisParameter = this.OriginalMethod.ThisParameter;
-            CapturedSymbolReplacement proxy;
-            if ((object)thisParameter == null || !proxies.TryGetValue(thisParameter, out proxy))
+            CapturedSymbolReplacement? proxy;
+            if ((object?)thisParameter == null || !proxies.TryGetValue(thisParameter, out proxy))
             {
                 // This can occur in a delegate creation expression because the method group
                 // in the argument can have a "this" receiver even when "this"
@@ -842,12 +839,12 @@ namespace Microsoft.CodeAnalysis.CSharp
             // TODO: fix up the type of the resulting node to be the base type
 
             // if "this" is cached, return it.
-            if ((object)this.cachedThis != null)
+            if ((object?)this.cachedThis != null)
             {
                 return F.Local(this.cachedThis);
             }
 
-            CapturedSymbolReplacement proxy = proxies[this.OriginalMethod.ThisParameter];
+            CapturedSymbolReplacement proxy = proxies[this.OriginalMethod.ThisParameter!];
             Debug.Assert(proxy != null);
             return proxy.Replacement(F.Syntax, static (frameType, F) => F.This(), F);
         }

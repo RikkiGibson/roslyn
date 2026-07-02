@@ -834,8 +834,8 @@
       "toggles": 4,
       "totalLines": 857,
       "disabledLines": 582,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed directives; nullable lazy fields (_dispatches, reusable fields); F.CurrentType!/CurrentFunction! in TypeMap/CurrentMethod; Visit/VisitExpressionStatement/VisitSequence/VisitAssignmentOperator -> BoundNode? (matched base BoundTreeRewriter; widened MethodToClassRewriter.VisitAssignmentOperator to BoundNode?); (object?) idioms for cachedThis/thisParameter/dispatchLabel; ! for instanceIdField/ModuleBuilderOpt/DiagnosticBag/ThisParameter invariants",
       "order": 76
     },
     {

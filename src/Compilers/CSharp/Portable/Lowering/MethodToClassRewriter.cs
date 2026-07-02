@@ -254,7 +254,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return false;
         }
 
-        public override BoundNode VisitAssignmentOperator(BoundAssignmentOperator node)
+        public override BoundNode? VisitAssignmentOperator(BoundAssignmentOperator node)
         {
             BoundExpression originalLeft = node.Left;
 
