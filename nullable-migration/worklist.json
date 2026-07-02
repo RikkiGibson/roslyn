@@ -801,8 +801,8 @@
       "toggles": 2,
       "totalLines": 535,
       "disabledLines": 529,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Matched base nullability: nullable returns/params (DeclaringCompilation, GetDocumentationCommentId, GetDllImportData, ReturnValueMarshallingInformation, AssociatedSymbol, ContainingType, ObsoleteAttributeData, GetUnmanagedCallersOnlyAttributeData, MarshallingInformation, context/builderArgument params); (object?) idiom in Equals; Debug.Assert for parameter ContainingSymbol invariant",
       "order": 73
     },
     {
