@@ -306,8 +306,8 @@
       "toggles": 2,
       "totalLines": 237,
       "disabledLines": 197,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Made _lazySpecialTypeMembers cache elements nullable (Symbol?[]?) and internal override return Symbol? \u2014 matches oblivious base that returns null; genuine null slots for not-found members. Lazy fields nullable.",
       "order": 28
     },
     {
