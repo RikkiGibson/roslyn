@@ -658,11 +658,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     }
                     else
                     {
-                        MethodSymbol implementedAccessor = this.MethodKind == MethodKind.PropertyGet
+                        MethodSymbol? implementedAccessor = this.MethodKind == MethodKind.PropertyGet
                             ? explicitlyImplementedPropertyOpt.GetMethod
                             : explicitlyImplementedPropertyOpt.SetMethod;
 
-                        explicitInterfaceImplementations = (object)implementedAccessor == null
+                        explicitInterfaceImplementations = (object?)implementedAccessor == null
                             ? ImmutableArray<MethodSymbol>.Empty
                             : ImmutableArray.Create<MethodSymbol>(implementedAccessor);
                     }
@@ -734,7 +734,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                                 ? explicitlyImplementedPropertyOpt.GetMethod
                                 : explicitlyImplementedPropertyOpt.SetMethod;
 
-                            string accessorName = (object)implementedAccessor != null
+                            string accessorName = (object?)implementedAccessor != null
                                 ? implementedAccessor.Name
                                 : GetAccessorName(explicitlyImplementedPropertyOpt.MetadataName,
                                     isGetMethod, isWinMdOutput: _property.IsCompilationOutputWinMdObj()); //Not name - could be indexer placeholder

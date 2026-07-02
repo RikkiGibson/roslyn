@@ -757,8 +757,8 @@
       "toggles": 2,
       "totalLines": 487,
       "disabledLines": 477,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "GetMethod/SetMethod/OverriddenProperty -> nullable (match overrides); nullable lazy signature field + params; (object?) idioms; ripple in 10 same-project callers",
       "order": 69
     },
     {

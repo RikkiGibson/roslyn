@@ -23,7 +23,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             while ((object?)property != null)
             {
-                MethodSymbol getMethod = property.GetMethod;
+                MethodSymbol? getMethod = property.GetMethod;
                 if ((object?)getMethod != null)
                 {
                     return getMethod;
@@ -43,7 +43,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             while ((object?)property != null)
             {
-                MethodSymbol setMethod = property.SetMethod;
+                MethodSymbol? setMethod = property.SetMethod;
                 if ((object?)setMethod != null)
                 {
                     return setMethod;

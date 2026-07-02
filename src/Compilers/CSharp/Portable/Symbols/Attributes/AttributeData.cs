@@ -558,7 +558,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 var property = (PropertySymbol)members[0];
                 if (property.TypeWithAnnotations.HasType && property.Type.SpecialType == SpecialType.System_String &&
                     property.DeclaredAccessibility == Accessibility.Public && property.GetMemberArity() == 0 &&
-                    (object)property.SetMethod != null && property.SetMethod.DeclaredAccessibility == Accessibility.Public)
+                    (object?)property.SetMethod != null && property.SetMethod.DeclaredAccessibility == Accessibility.Public)
                 {
                     return true;
                 }

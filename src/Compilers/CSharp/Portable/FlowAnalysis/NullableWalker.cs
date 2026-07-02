@@ -12380,7 +12380,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             if (member.Kind == SymbolKind.Property)
             {
                 var getMethod = ((PropertySymbol)member.OriginalDefinition).GetMethod;
-                if ((object)getMethod != null && getMethod.ContainingType.SpecialType == SpecialType.System_Nullable_T)
+                if ((object?)getMethod != null && getMethod.ContainingType.SpecialType == SpecialType.System_Nullable_T)
                 {
                     if (getMethod == compilation.GetSpecialTypeMember(SpecialMember.System_Nullable_T_get_Value))
                     {

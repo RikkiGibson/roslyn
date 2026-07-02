@@ -105,7 +105,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 {
                     var property = (PropertySymbol)m;
                     var getterMethod = property.GetMethod;
-                    return property.GetMethod is not null && !getterMethod.IsEffectivelyReadOnly;
+                    return getterMethod is not null && !getterMethod.IsEffectivelyReadOnly;
                 }
 
                 return false;
