@@ -317,8 +317,8 @@
       "toggles": 3,
       "totalLines": 229,
       "disabledLines": 203,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed nullable directives; changed GetDeclaredSpecialTypeMember, AssemblyVersionPattern, GetMetadata to nullable returns and Equals param to nullable (all internal)",
       "order": 29
     },
     {
