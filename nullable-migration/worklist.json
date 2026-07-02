@@ -394,8 +394,8 @@
       "toggles": 3,
       "totalLines": 273,
       "disabledLines": 229,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed nullable directives; changed abstract GetInitializer() return to CSharpSyntaxNode? to match overrides",
       "order": 36
     },
     {
