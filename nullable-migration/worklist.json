@@ -889,8 +889,8 @@
       "toggles": 2,
       "totalLines": 633,
       "disabledLines": 611,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed nullable directives; added Debug.Assert for SourceTree/ContainingType invariants",
       "order": 81
     },
     {
