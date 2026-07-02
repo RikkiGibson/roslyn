@@ -372,8 +372,8 @@
       "toggles": 2,
       "totalLines": 244,
       "disabledLines": 222,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed nullable directives; annotated nullable-returning explicit INamedTypeSymbol members (DelegateInvokeMethod, EnumUnderlyingType, AssociatedSymbol, TupleUnderlyingType, NativeIntegerUnderlyingType) with ?; Accept<TResult> now returns TResult? with where TResult : default",
       "order": 34
     },
     {

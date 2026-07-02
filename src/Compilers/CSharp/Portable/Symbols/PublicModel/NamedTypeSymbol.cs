@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -104,7 +102,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
             }
         }
 
-        IMethodSymbol INamedTypeSymbol.DelegateInvokeMethod
+        IMethodSymbol? INamedTypeSymbol.DelegateInvokeMethod
         {
             get
             {
@@ -112,7 +110,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
             }
         }
 
-        INamedTypeSymbol INamedTypeSymbol.EnumUnderlyingType
+        INamedTypeSymbol? INamedTypeSymbol.EnumUnderlyingType
         {
             get
             {
@@ -143,7 +141,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
             return UnderlyingNamedTypeSymbol.ConstructUnboundGenericType().GetPublicSymbol();
         }
 
-        ISymbol INamedTypeSymbol.AssociatedSymbol
+        ISymbol? INamedTypeSymbol.AssociatedSymbol
         {
             get
             {
@@ -168,7 +166,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
         /// If this is a tuple type with element names, returns the symbol for the tuple type without names.
         /// Otherwise, returns null.
         /// </summary>
-        INamedTypeSymbol INamedTypeSymbol.TupleUnderlyingType
+        INamedTypeSymbol? INamedTypeSymbol.TupleUnderlyingType
         {
             get
             {
@@ -200,9 +198,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
             UnderlyingNamedTypeSymbol.OriginalDefinition is SourceMemberContainerTypeSymbol
                 && UnderlyingNamedTypeSymbol.IsFileLocal;
 
-        INamedTypeSymbol INamedTypeSymbol.NativeIntegerUnderlyingType => UnderlyingNamedTypeSymbol.NativeIntegerUnderlyingType.GetPublicSymbol();
+        INamedTypeSymbol? INamedTypeSymbol.NativeIntegerUnderlyingType => UnderlyingNamedTypeSymbol.NativeIntegerUnderlyingType.GetPublicSymbol();
 
-#nullable enable
         bool INamedTypeSymbol.IsExtension
         {
             get
@@ -220,7 +217,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
         string? INamedTypeSymbol.ExtensionMarkerName => UnderlyingNamedTypeSymbol.ExtensionMarkerName;
 
         IParameterSymbol? INamedTypeSymbol.ExtensionParameter => UnderlyingNamedTypeSymbol.ExtensionParameter?.GetPublicSymbol();
-#nullable disable
 
         #region ISymbol Members
 
@@ -229,7 +225,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
             visitor.VisitNamedType(this);
         }
 
-        protected sealed override TResult Accept<TResult>(SymbolVisitor<TResult> visitor)
+        protected sealed override TResult? Accept<TResult>(SymbolVisitor<TResult> visitor)
+            where TResult : default
         {
             return visitor.VisitNamedType(this);
         }
