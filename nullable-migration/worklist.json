@@ -603,8 +603,8 @@
       "toggles": 2,
       "totalLines": 361,
       "disabledLines": 353,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed directives; nullable lazy fields, nullable LookupLocal/LookupLocalFunction returns, nullable iterator element helper params, nullable IdentifierMap, ReportConflictWithParameter takes Symbol? with legacy (object?) idiom and ! on Method-case casts",
       "order": 55
     },
     {
