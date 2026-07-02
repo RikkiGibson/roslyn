@@ -526,8 +526,8 @@
       "toggles": 3,
       "totalLines": 328,
       "disabledLines": 309,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Matched base nullability (GetDocumentationCommentXml CultureInfo?, SetReferences param?, DeclaringCompilation null!, GetMetadata!), NotNullWhen on RetargetingDefinitions out param; rippled dependency local in Compilation_UsedAssemblies.cs",
       "order": 48
     },
     {

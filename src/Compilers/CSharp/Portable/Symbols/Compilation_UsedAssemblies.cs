@@ -185,7 +185,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                                             {
                                                 if (!underlyingDependency.IsLinked && usedAssemblies.Contains(underlyingDependency))
                                                 {
-                                                    AssemblySymbol dependency;
+                                                    AssemblySymbol? dependency;
 
                                                     if (!((RetargetingModuleSymbol)retargetingAssembly.Modules[0]).RetargetingDefinitions(underlyingDependency, out dependency))
                                                     {
