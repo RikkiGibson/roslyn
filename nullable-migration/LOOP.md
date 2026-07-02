@@ -47,12 +47,15 @@ context does NOT stick** — it keeps reverting to `netstandard2.0`, where Nulla
 regions). Only the user can reset the context, and it reverts again quickly.
 
 **Therefore: use a real build as the feedback mechanism.** Build the containing project for `net10.0`
-with analyzers disabled (fast, no analyzer cost):
+with analyzers disabled (fast, no analyzer cost) **and nullable warnings elevated to errors** so the
+compiler short-circuits the emit/lowering phase as soon as it finds a nullable issue:
 ```
-dotnet build <csproj> -f net10.0 -p:RunAnalyzersDuringBuild=false -p:GenerateFullPaths=true -tl:off
+dotnet build <csproj> -f net10.0 -p:RunAnalyzersDuringBuild=false -p:WarningsAsErrors=nullable -p:GenerateFullPaths=true -tl:off
 ```
-Filter output with `grep -E "warning CS|error CS|Warning\(s\)|Error\(s\)"`. The `warning CS8###` lines
-are your work items; iterate until `0 Warning(s)  0 Error(s)`.
+Filter output with `grep -E "error CS|Warning\(s\)|Error\(s\)"`. The `error CS8###` lines are your work
+items; iterate until `0 Warning(s)  0 Error(s)`. Because the whole project compiles, this **also
+surfaces cross-file ripple** (e.g. a caller in another file that now passes a possibly-null argument) in
+the same build — no separate ripple check needed for same-project consumers.
 
 If you *do* try `get_errors` and it shows no CS8xxx after removing a `#nullable disable`, DO NOT trust
 it — verify with a throwaway `string x = null;` (must warn CS8600); if it doesn't warn, the context is
@@ -77,9 +80,10 @@ wrong and you must build instead.
    header intact. Do NOT remove qualified directives such as `#nullable disable warnings` or
    `#nullable enable annotations` without understanding them — if present, inspect and treat with care.
 
-5. **Build to read warnings.** Build the containing project for `net10.0`:
-   `dotnet build <csproj> -f net10.0 -p:RunAnalyzersDuringBuild=false -p:GenerateFullPaths=true -tl:off`
-   The reported `warning CS8###` items (in the target file) are your work items.
+5. **Build to read warnings.** Build the containing project for `net10.0` with nullable-as-errors:
+   `dotnet build <csproj> -f net10.0 -p:RunAnalyzersDuringBuild=false -p:WarningsAsErrors=nullable -p:GenerateFullPaths=true -tl:off`
+   The reported `error CS8###` items are your work items (in the target file **and any same-project
+   callers** that now see possibly-null arguments).
 
 6. **Fix warnings** per the constraints above. In priority order:
    - **Express an existing, untracked invariant with an attribute** (`[MemberNotNullWhen]`,
@@ -108,12 +112,12 @@ wrong and you must build instead.
      Commit nothing for a deferral except the worklist update (step 9). Stop.
 
 8. **Final verification.** The containing project must build clean for `net10.0`:
-   `dotnet build <csproj> -f net10.0 -p:RunAnalyzersDuringBuild=false -p:GenerateFullPaths=true -tl:off`
-   → require `0 Warning(s)  0 Error(s)`. If your change touched an **interface/base member signature**
-   or a **widely-used type/field**, warnings can appear in *other* projects (incl. the VB compiler) or
-   *other* TFMs, so verify with the whole compilers filter instead:
+   `dotnet build <csproj> -f net10.0 -p:RunAnalyzersDuringBuild=false -p:WarningsAsErrors=nullable -p:GenerateFullPaths=true -tl:off`
+   → require `0 Warning(s)  0 Error(s)`. This already covers same-project cross-file ripple. If your
+   change touched an **interface/base member signature** used by *other* projects (incl. the VB
+   compiler) or *other* TFMs, also verify with the whole compilers filter:
    `dotnet build -p:RunAnalyzersDuringBuild=false -p:GenerateFullPaths=true -tl:off Compilers.slnf`
-   (~3 min). When in doubt, build the filter.
+   (~3 min; note the filter build does not elevate nullable to errors, so grep `warning CS`).
 
 9. **Record + commit** (one file per commit):
    - `python3 nullable-migration/mark-status.py --order <order> --status done`
