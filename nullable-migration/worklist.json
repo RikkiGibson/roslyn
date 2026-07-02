@@ -163,8 +163,8 @@
       "toggles": 2,
       "totalLines": 143,
       "disabledLines": 131,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Fixed via merged/type 'is not null' patterns, NextRequired, nullable return types on LookupLocal/LookupLocalFunction, (NamespaceOrTypeSymbol?)null cast",
       "order": 15
     },
     {

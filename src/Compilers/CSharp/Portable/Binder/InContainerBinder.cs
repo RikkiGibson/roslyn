@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -45,7 +43,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             get
             {
                 var merged = _container as MergedNamespaceSymbol;
-                return ((object)merged != null) ? merged.GetConstituentForCompilation(this.Compilation) : _container;
+                return (merged is not null) ? merged.GetConstituentForCompilation(this.Compilation) : _container;
             }
         }
 
@@ -57,13 +55,13 @@ namespace Microsoft.CodeAnalysis.CSharp
         internal override bool IsAccessibleHelper(Symbol symbol, TypeSymbol accessThroughType, out bool failedThroughTypeCheck, ref CompoundUseSiteInfo<AssemblySymbol> useSiteInfo, ConsList<TypeSymbol> basesBeingResolved)
         {
             var type = _container as NamedTypeSymbol;
-            if ((object)type != null)
+            if (type is not null)
             {
                 return this.IsSymbolAccessibleConditional(symbol, type, accessThroughType, out failedThroughTypeCheck, ref useSiteInfo);
             }
             else
             {
-                return Next.IsAccessibleHelper(symbol, accessThroughType, out failedThroughTypeCheck, ref useSiteInfo, basesBeingResolved);  // delegate to containing Binder, eventually checking assembly.
+                return NextRequired.IsAccessibleHelper(symbol, accessThroughType, out failedThroughTypeCheck, ref useSiteInfo, basesBeingResolved);  // delegate to containing Binder, eventually checking assembly.
             }
         }
 
@@ -72,7 +70,6 @@ namespace Microsoft.CodeAnalysis.CSharp
             get { return true; }
         }
 
-#nullable enable
         internal override void GetAllExtensionCandidatesInSingleBinder(ArrayBuilder<Symbol> members, string? name, string? alternativeName, int arity, LookupOptions options, Binder originalBinder)
         {
             if (_container is NamespaceSymbol ns)
@@ -80,7 +77,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                 ns.GetAllExtensionMembers(members, name, alternativeName, arity, options, originalBinder.FieldsBeingBound);
             }
         }
-#nullable disable
 
         internal override TypeWithAnnotations GetIteratorElementType()
         {
@@ -93,7 +89,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             else
             {
                 // This path would eventually throw, if we didn't have the case above.
-                return Next.GetIteratorElementType();
+                return NextRequired.GetIteratorElementType();
             }
         }
 
@@ -115,7 +111,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         if (Next is WithExternAndUsingAliasesBinder withUsingAliases && withUsingAliases.IsUsingAlias(name, originalBinder.IsSemanticModelBinder, basesBeingResolved))
                         {
                             CSDiagnosticInfo diagInfo = new CSDiagnosticInfo(ErrorCode.ERR_ConflictAliasAndMember, name, _container);
-                            var error = new ExtendedErrorTypeSymbol((NamespaceOrTypeSymbol)null, name, arity, diagInfo, unreported: true);
+                            var error = new ExtendedErrorTypeSymbol((NamespaceOrTypeSymbol?)null, name, arity, diagInfo, unreported: true);
                             result.SetFrom(LookupResult.Good(error)); // force lookup to be done w/ error symbol as result
                         }
                     }
@@ -130,12 +126,12 @@ namespace Microsoft.CodeAnalysis.CSharp
             this.AddMemberLookupSymbolsInfo(result, _container, options, originalBinder);
         }
 
-        protected override SourceLocalSymbol LookupLocal(SyntaxToken nameToken)
+        protected override SourceLocalSymbol? LookupLocal(SyntaxToken nameToken)
         {
             return null;
         }
 
-        protected override LocalFunctionSymbol LookupLocalFunction(SyntaxToken nameToken)
+        protected override LocalFunctionSymbol? LookupLocalFunction(SyntaxToken nameToken)
         {
             return null;
         }
