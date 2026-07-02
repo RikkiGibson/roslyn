@@ -702,8 +702,8 @@
       "toggles": 2,
       "totalLines": 471,
       "disabledLines": 437,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed nullable directives; nullable out-params/returns, (object?) idiom, Debug.Assert for specifier invariant; rippled to SourceCustomEventSymbol (_explicitInterfaceType?) and SourcePropertySymbolBase",
       "order": 64
     },
     {

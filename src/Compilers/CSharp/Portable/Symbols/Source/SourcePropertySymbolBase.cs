@@ -247,7 +247,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     overriddenOrImplementedProperty = explicitlyImplementedProperty;
                 }
 
-                if ((object)overriddenOrImplementedProperty != null)
+                if ((object?)overriddenOrImplementedProperty != null)
                 {
                     _lazyRefCustomModifiers = _refKind != RefKind.None ? overriddenOrImplementedProperty.RefCustomModifiers : ImmutableArray<CustomModifier>.Empty;
 
