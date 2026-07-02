@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -55,7 +53,6 @@ namespace Microsoft.CodeAnalysis
         /// Creates and loads the rule set from a file
         /// </summary>
         /// <param name="filePath">The file path to load the rule set</param>
-#nullable enable
         public static RuleSet LoadFromFile(string filePath)
         {
             // First read the file without doing any validation
@@ -139,7 +136,6 @@ namespace Microsoft.CodeAnalysis
 
             return new RuleSet(filePath, generalOption, specificOptions.ToImmutable(), includes.ToImmutable());
         }
-#nullable disable
 
         /// <summary>
         /// Load the rules from the XML node
@@ -252,7 +248,7 @@ namespace Microsoft.CodeAnalysis
         /// <returns>The attribute value</returns>
         private static string ReadNonEmptyAttribute(XElement node, string attributeName)
         {
-            XAttribute attribute = node.Attribute(attributeName);
+            XAttribute? attribute = node.Attribute(attributeName);
             if (attribute == null)
             {
                 throw new InvalidRuleSetException(string.Format(CodeAnalysisResources.RuleSetMissingAttribute, node.Name, attributeName));
