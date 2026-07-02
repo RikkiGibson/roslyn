@@ -53,8 +53,8 @@
       "toggles": 1,
       "totalLines": 684,
       "disabledLines": 29,
-      "status": "pending",
-      "note": "",
+      "status": "deferred",
+      "note": "Language names can be null (0xFF NULL-string marker in metadata); proper typing requires propagating ImmutableArray<string?> through ReadLanguagesFromAttribute -> GetSupportedLanguages -> AttributeLanguagesFunc (internal cross-file ripple). Tracked by dotnet/roslyn#53994.",
       "order": 5
     },
     {
