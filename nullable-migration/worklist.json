@@ -31,8 +31,8 @@
       "toggles": 1,
       "totalLines": 105,
       "disabledLines": 2,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed interior #nullable toggle; added Debug.Assert(_streamProvider is not null) reflecting constructor XOR invariant",
       "order": 3
     },
     {

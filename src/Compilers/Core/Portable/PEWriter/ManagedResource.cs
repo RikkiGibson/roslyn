@@ -43,9 +43,8 @@ namespace Microsoft.Cci
             {
                 try
                 {
-#nullable disable // Can '_streamProvider' be null? https://github.com/dotnet/roslyn/issues/39166
+                    Debug.Assert(_streamProvider is not null);
                     using (Stream stream = _streamProvider())
-#nullable enable
                     {
                         if (stream == null)
                         {
