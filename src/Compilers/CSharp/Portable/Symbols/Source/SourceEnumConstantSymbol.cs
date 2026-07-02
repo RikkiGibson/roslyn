@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -31,11 +29,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         public static SourceEnumConstantSymbol CreateImplicitValuedConstant(
             SourceMemberContainerTypeSymbol containingEnum,
             EnumMemberDeclarationSyntax syntax,
-            SourceEnumConstantSymbol otherConstant,
+            SourceEnumConstantSymbol? otherConstant,
             int otherConstantOffset,
             BindingDiagnosticBag diagnostics)
         {
-            if ((object)otherConstant == null)
+            if ((object?)otherConstant == null)
             {
                 Debug.Assert(otherConstantOffset == 0);
                 return new ZeroValuedEnumConstantSymbol(containingEnum, syntax, diagnostics);
@@ -69,7 +67,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get
             {
-                return null;
+                // An enum constant has no associated symbol; the base signature is non-nullable public API.
+                return null!;
             }
         }
 
@@ -99,7 +98,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return OneOrMany<SyntaxList<AttributeListSyntax>>.Empty;
         }
 
-#nullable enable
         internal sealed override void ForceComplete(SourceLocation? locationOpt, Predicate<Symbol>? filter, CancellationToken cancellationToken)
         {
             if (filter?.Invoke(this) == false)
@@ -142,7 +140,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 state.SpinWaitComplete(incompletePart, cancellationToken);
             }
         }
-#nullable disable
 
         private sealed class ZeroValuedEnumConstantSymbol : SourceEnumConstantSymbol
         {

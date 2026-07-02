@@ -251,8 +251,8 @@
       "toggles": 2,
       "totalLines": 229,
       "disabledLines": 182,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "null! for AssociatedSymbol (non-nullable public base); nullable otherConstant param + is null pattern",
       "order": 23
     },
     {
