@@ -691,8 +691,8 @@
       "toggles": 2,
       "totalLines": 437,
       "disabledLines": 421,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed directives; made Visit/VisitCatchBlock/VisitLabeledStatement return BoundNode? to match base, _currentBlock nullable with Debug.Assert in VisitLabel, Analyze diagnostics params nullable (fixed UnboundLambda ripple), TryGetValue out BoundNode?; VariablesDeclaredWalker CS8764 resolved",
       "order": 63
     },
     {
