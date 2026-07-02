@@ -988,8 +988,8 @@
       "toggles": 1,
       "totalLines": 742,
       "disabledLines": 724,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed directives; GetBounds/_lazyBounds nullable, IsSet param nullable, (object?) idiom, useSiteDiagnosticsBuilder?, DeclaringCompilation null!",
       "order": 90
     },
     {
