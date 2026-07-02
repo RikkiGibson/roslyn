@@ -230,7 +230,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return new BoundThisReference(Syntax, CurrentFunction.ThisParameter.Type) { WasCompilerGenerated = true };
         }
 
-        public BoundExpression This(LocalSymbol thisTempOpt)
+        public BoundExpression This(LocalSymbol? thisTempOpt)
         {
             return (thisTempOpt != null) ? Local(thisTempOpt) : (BoundExpression)This();
         }

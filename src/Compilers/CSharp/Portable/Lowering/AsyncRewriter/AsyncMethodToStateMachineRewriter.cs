@@ -103,20 +103,16 @@ namespace Microsoft.CodeAnalysis.CSharp
             _placeholderMap = new Dictionary<BoundValuePlaceholderBase, BoundExpression>();
         }
 
-#nullable disable
-
         private FieldSymbol GetAwaiterField(TypeSymbol awaiterType)
         {
-            FieldSymbol result;
-
             // Awaiters of the same type always share the same slot, regardless of what await expressions they belong to.
             // Even in case of nested await expressions only one awaiter is active.
             // So we don't need to tie the awaiter variable to a particular await expression and only use its type
             // to find the previous awaiter field.
-            if (!_awaiterFields.TryGetValue(awaiterType, out result))
+            if (!_awaiterFields.TryGetValue(awaiterType, out FieldSymbol? result))
             {
                 int slotIndex;
-                if (slotAllocator == null || !slotAllocator.TryGetPreviousAwaiterSlotIndex(F.ModuleBuilderOpt.Translate(awaiterType, F.Syntax, F.Diagnostics.DiagnosticBag), F.Diagnostics.DiagnosticBag, out slotIndex))
+                if (slotAllocator == null || !slotAllocator.TryGetPreviousAwaiterSlotIndex(F.ModuleBuilderOpt!.Translate(awaiterType, F.Syntax, F.Diagnostics.DiagnosticBag!), F.Diagnostics.DiagnosticBag!, out slotIndex))
                 {
                     slotIndex = _nextAwaiterId++;
                 }
@@ -195,8 +191,8 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             var locals = ArrayBuilder<LocalSymbol>.GetInstance();
             locals.Add(cachedState);
-            if ((object)cachedThis != null) locals.Add(cachedThis);
-            if ((object)_exprRetValue != null) locals.Add(_exprRetValue);
+            if ((object?)cachedThis != null) locals.Add(cachedThis);
+            if ((object?)_exprRetValue != null) locals.Add(_exprRetValue);
 
             var newBody =
                 F.SequencePoint(
@@ -262,7 +258,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     F.Field(F.This(), _asyncMethodBuilderField),
                     _asyncMethodBuilderMemberCollection.SetResult,
                     _method.IsAsyncEffectivelyReturningGenericTask(F.Compilation)
-                        ? ImmutableArray.Create<BoundExpression>(F.Local(_exprRetValue))
+                        ? ImmutableArray.Create<BoundExpression>(F.Local(_exprRetValue!))
                         : ImmutableArray<BoundExpression>.Empty));
         }
 
@@ -308,7 +304,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         #region Visitors
 
         protected virtual BoundStatement VisitBody(BoundStatement body)
-            => (BoundStatement)Visit(body);
+            => (BoundStatement)Visit(body)!;
 
         public sealed override BoundNode VisitExpressionStatement(BoundExpressionStatement node)
         {
@@ -325,7 +321,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 }
             }
 
-            BoundExpression expr = (BoundExpression)this.Visit(node.Expression);
+            BoundExpression? expr = (BoundExpression?)this.Visit(node.Expression);
             return (expr != null) ? node.Update(expr) : (BoundStatement)F.StatementList();
         }
 
@@ -341,16 +337,14 @@ namespace Microsoft.CodeAnalysis.CSharp
             return node;
         }
 
-#nullable enable
         protected virtual BoundStatement? MakeAwaitPreamble() { return null; }
-#nullable disable
 
-        private BoundBlock VisitAwaitExpression(BoundAwaitExpression node, BoundExpression resultPlace)
+        private BoundBlock VisitAwaitExpression(BoundAwaitExpression node, BoundExpression? resultPlace)
         {
             Debug.Assert(node.AwaitableInfo.RuntimeAsyncAwaitCall is null);
-            BoundStatement preamble = MakeAwaitPreamble();
+            BoundStatement? preamble = MakeAwaitPreamble();
 
-            var expression = (BoundExpression)Visit(node.Expression);
+            var expression = (BoundExpression)Visit(node.Expression)!;
             var awaitablePlaceholder = node.AwaitableInfo.AwaitableInstancePlaceholder;
 
             if (awaitablePlaceholder != null)
@@ -360,11 +354,11 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             var getAwaiter = node.AwaitableInfo.IsDynamic ?
                 MakeCallMaybeDynamic(expression, null, WellKnownMemberNames.GetAwaiter) :
-                (BoundExpression)Visit(node.AwaitableInfo.GetAwaiter);
+                (BoundExpression)Visit(node.AwaitableInfo.GetAwaiter)!;
 
-            resultPlace = (BoundExpression)Visit(resultPlace);
-            MethodSymbol getResult = VisitMethodSymbol(node.AwaitableInfo.GetResult);
-            MethodSymbol isCompletedMethod = ((object)node.AwaitableInfo.IsCompleted != null) ? VisitMethodSymbol(node.AwaitableInfo.IsCompleted.GetMethod) : null;
+            resultPlace = (BoundExpression?)Visit(resultPlace);
+            MethodSymbol getResult = VisitMethodSymbol(node.AwaitableInfo.GetResult)!;
+            MethodSymbol? isCompletedMethod = ((object?)node.AwaitableInfo.IsCompleted != null) ? VisitMethodSymbol(node.AwaitableInfo.IsCompleted.GetMethod) : null;
             TypeSymbol type = VisitType(node.Type);
 
             if (awaitablePlaceholder != null)
@@ -376,7 +370,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             // It transfers the awaiter objects from the old version of the MoveNext method to the new one.
             Debug.Assert(node.Syntax.IsKind(SyntaxKind.AwaitExpression) || node.WasCompilerGenerated);
 
-            var awaiterTemp = F.SynthesizedLocal(getAwaiter.Type, syntax: node.Syntax, kind: SynthesizedLocalKind.Awaiter);
+            var awaiterTemp = F.SynthesizedLocal(getAwaiter.Type!, syntax: node.Syntax, kind: SynthesizedLocalKind.Awaiter);
             var awaitIfIncomplete = F.Block(
                     // temp $awaiterTemp = <expr>.GetAwaiter();
                     F.Assignment(
@@ -419,11 +413,11 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         private BoundExpression MakeCallMaybeDynamic(
             BoundExpression receiver,
-            MethodSymbol methodSymbol = null,
-            string methodName = null,
+            MethodSymbol? methodSymbol = null,
+            string? methodName = null,
             bool resultsDiscarded = false)
         {
-            if ((object)methodSymbol != null)
+            if ((object?)methodSymbol != null)
             {
                 // non-dynamic:
                 Debug.Assert(receiver != null);
@@ -440,13 +434,13 @@ namespace Microsoft.CodeAnalysis.CSharp
                 receiver,
                 typeArgumentsWithAnnotations: ImmutableArray<TypeWithAnnotations>.Empty,
                 loweredArguments: ImmutableArray<BoundExpression>.Empty,
-                argumentNames: ImmutableArray<string>.Empty,
+                argumentNames: ImmutableArray<string?>.Empty,
                 refKinds: ImmutableArray<RefKind>.Empty,
                 hasImplicitReceiver: false,
                 resultDiscarded: resultsDiscarded).ToExpression();
         }
 
-        private BoundExpression GenerateGetIsCompleted(LocalSymbol awaiterTemp, MethodSymbol getIsCompletedMethod)
+        private BoundExpression GenerateGetIsCompleted(LocalSymbol awaiterTemp, MethodSymbol? getIsCompletedMethod)
         {
             if (awaiterTemp.Type.IsDynamic())
             {
@@ -461,6 +455,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     resultType: F.SpecialType(SpecialType.System_Boolean)).ToExpression();
             }
 
+            Debug.Assert(getIsCompletedMethod is not null);
             return F.Call(F.Local(awaiterTemp), getIsCompletedMethod);
         }
 
@@ -533,7 +528,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             if (!TypeSymbol.Equals(awaiterTemp.Type, awaiterField.Type, TypeCompareKind.ConsiderEverything2))
             {
-                Debug.Assert(awaiterFieldRef.Type.IsObjectType() || TypeSymbol.Equals(awaiterTemp.Type, awaiterFieldRef.Type, TypeCompareKind.AllIgnoreOptions));
+                Debug.Assert(awaiterFieldRef.Type!.IsObjectType() || TypeSymbol.Equals(awaiterTemp.Type, awaiterFieldRef.Type, TypeCompareKind.AllIgnoreOptions));
                 Conversion c = F.ClassifyEmitConversion(awaiterFieldRef, awaiterTemp.Type);
                 Debug.Assert(c.IsReference || c.IsIdentity);
                 awaiterFieldRef = F.Convert(awaiterTemp.Type, awaiterFieldRef, c);
@@ -579,7 +574,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 F.WellKnownType(WellKnownType.System_Runtime_CompilerServices_INotifyCompletion),
                 null);
 
-            LocalSymbol thisTemp = (F.CurrentType.TypeKind == TypeKind.Class) ? F.SynthesizedLocal(F.CurrentType) : null;
+            LocalSymbol? thisTemp = (F.CurrentType!.TypeKind == TypeKind.Class) ? F.SynthesizedLocal(F.CurrentType) : null;
 
             var blockBuilder = ArrayBuilder<BoundStatement>.GetInstance();
 
@@ -640,7 +635,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             //    or
             // this.builder.AwaitOnCompleted<TAwaiter,TSM>(ref $awaiterArrayTemp[0], ref this)
 
-            LocalSymbol thisTemp = (F.CurrentType.TypeKind == TypeKind.Class) ? F.SynthesizedLocal(F.CurrentType) : null;
+            LocalSymbol? thisTemp = (F.CurrentType!.TypeKind == TypeKind.Class) ? F.SynthesizedLocal(F.CurrentType) : null;
 
             var discardedUseSiteInfo = CompoundUseSiteInfo<AssemblySymbol>.Discarded;
             var useUnsafeOnCompleted = F.Compilation.Conversions.ClassifyImplicitConversionFromType(
@@ -673,7 +668,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return F.ExpressionStatement(result);
         }
 
-        private static ImmutableArray<LocalSymbol> SingletonOrPair(LocalSymbol first, LocalSymbol secondOpt)
+        private static ImmutableArray<LocalSymbol> SingletonOrPair(LocalSymbol first, LocalSymbol? secondOpt)
         {
             return (secondOpt == null) ? ImmutableArray.Create(first) : ImmutableArray.Create(first, secondOpt);
         }
@@ -684,7 +679,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 Debug.Assert(_method.IsAsyncEffectivelyReturningGenericTask(F.Compilation));
                 return F.Block(
-                    F.Assignment(F.Local(_exprRetValue), (BoundExpression)Visit(node.ExpressionOpt)),
+                    F.Assignment(F.Local(_exprRetValue!), (BoundExpression)Visit(node.ExpressionOpt)!),
                     F.Goto(_exprReturnLabel));
             }
 
