@@ -1756,17 +1756,16 @@ namespace Microsoft.CodeAnalysis.CSharp
             return arguments;
         }
 
-#nullable disable
         internal BoundExpression MakeNullCheck(SyntaxNode syntax, BoundExpression rewrittenExpr, BinaryOperatorKind operatorKind)
         {
             Debug.Assert((operatorKind == BinaryOperatorKind.Equal) || (operatorKind == BinaryOperatorKind.NotEqual) ||
                 (operatorKind == BinaryOperatorKind.NullableNullEqual) || (operatorKind == BinaryOperatorKind.NullableNullNotEqual));
 
-            TypeSymbol exprType = rewrittenExpr.Type;
+            TypeSymbol? exprType = rewrittenExpr.Type;
 
             // Don't even call this method if the expression cannot be nullable.
             Debug.Assert(
-                (object)exprType == null ||
+                exprType is null ||
                 exprType.IsNullableTypeOrTypeParameter() ||
                 !exprType.IsValueType ||
                 exprType.IsPointerOrFunctionPointer());
@@ -1787,7 +1786,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             TypeSymbol objectType = SpecialType(CodeAnalysis.SpecialType.System_Object);
 
-            if ((object)exprType != null)
+            if (exprType is not null)
             {
                 if (exprType.Kind == SymbolKind.TypeParameter)
                 {
@@ -1812,6 +1811,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         internal BoundExpression MakeNullableHasValue(SyntaxNode syntax, BoundExpression expression)
         {
             // https://github.com/dotnet/roslyn/issues/58335: consider restoring the 'private' accessibility of 'static LocalRewriter.UnsafeGetNullableMethod()'
+            Debug.Assert(expression.Type is not null);
             return BoundCall.Synthesized(
                 syntax,
                 expression,
@@ -1850,7 +1850,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 return Literal(kind == BinaryOperatorKind.NullableNullEqual);
             }
 
-            BoundExpression nonNullValue = LocalRewriter.NullableAlwaysHasValue(nullable);
+            BoundExpression? nonNullValue = LocalRewriter.NullableAlwaysHasValue(nullable);
             if (nonNullValue != null)
             {
                 // We have something like "if (new int?(M()) != null)". We can optimize this to
@@ -1880,6 +1880,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                 var whenNull = kind == BinaryOperatorKind.NullableNullEqual ? Literal(true) : null;
 
+                Debug.Assert(whenNotNull.Type is not null);
                 return conditionalAccess.Update(conditionalAccess.Receiver, conditionalAccess.HasValueMethodOpt, whenNotNull, whenNull, conditionalAccess.Id, conditionalAccess.ForceCopyOfNullableValueType, whenNotNull.Type);
             }
 
@@ -1890,7 +1891,5 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             return result;
         }
-        // https://github.com/dotnet/roslyn/issues/58335: Re-enable annotations
-#nullable enable
     }
 }

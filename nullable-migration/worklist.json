@@ -185,8 +185,8 @@
       "toggles": 1,
       "totalLines": 1896,
       "disabledLines": 135,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Enabled disabled island (3 nullable-helper methods); TypeSymbol?/BoundExpression? locals, is null/is not null idioms, Debug.Assert for synthesized .Type invariants",
       "order": 17
     },
     {
