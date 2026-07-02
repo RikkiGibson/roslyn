@@ -240,8 +240,8 @@
       "toggles": 2,
       "totalLines": 206,
       "disabledLines": 172,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "3x CS8600 from (object)x!=null idiom; switched to 'is not null'",
       "order": 22
     },
     {

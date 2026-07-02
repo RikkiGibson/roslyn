@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp.Symbols;
@@ -41,8 +39,6 @@ namespace Microsoft.CodeAnalysis.CSharp
         public SynthesizedClosureEnvironment Frame
             => (SynthesizedClosureEnvironment)ContainingType;
 
-#nullable enable
-
         public static LambdaCapturedVariable Create(SynthesizedClosureEnvironment frame, Symbol captured, ref int uniqueId)
         {
             Debug.Assert(captured is LocalSymbol || captured is ParameterSymbol);
@@ -70,8 +66,6 @@ namespace Microsoft.CodeAnalysis.CSharp
             parameter = captured as ParameterSymbol;
             return (object?)parameter != null && parameter.IsThis;
         }
-
-#nullable disable
 
         private static string GetCapturedVariableFieldName(Symbol variable, ref int uniqueId)
         {
@@ -116,11 +110,11 @@ namespace Microsoft.CodeAnalysis.CSharp
         private static TypeSymbol GetCapturedVariableFieldType(SynthesizedContainer frame, Symbol variable)
         {
             var local = variable as LocalSymbol;
-            if ((object)local != null)
+            if ((object?)local != null)
             {
                 // if we're capturing a generic frame pointer, construct it with the new frame's type parameters
                 var lambdaFrame = local.Type.OriginalDefinition as SynthesizedClosureEnvironment;
-                if ((object)lambdaFrame != null)
+                if ((object?)lambdaFrame != null)
                 {
                     // lambdaFrame may have less generic type parameters than frame, so trim them down (the first N will always match)
                     var typeArguments = frame.TypeArgumentsWithAnnotationsNoUseSiteDiagnostics;
@@ -133,7 +127,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 }
             }
 
-            return frame.TypeMap.SubstituteType(((object)local != null ? local.TypeWithAnnotations : ((ParameterSymbol)variable).TypeWithAnnotations).Type).Type;
+            return frame.TypeMap.SubstituteType(((object?)local != null ? local.TypeWithAnnotations : ((ParameterSymbol)variable).TypeWithAnnotations).Type).Type;
         }
 
         public override RefKind RefKind => RefKind.None;
