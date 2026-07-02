@@ -130,7 +130,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
             ref MetadataTypeName emittedName)
         {
             var assembly = moduleSymbol.GetReferencedAssemblySymbol(referencedAssemblyIndex);
-            if ((object)assembly == null)
+            if ((object?)assembly == null)
             {
                 return new UnsupportedMetadataTypeSymbol();
             }

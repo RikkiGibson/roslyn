@@ -657,13 +657,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
                 var name = MetadataTypeName.FromFullName(forwarder.Key);
 
                 Debug.Assert(forwarder.Value.FirstIndex >= 0, "First index should never be negative");
-                AssemblySymbol firstSymbol = this.GetReferencedAssemblySymbol(forwarder.Value.FirstIndex);
-                Debug.Assert((object)firstSymbol != null, "Invalid indexes (out of bound) are discarded during reading metadata in PEModule.EnsureForwardTypeToAssemblyMap()");
+                var firstSymbol = this.GetReferencedAssemblySymbol(forwarder.Value.FirstIndex);
+                Debug.Assert((object?)firstSymbol != null, "Invalid indexes (out of bound) are discarded during reading metadata in PEModule.EnsureForwardTypeToAssemblyMap()");
 
                 if (forwarder.Value.SecondIndex >= 0)
                 {
                     var secondSymbol = this.GetReferencedAssemblySymbol(forwarder.Value.SecondIndex);
-                    Debug.Assert((object)secondSymbol != null, "Invalid indexes (out of bound) are discarded during reading metadata in PEModule.EnsureForwardTypeToAssemblyMap()");
+                    Debug.Assert((object?)secondSymbol != null, "Invalid indexes (out of bound) are discarded during reading metadata in PEModule.EnsureForwardTypeToAssemblyMap()");
 
                     yield return ContainingAssembly.CreateMultipleForwardingErrorTypeSymbol(ref name, this, firstSymbol, secondSymbol);
                 }

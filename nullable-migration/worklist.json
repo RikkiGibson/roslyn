@@ -658,8 +658,8 @@
       "toggles": 2,
       "totalLines": 419,
       "disabledLines": 402,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed directives; base GetMetadata/GetReferencedAssemblySymbol/GetModuleNamespace nullable to match overrides and real null returns; SetReferences param nullable; ContainingModule null!; (object?) idiom. Rippled MissingModuleSymbol, MetadataDecoder, PEModuleSymbol.",
       "order": 60
     },
     {
