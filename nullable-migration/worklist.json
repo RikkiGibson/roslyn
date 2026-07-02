@@ -97,8 +97,8 @@
       "toggles": 1,
       "totalLines": 119,
       "disabledLines": 76,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Annotated ctor params explicitlyImplementedEventOpt/aliasQualifierOpt nullable (caller passes null, base ctor oblivious) + TryGetBodyBinder param BinderFactory?. Project build clean incl. caller.",
       "order": 9
     },
     {

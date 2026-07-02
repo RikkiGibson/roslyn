@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System.Diagnostics;
 using Microsoft.CodeAnalysis.Collections;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -23,8 +21,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         internal SourceCustomEventAccessorSymbol(
             SourceEventSymbol @event,
             AccessorDeclarationSyntax syntax,
-            EventSymbol explicitlyImplementedEventOpt,
-            string aliasQualifierOpt,
+            EventSymbol? explicitlyImplementedEventOpt,
+            string? aliasQualifierOpt,
             bool isNullableAnalysisEnabled,
             BindingDiagnosticBag diagnostics)
             : base(@event,
@@ -65,7 +63,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return (AccessorDeclarationSyntax)syntaxReferenceOpt.GetSyntax();
         }
 
-        internal override ExecutableCodeBinder TryGetBodyBinder(BinderFactory binderFactoryOpt = null, bool ignoreAccessibility = false)
+        internal override ExecutableCodeBinder TryGetBodyBinder(BinderFactory? binderFactoryOpt = null, bool ignoreAccessibility = false)
         {
             return TryGetBodyBinderFromSyntax(binderFactoryOpt, ignoreAccessibility);
         }
@@ -78,7 +76,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-#nullable enable
         protected override SourceMemberMethodSymbol? BoundAttributesSource => (SourceMemberMethodSymbol?)PartialDefinitionPart;
 
         internal override OneOrMany<SyntaxList<AttributeListSyntax>> GetAttributeDeclarations()
