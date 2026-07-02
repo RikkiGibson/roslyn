@@ -845,8 +845,8 @@
       "toggles": 6,
       "totalLines": 739,
       "disabledLines": 584,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed directives; matched Cci nullable interface members (AsGeneric/AsSpecialized/AsDefinition/GetResolvedMethod/ResolvedMethodImpl), (object?) idiom, (CSharpSyntaxNode?)SyntaxNode casts, nullable synthesized local; islanded PlatformInvokeData",
       "order": 77
     },
     {
