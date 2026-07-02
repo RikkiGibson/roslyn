@@ -735,8 +735,8 @@
       "toggles": 7,
       "totalLines": 537,
       "disabledLines": 469,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable-enable: fields TypeMap?/StrongBox?/ConcurrentCache? + [MemberNotNull] on EnsureMapAndTypeParameters; matched base nullability on ContainingType/GetDeclaredBaseType/BaseTypeNoUseSiteDiagnostics/AssociatedFileIdentifier/NativeIntegerUnderlyingType; (object?) idiom; nullable ctor params; Debug.Assert for lazy StrongBox",
       "order": 67
     },
     {

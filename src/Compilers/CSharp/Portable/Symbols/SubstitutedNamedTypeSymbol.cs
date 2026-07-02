@@ -2,12 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -37,12 +36,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         // the same containing symbol as the local: it is contained in the method.
         private readonly Symbol _newContainer;
 
-        private TypeMap _lazyMap;
+        private TypeMap? _lazyMap;
         private ImmutableArray<TypeParameterSymbol> _lazyTypeParameters;
 
-#nullable enable
-        private StrongBox<ParameterSymbol?> _lazyExtensionParameter;
-#nullable disable
+        private StrongBox<ParameterSymbol?>? _lazyExtensionParameter;
 
         private NamedTypeSymbol _lazyBaseType = ErrorTypeSymbol.UnknownResultType;
 
@@ -50,11 +47,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         private int _hashCode;
 
         // lazily created, does not need to be unique
-        private ConcurrentCache<string, ImmutableArray<Symbol>> _lazyMembersByNameCache;
+        private ConcurrentCache<string, ImmutableArray<Symbol>>? _lazyMembersByNameCache;
 
         private ImmutableArray<Symbol> _lazyMembers;
 
-        protected SubstitutedNamedTypeSymbol(Symbol newContainer, TypeMap map, NamedTypeSymbol originalDefinition, NamedTypeSymbol constructedFrom = null, bool unbound = false, TupleExtraData tupleData = null)
+        protected SubstitutedNamedTypeSymbol(Symbol newContainer, TypeMap map, NamedTypeSymbol originalDefinition, NamedTypeSymbol? constructedFrom = null, bool unbound = false, TupleExtraData? tupleData = null)
             : base(originalDefinition, tupleData)
         {
             Debug.Assert(originalDefinition.IsDefinition);
@@ -65,7 +62,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             // if we're substituting to create a new unconstructed type as a member of a constructed type,
             // then we must alpha rename the type parameters.
-            if ((object)constructedFrom != null)
+            if ((object?)constructedFrom != null)
             {
                 Debug.Assert(ReferenceEquals(constructedFrom.ConstructedFrom, constructedFrom));
                 _lazyTypeParameters = constructedFrom.TypeParameters;
@@ -99,10 +96,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+        [MemberNotNull(nameof(_lazyMap))]
         private void EnsureMapAndTypeParameters()
         {
             if (!RoslynImmutableInterlocked.VolatileRead(ref _lazyTypeParameters).IsDefault)
             {
+                Debug.Assert(_lazyMap is not null);
                 return;
             }
 
@@ -121,6 +120,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             ImmutableInterlocked.InterlockedCompareExchange(ref _lazyTypeParameters, typeParameters, default(ImmutableArray<TypeParameterSymbol>));
             Debug.Assert(_lazyTypeParameters != null);
+            Debug.Assert(_lazyMap is not null);
         }
 
         public sealed override Symbol ContainingSymbol
@@ -128,7 +128,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return _newContainer; }
         }
 
-        public override NamedTypeSymbol ContainingType
+        public override NamedTypeSymbol? ContainingType
         {
             get
             {
@@ -146,7 +146,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return _underlyingType; }
         }
 
-        internal sealed override NamedTypeSymbol GetDeclaredBaseType(ConsList<TypeSymbol> basesBeingResolved)
+        internal sealed override NamedTypeSymbol? GetDeclaredBaseType(ConsList<TypeSymbol> basesBeingResolved)
         {
             return _unbound ? null : Map.SubstituteNamedType(OriginalDefinition.GetDeclaredBaseType(basesBeingResolved));
         }
@@ -156,7 +156,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return _unbound ? ImmutableArray<NamedTypeSymbol>.Empty : Map.SubstituteNamedTypes(OriginalDefinition.GetDeclaredInterfaces(basesBeingResolved));
         }
 
-        internal sealed override NamedTypeSymbol BaseTypeNoUseSiteDiagnostics
+        internal sealed override NamedTypeSymbol? BaseTypeNoUseSiteDiagnostics
         {
             get
             {
@@ -371,7 +371,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-#nullable enable
         internal sealed override IEnumerable<(MethodSymbol Body, MethodSymbol Implemented)> SynthesizedInterfaceMethodImpls()
         {
             if (_unbound)
@@ -386,7 +385,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 yield return (newBody, newImplemented);
             }
         }
-#nullable disable
 
         internal override IEnumerable<FieldSymbol> GetFieldsToEmit()
         {
@@ -446,7 +444,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return OriginalDefinition.ComImportCoClass; }
         }
 
-#nullable enable
         internal sealed override bool HasCollectionBuilderAttribute(out TypeSymbol? builderType, out string? methodName)
         {
             return _underlyingType.HasCollectionBuilderAttribute(out builderType, out methodName);
@@ -456,7 +453,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             return _underlyingType.HasAsyncMethodBuilderAttribute(out builderArgument);
         }
-#nullable disable
 
         internal override IEnumerable<MethodSymbol> GetMethodsToEmit()
         {
@@ -479,11 +475,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         }
 
         internal sealed override bool IsFileLocal => _underlyingType.IsFileLocal;
-        internal sealed override FileIdentifier AssociatedFileIdentifier => _underlyingType.AssociatedFileIdentifier;
+        internal sealed override FileIdentifier? AssociatedFileIdentifier => _underlyingType.AssociatedFileIdentifier;
 
         internal sealed override NamedTypeSymbol AsNativeInteger() => throw ExceptionUtilities.Unreachable();
 
-        internal sealed override NamedTypeSymbol NativeIntegerUnderlyingType => null;
+        internal sealed override NamedTypeSymbol? NativeIntegerUnderlyingType => null;
 
         internal sealed override bool IsRecord => _underlyingType.IsRecord;
         internal sealed override bool IsRecordStruct => _underlyingType.IsRecordStruct;
@@ -498,7 +494,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal override bool IsUnionTypeCore => _underlyingType.IsUnionTypeCore;
 
-#nullable enable
         internal sealed override ParameterSymbol? ExtensionParameter
         {
             get
@@ -508,6 +503,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     Interlocked.CompareExchange(ref _lazyExtensionParameter, new StrongBox<ParameterSymbol?>(substituteParameter()), null);
                 }
 
+                Debug.Assert(_lazyExtensionParameter is not null);
                 return _lazyExtensionParameter.Value;
 
                 ParameterSymbol? substituteParameter()
