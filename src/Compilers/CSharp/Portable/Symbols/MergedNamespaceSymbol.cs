@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -33,10 +31,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
     {
         private readonly NamespaceExtent _extent;
         private readonly ImmutableArray<NamespaceSymbol> _namespacesToMerge;
-        private readonly NamespaceSymbol _containingNamespace;
+        private readonly NamespaceSymbol? _containingNamespace;
 
         // used when this namespace is constructed as the result of an extern alias directive
-        private readonly string _nameOpt;
+        private readonly string? _nameOpt;
 
         // The cachedLookup caches results of lookups on the constituent namespaces so that
         // subsequent lookups for the same name are much faster than having to ask each of the
@@ -62,9 +60,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// <returns>A namespace symbol representing the merged namespace.</returns>
         internal static NamespaceSymbol Create(
             NamespaceExtent extent,
-            NamespaceSymbol containingNamespace,
+            NamespaceSymbol? containingNamespace,
             ImmutableArray<NamespaceSymbol> namespacesToMerge,
-            string nameOpt = null)
+            string? nameOpt = null)
         {
             // Currently, if we are just merging 1 namespace, we just return the namespace itself.
             // This is by far the most efficient, because it means that we don't create merged
@@ -86,7 +84,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         }
 
         // Constructor. Use static Create method to create instances.
-        private MergedNamespaceSymbol(NamespaceExtent extent, NamespaceSymbol containingNamespace, ImmutableArray<NamespaceSymbol> namespacesToMerge, string nameOpt)
+        private MergedNamespaceSymbol(NamespaceExtent extent, NamespaceSymbol? containingNamespace, ImmutableArray<NamespaceSymbol> namespacesToMerge, string? nameOpt)
         {
             _extent = extent;
             _namespacesToMerge = namespacesToMerge;
@@ -103,7 +101,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 #endif
         }
 
-        internal NamespaceSymbol GetConstituentForCompilation(CSharpCompilation compilation)
+        internal NamespaceSymbol? GetConstituentForCompilation(CSharpCompilation compilation)
         {
             //return namespacesToMerge.FirstOrDefault(n => n.IsFromSource);
             //Replace above code with that below to eliminate allocation of array enumerator.
@@ -117,7 +115,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return null;
         }
 
-        internal override void ForceComplete(SourceLocation locationOpt, Predicate<Symbol> filter, CancellationToken cancellationToken)
+        internal override void ForceComplete(SourceLocation? locationOpt, Predicate<Symbol>? filter, CancellationToken cancellationToken)
         {
             foreach (var part in _namespacesToMerge)
             {
@@ -132,7 +130,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// </summary>
         private ImmutableArray<Symbol> SlowGetChildrenOfName(ReadOnlyMemory<char> name)
         {
-            ArrayBuilder<NamespaceSymbol> namespaceSymbols = null;
+            ArrayBuilder<NamespaceSymbol>? namespaceSymbols = null;
             var otherSymbols = ArrayBuilder<Symbol>.GetInstance();
 
             // Accumulate all the child namespaces and types.
@@ -249,7 +247,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get
             {
-                return _containingNamespace;
+                return _containingNamespace!;
             }
         }
 
@@ -267,7 +265,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 }
                 else
                 {
-                    return null;
+                    return null!;
                 }
             }
         }
@@ -290,7 +288,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-#nullable enable
         internal sealed override void GetAllExtensionMembers(ArrayBuilder<Symbol> members, string? name, string? alternativeName, int arity, LookupOptions options, ConsList<FieldSymbol> fieldsBeingBound)
         {
             foreach (NamespaceSymbol namespaceSymbol in _namespacesToMerge)

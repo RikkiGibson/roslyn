@@ -493,8 +493,8 @@
       "toggles": 1,
       "totalLines": 302,
       "disabledLines": 288,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable annotations: nullable _containingNamespace/_nameOpt fields and Create/ctor params, nullable GetConstituentForCompilation return (aligned InContainerBinder.ContainingMemberOrLambda to nullable base), nullable ForceComplete params, null! for public-API ContainingSymbol/ContainingAssembly genuine-null returns",
       "order": 45
     },
     {

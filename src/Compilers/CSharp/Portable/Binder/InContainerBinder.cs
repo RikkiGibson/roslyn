@@ -38,7 +38,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        internal override Symbol ContainingMemberOrLambda
+        internal override Symbol? ContainingMemberOrLambda
         {
             get
             {
