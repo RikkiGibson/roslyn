@@ -559,8 +559,8 @@
       "toggles": 3,
       "totalLines": 14424,
       "disabledLines": 336,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed 4 interior #nullable toggles in VisitConversion; fixed via getDelegateOrFunctionPointerInfo returning MethodSymbol?, Debug.Assert for method/conversionOpt/conversionOperand invariants, dropped redundant method?. , TrackNullableStateOfTupleConversion operandType made nullable, and ! on operandType.Type/conversionOperand.Type diagnostic args",
       "order": 51
     },
     {

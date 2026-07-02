@@ -9515,7 +9515,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             BoundExpression convertedNode,
             Conversion conversion,
             TypeSymbol targetType,
-            TypeSymbol operandType,
+            TypeSymbol? operandType,
             bool fromExplicitCast,
             int slot,
             int valueSlot,
@@ -9884,7 +9884,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                 reportRemainingWarnings = false;
                 isSuppressed = true;
             }
-#nullable disable
 
             TypeSymbol targetType = targetTypeWithNullability.Type;
             switch (conversion.Kind)
@@ -9894,9 +9893,10 @@ namespace Microsoft.CodeAnalysis.CSharp
                         var group = conversionOperand as BoundMethodGroup;
                         var (invokeSignature, parameters) = getDelegateOrFunctionPointerInfo(targetType);
                         var method = conversion.Method;
+                        Debug.Assert(method is not null);
                         if (group != null)
                         {
-                            if (method?.OriginalDefinition is LocalFunctionSymbol localFunc)
+                            if (method.OriginalDefinition is LocalFunctionSymbol localFunc)
                             {
                                 VisitLocalFunctionUse(localFunc);
                             }
@@ -9910,7 +9910,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     resultState = NullableFlowState.NotNull;
                     break;
 
-                    static (MethodSymbol invokeSignature, ImmutableArray<ParameterSymbol>) getDelegateOrFunctionPointerInfo(TypeSymbol targetType)
+                    static (MethodSymbol? invokeSignature, ImmutableArray<ParameterSymbol>) getDelegateOrFunctionPointerInfo(TypeSymbol targetType)
                         => targetType switch
                         {
                             NamedTypeSymbol { TypeKind: TypeKind.Delegate, DelegateInvokeMethod: { Parameters: { } parameters } signature } => (signature, parameters),
@@ -9918,7 +9918,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                             _ => (null, ImmutableArray<ParameterSymbol>.Empty),
                         };
 
-#nullable enable
                 case ConversionKind.AnonymousFunction:
                     Debug.Assert(targetInstanceSlotOpt < 0);
                     if (conversionOperand is BoundLambda lambda)
@@ -9935,7 +9934,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                         return TypeWithState.Create(targetType, NullableFlowState.NotNull);
                     }
                     break;
-#nullable disable
 
                 case ConversionKind.FunctionType:
                     resultState = NullableFlowState.NotNull;
@@ -10132,6 +10130,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                                     int valueSlot = MakeSlot(conversionOperand);
                                     if (valueSlot > 0)
                                     {
+                                        Debug.Assert(conversionOpt is not null);
                                         int slot = GetOrCreatePlaceholderSlot(conversionOpt);
                                         if (slot > 0)
                                         {
@@ -10148,7 +10147,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         // https://github.com/dotnet/roslyn/issues/29699: Report warnings for user-defined conversions on tuple elements.
                         canConvertNestedNullability = GenerateConversion(_conversions, conversionOperand, operandType.Type, targetType, fromExplicitCast, extensionMethodThisArgument, isChecked: conversionOpt?.Checked ?? false).Exists;
 
-                        if (canConvertNestedNullability && trackMembers && conversionOpt is { } && conversionOperand.Type.Equals(conversionOpt.Type, TypeCompareKind.AllIgnoreOptions))
+                        if (canConvertNestedNullability && trackMembers && conversionOpt is { } && conversionOperand.Type!.Equals(conversionOpt.Type, TypeCompareKind.AllIgnoreOptions))
                         {
                             Debug.Assert(conversionOperand != null);
                             switch (conversion.Kind)
@@ -10206,6 +10205,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             TypeWithState resultType = calculateResultType(targetTypeWithNullability, fromExplicitCast, resultState, isSuppressed, targetType);
 
+            Debug.Assert(conversionOperand is not null);
             if (!conversionOperand.HasErrors && !targetType.IsErrorType())
             {
                 // Need to report all warnings that apply since the warnings can be suppressed individually.
@@ -10217,7 +10217,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 {
                     if (assignmentKind == AssignmentKind.Argument)
                     {
-                        ReportNullabilityMismatchInArgument(getDiagnosticLocation(), operandType.Type, parameterOpt, targetType, forOutput: false);
+                        ReportNullabilityMismatchInArgument(getDiagnosticLocation(), operandType.Type!, parameterOpt, targetType, forOutput: false);
                     }
                     else
                     {
@@ -10237,7 +10237,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                 return diagnosticLocation;
             }
 
-#nullable enable
             static TypeWithState calculateResultType(TypeWithAnnotations targetTypeWithNullability, bool fromExplicitCast, NullableFlowState resultState, bool isSuppressed, TypeSymbol targetType)
             {
                 if (isSuppressed)
