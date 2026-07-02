@@ -22,6 +22,10 @@ inherits the project default, then resolving the resulting warnings.
   `[NotNullIfNotNull]`, `[DisallowNull]`, `[AllowNull]`, `[return: NotNull]`.
   Example from this migration: a `bool HasUniqueSymbol` getter that checks `_field != null` should be
   annotated `[MemberNotNullWhen(true, nameof(_field))]`, so the guarded cast needs no `!`.
+- **Legacy `(object)x != null` idiom** (a reference-equality null check that bypasses user-defined
+  `==`/`!=`): when it trips CS8600, change the cast to nullable — `(object?)x != null` /
+  `(object?)x == null`. Do **not** rewrite it to `x is not null` / `x is null`; the `(object?)` form is
+  the least-invasive edit and preserves the operator-bypass intent.
 - Use the null-forgiving operator `!` only as a **last resort**, when an invariant is genuinely known
   but cannot be expressed with an attribute or a local check. Prefer pairing it with a
   `Debug.Assert(...)` (assert is release-time no-op, so no runtime change). Do not sprinkle `!` to make
