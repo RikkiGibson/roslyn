@@ -395,6 +395,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 }
             }
 
+            Debug.Assert(_lazyMergedGlobalAliasesAndUsings is not null);
             return _lazyMergedGlobalAliasesAndUsings;
         }
 

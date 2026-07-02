@@ -768,8 +768,8 @@
       "toggles": 2,
       "totalLines": 493,
       "disabledLines": 486,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable lazy fields (_nameToMembersMap, _nameToTypeMembersMap, _lazyMergedGlobalAliasesAndUsings); Symbol?[] + (object?) legacy casts; Debug.Assert for lazy-init returns",
       "order": 70
     },
     {
