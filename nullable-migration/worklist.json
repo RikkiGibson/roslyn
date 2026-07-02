@@ -196,8 +196,8 @@
       "toggles": 1,
       "totalLines": 237,
       "disabledLines": 142,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "No warnings after removing directives",
       "order": 18
     },
     {

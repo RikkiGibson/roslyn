@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using Roslyn.Utilities;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -144,7 +142,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-#nullable enable
         /// <summary>
         /// Returns whether this method is async and returns void.
         /// </summary>
