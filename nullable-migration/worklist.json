@@ -64,8 +64,8 @@
       "toggles": 1,
       "totalLines": 325,
       "disabledLines": 30,
-      "status": "pending",
-      "note": "",
+      "status": "deferred",
+      "note": "Public API: disabled region is ISymbol interface members (ContainingSymbol/Assembly/Module/Type/Namespace, several nullable). Proper typing requires public API nullability changes (PublicAPI.Shipped.txt + API review) - out of scope. Tracked by dotnet/roslyn#39166.",
       "order": 6
     },
     {
