@@ -746,8 +746,8 @@
       "toggles": 2,
       "totalLines": 500,
       "disabledLines": 474,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Made lazy fields nullable (_lazyReturnType, _lazyMap via [MemberNotNull], _lazyOverriddenOrHiddenMembers); matched base nullability on CallsiteReducedFromMethod, AssociatedSymbol, GetUnmanagedCallersOnlyAttributeData; (object?) casts; removed directives",
       "order": 68
     },
     {
