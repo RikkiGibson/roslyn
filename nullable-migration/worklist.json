@@ -218,8 +218,8 @@
       "toggles": 2,
       "totalLines": 181,
       "disabledLines": 169,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Added ? to explicit Cci interface impl returns and object? on Equals",
       "order": 20
     },
     {
