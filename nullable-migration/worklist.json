@@ -922,8 +922,8 @@
       "toggles": 8,
       "totalLines": 759,
       "disabledLines": 652,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed 9 nullable directives; annotated abstract MakePattern/Declaration/Deconstruction variable methods and nodeToBind params nullable, made MakeLocalSymbolWithEnclosingContext typeSyntax nullable; used null! for late-init pooled fields; 0/0.",
       "order": 84
     },
     {
