@@ -636,8 +636,8 @@
       "toggles": 1,
       "totalLines": 826,
       "disabledLines": 371,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable ConstantValueOpt local; Debug.Assert on init.Type in AsConstOrDefault",
       "order": 58
     },
     {
