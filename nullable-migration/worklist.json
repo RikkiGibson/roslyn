@@ -438,8 +438,8 @@
       "toggles": 2,
       "totalLines": 253,
       "disabledLines": 241,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Matched nullable Cci interface member return types (As*/GetResolvedType/AsDefinition/GetInternalSymbol/AssemblyVersionPattern) and Equals(object?) override",
       "order": 40
     },
     {
