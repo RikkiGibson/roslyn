@@ -361,8 +361,8 @@
       "toggles": 5,
       "totalLines": 243,
       "disabledLines": 217,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Annotated nullable Constructor/ObsoleteAttributeData/NativeIntegerUnderlyingType returns and GetGuidString out param; used (object?) casts",
       "order": 33
     },
     {

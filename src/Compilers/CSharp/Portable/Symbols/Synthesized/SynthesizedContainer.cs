@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -43,15 +41,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal TypeMap TypeMap { get; }
 
-        internal virtual MethodSymbol Constructor => null;
+        internal virtual MethodSymbol? Constructor => null;
 
         internal sealed override bool IsInterface => this.TypeKind == TypeKind.Interface;
 
-#nullable enable
         internal sealed override ParameterSymbol? ExtensionParameter => null;
         internal sealed override string? ExtensionGroupingName => null;
         internal sealed override string? ExtensionMarkerName => null;
-#nullable disable
 
         internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
         {
@@ -91,7 +87,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         public override bool IsSealed => true;
 
-        public override bool IsAbstract => (object)Constructor == null && this.TypeKind != TypeKind.Struct;
+        public override bool IsAbstract => (object?)Constructor == null && this.TypeKind != TypeKind.Struct;
 
         internal override ImmutableArray<TypeWithAnnotations> TypeArgumentsWithAnnotationsNoUseSiteDiagnostics
         {
@@ -112,7 +108,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal sealed override ImmutableArray<NamedTypeSymbol> CandidateClosedSubtypeDefinitions => [];
 
-        internal override bool GetGuidString(out string guidString)
+        internal override bool GetGuidString(out string? guidString)
         {
             guidString = null;
             return false;
@@ -120,14 +116,14 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         public override ImmutableArray<Symbol> GetMembers()
         {
-            Symbol constructor = this.Constructor;
-            return (object)constructor == null ? ImmutableArray<Symbol>.Empty : ImmutableArray.Create(constructor);
+            Symbol? constructor = this.Constructor;
+            return (object?)constructor == null ? ImmutableArray<Symbol>.Empty : ImmutableArray.Create(constructor);
         }
 
         public override ImmutableArray<Symbol> GetMembers(string name)
         {
             var ctor = Constructor;
-            return ((object)ctor != null && name == ctor.Name) ? ImmutableArray.Create<Symbol>(ctor) : ImmutableArray<Symbol>.Empty;
+            return ((object?)ctor != null && name == ctor.Name) ? ImmutableArray.Create<Symbol>(ctor) : ImmutableArray<Symbol>.Empty;
         }
 
         internal override IEnumerable<FieldSymbol> GetFieldsToEmit()
@@ -177,10 +173,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal override bool MangleName => Arity > 0;
 
-#nullable enable
         internal sealed override bool IsFileLocal => false;
         internal sealed override FileIdentifier? AssociatedFileIdentifier => null;
-#nullable disable
 
         public override bool IsImplicitlyDeclared => true;
 
@@ -190,7 +184,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal override bool IsComImport => false;
 
-        internal sealed override ObsoleteAttributeData ObsoleteAttributeData => null;
+        internal sealed override ObsoleteAttributeData? ObsoleteAttributeData => null;
 
         internal sealed override ImmutableArray<string> GetAppliedConditionalSymbols() => ImmutableArray<string>.Empty;
 
@@ -213,7 +207,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal sealed override NamedTypeSymbol AsNativeInteger() => throw ExceptionUtilities.Unreachable();
 
-        internal sealed override NamedTypeSymbol NativeIntegerUnderlyingType => null;
+        internal sealed override NamedTypeSymbol? NativeIntegerUnderlyingType => null;
 
         internal sealed override IEnumerable<(MethodSymbol Body, MethodSymbol Implemented)> SynthesizedInterfaceMethodImpls()
         {
@@ -226,7 +220,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return false;
         }
 
-#nullable enable
         internal sealed override bool HasCollectionBuilderAttribute(out TypeSymbol? builderType, out string? methodName)
         {
             builderType = null;
