@@ -295,8 +295,8 @@
       "toggles": 2,
       "totalLines": 226,
       "disabledLines": 196,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "TypeMap late-init property annotated with null!",
       "order": 27
     },
     {
