@@ -1043,8 +1043,8 @@
       "toggles": 8,
       "totalLines": 1199,
       "disabledLines": 845,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Cci emit base: nullable ?-fields/locals, Cci interface nullability matched, ISLAND GetContainingAssembly (returns null for netmodules, Cci non-null); base SourceAssemblyOpt made nullable (PENetModuleBuilder returns null) to fix CS8764; cctor GetInternalSymbol()!; verified Core+CSharp net10.0 nullable-as-errors 0/0",
       "order": 95
     },
     {
