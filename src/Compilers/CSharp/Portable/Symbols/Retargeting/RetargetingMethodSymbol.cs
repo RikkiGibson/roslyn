@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -52,9 +50,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
         private ImmutableArray<MethodSymbol> _lazyExplicitInterfaceImplementations;
         private CachedUseSiteInfo<AssemblySymbol> _lazyCachedUseSiteInfo = CachedUseSiteInfo<AssemblySymbol>.Uninitialized;
 
-        private TypeWithAnnotations.Boxed _lazyReturnType;
+        private TypeWithAnnotations.Boxed? _lazyReturnType;
 
-        private UnmanagedCallersOnlyAttributeData _lazyUnmanagedAttributeData = UnmanagedCallersOnlyAttributeData.Uninitialized;
+        private UnmanagedCallersOnlyAttributeData? _lazyUnmanagedAttributeData = UnmanagedCallersOnlyAttributeData.Uninitialized;
 
         public RetargetingMethodSymbol(RetargetingModuleSymbol retargetingModule, MethodSymbol underlyingMethod)
         {
@@ -187,12 +185,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
             }
         }
 
-        public override Symbol AssociatedSymbol
+        public override Symbol? AssociatedSymbol
         {
             get
             {
                 var associatedPropertyOrEvent = _underlyingMethod.AssociatedSymbol;
-                return (object)associatedPropertyOrEvent == null ? null : this.RetargetingTranslator.Retarget(associatedPropertyOrEvent);
+                return (object?)associatedPropertyOrEvent == null ? null : this.RetargetingTranslator.Retarget(associatedPropertyOrEvent);
             }
         }
 
@@ -228,7 +226,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
             return this.RetargetingTranslator.GetRetargetedAttributes(_underlyingMethod.GetReturnTypeAttributes(), ref _lazyReturnTypeCustomAttributes);
         }
 
-#nullable enable
         internal override UnmanagedCallersOnlyAttributeData? GetUnmanagedCallersOnlyAttributeData(bool forceComplete)
         {
             if (ReferenceEquals(_lazyUnmanagedAttributeData, UnmanagedCallersOnlyAttributeData.Uninitialized))
@@ -278,7 +275,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
 
         internal override int TryGetOverloadResolutionPriority()
             => _underlyingMethod.TryGetOverloadResolutionPriority();
-#nullable disable
 
         public override AssemblySymbol ContainingAssembly
         {
@@ -344,7 +340,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
         /// <summary>
         /// The explicitly overridden method (e.g. as would be declared in the PE method in covariant return scenarios).
         /// </summary>
-        internal MethodSymbol ExplicitlyOverriddenClassMethod
+        internal MethodSymbol? ExplicitlyOverriddenClassMethod
         {
             get
             {
@@ -368,7 +364,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
             return _lazyCachedUseSiteInfo.ToUseSiteInfo(PrimaryDependency);
         }
 
-        internal sealed override CSharpCompilation DeclaringCompilation // perf, not correctness
+        internal sealed override CSharpCompilation? DeclaringCompilation // perf, not correctness
         {
             get { return null; }
         }
@@ -386,7 +382,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
 
         internal override bool IsNullableAnalysisEnabled() => throw ExceptionUtilities.Unreachable();
 
-        internal sealed override bool HasAsyncMethodBuilderAttribute(out TypeSymbol builderArgument)
+        internal sealed override bool HasAsyncMethodBuilderAttribute(out TypeSymbol? builderArgument)
         {
             if (_underlyingMethod.HasAsyncMethodBuilderAttribute(out builderArgument))
             {

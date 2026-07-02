@@ -592,8 +592,8 @@
       "toggles": 2,
       "totalLines": 406,
       "disabledLines": 352,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed directives; DeclaringCompilation/AssociatedSymbol/ExplicitlyOverriddenClassMethod/HasAsyncMethodBuilderAttribute out param nullable; lazy _lazyReturnType and _lazyUnmanagedAttributeData fields nullable; legacy (object)->(object?) cast",
       "order": 54
     },
     {
