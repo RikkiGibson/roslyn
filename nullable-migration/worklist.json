@@ -570,8 +570,8 @@
       "toggles": 4,
       "totalLines": 399,
       "disabledLines": 348,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed directives; nullable lazy fields; matched IMethodSymbol nullable returns on explicit impls; TResult? Accept",
       "order": 52
     },
     {

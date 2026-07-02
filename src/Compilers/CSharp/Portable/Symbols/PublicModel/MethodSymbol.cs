@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Reflection.Metadata;
@@ -17,10 +15,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
     internal sealed class MethodSymbol : Symbol, IMethodSymbol
     {
         private readonly Symbols.MethodSymbol _underlying;
-        private ITypeSymbol _lazyReturnType;
+        private ITypeSymbol? _lazyReturnType;
         private ImmutableArray<ITypeSymbol> _lazyTypeArguments;
         private ImmutableArray<IParameterSymbol> _lazyParameters;
-        private ITypeSymbol _lazyReceiverType;
+        private ITypeSymbol? _lazyReceiverType;
 
         public MethodSymbol(Symbols.MethodSymbol underlying)
         {
@@ -163,7 +161,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
             }
         }
 
-        IMethodSymbol IMethodSymbol.OverriddenMethod
+        IMethodSymbol? IMethodSymbol.OverriddenMethod
         {
             get
             {
@@ -171,7 +169,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
             }
         }
 
-        ITypeSymbol IMethodSymbol.ReceiverType
+        ITypeSymbol? IMethodSymbol.ReceiverType
         {
             get
             {
@@ -186,7 +184,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
 
         CodeAnalysis.NullableAnnotation IMethodSymbol.ReceiverNullableAnnotation => _underlying.ReceiverNullableAnnotation;
 
-        IMethodSymbol IMethodSymbol.ReducedFrom
+        IMethodSymbol? IMethodSymbol.ReducedFrom
         {
             get
             {
@@ -194,14 +192,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
             }
         }
 
-        ITypeSymbol IMethodSymbol.GetTypeInferredDuringReduction(ITypeParameterSymbol reducedFromTypeParameter)
+        ITypeSymbol? IMethodSymbol.GetTypeInferredDuringReduction(ITypeParameterSymbol reducedFromTypeParameter)
         {
             return _underlying.GetTypeInferredDuringReduction(
                 reducedFromTypeParameter.EnsureCSharpSymbolOrNull(nameof(reducedFromTypeParameter))).
                 GetPublicSymbol();
         }
 
-#nullable enable
         IMethodSymbol? IMethodSymbol.ReduceExtensionMethod(ITypeSymbol receiverType)
         {
             return _underlying.ReduceExtensionMethod(
@@ -219,7 +216,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
 
             return null;
         }
-#nullable disable
 
         ImmutableArray<IMethodSymbol> IMethodSymbol.ExplicitInterfaceImplementations
         {
@@ -229,7 +225,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
             }
         }
 
-        ISymbol IMethodSymbol.AssociatedSymbol
+        ISymbol? IMethodSymbol.AssociatedSymbol
         {
             get
             {
@@ -296,7 +292,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
             return _underlying.Construct(ConstructTypeArguments(typeArguments, typeArgumentNullableAnnotations)).GetPublicSymbol();
         }
 
-        IMethodSymbol IMethodSymbol.PartialImplementationPart
+        IMethodSymbol? IMethodSymbol.PartialImplementationPart
         {
             get
             {
@@ -304,7 +300,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
             }
         }
 
-        IMethodSymbol IMethodSymbol.PartialDefinitionPart
+        IMethodSymbol? IMethodSymbol.PartialDefinitionPart
         {
             get
             {
@@ -314,7 +310,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
 
         bool IMethodSymbol.IsPartialDefinition => _underlying.IsDefinition && _underlying.IsPartialDefinition();
 
-        INamedTypeSymbol IMethodSymbol.AssociatedAnonymousDelegate
+        INamedTypeSymbol? IMethodSymbol.AssociatedAnonymousDelegate
         {
             get
             {
@@ -344,9 +340,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
 
         bool IMethodSymbol.IsIterator => _underlying.IsIterator;
 
-        DllImportData IMethodSymbol.GetDllImportData() => _underlying.GetDllImportData();
+        DllImportData? IMethodSymbol.GetDllImportData() => _underlying.GetDllImportData();
 
-#nullable enable
         IMethodSymbol? IMethodSymbol.AssociatedExtensionImplementation
         {
             get
@@ -375,7 +370,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
                 return implementation.GetPublicSymbol();
             }
         }
-#nullable disable
 
         #region ISymbol Members
 
@@ -384,7 +378,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
             visitor.VisitMethod(this);
         }
 
-        protected override TResult Accept<TResult>(SymbolVisitor<TResult> visitor)
+        protected override TResult? Accept<TResult>(SymbolVisitor<TResult> visitor)
+            where TResult : default
         {
             return visitor.VisitMethod(this);
         }
