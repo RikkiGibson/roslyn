@@ -15,6 +15,7 @@ regions piecemeal. This effort finishes that job, one file at a time.
 - `LOOP.md` — the exact per-iteration instructions the agent follows.
 - `loop.py` — the single entry point for routine loop actions. Subcommands:
   - `loop.py next` — print the next `pending` file (order, path, project, csproj, build command).
+    Normally easiest-first, but enforces a **base-before-derived** constraint (see Ordering below).
   - `loop.py status --order <n> --status <s> [--note "..."]` — update an item's `status`/`note`.
   - `loop.py verify --order <n>` — cheap post-subagent check (working tree clean + terminal status +
     show HEAD; no rebuild).
@@ -34,10 +35,16 @@ globally. Rationale:
 - Easy to `defer` an awkward file without blocking the rest.
 - A global flip produces thousands of simultaneous, interdependent warnings that are hard to attribute.
 
-Ordering is **easiest-first** (fewest currently-disabled lines) to build momentum. If you prefer to
-minimize cross-file annotation churn instead, process low-level types first
-(`Symbol`, `TypeSymbol`, `NamedTypeSymbol`, `MethodSymbol`, ...) so higher-level files see correct
-annotations — but those are the hardest, so expect slower early progress.
+Ordering is **easiest-first** (fewest currently-disabled lines) to build momentum, with one override:
+a **base-before-derived** constraint. `next` will not hand you a file whose declared type derives from
+(or implements) a type declared in another *still-pending* file — it gives you the base file first and
+prints a `base-first: skipping ...` note explaining what it is waiting on. Annotating a base member's
+nullability ripples into every override, so doing the base first avoids re-touching (churning) the
+derived files when the base is later annotated. The check is a lightweight lexical scan over pending
+files and falls back to plain easiest-first if it detects a cycle, so it can never deadlock the loop.
+If you additionally want to minimize churn, note that the hardest low-level types
+(`Symbol`, `TypeSymbol`, `NamedTypeSymbol`, `MethodSymbol`, ...) are the roots of most hierarchies, so
+expect the constraint to pull them earlier than their raw line-count would suggest.
 
 ## Resolutions
 Each file ends in one of:

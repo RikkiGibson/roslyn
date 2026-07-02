@@ -16,11 +16,21 @@ Subcommands:
                           HEAD commit present + item status is done/deferred.
                           Exits 0 (PASS) or 1 (FAIL). Does NOT build.
 
+Ordering: items are normally taken easiest-first (lowest "order"), BUT a
+base-before-derived constraint takes precedence. If a pending file declares a
+type that derives from (or implements) a type declared in a DIFFERENT pending
+file, the base file is annotated first. Annotating a base member's nullability
+ripples into its overrides, so doing the base first avoids re-touching (churning)
+the derived files. `next` skips a lower-order derived file until its pending base
+files are done, and prints a note on stderr when it does so. Cycles fall back to
+plain easiest-first so the loop can't deadlock.
+
 Valid statuses: pending, in-progress, done, deferred, blocked
 """
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -59,6 +69,92 @@ def _csproj(item):
     return PROJECT_FILE.get(item.get("project", ""), "")
 
 
+# --- base-before-derived ordering -------------------------------------------
+# Heuristic type-graph over PENDING worklist files so we annotate a base type
+# before any derived type. This is intentionally a lightweight lexical scan, not
+# a full parse: a false positive only makes us do a base file slightly earlier
+# (which is the goal anyway), and a false negative just falls back to easiest-
+# first. It never blocks the loop (cycles fall back to plain order).
+
+_CS_TYPE_DECL = re.compile(
+    r"\b(?:class|struct|interface|record(?:\s+struct|\s+class)?)\s+"
+    r"([A-Za-z_]\w*)"                       # 1: type name
+    r"(?:\s*<[^>{}]*>)?"                    # optional generic params
+    r"(?:\s*:\s*(?P<bases>[^{;\n]*))?",     # optional base list up to { ; or EOL
+    re.MULTILINE,
+)
+_VB_TYPE_DECL = re.compile(r"\b(?:Class|Structure|Interface|Module)\s+([A-Za-z_]\w*)", re.IGNORECASE)
+_VB_INHERITS = re.compile(r"\bInherits\s+([A-Za-z_][\w.]*)", re.IGNORECASE)
+
+
+def _simple_name(name):
+    """Strip generic args, namespace qualifiers, and trailing '?'."""
+    name = name.split("<", 1)[0].strip().rstrip("?").strip()
+    if "." in name:
+        name = name.rsplit(".", 1)[-1]
+    return name
+
+
+def _read_source(path):
+    try:
+        with open(os.path.join(REPO, path), encoding="utf-8") as f:
+            return f.read()
+    except OSError:
+        return ""
+
+
+def _declared_and_bases(path):
+    """Return (types declared in this file, base/interface simple-names it uses)."""
+    text = _read_source(path)
+    declared, bases = set(), set()
+    if path.endswith(".vb"):
+        for m in _VB_TYPE_DECL.finditer(text):
+            declared.add(m.group(1))
+        for m in _VB_INHERITS.finditer(text):
+            bases.add(_simple_name(m.group(1)))
+    else:
+        for m in _CS_TYPE_DECL.finditer(text):
+            declared.add(m.group(1))
+            base_list = m.group("bases")
+            if base_list:
+                for part in base_list.split(","):
+                    if part.strip().startswith("where"):
+                        break
+                    s = _simple_name(part)
+                    if s:
+                        bases.add(s)
+    bases -= declared  # a base declared in the same file creates no cross-file order
+    return declared, bases
+
+
+def _pending_ready(items):
+    """Split pending items into (ready, blocked).
+
+    A pending item is BLOCKED if one of the types it declares derives from a type
+    declared in a *different* pending file; that base file must go first.
+    Returns (pending, ready, blocked_by) where blocked_by maps path -> set(paths).
+    """
+    pending = [it for it in items if it["status"] == "pending"]
+    info = {it["path"]: _declared_and_bases(it["path"]) for it in pending}
+    decl_map = {}  # type name -> set of pending paths declaring it
+    for path, (declared, _bases) in info.items():
+        for t in declared:
+            decl_map.setdefault(t, set()).add(path)
+    ready, blocked_by = [], {}
+    for it in pending:
+        _declared, bases = info[it["path"]]
+        blockers = set()
+        for b in bases:
+            for p in decl_map.get(b, ()):
+                if p != it["path"]:
+                    blockers.add(p)
+        if blockers:
+            blocked_by[it["path"]] = blockers
+        else:
+            ready.append(it)
+    return pending, ready, blocked_by
+
+
 def _git(*args):
     return subprocess.run(
         ["git", *args], cwd=REPO, capture_output=True, text=True
@@ -67,11 +163,24 @@ def _git(*args):
 
 def cmd_next(args) -> int:
     data = _load()
-    pending = [it for it in data["items"] if it["status"] == "pending"]
+    pending, ready, blocked_by = _pending_ready(data["items"])
     if not pending:
         print("no pending items", file=sys.stderr)
         return 1
-    nxt = min(pending, key=lambda it: it["order"])
+    # Prefer base-before-derived: pick the easiest READY item. If nothing is
+    # ready (a dependency cycle), fall back to plain easiest-first so we never
+    # deadlock.
+    pool = ready if ready else pending
+    nxt = min(pool, key=lambda it: it["order"])
+    strict = min(pending, key=lambda it: it["order"])
+    if nxt is not strict:
+        blockers = sorted(blocked_by.get(strict["path"], ()))
+        print(
+            "base-first: skipping order "
+            + f"{strict['order']} ({strict['path']}) until its pending base file(s) are done: "
+            + ", ".join(blockers),
+            file=sys.stderr,
+        )
     if args.path:
         print(nxt["path"])
         return 0

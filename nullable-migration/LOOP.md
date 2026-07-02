@@ -71,6 +71,13 @@ wrong and you must build instead.
    done — stop. It prints the `order`, `path`, `project`, containing `csproj`, and the exact `build`
    command to use. Mark it in-progress:
    `python3 nullable-migration/loop.py status --order <order> --status in-progress`.
+   - **Base before derived.** Items are normally easiest-first, but `next` enforces a
+     base-before-derived constraint: if the lowest-order pending file declares a type that derives
+     from (or implements) a type declared in a *different* still-pending file, `next` skips it and
+     hands you the base file first (it prints a `base-first: skipping ...` note on stderr explaining
+     which base it is waiting on). Annotating a base member's nullability ripples into every override,
+     so doing the base first avoids re-touching (churning) the derived files. Just take whatever `next`
+     gives you — the ordering is handled for you.
 
 2. **Identify the containing project** (needed for the build feedback loop):
    - `src/Compilers/CSharp/Portable/...` → `src/Compilers/CSharp/Portable/Microsoft.CodeAnalysis.CSharp.csproj`
