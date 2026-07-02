@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -123,9 +121,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
             // Native compiler encodes bools (always false) for custom modifiers and parameter ref-kinds, if ref-kind is ref or out.
             if (decoder.HandleCustomModifiers(targetSymbolCustomModifierCount) && decoder.HandleRefKind(targetSymbolRefKind))
             {
-                TypeSymbol transformedType = decoder.TransformType(metadataType);
+                TypeSymbol? transformedType = decoder.TransformType(metadataType);
 
-                if ((object)transformedType != null && (!checkLength || decoder._index == dynamicTransformFlags.Length))
+                if ((object?)transformedType != null && (!checkLength || decoder._index == dynamicTransformFlags.Length))
                 {
                     // Even when we're not checking the length, there shouldn't be any unconsumed "true"s.
                     Debug.Assert(checkLength || decoder._dynamicTransformFlags.LastIndexOf(true) < decoder._index);
@@ -137,7 +135,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
             return metadataType;
         }
 
-        private TypeSymbol TransformType(TypeSymbol type)
+        private TypeSymbol? TransformType(TypeSymbol type)
         {
             Debug.Assert(_index >= 0);
 
@@ -212,7 +210,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
             return refKind == RefKind.None || !ConsumeFlag();
         }
 
-        private NamedTypeSymbol TransformNamedType(NamedTypeSymbol namedType, bool isContaining = false)
+        private NamedTypeSymbol? TransformNamedType(NamedTypeSymbol namedType, bool isContaining = false)
         {
             // Native compiler encodes a bool for the given namedType, but none for its containing types.
             if (!isContaining)
@@ -222,11 +220,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
             }
 
             NamedTypeSymbol containingType = namedType.ContainingType;
-            NamedTypeSymbol newContainingType;
-            if ((object)containingType != null && containingType.IsGenericType)
+            NamedTypeSymbol? newContainingType;
+            if ((object?)containingType != null && containingType.IsGenericType)
             {
                 newContainingType = TransformNamedType(namedType.ContainingType, isContaining: true);
-                if ((object)newContainingType == null)
+                if ((object?)newContainingType == null)
                 {
                     return null;
                 }
@@ -278,8 +276,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
             bool anyTransformed = false;
             foreach (var typeArg in typeArguments)
             {
-                TypeSymbol transformedTypeArg = TransformType(typeArg.Type);
-                if ((object)transformedTypeArg == null)
+                TypeSymbol? transformedTypeArg = TransformType(typeArg.Type);
+                if ((object?)transformedTypeArg == null)
                 {
                     transformedTypeArgsBuilder.Free();
                     return default(ImmutableArray<TypeWithAnnotations>);
@@ -299,7 +297,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
             return transformedTypeArgsBuilder.ToImmutableAndFree();
         }
 
-        private ArrayTypeSymbol TransformArrayType(ArrayTypeSymbol arrayType)
+        private ArrayTypeSymbol? TransformArrayType(ArrayTypeSymbol arrayType)
         {
             var flag = ConsumeFlag();
             Debug.Assert(!flag);
@@ -309,8 +307,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
                 return null;
             }
 
-            TypeSymbol transformedElementType = TransformType(arrayType.ElementType);
-            if ((object)transformedElementType == null)
+            TypeSymbol? transformedElementType = TransformType(arrayType.ElementType);
+            if ((object?)transformedElementType == null)
             {
                 return null;
             }
@@ -322,7 +320,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
                     ArrayTypeSymbol.CreateMDArray(_containingAssembly, arrayType.ElementTypeWithAnnotations.WithTypeAndModifiers(transformedElementType, arrayType.ElementTypeWithAnnotations.CustomModifiers), arrayType.Rank, arrayType.Sizes, arrayType.LowerBounds);
         }
 
-        private PointerTypeSymbol TransformPointerType(PointerTypeSymbol pointerType)
+        private PointerTypeSymbol? TransformPointerType(PointerTypeSymbol pointerType)
         {
             var flag = ConsumeFlag();
             Debug.Assert(!flag);
@@ -332,8 +330,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
                 return null;
             }
 
-            TypeSymbol transformedPointedAtType = TransformType(pointerType.PointedAtType);
-            if ((object)transformedPointedAtType == null)
+            TypeSymbol? transformedPointedAtType = TransformType(pointerType.PointedAtType);
+            if ((object?)transformedPointedAtType == null)
             {
                 return null;
             }
@@ -343,7 +341,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
                 new PointerTypeSymbol(pointerType.PointedAtTypeWithAnnotations.WithTypeAndModifiers(transformedPointedAtType, pointerType.PointedAtTypeWithAnnotations.CustomModifiers));
         }
 
-#nullable enable
         private FunctionPointerTypeSymbol? TransformFunctionPointerType(FunctionPointerTypeSymbol type)
         {
             var flag = ConsumeFlag();
@@ -418,7 +415,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
                 return (typeWithAnnotations.WithType(transformedType), true);
             }
         }
-#nullable disable
 
         private bool HasFlag => _index < _dynamicTransformFlags.Length || !_checkLength;
 
