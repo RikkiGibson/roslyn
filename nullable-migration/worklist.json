@@ -933,8 +933,8 @@
       "toggles": 2,
       "totalLines": 701,
       "disabledLines": 655,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Made decodedData param and _lazyTypeAndRefKind field nullable; (object?) idiom; null!/Debug.Assert for oblivious base overrides and Parent navigation",
       "order": 85
     },
     {
