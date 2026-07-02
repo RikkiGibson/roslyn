@@ -900,8 +900,8 @@
       "toggles": 9,
       "totalLines": 902,
       "disabledLines": 620,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed 10 directives; _lazyName->string?; TryGetBodyBinder override return/param nullable to match enabled base (ExecutableCodeBinder?/BinderFactory?). No ripple.",
       "order": 82
     },
     {

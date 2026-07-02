@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
@@ -22,7 +20,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         private TypeWithAnnotations _lazyReturnType;
         private ImmutableArray<CustomModifier> _lazyRefCustomModifiers;
         private ImmutableArray<MethodSymbol> _lazyExplicitInterfaceImplementations;
-        private string _lazyName;
+        private string? _lazyName;
         private readonly bool _isAutoPropertyAccessor;
         private readonly bool _usesInit;
 
@@ -81,7 +79,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 diagnostics);
         }
 
-#nullable enable
         public static SourcePropertyAccessorSymbol CreateAccessorSymbol(
             bool isGetMethod,
             bool usesInit,
@@ -151,7 +148,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 isNullableAnalysisEnabled: false,
                 diagnostics);
         }
-#nullable disable
 
         internal sealed override ImmutableArray<string> NotNullMembers
             => _property.NotNullMembers.Concat(base.NotNullMembers);
@@ -195,7 +191,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             this.CheckModifiers(location, hasBody: true, isAutoPropertyOrExpressionBodied: true, diagnostics: diagnostics);
         }
 
-#nullable enable
         protected SourcePropertyAccessorSymbol(
             NamedTypeSymbol containingType,
             SourcePropertySymbolBase property,
@@ -272,9 +267,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             return (declarationModifiers, flags);
         }
-#nullable disable
 
-        internal override ExecutableCodeBinder TryGetBodyBinder(BinderFactory binderFactoryOpt = null, bool ignoreAccessibility = false)
+        internal override ExecutableCodeBinder? TryGetBodyBinder(BinderFactory? binderFactoryOpt = null, bool ignoreAccessibility = false)
         {
             if (_property is SynthesizedUnionValuePropertySymbol or SynthesizedRecordEqualityContractProperty or SynthesizedRecordPropertySymbol)
             {
@@ -642,7 +636,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-#nullable enable
         public sealed override ImmutableArray<MethodSymbol> ExplicitInterfaceImplementations
         {
             get
@@ -673,7 +666,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return _lazyExplicitInterfaceImplementations;
             }
         }
-#nullable disable
 
         internal sealed override OneOrMany<SyntaxList<AttributeListSyntax>> GetAttributeDeclarations()
         {
@@ -714,7 +706,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-#nullable enable
         public sealed override string Name
         {
             get
@@ -766,7 +757,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return _lazyName;
             }
         }
-#nullable disable
 
         public override bool IsImplicitlyDeclared
         {
@@ -852,7 +842,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-#nullable enable
         protected sealed override SourceMemberMethodSymbol? BoundAttributesSource => (SourceMemberMethodSymbol?)PartialDefinitionPart;
 
         public sealed override MethodSymbol? PartialImplementationPart => _property is SourcePropertySymbol { IsPartialDefinition: true, OtherPartOfPartial: { } other }
