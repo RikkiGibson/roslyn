@@ -966,8 +966,8 @@
       "toggles": 6,
       "totalLines": 952,
       "disabledLines": 673,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed #nullable directives; nullable returns on OfMinimalArity/GetOwnOrInherited{Add,Remove}Method/GetOverriddenMember; [NotNullWhen]/[MemberNotNull]-style attrs on IsImplementable/HasThisConstructorInitializer/IsFieldOrFieldLikeEvent; nullable accessingTypeOpt; fixed same-project ripple in 7 files",
       "order": 88
     },
     {

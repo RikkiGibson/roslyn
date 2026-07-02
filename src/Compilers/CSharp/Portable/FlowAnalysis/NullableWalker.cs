@@ -1017,7 +1017,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                                 // will have already set the abstract member to non-null, and there isn't a separate slot for that abstract member.
                                 if (requiredMember is PropertySymbol { IsAbstract: true } abstractProperty)
                                 {
-                                    if (members.FirstOrDefault(static (thisMember, baseMember) => thisMember.IsOverride && (object)thisMember.GetOverriddenMember() == baseMember, requiredMember) is { } overridingMember
+                                    if (members.FirstOrDefault(static (thisMember, baseMember) => thisMember.IsOverride && (object?)thisMember.GetOverriddenMember() == baseMember, requiredMember) is { } overridingMember
                                         && isFilterableOverrideOfAbstractProperty((PropertySymbol)overridingMember))
                                     {
                                         continue;

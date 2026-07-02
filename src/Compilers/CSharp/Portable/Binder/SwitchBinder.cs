@@ -445,7 +445,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     {
                         // Condition (2) satisfied
                         Debug.Assert(conversion.Kind == ConversionKind.ImplicitUserDefined);
-                        Debug.Assert(conversion.Method.IsUserDefinedConversion());
+                        Debug.Assert(conversion.Method!.IsUserDefinedConversion());
                         Debug.Assert(conversion.UserDefinedToConversion.IsIdentity);
                         Debug.Assert(resultantGoverningType.IsValidV6SwitchGoverningType(isTargetTypeOfUserDefinedOp: true));
                         return binder.CreateConversion(node, switchGoverningExpression, conversion, isCast: false, conversionGroupOpt: null, InConversionGroupFlags.Unspecified, resultantGoverningType, diagnostics);

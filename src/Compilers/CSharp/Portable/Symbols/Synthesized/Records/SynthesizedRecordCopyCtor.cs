@@ -107,6 +107,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
                     if (bestModifierCountSoFar < 0)
                     {
+                        Debug.Assert(bestCandidate is not null);
                         bestModifierCountSoFar = bestCandidate.CustomModifierCount();
                     }
 

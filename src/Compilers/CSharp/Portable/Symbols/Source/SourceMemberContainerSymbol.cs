@@ -764,7 +764,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
                     foreach (var member in membersAndInitializers.NonTypeMembers)
                     {
-                        FieldSymbol field;
+                        FieldSymbol? field;
                         if (!member.IsFieldOrFieldLikeEvent(out field) || field.IsConst || field.IsFixedSizeBuffer)
                         {
                             continue;
