@@ -1109,8 +1109,8 @@
       "toggles": 2,
       "totalLines": 1087,
       "disabledLines": 1075,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Cci emit adapter: matched nullable Cci As*/GetResolvedType/GetBaseClass/AsDefinition return types; nullable synthesized-member locals and ref seen; (CSharpSyntaxNode?) casts; (object?) idioms for as-results and BaseTypeNoUseSiteDiagnostics",
       "order": 101
     },
     {
