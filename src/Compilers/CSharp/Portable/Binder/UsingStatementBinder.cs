@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -26,8 +24,8 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         protected override ImmutableArray<LocalSymbol> BuildLocals()
         {
-            ExpressionSyntax expressionSyntax = TargetExpressionSyntax;
-            VariableDeclarationSyntax declarationSyntax = _syntax.Declaration;
+            ExpressionSyntax? expressionSyntax = TargetExpressionSyntax;
+            VariableDeclarationSyntax? declarationSyntax = _syntax.Declaration;
 
             Debug.Assert((expressionSyntax == null) ^ (declarationSyntax == null)); // Can't have both or neither.
 
@@ -39,6 +37,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
             else
             {
+                Debug.Assert(declarationSyntax is not null);
                 var locals = ArrayBuilder<LocalSymbol>.GetInstance(declarationSyntax.Variables.Count);
 
                 // gather expression-declared variables from invalid array dimensions. eg. using(int[x is var y] z = new int[0])
@@ -65,7 +64,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        protected override ExpressionSyntax TargetExpressionSyntax
+        protected override ExpressionSyntax? TargetExpressionSyntax
         {
             get
             {
@@ -75,18 +74,17 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         internal override BoundStatement BindUsingStatementParts(BindingDiagnosticBag diagnostics, Binder originalBinder)
         {
-            ExpressionSyntax expressionSyntax = TargetExpressionSyntax;
-            VariableDeclarationSyntax declarationSyntax = _syntax.Declaration;
+            ExpressionSyntax? expressionSyntax = TargetExpressionSyntax;
+            VariableDeclarationSyntax? declarationSyntax = _syntax.Declaration;
             bool hasAwait = _syntax.AwaitKeyword.Kind() != default;
 
             Debug.Assert((expressionSyntax == null) ^ (declarationSyntax == null)); // Can't have both or neither.
 
-            var boundUsingStatement = BindUsingStatementOrDeclarationFromParts((CSharpSyntaxNode)expressionSyntax ?? declarationSyntax, _syntax.UsingKeyword, _syntax.AwaitKeyword, originalBinder, this, diagnostics);
+            var boundUsingStatement = BindUsingStatementOrDeclarationFromParts(((CSharpSyntaxNode?)expressionSyntax ?? declarationSyntax)!, _syntax.UsingKeyword, _syntax.AwaitKeyword, originalBinder, this, diagnostics);
             Debug.Assert(boundUsingStatement is BoundUsingStatement);
             return boundUsingStatement;
         }
 
-#nullable enable
         internal static BoundStatement BindUsingStatementOrDeclarationFromParts(SyntaxNode syntax, SyntaxToken usingKeyword, SyntaxToken awaitKeyword, Binder originalBinder, UsingStatementBinder? usingBinderOpt, BindingDiagnosticBag diagnostics)
         {
             bool isUsingDeclaration = syntax.Kind() == SyntaxKind.LocalDeclarationStatement;

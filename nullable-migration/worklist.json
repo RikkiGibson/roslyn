@@ -108,8 +108,8 @@
       "toggles": 1,
       "totalLines": 341,
       "disabledLines": 84,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "annotated nullable target-expression/declaration locals + return; XOR asserts",
       "order": 10
     },
     {
