@@ -262,8 +262,8 @@
       "toggles": 1,
       "totalLines": 204,
       "disabledLines": 187,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Annotated internal override return/out types nullable (BaseTypeNoUseSiteDiagnostics, GetDeclaredBaseType, ComImportCoClass, GetGuidString, ObsoleteAttributeData, ExtensionParameter, NativeIntegerUnderlyingType)",
       "order": 24
     },
     {
