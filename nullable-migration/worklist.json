@@ -790,8 +790,8 @@
       "toggles": 3,
       "totalLines": 874,
       "disabledLines": 512,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed 4 nullable directives; (object?) idiom for enum/pointer/operand.Type null checks, made constrainedToTypeOpt local/param and current nullable, name2Opt string? on internal GetUserDefinedOperators",
       "order": 72
     },
     {
