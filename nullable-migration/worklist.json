@@ -273,8 +273,8 @@
       "toggles": 2,
       "totalLines": 309,
       "disabledLines": 195,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "CS8603 nullable return on GetConstantValue; CS8600 legacy (object?) cast idiom",
       "order": 25
     },
     {
