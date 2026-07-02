@@ -132,9 +132,15 @@ wrong and you must build instead.
    `dotnet build <csproj> -f net10.0 -p:RunAnalyzersDuringBuild=false -p:WarningsAsErrors=nullable -p:GenerateFullPaths=true -tl:off`
    → require `0 Warning(s)  0 Error(s)`. This already covers same-project cross-file ripple. If your
    change touched an **interface/base member signature** used by *other* projects (incl. the VB
-   compiler) or *other* TFMs, also verify with the whole compilers filter:
-   `dotnet build -p:RunAnalyzersDuringBuild=false -p:GenerateFullPaths=true -tl:off Compilers.slnf`
-   (~3 min; note the filter build does not elevate nullable to errors, so grep `warning CS`).
+   compiler) — e.g. a change under `src/Compilers/Core/Portable/...` that alters an `abstract` /
+   `virtual` / interface member's nullability — also verify with the ripple filter
+   `CompilerConsumers.slnf` (the non-test set of projects with `InternalsVisibleTo` access to
+   `Microsoft.CodeAnalysis` / `Microsoft.CodeAnalysis.CSharp`). Do **not** use `Compilers.slnf` (it
+   pulls in test projects and is slower); use:
+   `dotnet build CompilerConsumers.slnf -p:RunAnalyzersDuringBuild=false -p:WarningsAsErrors=nullable -p:GenerateFullPaths=true -tl:off`
+   Because `-p:WarningsAsErrors=nullable` propagates to every project built, this elevates nullable to
+   errors across all the consumers in one build; grep `-E "error CS|Warning\(s\)|Error\(s\)"` and require
+   `0 Error(s)`. (VB projects never emit CS8xxx, so they can't break from nullable annotation changes.)
 
 9. **Record + commit** (one file per commit):
    - `python3 nullable-migration/loop.py status --order <order> --status done --note "<short note>"`

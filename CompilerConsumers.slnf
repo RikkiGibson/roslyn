@@ -1,0 +1,25 @@
+{
+  "solution": {
+    "path": "Roslyn.slnx",
+    "projects": [
+      "src\\Compilers\\Core\\Portable\\Microsoft.CodeAnalysis.csproj",
+      "src\\Compilers\\CSharp\\Portable\\Microsoft.CodeAnalysis.CSharp.csproj",
+      "src\\Compilers\\VisualBasic\\Portable\\Microsoft.CodeAnalysis.VisualBasic.vbproj",
+      "src\\Compilers\\Core\\Rebuild\\Microsoft.CodeAnalysis.Rebuild.csproj",
+      "src\\Compilers\\Core\\MSBuildTask\\MSBuild\\Microsoft.Build.Tasks.CodeAnalysis.csproj",
+      "src\\Compilers\\CSharp\\csc\\AnyCpu\\csc.csproj",
+      "src\\Compilers\\VisualBasic\\vbc\\AnyCpu\\vbc.csproj",
+      "src\\Compilers\\Server\\VBCSCompiler\\AnyCpu\\VBCSCompiler.csproj",
+      "src\\ExpressionEvaluator\\Core\\Source\\ExpressionCompiler\\Microsoft.CodeAnalysis.ExpressionCompiler.csproj",
+      "src\\ExpressionEvaluator\\CSharp\\Source\\ExpressionCompiler\\Microsoft.CodeAnalysis.CSharp.ExpressionCompiler.csproj",
+      "src\\ExpressionEvaluator\\VisualBasic\\Source\\ExpressionCompiler\\Microsoft.CodeAnalysis.VisualBasic.ExpressionCompiler.vbproj",
+      "src\\Scripting\\Core\\Microsoft.CodeAnalysis.Scripting.csproj",
+      "src\\Scripting\\CSharp\\Microsoft.CodeAnalysis.CSharp.Scripting.csproj",
+      "src\\Scripting\\VisualBasic\\Microsoft.CodeAnalysis.VisualBasic.Scripting.vbproj",
+      "src\\Interactive\\csi\\csi.csproj",
+      "src\\Interactive\\vbi\\vbi.vbproj",
+      "src\\Tools\\BuildValidator\\BuildValidator.csproj",
+      "src\\Tools\\ExternalAccess\\RazorCompiler\\Microsoft.CodeAnalysis.ExternalAccess.RazorCompiler.csproj"
+    ]
+  }
+}
