@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis.CodeGen;
@@ -77,7 +75,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
 
             public TMethodSymbol UnderlyingMethod => this.UnderlyingSymbol;
 
-            protected sealed override TAttributeData PortAttributeIfNeedTo(TAttributeData attrData, TSyntaxNode syntaxNodeOpt, DiagnosticBag diagnostics)
+            protected sealed override TAttributeData? PortAttributeIfNeedTo(TAttributeData attrData, TSyntaxNode syntaxNodeOpt, DiagnosticBag diagnostics)
             {
                 // Note, when porting attributes, we are not using constructors from original symbol.
                 // The constructors might be missing (for example, in metadata case) and doing lookup
@@ -93,7 +91,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
 
                 return null;
             }
-#nullable enable
+
             public bool HasBody
                 => Cci.DefaultImplementations.HasBody(this);
 
@@ -109,7 +107,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
 
                 return null;
             }
-#nullable disable
+
             private sealed class EmptyBody : Cci.IMethodBody
             {
                 private readonly CommonEmbeddedMethod _method;
@@ -139,25 +137,25 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
 
                 bool Cci.IMethodBody.HasDynamicLocalVariables => false;
 
-                StateMachineMoveNextBodyDebugInfo Cci.IMethodBody.MoveNextBodyInfo => null;
+                StateMachineMoveNextBodyDebugInfo? Cci.IMethodBody.MoveNextBodyInfo => null;
 
                 ImmutableArray<SourceSpan> Cci.IMethodBody.CodeCoverageSpans => ImmutableArray<SourceSpan>.Empty;
 
                 ImmutableArray<Cci.LocalScope> Cci.IMethodBody.LocalScopes =>
                     ImmutableArray<Cci.LocalScope>.Empty;
 
-                Cci.IImportScope Cci.IMethodBody.ImportScope => null;
+                Cci.IImportScope? Cci.IMethodBody.ImportScope => null;
 
                 ImmutableArray<StateMachineHoistedLocalScope> Cci.IMethodBody.StateMachineHoistedLocalScopes =>
                     default(ImmutableArray<StateMachineHoistedLocalScope>);
 
-                string Cci.IMethodBody.StateMachineTypeName => null;
+                string? Cci.IMethodBody.StateMachineTypeName => null;
 
                 ImmutableArray<EncHoistedLocalInfo> Cci.IMethodBody.StateMachineHoistedLocalSlots =>
                     default(ImmutableArray<EncHoistedLocalInfo>);
 
-                ImmutableArray<Cci.ITypeReference> Cci.IMethodBody.StateMachineAwaiterSlots =>
-                    default(ImmutableArray<Cci.ITypeReference>);
+                ImmutableArray<Cci.ITypeReference?> Cci.IMethodBody.StateMachineAwaiterSlots =>
+                    default(ImmutableArray<Cci.ITypeReference?>);
 
                 ImmutableArray<EncClosureInfo> Cci.IMethodBody.ClosureDebugInfo =>
                     default(ImmutableArray<EncClosureInfo>);
@@ -277,9 +275,9 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
                 }
             }
 
-            Cci.IGenericMethodInstanceReference Cci.IMethodReference.AsGenericMethodInstanceReference => null;
+            Cci.IGenericMethodInstanceReference? Cci.IMethodReference.AsGenericMethodInstanceReference => null;
 
-            Cci.ISpecializedMethodReference Cci.IMethodReference.AsSpecializedMethodReference => null;
+            Cci.ISpecializedMethodReference? Cci.IMethodReference.AsSpecializedMethodReference => null;
 
             Cci.CallingConvention Cci.ISignature.CallingConvention => UnderlyingMethodSignature.CallingConvention;
 
@@ -308,7 +306,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
             /// </remarks>
             public override string ToString()
             {
-                return UnderlyingMethod.GetInternalSymbol().GetISymbol().ToDisplayString(SymbolDisplayFormat.ILVisualizationFormat);
+                return UnderlyingMethod.GetInternalSymbol()!.GetISymbol().ToDisplayString(SymbolDisplayFormat.ILVisualizationFormat);
             }
         }
     }

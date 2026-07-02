@@ -504,8 +504,8 @@
       "toggles": 2,
       "totalLines": 315,
       "disabledLines": 295,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Matched Cci.IMethodBody/IMethodReference nullable members (MoveNextBodyInfo?, ImportScope?, StateMachineTypeName?, StateMachineAwaiterSlots<ITypeReference?>, As*Reference?); PortAttributeIfNeedTo returns TAttributeData?; ! on test-only ToString GetInternalSymbol",
       "order": 46
     },
     {
