@@ -647,8 +647,8 @@
       "toggles": 4,
       "totalLines": 566,
       "disabledLines": 384,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Conversions.cs: nullable ctor otherNullabilityOpt; MethodSymbol? tuple return + Opt param; ParameterSymbol? thisParameter; (object?) idioms; reused delegateInvokeMethod local; ! on resolution.OverloadResolutionResult/MethodGroup and GetReceiverParameter",
       "order": 59
     },
     {
