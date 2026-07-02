@@ -1065,8 +1065,8 @@
       "toggles": 4,
       "totalLines": 1246,
       "disabledLines": 1011,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed 5 directives; walker Visit* overrides -> BoundNode?; MightAssignSomething/MethodMayMutateReceiver params nullable + receiver?.Type; TryGetValue out LabelSymbol?; nextNode params/locals nullable (LowerDecisionDagNode/GenerateTest); ForInput/ForType nullable + Debug.Assert; _loweredDecisionDag = null! late-init buffer; lengthBasedDispatchOpt?; (object?) idiom x3; DiagnosticBag!",
       "order": 97
     },
     {

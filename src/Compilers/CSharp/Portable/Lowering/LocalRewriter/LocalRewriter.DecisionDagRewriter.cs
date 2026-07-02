@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -35,21 +33,19 @@ namespace Microsoft.CodeAnalysis.CSharp
             /// The lowered decision dag. This includes all of the code to decide which pattern
             /// is matched, but not the code to assign to pattern variables and evaluate when clauses.
             /// </summary>
-            private ArrayBuilder<BoundStatement> _loweredDecisionDag;
+            private ArrayBuilder<BoundStatement> _loweredDecisionDag = null!;
 
             /// <summary>
             /// The label in the code for the beginning of code for each node of the dag.
             /// </summary>
             private readonly PooledDictionary<BoundDecisionDagNode, LabelSymbol> _dagNodeLabels = PooledDictionary<BoundDecisionDagNode, LabelSymbol>.GetInstance();
 
-#nullable enable
             // When different branches of the DAG share `when` expressions, the
             // shared expression will be lowered as a shared section and the `when` nodes that need
             // to will jump there. After the expression is evaluated, we need to jump to different
             // labels depending on the `when` node we came from. To achieve that, each `when` node
             // gets an identifier and sets a local before jumping into the shared `when` expression.
             internal LocalSymbol? _whenNodeIdentifierLocal;
-#nullable disable
 
             protected DecisionDagRewriter(
                 SyntaxNode node,
@@ -110,7 +106,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             protected virtual LabelSymbol GetDagNodeLabel(BoundDecisionDagNode dag)
             {
-                if (!_dagNodeLabels.TryGetValue(dag, out LabelSymbol label))
+                if (!_dagNodeLabels.TryGetValue(dag, out LabelSymbol? label))
                 {
                     _dagNodeLabels.Add(dag, label = dag is BoundLeafDecisionDagNode d ? d.Label : _factory.GenerateLabel("dagNode"));
                 }
@@ -128,7 +124,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 private bool _mightAssignSomething;
 
-                public bool MightAssignSomething(BoundExpression expr)
+                public bool MightAssignSomething(BoundExpression? expr)
                 {
                     if (expr == null)
                         return false;
@@ -138,7 +134,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return this._mightAssignSomething;
                 }
 
-                public override BoundNode Visit(BoundNode node)
+                public override BoundNode? Visit(BoundNode? node)
                 {
                     // A constant expression cannot mutate anything
                     if (node is BoundExpression { ConstantValueOpt: { } })
@@ -164,18 +160,18 @@ namespace Microsoft.CodeAnalysis.CSharp
                         base.VisitArguments(node);
                 }
 
-                private static bool MethodMayMutateReceiver(BoundExpression receiver, MethodSymbol method)
+                private static bool MethodMayMutateReceiver(BoundExpression? receiver, MethodSymbol? method)
                 {
                     return
                         method != null &&
                         !method.IsStatic &&
                         !method.IsEffectivelyReadOnly &&
-                        receiver.Type?.IsReferenceType == false &&
+                        receiver?.Type?.IsReferenceType == false &&
                         // methods of primitive types do not mutate their receiver
                         !method.ContainingType.SpecialType.IsPrimitiveRecursiveStruct();
                 }
 
-                public override BoundNode VisitPropertyAccess(BoundPropertyAccess node)
+                public override BoundNode? VisitPropertyAccess(BoundPropertyAccess node)
                 {
                     bool mightMutate =
                         // We only need to check the get accessor because an assignment would cause _mightAssignSomething to be set to true in the caller
@@ -189,19 +185,19 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return null;
                 }
 
-                public override BoundNode VisitAssignmentOperator(BoundAssignmentOperator node)
+                public override BoundNode? VisitAssignmentOperator(BoundAssignmentOperator node)
                 {
                     _mightAssignSomething = true;
                     return null;
                 }
 
-                public override BoundNode VisitCompoundAssignmentOperator(BoundCompoundAssignmentOperator node)
+                public override BoundNode? VisitCompoundAssignmentOperator(BoundCompoundAssignmentOperator node)
                 {
                     _mightAssignSomething = true;
                     return null;
                 }
 
-                public override BoundNode VisitConversion(BoundConversion node)
+                public override BoundNode? VisitConversion(BoundConversion node)
                 {
                     visitConversion(node.Conversion);
                     if (!_mightAssignSomething)
@@ -213,7 +209,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         switch (conversion.Kind)
                         {
                             case ConversionKind.MethodGroup:
-                                if (conversion.Method.MethodKind == MethodKind.LocalFunction)
+                                if (conversion.Method?.MethodKind == MethodKind.LocalFunction)
                                 {
                                     _mightAssignSomething = true;
                                 }
@@ -234,7 +230,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     }
                 }
 
-                public override BoundNode VisitDelegateCreationExpression(BoundDelegateCreationExpression node)
+                public override BoundNode? VisitDelegateCreationExpression(BoundDelegateCreationExpression node)
                 {
                     bool mightMutate =
                         node.MethodOpt?.MethodKind == MethodKind.LocalFunction;
@@ -247,25 +243,25 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return null;
                 }
 
-                public override BoundNode VisitAddressOfOperator(BoundAddressOfOperator node)
+                public override BoundNode? VisitAddressOfOperator(BoundAddressOfOperator node)
                 {
                     _mightAssignSomething = true;
                     return null;
                 }
 
-                public override BoundNode VisitDeconstructionAssignmentOperator(BoundDeconstructionAssignmentOperator node)
+                public override BoundNode? VisitDeconstructionAssignmentOperator(BoundDeconstructionAssignmentOperator node)
                 {
                     _mightAssignSomething = true;
                     return null;
                 }
 
-                public override BoundNode VisitIncrementOperator(BoundIncrementOperator node)
+                public override BoundNode? VisitIncrementOperator(BoundIncrementOperator node)
                 {
                     _mightAssignSomething = true;
                     return null;
                 }
 
-                public override BoundNode VisitDynamicInvocation(BoundDynamicInvocation node)
+                public override BoundNode? VisitDynamicInvocation(BoundDynamicInvocation node)
                 {
                     // perhaps we are passing a variable by ref and mutating it that way
                     if (!node.ArgumentRefKindsOpt.IsDefault)
@@ -276,7 +272,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return null;
                 }
 
-                public override BoundNode VisitObjectCreationExpression(BoundObjectCreationExpression node)
+                public override BoundNode? VisitObjectCreationExpression(BoundObjectCreationExpression node)
                 {
                     // perhaps we are passing a variable by ref and mutating it that way
                     if (!node.ArgumentRefKindsOpt.IsDefault)
@@ -287,7 +283,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return null;
                 }
 
-                public override BoundNode VisitDynamicObjectCreationExpression(BoundDynamicObjectCreationExpression node)
+                public override BoundNode? VisitDynamicObjectCreationExpression(BoundDynamicObjectCreationExpression node)
                 {
                     if (!node.ArgumentRefKindsOpt.IsDefault)
                         _mightAssignSomething = true;
@@ -297,7 +293,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return null;
                 }
 
-                public override BoundNode VisitObjectInitializerMember(BoundObjectInitializerMember node)
+                public override BoundNode? VisitObjectInitializerMember(BoundObjectInitializerMember node)
                 {
                     // Although ref indexers are not declarable in C#, they may be usable
                     if (!node.ArgumentRefKindsOpt.IsDefault)
@@ -308,7 +304,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return null;
                 }
 
-                public override BoundNode VisitIndexerAccess(BoundIndexerAccess node)
+                public override BoundNode? VisitIndexerAccess(BoundIndexerAccess node)
                 {
                     bool mightMutate =
                         !node.ArgumentRefKindsOpt.IsDefault ||
@@ -323,7 +319,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return null;
                 }
 
-                public override BoundNode VisitDynamicIndexerAccess(BoundDynamicIndexerAccess node)
+                public override BoundNode? VisitDynamicIndexerAccess(BoundDynamicIndexerAccess node)
                 {
                     if (!node.ArgumentRefKindsOpt.IsDefault)
                         _mightAssignSomething = true;
@@ -397,7 +393,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         continue;
                     }
 
-                    if (_dagNodeLabels.TryGetValue(node, out LabelSymbol label))
+                    if (_dagNodeLabels.TryGetValue(node, out LabelSymbol? label))
                     {
                         _loweredDecisionDag.Add(_factory.Label(label));
                     }
@@ -415,7 +411,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     }
 
                     // We pass the node that will follow so we can permit a test to fall through if appropriate
-                    BoundDecisionDagNode nextNode = ((i + 1) < length) ? nodesToLower[i + 1] : null;
+                    BoundDecisionDagNode? nextNode = ((i + 1) < length) ? nodesToLower[i + 1] : null;
                     if (nextNode != null && loweredNodes.Contains(nextNode))
                     {
                         nextNode = null;
@@ -426,7 +422,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                 loweredNodes.Free();
                 var result = _loweredDecisionDag.ToImmutableAndFree();
-                _loweredDecisionDag = null;
+                _loweredDecisionDag = null!;
                 return result;
             }
 
@@ -468,7 +464,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 return false;
             }
 
-            private void GenerateTest(BoundExpression test, BoundDecisionDagNode whenTrue, BoundDecisionDagNode whenFalse, BoundDecisionDagNode nextNode)
+            private void GenerateTest(BoundExpression test, BoundDecisionDagNode whenTrue, BoundDecisionDagNode whenFalse, BoundDecisionDagNode? nextNode)
             {
                 // Because we have already "optimized" away tests for a constant switch expression, the test should be nontrivial.
                 _factory.Syntax = test.Syntax;
@@ -551,7 +547,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                 HashSet<BoundDecisionDagNode> loweredNodes,
                 BoundDagTemp input)
             {
-                IConstantValueSetFactory fac = ValueSetFactory.ForInput(input);
+                IConstantValueSetFactory? fac = ValueSetFactory.ForInput(input);
+                Debug.Assert(fac is not null);
                 return GatherValueDispatchNodes(node, loweredNodes, input, fac);
             }
 
@@ -563,9 +560,9 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 if (loweredNodes.Contains(node))
                 {
-                    bool foundLabel = this._dagNodeLabels.TryGetValue(node, out LabelSymbol label);
+                    bool foundLabel = this._dagNodeLabels.TryGetValue(node, out LabelSymbol? label);
                     Debug.Assert(foundLabel);
-                    return new ValueDispatchNode.LeafDispatchNode(node.Syntax, label);
+                    return new ValueDispatchNode.LeafDispatchNode(node.Syntax, label!);
                 }
                 if (!(node is BoundTestDecisionDagNode testNode && testNode.Test.Input.Equals(input)))
                 {
@@ -706,8 +703,9 @@ namespace Microsoft.CodeAnalysis.CSharp
                 private readonly IConstantValueSetFactory _fac;
                 public CasesComparer(TypeSymbol type)
                 {
-                    _fac = ValueSetFactory.ForType(type);
-                    Debug.Assert(_fac is { });
+                    var fac = ValueSetFactory.ForType(type);
+                    Debug.Assert(fac is not null);
+                    _fac = fac;
                 }
 
                 int IComparer<(ConstantValue value, LabelSymbol label)>.Compare((ConstantValue value, LabelSymbol label) left, (ConstantValue value, LabelSymbol label) right)
@@ -743,6 +741,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 LabelSymbol defaultLabel = node.Otherwise;
 
+                Debug.Assert(input.Type is not null);
                 if (input.Type.IsValidV6SwitchGoverningType() || input.Type.IsSpanOrReadOnlySpanChar())
                 {
                     // If we are emitting a hash table based string switch,
@@ -752,7 +751,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     bool isStringInput = input.Type.SpecialType == SpecialType.System_String;
                     bool isSpanInput = input.Type.IsSpanChar();
                     bool isReadOnlySpanInput = input.Type.IsReadOnlySpanChar();
-                    LengthBasedStringSwitchData lengthBasedDispatchOpt = null;
+                    LengthBasedStringSwitchData? lengthBasedDispatchOpt = null;
                     if (isStringInput || isSpanInput || isReadOnlySpanInput)
                     {
                         var stringPatternInput = isStringInput ? StringPatternInput.String : (isSpanInput ? StringPatternInput.SpanChar : StringPatternInput.ReadOnlySpanChar);
@@ -865,7 +864,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         _ => throw ExceptionUtilities.UnexpectedValue(stringPatternInput),
                     };
 
-                    if ((object)lengthMember == null || lengthMember.HasUseSiteError)
+                    if ((object?)lengthMember == null || lengthMember.HasUseSiteError)
                     {
                         return false;
                     }
@@ -878,7 +877,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         _ => throw ExceptionUtilities.UnexpectedValue(stringPatternInput),
                     };
 
-                    if ((object)charsMember == null || charsMember.HasUseSiteError)
+                    if ((object?)charsMember == null || charsMember.HasUseSiteError)
                     {
                         return false;
                     }
@@ -928,7 +927,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                 // If we have already generated the helper, possibly for another switch
                 // or on another thread, we don't need to regenerate it.
-                var privateImplClass = module.GetPrivateImplClass(syntaxNode, _localRewriter._diagnostics.DiagnosticBag);
+                var privateImplClass = module.GetPrivateImplClass(syntaxNode, _localRewriter._diagnostics.DiagnosticBag!);
                 if (privateImplClass.PrivateImplementationDetails.GetMethod(stringPatternInput switch
                 {
                     StringPatternInput.String => CodeAnalysis.CodeGen.PrivateImplementationDetails.SynthesizedStringHashFunctionName,
@@ -948,7 +947,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     StringPatternInput.ReadOnlySpanChar => _localRewriter._compilation.GetWellKnownTypeMember(WellKnownMember.System_ReadOnlySpan_T__get_Item),
                     _ => throw ExceptionUtilities.UnexpectedValue(stringPatternInput),
                 };
-                if ((object)charsMember == null || charsMember.HasUseSiteError)
+                if ((object?)charsMember == null || charsMember.HasUseSiteError)
                 {
                     return;
                 }
@@ -974,7 +973,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                 privateImplClass.PrivateImplementationDetails.TryAddSynthesizedMethod(method.GetCciAdapter());
             }
 
-#nullable enable
             private void LowerWhenClauses(ImmutableArray<BoundDecisionDagNode> sortedNodes)
             {
                 if (!sortedNodes.Any(static n => n.Kind == BoundKind.WhenDecisionDagNode)) return;
@@ -1198,12 +1196,11 @@ namespace Microsoft.CodeAnalysis.CSharp
                     }
                 }
             }
-#nullable disable
 
             /// <summary>
             /// Translate the decision dag for node, given that it will be followed by the translation for nextNode.
             /// </summary>
-            private void LowerDecisionDagNode(BoundDecisionDagNode node, BoundDecisionDagNode nextNode)
+            private void LowerDecisionDagNode(BoundDecisionDagNode node, BoundDecisionDagNode? nextNode)
             {
                 _factory.Syntax = node.Syntax;
                 switch (node)
