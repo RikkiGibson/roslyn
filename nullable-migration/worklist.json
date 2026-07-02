@@ -944,8 +944,8 @@
       "toggles": 2,
       "totalLines": 703,
       "disabledLines": 659,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "attribute-free: nullable slotAllocatorOpt param, Debug.Asserts for env invariants, ModuleBuilderOpt!, nullable helper returns, StatementOpt!",
       "order": 86
     },
     {
