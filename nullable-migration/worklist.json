@@ -856,8 +856,8 @@
       "toggles": 7,
       "totalLines": 890,
       "disabledLines": 587,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Made _typeSyntax/_constantTuple nullable, GetConstantValue return+diagnostics nullable, ScopeDesignatorOpt nullable, ?/! on late-init and Parent, (object?) cast; rippled UpdatedContainingSymbolLocal overrides",
       "order": 78
     },
     {
