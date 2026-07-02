@@ -328,8 +328,8 @@
       "toggles": 2,
       "totalLines": 220,
       "disabledLines": 204,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed nullable directives; matched explicit ITypeSymbol/ISymbol interface member nullability (Equals param, FindImplementationForInterfaceMember return, SymbolDisplayFormat? params); made protected Equals otherType nullable",
       "order": 30
     },
     {
