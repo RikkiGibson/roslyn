@@ -713,8 +713,8 @@
       "toggles": 4,
       "totalLines": 1235,
       "disabledLines": 437,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed 5 #nullable directives; Debug.Assert for parameterSyntax.Default; pattern-match TypeSymbol guards for conversion branches; (object?) cast; FindContainingGenericMethod returns MethodSymbol?",
       "order": 65
     },
     {
