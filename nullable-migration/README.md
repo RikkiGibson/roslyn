@@ -51,6 +51,12 @@ not fix it inline — record it in `found-bugs.md`, keep the migration commit be
 (defer the file or land a documented, behavior-preserving guard), and fix the bug in a separate change
 so the semantic change gets its own review.
 
+**Public APIs are out of scope.** Do not change the nullability of public surface (e.g. `ISymbol`, or
+anything tracked in `PublicAPI.Shipped.txt` / `PublicAPI.Unshipped.txt`). If a warning can only be
+resolved by re-annotating a public member, defer the file (note: "requires public API nullability
+change"). Accidental public-API changes generally break CI, but defer deliberately rather than relying
+on that.
+
 ## Running the loop
 Drive it however you invoke your agent. The minimal shell driver:
 

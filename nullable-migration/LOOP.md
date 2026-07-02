@@ -26,6 +26,14 @@ inherits the project default, then resolving the resulting warnings.
   but cannot be expressed with an attribute or a local check. Prefer pairing it with a
   `Debug.Assert(...)` (assert is release-time no-op, so no runtime change). Do not sprinkle `!` to make
   warnings disappear — that hides real information and is not the kind of fix we want.
+- **Do NOT change the nullability of public APIs.** This loop is out of scope for public surface
+  (e.g. `ISymbol` and anything tracked in `PublicAPI.Shipped.txt` / `PublicAPI.Unshipped.txt`). Adding
+  or removing `?` on a public member's parameter/return/property is an API change requiring separate
+  review and API-tracking updates. If a warning can only be resolved by changing a public API's
+  nullability, **DEFER the file** (note: "requires public API nullability change"). Do not annotate the
+  public signature to make the warning go away. (Safety net: accidental public-API nullability changes
+  generally break CI — the public API analyzer / a build leg will flag them — so mistakes here are
+  usually caught, but don't rely on that; defer deliberately.)
 - Keep edits minimal and local. Cross-file annotations are allowed but should be small. If enabling
   this file forces broad ripples across other files' public/internal surface, that is a signal to DEFER.
 - Follow repo conventions: `_camelCase` private fields, `Contract.ThrowIfNull` only where a null check
@@ -83,9 +91,10 @@ optional final/CI-level check.
 
 7. **Decision:**
    - **Enable (default):** the file builds clean with reasonable, local changes → keep changes.
-   - **Defer:** clean enablement requires an API redesign or large cross-file ripple, **or** a real bug
-     is best fixed first. Then: `git checkout -- <path>` (and any other files you touched), and mark
-     deferred with a reason: `python3 nullable-migration/mark-status.py --order <order> --status deferred --note "<why; link found-bugs.md entry if applicable>"`.
+   - **Defer:** clean enablement requires an API redesign, a **public API nullability change**, a large
+     cross-file ripple, **or** a real bug is best fixed first. Then: `git checkout -- <path>` (and any
+     other files you touched), and mark deferred with a reason:
+     `python3 nullable-migration/mark-status.py --order <order> --status deferred --note "<why; link found-bugs.md entry if applicable>"`.
      Commit nothing for a deferral except the worklist update (step 9). Stop.
 
 8. **Final verification.** `get_errors` on the file must be clean. Optionally run
