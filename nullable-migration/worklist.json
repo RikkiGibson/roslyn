@@ -416,8 +416,8 @@
       "toggles": 1,
       "totalLines": 258,
       "disabledLines": 236,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Made explicitlyImplementedEventOpt/aliasQualifierOpt ctor params and GetOverriddenAccessorName return nullable; (object?) casts and nullable local symbols",
       "order": 38
     },
     {
