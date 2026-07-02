@@ -1032,8 +1032,8 @@
       "toggles": 2,
       "totalLines": 924,
       "disabledLines": 824,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable-enable PatternExplainer.cs: nullable graph-walk locals/dict-tuple, string? on tryHandle* fall-through helpers, Debug.Assert for guaranteed nodes, ! on FormatPrimitive for known primitives",
       "order": 94
     },
     {
