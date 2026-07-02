@@ -63,9 +63,10 @@ wrong and you must build instead.
 
 ## Procedure
 
-1. **Pick the file.** Run `python3 nullable-migration/pick-next.py`. If it prints nothing, the loop is
-   done — stop. Otherwise take the printed `<order>` and `<path>`. Mark it in-progress:
-   `python3 nullable-migration/mark-status.py --order <order> --status in-progress`.
+1. **Pick the file.** Run `python3 nullable-migration/loop.py next`. If it prints nothing, the loop is
+   done — stop. It prints the `order`, `path`, `project`, containing `csproj`, and the exact `build`
+   command to use. Mark it in-progress:
+   `python3 nullable-migration/loop.py status --order <order> --status in-progress`.
 
 2. **Identify the containing project** (needed for the build feedback loop):
    - `src/Compilers/CSharp/Portable/...` → `src/Compilers/CSharp/Portable/Microsoft.CodeAnalysis.CSharp.csproj`
@@ -105,10 +106,15 @@ wrong and you must build instead.
 
 7. **Decision:**
    - **Enable (default):** the file builds clean with reasonable, local changes → keep changes.
-   - **Defer:** clean enablement requires an API redesign, a **public API nullability change**, a large
-     cross-file ripple, **or** a real bug is best fixed first. Then: `git checkout -- <path>` (and any
-     other files you touched), and mark deferred with a reason:
-     `python3 nullable-migration/mark-status.py --order <order> --status deferred --note "<why; link found-bugs.md entry if applicable>"`.
+   - **Island (preferred over deferring the whole file):** if only ONE method/region can't be enabled
+     cleanly (needs an API redesign, or a real-bug investigation), enable the REST of the file and wrap
+     JUST that method/region back in `#nullable disable` / `#nullable enable` with a short `TODO2:`
+     comment explaining why (do NOT invent a GitHub issue number). Log it in `found-bugs.md`. Prefer
+     this over deferring the whole file, and over papering the method with `!`.
+   - **Defer (whole file):** clean enablement requires an API redesign, a **public API nullability
+     change**, or a large cross-file ripple that can't be islanded. Then: `git checkout -- <path>` (and
+     any other files you touched), and mark deferred with a reason:
+     `python3 nullable-migration/loop.py status --order <order> --status deferred --note "<why; link found-bugs.md entry if applicable>"`.
      Commit nothing for a deferral except the worklist update (step 9). Stop.
 
 8. **Final verification.** The containing project must build clean for `net10.0`:
@@ -120,9 +126,11 @@ wrong and you must build instead.
    (~3 min; note the filter build does not elevate nullable to errors, so grep `warning CS`).
 
 9. **Record + commit** (one file per commit):
-   - `python3 nullable-migration/mark-status.py --order <order> --status done`
+   - `python3 nullable-migration/loop.py status --order <order> --status done --note "<short note>"`
    - `git add <path> nullable-migration/worklist.json` (plus any other files you had to annotate)
    - `git commit -m "Nullable-enable <relative path>"`
+   - Orchestrator can then cheaply confirm with `python3 nullable-migration/loop.py verify --order <order>`
+     (checks working tree clean + terminal status + shows HEAD; no rebuild).
 
 10. **Stop.** Exactly one file per iteration.
 

@@ -13,8 +13,14 @@ regions piecemeal. This effort finishes that job, one file at a time.
   (`disabledLines`, `toggles`, `totalLines`), a `status`, and a free-text `note`.
 - `worklist.md` — human-readable rendering of the queue (regenerate if you want; JSON is authoritative).
 - `LOOP.md` — the exact per-iteration instructions the agent follows.
-- `pick-next.py` — prints the next `pending` file (lowest `order`).
-- `mark-status.py` — safely updates an item's `status`/`note`.
+- `loop.py` — the single entry point for routine loop actions. Subcommands:
+  - `loop.py next` — print the next `pending` file (order, path, project, csproj, build command).
+  - `loop.py status --order <n> --status <s> [--note "..."]` — update an item's `status`/`note`.
+  - `loop.py verify --order <n>` — cheap post-subagent check (working tree clean + terminal status +
+    show HEAD; no rebuild).
+  Using one command prefix (`python3 nullable-migration/loop.py`) means a single terminal auto-approve
+  rule covers the whole loop.
+- `pick-next.py` / `mark-status.py` — deprecated thin shims that delegate to `loop.py`.
 - `found-bugs.md` — log of real nullability bugs uncovered during the migration (fixed separately).
 
 Statuses: `pending` → `in-progress` → `done` | `deferred` | `blocked`.
@@ -35,9 +41,11 @@ annotations — but those are the hardest, so expect slower early progress.
 
 ## Resolutions
 Each file ends in one of:
-- **done** — directives removed, warnings resolved with local, semantics-preserving changes.
-- **deferred** — clean enablement needs an API redesign or a large cross-file ripple. Revert the file
-  and record why in `note`. Revisit later.
+- **done** — directives removed, warnings resolved with local, semantics-preserving changes. May keep a
+  single `#nullable disable` **island** around one method that needs an API redesign or a real-bug fix
+  (with a `TODO2:` comment + a `found-bugs.md` entry) — preferred over deferring the whole file.
+- **deferred** — clean enablement needs an API redesign or a large cross-file ripple that can't be
+  islanded. Revert the file and record why in `note`. Revisit later.
 - **blocked** — couldn't even baseline-build; record the error.
 
 No runtime semantic changes are permitted. When a warning stems from a null check that already exists
@@ -61,7 +69,7 @@ on that.
 Drive it however you invoke your agent. The minimal shell driver:
 
 ```bash
-while path=$(python3 nullable-migration/pick-next.py --path); do
+while path=$(python3 nullable-migration/loop.py next --path); do
   # invoke your coding agent with nullable-migration/LOOP.md as the prompt.
   # the agent processes exactly one file ($path), commits, and updates worklist.json.
   <your-agent-cli> --prompt-file nullable-migration/LOOP.md || break
