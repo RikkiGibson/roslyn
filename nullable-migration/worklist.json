@@ -548,8 +548,8 @@
       "toggles": 2,
       "totalLines": 335,
       "disabledLines": 315,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed directives; CultureInfo? on GetDocumentationCommentXml, null! DeclaringCompilation, nullable _noPiaUnificationMap backing field",
       "order": 50
     },
     {

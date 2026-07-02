@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -72,7 +70,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
         /// <summary>
         /// Backing field for the map from a local NoPia type to corresponding canonical type.
         /// </summary>
-        private ConcurrentDictionary<NamedTypeSymbol, NamedTypeSymbol> _noPiaUnificationMap;
+        private ConcurrentDictionary<NamedTypeSymbol, NamedTypeSymbol>? _noPiaUnificationMap;
 
         /// <summary>
         /// A map from a local NoPia type to corresponding canonical type.
@@ -158,7 +156,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
             get { return _underlyingAssembly.PublicKey; }
         }
 
-        public override string GetDocumentationCommentXml(CultureInfo preferredCulture = null, bool expandIncludes = false, CancellationToken cancellationToken = default(CancellationToken))
+        public override string GetDocumentationCommentXml(CultureInfo? preferredCulture = null, bool expandIncludes = false, CancellationToken cancellationToken = default(CancellationToken))
         {
             return _underlyingAssembly.GetDocumentationCommentXml(preferredCulture, expandIncludes, cancellationToken);
         }
@@ -294,7 +292,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
 
         internal sealed override CSharpCompilation DeclaringCompilation // perf, not correctness
         {
-            get { return null; }
+            get { return null!; }
         }
 
         internal override TypeConversions TypeConversions => CorLibrary.TypeConversions;
@@ -304,7 +302,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
             return _underlyingAssembly.GetGuidString(out guidString);
         }
 
-#nullable enable
         internal sealed override ObsoleteAttributeData? ObsoleteAttributeData
             => _underlyingAssembly.ObsoleteAttributeData;
 
@@ -319,8 +316,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
 
             return this.RetargetingTranslator.Retarget(underlying, RetargetOptions.RetargetPrimitiveTypesByName);
         }
-
-#nullable disable
 
         internal override IEnumerable<NamedTypeSymbol> GetAllTopLevelForwardedTypes()
         {
