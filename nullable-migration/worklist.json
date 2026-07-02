@@ -669,8 +669,8 @@
       "toggles": 2,
       "totalLines": 430,
       "disabledLines": 407,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Made _lazyCustomAttributesBag nullable; annotated ObsoleteAttributeData/MarshallingInformation overrides nullable (base oblivious); Debug.Assert non-null pattern for attribute syntax; (object?) cast idiom",
       "order": 61
     },
     {

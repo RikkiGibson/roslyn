@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -19,7 +17,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 {
     internal abstract class FieldSymbolWithAttributesAndModifiers : FieldSymbol, IAttributeTargetSymbol
     {
-        private CustomAttributesBag<CSharpAttributeData> _lazyCustomAttributesBag;
+        private CustomAttributesBag<CSharpAttributeData>? _lazyCustomAttributesBag;
         protected SymbolCompletionState state;
         internal abstract Location ErrorLocation { get; }
         protected abstract DeclarationModifiers Modifiers { get; }
@@ -99,7 +97,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 Debug.Assert(completed);
             }
 
-            Debug.Assert(_lazyCustomAttributesBag.IsSealed);
+            Debug.Assert(_lazyCustomAttributesBag is { IsSealed: true });
             return _lazyCustomAttributesBag;
         }
 
@@ -120,7 +118,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return (FieldWellKnownAttributeData)attributesBag.DecodedWellKnownAttributeData;
         }
 
-#nullable enable
         internal sealed override (CSharpAttributeData?, BoundAttribute?) EarlyDecodeWellKnownAttribute(ref EarlyDecodeWellKnownAttributeArguments<EarlyWellKnownAttributeBinder, NamedTypeSymbol, AttributeSyntax, AttributeLocation> arguments)
         {
             CSharpAttributeData? attributeData;
@@ -139,13 +136,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             return base.EarlyDecodeWellKnownAttribute(ref arguments);
         }
-#nullable disable
 
         /// <summary>
         /// Returns data decoded from Obsolete attribute or null if there is no Obsolete attribute.
         /// This property returns ObsoleteAttributeData.Uninitialized if attribute arguments haven't been decoded yet.
         /// </summary>
-        internal sealed override ObsoleteAttributeData ObsoleteAttributeData
+        internal sealed override ObsoleteAttributeData? ObsoleteAttributeData
         {
             get
             {
@@ -158,7 +154,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 var lazyCustomAttributesBag = _lazyCustomAttributesBag;
                 if (lazyCustomAttributesBag != null && lazyCustomAttributesBag.IsEarlyDecodedWellKnownAttributeDataComputed)
                 {
-                    var data = (CommonFieldEarlyWellKnownAttributeData)lazyCustomAttributesBag.EarlyDecodedWellKnownAttributeData;
+                    var data = (CommonFieldEarlyWellKnownAttributeData?)lazyCustomAttributesBag.EarlyDecodedWellKnownAttributeData;
                     return data != null ? data.ObsoleteAttributeData : null;
                 }
 
@@ -168,7 +164,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         protected override void DecodeWellKnownAttributeImpl(ref DecodeWellKnownAttributeArguments<AttributeSyntax, CSharpAttributeData, AttributeLocation> arguments)
         {
-            Debug.Assert((object)arguments.AttributeSyntaxOpt != null);
+            Debug.Assert((object?)arguments.AttributeSyntaxOpt != null);
             var diagnostics = (BindingDiagnosticBag)arguments.Diagnostics;
 
             var attribute = arguments.Attribute;
@@ -272,6 +268,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             if (!attrValue.IsBad)
             {
+                var attributeSyntax = arguments.AttributeSyntaxOpt;
+                Debug.Assert(attributeSyntax is not null);
                 var data = arguments.GetOrCreateData<FieldWellKnownAttributeData>();
                 ConstantValue constValue;
                 var diagnostics = (BindingDiagnosticBag)arguments.Diagnostics;
@@ -284,12 +282,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
                         if ((object)constValue != null && !constValue.IsBad && constValue != attrValue)
                         {
-                            diagnostics.Add(ErrorCode.ERR_FieldHasMultipleDistinctConstantValues, arguments.AttributeSyntaxOpt.Location);
+                            diagnostics.Add(ErrorCode.ERR_FieldHasMultipleDistinctConstantValues, attributeSyntax.Location);
                         }
                     }
                     else
                     {
-                        diagnostics.Add(ErrorCode.ERR_FieldHasMultipleDistinctConstantValues, arguments.AttributeSyntaxOpt.Location);
+                        diagnostics.Add(ErrorCode.ERR_FieldHasMultipleDistinctConstantValues, attributeSyntax.Location);
                     }
 
                     if (data.ConstValue == CodeAnalysis.ConstantValue.Unset)
@@ -305,7 +303,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     {
                         if (constValue != attrValue)
                         {
-                            diagnostics.Add(ErrorCode.ERR_FieldHasMultipleDistinctConstantValues, arguments.AttributeSyntaxOpt.Location);
+                            diagnostics.Add(ErrorCode.ERR_FieldHasMultipleDistinctConstantValues, attributeSyntax.Location);
                         }
                     }
                     else
@@ -374,7 +372,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        internal sealed override MarshalPseudoCustomAttributeData MarshallingInformation
+        internal sealed override MarshalPseudoCustomAttributeData? MarshallingInformation
         {
             get
             {
