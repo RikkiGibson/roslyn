@@ -55,7 +55,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal sealed override OneOrMany<SyntaxList<AttributeListSyntax>> GetAttributeDeclarations() => OneOrMany.Create(default(SyntaxList<AttributeListSyntax>));
 
-        public sealed override string? GetDocumentationCommentXml(CultureInfo? preferredCulture = null, bool expandIncludes = false, CancellationToken cancellationToken = default) => null;
+        public sealed override string GetDocumentationCommentXml(CultureInfo? preferredCulture = null, bool expandIncludes = false, CancellationToken cancellationToken = default) => null!;
 
         internal sealed override bool GenerateDebugInfo => false;
 

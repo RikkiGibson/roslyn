@@ -122,7 +122,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return (ConstructorDeclarationSyntax)syntaxReferenceOpt.GetSyntax();
         }
 
-        internal override ExecutableCodeBinder TryGetBodyBinder(BinderFactory? binderFactoryOpt = null, bool ignoreAccessibility = false)
+        internal override ExecutableCodeBinder? TryGetBodyBinder(BinderFactory? binderFactoryOpt = null, bool ignoreAccessibility = false)
         {
             return TryGetBodyBinderFromSyntax(binderFactoryOpt, ignoreAccessibility);
         }

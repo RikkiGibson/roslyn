@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -305,13 +303,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         protected Flags flags;
 
         private readonly NamedTypeSymbol _containingType;
-        private ParameterSymbol _lazyThisParameter;
+        private ParameterSymbol? _lazyThisParameter;
 
-        private OverriddenOrHiddenMembersResult _lazyOverriddenOrHiddenMembers;
+        private OverriddenOrHiddenMembersResult? _lazyOverriddenOrHiddenMembers;
 
         protected readonly Location _location;
-        protected string lazyDocComment;
-        protected string lazyExpandedDocComment;
+        protected string? lazyDocComment;
+        protected string? lazyExpandedDocComment;
 
         //null if has never been computed. Initial binding diagnostics
         //are stashed here in service of API usage patterns
@@ -455,7 +453,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// </summary>
         protected virtual object MethodChecksLockObject
         {
-            get { return this.syntaxReferenceOpt; }
+            get { return this.syntaxReferenceOpt!; }
         }
 
         protected void LazyMethodChecks()
@@ -533,7 +531,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        public override Symbol AssociatedSymbol
+        public override Symbol? AssociatedSymbol
         {
             get
             {
@@ -567,7 +565,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-#nullable enable
         internal override bool IsMetadataNewSlot(ModuleSymbol? context, bool ignoreInterfaceImplementationChanges = false)
         {
             if (IsExplicitInterfaceImplementation && _containingType.IsInterface)
@@ -596,7 +593,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             return this.flags.IsMetadataVirtual(ignoreInterfaceImplementationChanges);
         }
-#nullable disable
 
         internal void EnsureMetadataVirtual()
         {
@@ -747,7 +743,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        internal (BlockSyntax blockBody, ArrowExpressionClauseSyntax arrowBody) Bodies
+        internal (BlockSyntax? blockBody, ArrowExpressionClauseSyntax? arrowBody) Bodies
         {
             get
             {
@@ -760,7 +756,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                         return (accessor.Body, accessor.ExpressionBody);
 
                     case ArrowExpressionClauseSyntax arrowExpression:
-                        Debug.Assert(arrowExpression.Parent.Kind() == SyntaxKind.PropertyDeclaration ||
+                        Debug.Assert(arrowExpression.Parent!.Kind() == SyntaxKind.PropertyDeclaration ||
                                      arrowExpression.Parent.Kind() == SyntaxKind.IndexerDeclaration ||
                                      this is SynthesizedClosureMethod);
                         return (null, arrowExpression);
@@ -775,9 +771,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        private Binder TryGetInMethodBinder(BinderFactory binderFactoryOpt = null)
+        private Binder? TryGetInMethodBinder(BinderFactory? binderFactoryOpt = null)
         {
-            CSharpSyntaxNode contextNode = GetInMethodSyntaxNode();
+            CSharpSyntaxNode? contextNode = GetInMethodSyntaxNode();
             if (contextNode == null)
             {
                 return null;
@@ -785,7 +781,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             Binder result = (binderFactoryOpt ?? this.DeclaringCompilation.GetBinderFactory(contextNode.SyntaxTree)).GetBinder(contextNode);
 #if DEBUG
-            Binder current = result;
+            Binder? current = result;
             do
             {
                 if (current is InMethodBinder)
@@ -802,11 +798,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return result;
         }
 
-        internal abstract ExecutableCodeBinder TryGetBodyBinder(BinderFactory binderFactoryOpt = null, bool ignoreAccessibility = false);
+        internal abstract ExecutableCodeBinder? TryGetBodyBinder(BinderFactory? binderFactoryOpt = null, bool ignoreAccessibility = false);
 
-        protected ExecutableCodeBinder TryGetBodyBinderFromSyntax(BinderFactory binderFactoryOpt = null, bool ignoreAccessibility = false)
+        protected ExecutableCodeBinder? TryGetBodyBinderFromSyntax(BinderFactory? binderFactoryOpt = null, bool ignoreAccessibility = false)
         {
-            Binder inMethod = TryGetInMethodBinder(binderFactoryOpt);
+            Binder? inMethod = TryGetInMethodBinder(binderFactoryOpt);
             return inMethod == null ? null : new ExecutableCodeBinder(SyntaxNode, this, inMethod.WithAdditionalFlags(ignoreAccessibility ? BinderFlags.IgnoreAccessibility : BinderFlags.None));
         }
 
@@ -820,7 +816,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         public override Location TryGetFirstLocation()
             => _location;
 
-        public override string GetDocumentationCommentXml(CultureInfo preferredCulture = null, bool expandIncludes = false, CancellationToken cancellationToken = default(CancellationToken))
+        public override string GetDocumentationCommentXml(CultureInfo? preferredCulture = null, bool expandIncludes = false, CancellationToken cancellationToken = default(CancellationToken))
         {
             ref var lazyDocComment = ref expandIncludes ? ref this.lazyExpandedDocComment : ref this.lazyDocComment;
             return SourceDocumentationCommentUtils.GetAndCacheDocumentationComment(this, expandIncludes, ref lazyDocComment);
@@ -844,12 +840,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-#nullable enable
-
         internal sealed override bool TryGetThisParameter(out ParameterSymbol? thisParameter)
         {
             thisParameter = _lazyThisParameter;
-            if ((object)thisParameter != null || IsStatic || this.IsExtensionBlockMember())
+            if ((object?)thisParameter != null || IsStatic || this.IsExtensionBlockMember())
             {
                 return true;
             }
@@ -858,8 +852,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             thisParameter = _lazyThisParameter;
             return true;
         }
-
-#nullable disable
 
         //overridden appropriately in SourceMemberMethodSymbol
         public override ImmutableArray<MethodSymbol> ExplicitInterfaceImplementations
@@ -894,7 +886,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return state.HasComplete(part);
         }
 
-#nullable enable
         internal override void ForceComplete(SourceLocation? locationOpt, Predicate<Symbol>? filter, CancellationToken cancellationToken)
         {
             if (filter?.Invoke(this) == false)
@@ -976,7 +967,6 @@ done:
             CompletionPart allParts = CompletionPart.MethodSymbolAll;
             state.SpinWaitComplete(allParts, cancellationToken);
         }
-#nullable disable
 
         protected sealed override void NoteAttributesComplete(bool forReturnType)
         {
@@ -1145,8 +1135,8 @@ done:
         {
             Debug.Assert(this.SyntaxNode.SyntaxTree == localTree);
 
-            (BlockSyntax blockBody, ArrowExpressionClauseSyntax expressionBody) = Bodies;
-            CSharpSyntaxNode bodySyntax = null;
+            (BlockSyntax? blockBody, ArrowExpressionClauseSyntax? expressionBody) = Bodies;
+            CSharpSyntaxNode? bodySyntax = null;
 
             // All locals are declared within the body of the method.
             if (blockBody?.Span.Contains(localPosition) == true)

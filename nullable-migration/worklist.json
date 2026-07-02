@@ -1098,8 +1098,8 @@
       "toggles": 6,
       "totalLines": 1170,
       "disabledLines": 1040,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed 7 directives. Nullable lazy fields (_lazyThisParameter/_lazyOverriddenOrHiddenMembers/lazyDocComment/lazyExpandedDocComment); AssociatedSymbol->Symbol?; Bodies tuple elements nullable; TryGetInMethodBinder/TryGetBodyBinder(FromSyntax) return+param nullable; MethodChecksLockObject syntaxReferenceOpt!; GetDocumentationCommentXml CultureInfo? param; (object?) idiom; Binder? current in DEBUG. Same-project ripple: MethodCompiler.cs (Binder? bodyBinder), SourceConstructorSymbol.cs + SourceCustomEventAccessorSymbol.cs (ExecutableCodeBinder? override), SynthesizedRecordEqualityOperatorBase.cs (GetDocumentationCommentXml non-null return + null!).",
       "order": 100
     },
     {

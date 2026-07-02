@@ -1928,7 +1928,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return null;
                 }
 
-                Binder bodyBinder = sourceMethod.TryGetBodyBinder();
+                Binder? bodyBinder = sourceMethod.TryGetBodyBinder();
                 if (bodyBinder != null)
                 {
                     importChain = bodyBinder.ImportChain;
