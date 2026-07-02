@@ -130,8 +130,8 @@
       "toggles": 2,
       "totalLines": 117,
       "disabledLines": 101,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Made 4 nullable fields/ctor params nullable; MemberNotNullWhen(HasAnyApplicableMethod); invariant asserts in Binder_Conversions",
       "order": 12
     },
     {
