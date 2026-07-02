@@ -174,8 +174,8 @@
       "toggles": 2,
       "totalLines": 157,
       "disabledLines": 131,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable-enabled except GetPublicSymbol(this TypeWithAnnotations), kept in a #nullable disable island (returns null but typed non-null; needs GetPublicSymbol/GetRequiredPublicSymbol API split). See found-bugs.md.",
       "order": 16
     },
     {
