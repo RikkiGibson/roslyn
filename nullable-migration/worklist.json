@@ -625,8 +625,8 @@
       "toggles": 4,
       "totalLines": 613,
       "disabledLines": 368,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable context/method fields, TypeSymbol? baseType param, (object?) idiom for nullable operands, null! for oblivious class-constrained override returns",
       "order": 57
     },
     {
