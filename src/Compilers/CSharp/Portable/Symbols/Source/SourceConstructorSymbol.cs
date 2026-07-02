@@ -16,7 +16,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
     {
         private SourceConstructorSymbol? _otherPartOfPartial;
 
-#nullable disable
         public static SourceConstructorSymbol CreateConstructorSymbol(
             SourceMemberContainerTypeSymbol containingType,
             ConstructorDeclarationSyntax syntax,
@@ -123,7 +122,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return (ConstructorDeclarationSyntax)syntaxReferenceOpt.GetSyntax();
         }
 
-        internal override ExecutableCodeBinder TryGetBodyBinder(BinderFactory binderFactoryOpt = null, bool ignoreAccessibility = false)
+        internal override ExecutableCodeBinder TryGetBodyBinder(BinderFactory? binderFactoryOpt = null, bool ignoreAccessibility = false)
         {
             return TryGetBodyBinderFromSyntax(binderFactoryOpt, ignoreAccessibility);
         }
@@ -133,7 +132,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return GetSyntax().ParameterList;
         }
 
-        protected override CSharpSyntaxNode GetInitializer()
+        protected override CSharpSyntaxNode? GetInitializer()
         {
             return GetSyntax().Initializer;
         }
@@ -207,7 +206,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-#nullable enable
         internal override OneOrMany<SyntaxList<AttributeListSyntax>> GetAttributeDeclarations()
         {
             // Attributes on partial constructors are owned by the definition part.
@@ -238,7 +236,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         }
 
         protected override SourceMemberMethodSymbol? BoundAttributesSource => SourcePartialDefinitionPart;
-#nullable disable
 
         internal override bool IsNullableAnalysisEnabled()
             => flags.HasThisInitializer
@@ -275,7 +272,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return false;
         }
 
-#nullable enable
         internal sealed override void ForceComplete(SourceLocation? locationOpt, Predicate<Symbol>? filter, CancellationToken cancellationToken)
         {
             SourcePartialImplementationPart?.ForceComplete(locationOpt, filter, cancellationToken);
