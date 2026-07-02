@@ -17,8 +17,6 @@ namespace Microsoft.CodeAnalysis.Emit.EditAndContinue
 
         public ImmutableArray<byte> IL { get; } = il;
 
-#nullable disable
-
         public ImmutableArray<Cci.ExceptionHandlerRegion> ExceptionRegions => ImmutableArray<Cci.ExceptionHandlerRegion>.Empty;
 
         public bool AreLocalsZeroed => false;
@@ -29,7 +27,7 @@ namespace Microsoft.CodeAnalysis.Emit.EditAndContinue
 
         public Cci.IMethodDefinition MethodDefinition => _methodDef;
 
-        public StateMachineMoveNextBodyDebugInfo MoveNextBodyInfo => null;
+        public StateMachineMoveNextBodyDebugInfo? MoveNextBodyInfo => null;
 
         public ushort MaxStack => 8;
 
@@ -39,17 +37,17 @@ namespace Microsoft.CodeAnalysis.Emit.EditAndContinue
 
         public ImmutableArray<Cci.LocalScope> LocalScopes => ImmutableArray<Cci.LocalScope>.Empty;
 
-        public Cci.IImportScope ImportScope => null;
+        public Cci.IImportScope? ImportScope => null;
 
         public DebugId MethodId => default;
 
         public ImmutableArray<StateMachineHoistedLocalScope> StateMachineHoistedLocalScopes => default;
 
-        public string StateMachineTypeName => null;
+        public string? StateMachineTypeName => null;
 
         public ImmutableArray<EncHoistedLocalInfo> StateMachineHoistedLocalSlots => default;
 
-        public ImmutableArray<Cci.ITypeReference> StateMachineAwaiterSlots => default;
+        public ImmutableArray<Cci.ITypeReference?> StateMachineAwaiterSlots => default;
 
         public ImmutableArray<EncClosureInfo> ClosureDebugInfo => ImmutableArray<EncClosureInfo>.Empty;
 
@@ -63,7 +61,6 @@ namespace Microsoft.CodeAnalysis.Emit.EditAndContinue
 
         public bool IsPrimaryConstructor => false;
 
-#nullable enable
         public static ImmutableArray<byte> GetIL(EmitContext context, RuntimeRudeEdit? rudeEdit, bool isLambdaOrLocalFunction)
         {
             var hotReloadExceptionCtorDef = context.Module.GetOrCreateHotReloadExceptionConstructorDefinition();

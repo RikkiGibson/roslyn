@@ -86,8 +86,8 @@
       "toggles": 1,
       "totalLines": 102,
       "disabledLines": 46,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Annotated 4 interface-impl properties (MoveNextBodyInfo/ImportScope/StateMachineTypeName ?, StateMachineAwaiterSlots ImmutableArray<ITypeReference?>) to match Cci.IMethodBody. Internal, build clean.",
       "order": 8
     },
     {
