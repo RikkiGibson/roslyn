@@ -836,7 +836,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
             return annotations;
         }
 
-#nullable enable
         internal override ImmutableArray<int> InterpolatedStringHandlerArgumentIndexes
         {
             get
@@ -940,7 +939,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
 
             return builder.ToImmutableAndFree();
         }
-#nullable disable
 
         internal override ImmutableHashSet<string> NotNullIfParameterNotNull
         {
@@ -986,7 +984,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
             }
         }
 
-        internal override MarshalPseudoCustomAttributeData MarshallingInformation
+        internal override MarshalPseudoCustomAttributeData? MarshallingInformation
         {
             get
             {
@@ -1139,10 +1137,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
                 bool filterOutParamArrayAttribute = ((_lazyIsParams & (IsParamsValues.Initialized | IsParamsValues.Array)) is 0 or (IsParamsValues.Initialized | IsParamsValues.Array));
                 bool filterOutParamCollectionAttribute = ((_lazyIsParams & (IsParamsValues.Initialized | IsParamsValues.Collection)) is 0 or (IsParamsValues.Initialized | IsParamsValues.Collection));
 
-                ConstantValue defaultValue = this.ExplicitDefaultConstantValue;
+                ConstantValue? defaultValue = this.ExplicitDefaultConstantValue;
                 AttributeDescription filterOutConstantAttributeDescription = default(AttributeDescription);
 
-                if ((object)defaultValue != null)
+                if ((object?)defaultValue != null)
                 {
                     if (defaultValue.Discriminator == ConstantValueTypeDiscriminator.DateTime)
                     {
@@ -1240,7 +1238,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
             }
         }
 
-        internal sealed override CSharpCompilation DeclaringCompilation // perf, not correctness
+        internal sealed override CSharpCompilation? DeclaringCompilation // perf, not correctness
         {
             get { return null; }
         }
@@ -1252,7 +1250,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
                 base.Equals(other, compareKind);
         }
 
-#nullable enable
         internal DiagnosticInfo? DeriveCompilerFeatureRequiredDiagnostic(MetadataDecoder decoder)
             => PEUtilities.DeriveCompilerFeatureRequiredAttributeDiagnostic(this, (PEModuleSymbol)ContainingModule, Handle, allowedFeatures: CompilerFeatureRequiredFeatures.None, decoder);
 

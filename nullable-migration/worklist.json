@@ -537,8 +537,8 @@
       "toggles": 2,
       "totalLines": 1275,
       "disabledLines": 312,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed interior #nullable directives; matched base nullability for MarshallingInformation and DeclaringCompilation overrides, nullable local for ExplicitDefaultConstantValue with (object?) legacy cast",
       "order": 49
     },
     {
