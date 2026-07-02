@@ -460,8 +460,8 @@
       "toggles": 1,
       "totalLines": 290,
       "disabledLines": 266,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable-enable; matched base override nullability (out PublicSemanticModel?, ref/out nullable), nullable parentRemappedSymbolsOpt, ! on known-present initializers, nullable equalsValue local, (object?) idiom",
       "order": 42
     },
     {
