@@ -1010,8 +1010,8 @@
       "toggles": 2,
       "totalLines": 796,
       "disabledLines": 750,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable-enable PdbWriter.cs: late-init COM fields = null!, nullable interop returns/locals, string? out results, nullable ctor params",
       "order": 92
     },
     {

@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -27,12 +25,12 @@ namespace Microsoft.Cci
         internal const uint Age = 1;
 
         private readonly HashAlgorithmName _hashAlgorithmNameOpt;
-        private readonly string _fileName;
-        private readonly Func<ISymWriterMetadataProvider, SymUnmanagedWriter> _symWriterFactory;
+        private readonly string? _fileName;
+        private readonly Func<ISymWriterMetadataProvider, SymUnmanagedWriter>? _symWriterFactory;
         private readonly Dictionary<DebugSourceDocument, int> _documentIndex;
-        private MetadataWriter _metadataWriter;
-        private SymUnmanagedWriter _symWriter;
-        private SymUnmanagedSequencePointsWriter _sequencePointsWriter;
+        private MetadataWriter _metadataWriter = null!;
+        private SymUnmanagedWriter _symWriter = null!;
+        private SymUnmanagedSequencePointsWriter _sequencePointsWriter = null!;
 
         // { INamespace or ITypeReference -> qualified name }
         private readonly Dictionary<object, string> _qualifiedNameCache;
@@ -40,7 +38,7 @@ namespace Microsoft.Cci
         // in support of determinism
         private bool IsDeterministic { get => _hashAlgorithmNameOpt.Name != null; }
 
-        public PdbWriter(string fileName, Func<ISymWriterMetadataProvider, SymUnmanagedWriter> symWriterFactory, HashAlgorithmName hashAlgorithmNameOpt)
+        public PdbWriter(string? fileName, Func<ISymWriterMetadataProvider, SymUnmanagedWriter>? symWriterFactory, HashAlgorithmName hashAlgorithmNameOpt)
         {
             _fileName = fileName;
             _symWriterFactory = symWriterFactory;
@@ -162,7 +160,7 @@ namespace Microsoft.Cci
 
             var namespaceScopes = methodBody.ImportScope;
 
-            PooledHashSet<string> lazyDeclaredExternAliases = null;
+            PooledHashSet<string>? lazyDeclaredExternAliases = null;
             if (!isVisualBasic)
             {
                 for (var scope = namespaceScopes; scope != null; scope = scope.Parent)
@@ -186,7 +184,7 @@ namespace Microsoft.Cci
             }
 
             // file and namespace level
-            for (IImportScope scope = namespaceScopes; scope != null; scope = scope.Parent)
+            for (IImportScope? scope = namespaceScopes; scope != null; scope = scope.Parent)
             {
                 foreach (UsedNamespaceOrType import in scope.GetUsedNamespaces(Context))
                 {
@@ -238,7 +236,7 @@ namespace Microsoft.Cci
             }
         }
 
-        private string TryEncodeImport(UsedNamespaceOrType import, HashSet<string> declaredExternAliasesOpt, bool isProjectLevel)
+        private string? TryEncodeImport(UsedNamespaceOrType import, HashSet<string>? declaredExternAliasesOpt, bool isProjectLevel)
         {
             // NOTE: Dev12 has related cases "I" and "O" in EMITTER::ComputeDebugNamespace,
             // but they were probably implementation details that do not affect Roslyn.
@@ -331,7 +329,7 @@ namespace Microsoft.Cci
 
         internal string GetOrCreateSerializedNamespaceName(INamespace @namespace)
         {
-            string result;
+            string? result;
             if (!_qualifiedNameCache.TryGetValue(@namespace, out result))
             {
                 result = TypeNameSerializer.BuildQualifiedNamespaceName(@namespace);
@@ -343,7 +341,7 @@ namespace Microsoft.Cci
 
         internal string GetOrCreateSerializedTypeName(ITypeReference typeReference)
         {
-            string result;
+            string? result;
             if (!_qualifiedNameCache.TryGetValue(typeReference, out result))
             {
                 if (Module.GenerateVisualBasicStylePdb)
@@ -368,15 +366,16 @@ namespace Microsoft.Cci
             Debug.Assert(!typeReference.IsTypeSpecification());
 
             var result = PooledStringBuilder.GetInstance();
-            ArrayBuilder<string> nestedNamesReversed;
+            ArrayBuilder<string>? nestedNamesReversed;
 
-            INestedTypeReference nestedType = typeReference.AsNestedTypeReference;
+            INestedTypeReference? nestedType = typeReference.AsNestedTypeReference;
             if (nestedType != null)
             {
                 nestedNamesReversed = ArrayBuilder<string>.GetInstance();
 
                 while (nestedType != null)
                 {
+                    Debug.Assert(nestedType.Name is not null);
                     nestedNamesReversed.Add(nestedType.Name);
                     typeReference = nestedType.GetContainingType(_metadataWriter.Context);
                     nestedType = typeReference.AsNestedTypeReference;
@@ -387,7 +386,7 @@ namespace Microsoft.Cci
                 nestedNamesReversed = null;
             }
 
-            INamespaceTypeReference namespaceType = typeReference.AsNamespaceTypeReference;
+            INamespaceTypeReference? namespaceType = typeReference.AsNamespaceTypeReference;
             Debug.Assert(namespaceType != null);
 
             string namespaceName = namespaceType.NamespaceName;
@@ -412,8 +411,6 @@ namespace Microsoft.Cci
 
             return result.ToStringAndFree();
         }
-
-#nullable enable
 
         private string GetAssemblyReferenceAlias(IAssemblyReference assembly, HashSet<string>? declaredExternAliases)
         {
@@ -454,8 +451,6 @@ namespace Microsoft.Cci
             // no alias defined for given assembly -> error in compiler
             throw ExceptionUtilities.Unreachable();
         }
-
-#nullable disable
 
         private void DefineLocalScopes(ImmutableArray<LocalScope> scopes, StandaloneSignatureHandle localSignatureHandleOpt)
         {
@@ -664,7 +659,7 @@ namespace Microsoft.Cci
         private void EmitSequencePoints(ImmutableArray<SequencePoint> sequencePoints)
         {
             int lastDocumentIndex = -1;
-            DebugSourceDocument lastDocument = null;
+            DebugSourceDocument? lastDocument = null;
 
             foreach (var sequencePoint in sequencePoints)
             {
@@ -788,8 +783,8 @@ namespace Microsoft.Cci
         public void WriteCompilerVersion(string language)
         {
             var compilerAssembly = typeof(Compilation).Assembly;
-            var fileVersion = Version.Parse(compilerAssembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
-            var versionString = compilerAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+            var fileVersion = Version.Parse(compilerAssembly.GetCustomAttribute<AssemblyFileVersionAttribute>()!.Version);
+            var versionString = compilerAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion;
             _symWriter.AddCompilerInfo((ushort)fileVersion.Major, (ushort)fileVersion.Minor, (ushort)fileVersion.Build, (ushort)fileVersion.Revision, $"{language} - {versionString}");
         }
     }
