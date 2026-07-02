@@ -1120,8 +1120,8 @@
       "toggles": 4,
       "totalLines": 1526,
       "disabledLines": 1122,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable fields _assemblyName/_writer/_filterTree + lazy _lazyComparer/_includedFileCache/_temporaryStringBuilders; ctor params nullable; GetLocationInTree->Location? + SourceTree!; FindMultiLineCommentPattern->string?; out firstExtension?; DelegateInvokeMethod? + (object?) idiom; RequiresDocComment loop uses Symbol? current; WriteLine params object?[]; Debug.Assert for temp-builder stack & cref ambiguityWinner; GetDescription locationTemplate!/GetEscaped(cref) return!. No ripple, no found-bugs.",
       "order": 102
     },
     {

@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -30,28 +28,28 @@ namespace Microsoft.CodeAnalysis.CSharp
     /// </summary>
     internal partial class DocumentationCommentCompiler : CSharpSymbolVisitor
     {
-        private readonly string _assemblyName;
+        private readonly string? _assemblyName;
         private readonly CSharpCompilation _compilation;
-        private readonly TextWriter _writer; //never write directly - always use a helper
-        private readonly SyntaxTree _filterTree; //if not null, limit analysis to types residing in this tree
+        private readonly TextWriter? _writer; //never write directly - always use a helper
+        private readonly SyntaxTree? _filterTree; //if not null, limit analysis to types residing in this tree
         private readonly TextSpan? _filterSpanWithinTree; //if filterTree and filterSpanWithinTree is not null, limit analysis to types residing within this span in the filterTree.
         private readonly bool _processIncludes;
         private readonly bool _isForSingleSymbol; //minor differences in behavior between batch case and API case.
         private readonly BindingDiagnosticBag _diagnostics;
         private readonly CancellationToken _cancellationToken;
 
-        private SyntaxNodeLocationComparer _lazyComparer;
-        private DocumentationCommentIncludeCache _includedFileCache;
+        private SyntaxNodeLocationComparer? _lazyComparer;
+        private DocumentationCommentIncludeCache? _includedFileCache;
 
         private int _indentDepth;
 
-        private Stack<TemporaryStringBuilder> _temporaryStringBuilders;
+        private Stack<TemporaryStringBuilder>? _temporaryStringBuilders;
 
         private DocumentationCommentCompiler(
-            string assemblyName,
+            string? assemblyName,
             CSharpCompilation compilation,
-            TextWriter writer,
-            SyntaxTree filterTree,
+            TextWriter? writer,
+            SyntaxTree? filterTree,
             TextSpan? filterSpanWithinTree,
             bool processIncludes,
             bool isForSingleSymbol,
@@ -81,11 +79,9 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <param name="cancellationToken">To stop traversing the symbol table early.</param>
         /// <param name="filterTree">Only report diagnostics from this syntax tree, if non-null.</param>
         /// <param name="filterSpanWithinTree">If <paramref name="filterTree"/> and filterSpanWithinTree is non-null, report diagnostics within this span in the <paramref name="filterTree"/>.</param>
-#nullable enable
         public static void WriteDocumentationCommentXml(CSharpCompilation compilation, string? assemblyName, Stream? xmlDocStream, BindingDiagnosticBag diagnostics, CancellationToken cancellationToken, SyntaxTree? filterTree = null, TextSpan? filterSpanWithinTree = null)
-#nullable disable
         {
-            StreamWriter writer = null;
+            StreamWriter? writer = null;
             if (xmlDocStream != null && xmlDocStream.CanWrite)
             {
                 writer = new StreamWriter(
@@ -284,7 +280,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 _cancellationToken.ThrowIfCancellationRequested();
                 var docCommentNodesBuilder = ArrayBuilder<DocumentationCommentTriviaSyntax>.GetInstance();
-                if (!collectDocCommentNodes(extensions, docCommentNodesBuilder, out SourceNamedTypeSymbol firstExtension))
+                if (!collectDocCommentNodes(extensions, docCommentNodesBuilder, out SourceNamedTypeSymbol? firstExtension))
                 {
                     docCommentNodesBuilder.Free();
                     return;
@@ -300,7 +296,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 ProcessDocumentationCommentTriviaNodes(firstExtension, shouldSkipPartialDefinitionComments: false, docCommentNodesBuilder.ToImmutableAndFree());
             }
 
-            bool collectDocCommentNodes(IEnumerable<SourceNamedTypeSymbol> extensions, ArrayBuilder<DocumentationCommentTriviaSyntax> docCommentNodesBuilder, out SourceNamedTypeSymbol firstExtension)
+            bool collectDocCommentNodes(IEnumerable<SourceNamedTypeSymbol> extensions, ArrayBuilder<DocumentationCommentTriviaSyntax> docCommentNodesBuilder, out SourceNamedTypeSymbol? firstExtension)
             {
                 firstExtension = null;
                 foreach (var extension in extensions)
@@ -334,7 +330,6 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-#nullable enable
         public override void VisitMethod(MethodSymbol symbol)
         {
             if (symbol is SourceExtensionImplementationMethodSymbol implementation)
@@ -445,7 +440,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     && !shouldSkipPartialDefinitionComments)
                 {
                     // Report the error at a location in the tree that was parsing doc comments.
-                    Location location = GetLocationInTreeReportingDocumentationCommentDiagnostics(symbol);
+                    Location? location = GetLocationInTreeReportingDocumentationCommentDiagnostics(symbol);
                     if (location != null)
                     {
                         _diagnostics.Add(ErrorCode.WRN_MissingXMLComment, location, symbol);
@@ -732,13 +727,12 @@ namespace Microsoft.CodeAnalysis.CSharp
                 return true;
             }
         }
-#nullable disable
 
-        private static Location GetLocationInTreeReportingDocumentationCommentDiagnostics(Symbol symbol)
+        private static Location? GetLocationInTreeReportingDocumentationCommentDiagnostics(Symbol symbol)
         {
             foreach (Location location in symbol.Locations)
             {
-                if (location.SourceTree.ReportDocumentationCommentDiagnostics())
+                if (location.SourceTree!.ReportDocumentationCommentDiagnostics())
                 {
                     return location;
                 }
@@ -755,8 +749,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             switch (symbol.Kind)
             {
                 case SymbolKind.NamedType:
-                    MethodSymbol delegateInvoke = ((NamedTypeSymbol)symbol).DelegateInvokeMethod;
-                    if ((object)delegateInvoke != null)
+                    MethodSymbol? delegateInvoke = ((NamedTypeSymbol)symbol).DelegateInvokeMethod;
+                    if ((object?)delegateInvoke != null)
                     {
                         return delegateInvoke.Parameters;
                     }
@@ -800,14 +794,15 @@ namespace Microsoft.CodeAnalysis.CSharp
                 return false;
             }
 
-            while ((object)symbol != null)
+            Symbol? current = symbol;
+            while ((object?)current != null)
             {
-                switch (symbol.DeclaredAccessibility)
+                switch (current.DeclaredAccessibility)
                 {
                     case Accessibility.Public:
                     case Accessibility.Protected:
                     case Accessibility.ProtectedOrInternal:
-                        symbol = symbol.ContainingType;
+                        current = current.ContainingType;
                         break;
                     default:
                         return false;
@@ -827,7 +822,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             maxDocumentationMode = DocumentationMode.None;
             nodes = default(ImmutableArray<DocumentationCommentTriviaSyntax>);
 
-            ArrayBuilder<DocumentationCommentTriviaSyntax> builder = null;
+            ArrayBuilder<DocumentationCommentTriviaSyntax>? builder = null;
             var diagnosticBag = _diagnostics.DiagnosticBag ?? DiagnosticBag.GetInstance();
 
             foreach (SyntaxReference reference in symbol.DeclaringSyntaxReferences)
@@ -1087,7 +1082,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             int skipLength = 0;
             if (numLines > 1)
             {
-                string pattern = FindMultiLineCommentPattern(lines[1]);
+                string? pattern = FindMultiLineCommentPattern(lines[1]);
 
                 if (pattern != null)
                 {
@@ -1157,7 +1152,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>
         /// Return the longest prefix matching [whitespace]*[*][whitespace]*.
         /// </summary>
-        private static string FindMultiLineCommentPattern(string line)
+        private static string? FindMultiLineCommentPattern(string line)
         {
             int length = 0;
 
@@ -1185,8 +1180,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>
         /// Return the longest common prefix of two strings
         /// </summary>
-        private static string LongestCommonPrefix(string str1, string str2)
-        {
+        private static string LongestCommonPrefix(string str1, string str2)        {
             int pos = 0;
             int minLength = Math.Min(str1.Length, str2.Length);
 
@@ -1210,7 +1204,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 return ToBadCrefString(crefSyntax);
             }
 
-            Symbol ambiguityWinner;
+            Symbol? ambiguityWinner;
             ImmutableArray<Symbol> symbols = binder.BindCref(crefSyntax, out ambiguityWinner, diagnostics);
 
             Symbol symbol;
@@ -1222,8 +1216,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                     symbol = symbols[0];
                     break;
                 default:
+                    Debug.Assert(ambiguityWinner is not null);
                     symbol = ambiguityWinner;
-                    Debug.Assert((object)symbol != null);
                     break;
             }
 
@@ -1242,7 +1236,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 diagnostics.AddDependencies(symbol as TypeSymbol ?? symbol.ContainingType);
             }
 
-            return symbol.OriginalDefinition.GetEscapedDocumentationCommentId();
+            return symbol.OriginalDefinition.GetEscapedDocumentationCommentId()!;
         }
 
         /// <summary>
@@ -1379,6 +1373,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         private string GetAndEndTemporaryString()
         {
+            Debug.Assert(_temporaryStringBuilders is not null);
             TemporaryStringBuilder t = _temporaryStringBuilders.Pop();
             RoslynDebug.Assert(_indentDepth == t.InitialIndentDepth, $"Temporary strings should be indent-neutral (was {t.InitialIndentDepth}, is {_indentDepth})");
             _indentDepth = t.InitialIndentDepth;
@@ -1444,7 +1439,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        private void WriteLine(string format, params object[] args)
+        private void WriteLine(string format, params object?[] args)
         {
             WriteLine(string.Format(format, args));
         }
@@ -1493,8 +1488,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             try
             {
                 ResourceManager manager = new ResourceManager("System.Xml", typeof(XmlException).GetTypeInfo().Assembly);
-                string locationTemplate = manager.GetString("Xml_MessageWithErrorPosition");
-                string locationString = string.Format(locationTemplate, "", e.LineNumber, e.LinePosition); // first arg is where the problem description goes
+                string? locationTemplate = manager.GetString("Xml_MessageWithErrorPosition");
+                string locationString = string.Format(locationTemplate!, "", e.LineNumber, e.LinePosition); // first arg is where the problem description goes
                 int position = message.IndexOf(locationString, StringComparison.Ordinal); // Expect exact match
                 return position < 0
                     ? message
