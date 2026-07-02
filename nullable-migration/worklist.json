@@ -1076,8 +1076,8 @@
       "toggles": 16,
       "totalLines": 1810,
       "disabledLines": 1025,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable-enabled; made _syntaxRef/_lazyCustomAttributesBag/ParameterSyntax/SyntaxReference/MarshallingInformation nullable, ctor location/syntaxRef params nullable (match base), diagnosticsOpt params nullable, Debug.Asserts for real invariants",
       "order": 98
     },
     {
