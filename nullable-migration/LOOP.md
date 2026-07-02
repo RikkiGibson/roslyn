@@ -97,9 +97,14 @@ optional final/CI-level check.
      `python3 nullable-migration/mark-status.py --order <order> --status deferred --note "<why; link found-bugs.md entry if applicable>"`.
      Commit nothing for a deferral except the worklist update (step 9). Stop.
 
-8. **Final verification.** `get_errors` on the file must be clean. Optionally run
-   `dotnet build <csproj> -f net10.0 -p:RunAnalyzersDuringBuild=false -tl:off` as a heavier confirmation
-   (e.g. before pushing). A clean LSP diagnostics result is the required bar per iteration.
+8. **Final verification.** `get_errors` on the file must be clean. **`get_errors` only validates the
+   single open file** — it does NOT catch warnings introduced in *other* files (or in the VB compiler,
+   or in TFMs other than the active context). So when the change can **ripple across files** — changing
+   the nullability of an interface/base member signature, or of a widely-used type/field — you MUST fall
+   back to a real build before committing:
+   `dotnet build -p:RunAnalyzersDuringBuild=false -p:GenerateFullPaths=true -tl:off Compilers.slnf`
+   (~3 min). Require `0 Warning(s)  0 Error(s)`. For purely local, single-file fixes a clean `get_errors`
+   is sufficient. When in doubt, build.
 
 9. **Record + commit** (one file per commit):
    - `python3 nullable-migration/mark-status.py --order <order> --status done`
