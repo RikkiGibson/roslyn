@@ -141,8 +141,8 @@
       "toggles": 2,
       "totalLines": 130,
       "disabledLines": 121,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Subagent left incomplete (1 remaining CS8603). Finished: ResolveForwardedType return INamedTypeSymbol? (matches public IAssemblySymbol), _lazyModules nullable, single-arg Accept<TResult> -> TResult? (matches public ISymbol.Accept<TResult>). Build clean.",
       "order": 13
     },
     {
