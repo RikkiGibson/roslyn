@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System.Collections.Immutable;
 using System.Diagnostics;
 using Roslyn.Utilities;
@@ -71,7 +69,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal sealed override bool UseUpdatedEscapeRules => _originalParam.UseUpdatedEscapeRules;
 
-#nullable enable
         internal override ConstantValue? ExplicitDefaultConstantValue
         {
             get
@@ -85,7 +82,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get { return _originalParam.DefaultValueFromAttributes; }
         }
-#nullable disable
 
         #region Forwarded
 
@@ -134,7 +130,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return _originalParam.HasEnumeratorCancellationAttribute; }
         }
 
-        internal override MarshalPseudoCustomAttributeData MarshallingInformation
+        internal override MarshalPseudoCustomAttributeData? MarshallingInformation
         {
             get { return _originalParam.MarshallingInformation; }
         }

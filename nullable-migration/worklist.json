@@ -207,8 +207,8 @@
       "toggles": 2,
       "totalLines": 168,
       "disabledLines": 150,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "CS8603 on MarshallingInformation override: added ? to return type to match base ParameterSymbol nullability",
       "order": 19
     },
     {
