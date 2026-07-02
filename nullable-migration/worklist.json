@@ -1054,8 +1054,8 @@
       "toggles": 2,
       "totalLines": 1128,
       "disabledLines": 965,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable-enabled; nullable syntax locals/params (BuildMap handler Action<Binder,SyntaxNode?>?, private Visit param, various node.Body/Declaration/Condition locals), FindLocalFunction->LocalFunctionSymbol? return, nullable out embeddedScopeDesignator, Debug.Assert(declarationSyntax is not null) in using-else, (object?) idioms; no ripple",
       "order": 96
     },
     {
