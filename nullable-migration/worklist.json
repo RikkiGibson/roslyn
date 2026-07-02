@@ -152,8 +152,8 @@
       "toggles": 2,
       "totalLines": 150,
       "disabledLines": 129,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed 3 directives. Annotated GetMethod/SetMethod/OverriddenProperty nullable to match public IPropertySymbol; _lazyType nullable; single-arg Accept<TResult> -> TResult?. Build clean.",
       "order": 14
     },
     {
