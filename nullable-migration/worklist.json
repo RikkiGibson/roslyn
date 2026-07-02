@@ -812,8 +812,8 @@
       "toggles": 11,
       "totalLines": 803,
       "disabledLines": 531,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "nullable lazy TypeNames/NamespaceNames fields; TryDecodeAttributeWithTypeArgument->TypeSymbol?; DeclaringCompilation->CSharpCompilation?; GetMetadata->ModuleMetadata?; nullable forwarded-type tuple w/ ripple to PEAssemblySymbol+SourceAssemblySymbol; (object?) idioms",
       "order": 74
     },
     {

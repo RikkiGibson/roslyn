@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -41,8 +39,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
         /// </summary>
         private readonly PENamespaceSymbol _globalNamespace;
 
-#nullable enable
-
         /// <summary>
         /// Cache the symbol for well-known type System.Type because we use it frequently
         /// (for attributes).
@@ -50,8 +46,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
         private NamedTypeSymbol? _lazySystemTypeSymbol;
         private NamedTypeSymbol? _lazyEventRegistrationTokenSymbol;
         private NamedTypeSymbol? _lazyEventRegistrationTokenTableSymbol;
-
-#nullable disable
 
         /// <summary>
         /// The same value as ConcurrentDictionary.DEFAULT_CAPACITY
@@ -91,10 +85,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
         private ImmutableArray<CSharpAttributeData> _lazyAssemblyAttributes;
 
         // Type names from module
-        private ICollection<string> _lazyTypeNames;
+        private ICollection<string>? _lazyTypeNames;
 
         // Namespace names from module
-        private ICollection<string> _lazyNamespaceNames;
+        private ICollection<string>? _lazyNamespaceNames;
 
         private enum NullableMemberMetadata
         {
@@ -126,11 +120,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
 
         private MemorySafetyRulesAttributeVersion _lazyMemorySafetyRulesAttributeVersion;
 
-#nullable enable
         private DiagnosticInfo? _lazyCachedCompilerFeatureRequiredDiagnosticInfo = CSDiagnosticInfo.EmptyErrorInfo;
 
         private ObsoleteAttributeData? _lazyObsoleteAttributeData = ObsoleteAttributeData.Uninitialized;
-#nullable disable
 
         internal PEModuleSymbol(PEAssemblySymbol assemblySymbol, PEModule module, MetadataImportOptions importOptions, int ordinal)
             : this((AssemblySymbol)assemblySymbol, module, importOptions, ordinal)
@@ -262,7 +254,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
         {
             if (_lazyAssemblyAttributes.IsDefault)
             {
-                ArrayBuilder<CSharpAttributeData> moduleAssemblyAttributesBuilder = null;
+                ArrayBuilder<CSharpAttributeData>? moduleAssemblyAttributesBuilder = null;
 
                 string corlibName = ContainingAssembly.CorLibrary.Name;
                 EntityHandle assemblyMSCorLib = Module.GetAssemblyRef(corlibName);
@@ -349,7 +341,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
             return false;
         }
 
-        internal TypeSymbol TryDecodeAttributeWithTypeArgument(EntityHandle handle, AttributeDescription attributeDescription)
+        internal TypeSymbol? TryDecodeAttributeWithTypeArgument(EntityHandle handle, AttributeDescription attributeDescription)
         {
             string typeName;
             if (_module.HasStringValuedAttribute(handle, attributeDescription, out typeName))
@@ -398,7 +390,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
                     Interlocked.CompareExchange(ref _lazyTypeNames, _module.TypeNames.AsCaseSensitiveCollection(), null);
                 }
 
-                return _lazyTypeNames;
+                return _lazyTypeNames!;
             }
         }
 
@@ -411,7 +403,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
                     Interlocked.CompareExchange(ref _lazyNamespaceNames, _module.NamespaceNames.AsCaseSensitiveCollection(), null);
                 }
 
-                return _lazyNamespaceNames;
+                return _lazyNamespaceNames!;
             }
         }
 
@@ -425,7 +417,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
             get
             {
                 var assembly = _assemblySymbol as PEAssemblySymbol;
-                if ((object)assembly != null)
+                if ((object?)assembly != null)
                 {
                     return assembly.DocumentationProvider;
                 }
@@ -435,8 +427,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
                 }
             }
         }
-
-#nullable enable
 
         internal NamedTypeSymbol EventRegistrationToken
         {
@@ -543,8 +533,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
             }
         }
 
-#nullable disable
-
         internal override bool HasAssemblyCompilationRelaxationsAttribute
         {
             get
@@ -580,12 +568,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
             }
         }
 
-        internal sealed override CSharpCompilation DeclaringCompilation // perf, not correctness
+        internal sealed override CSharpCompilation? DeclaringCompilation // perf, not correctness
         {
             get { return null; }
         }
-
-#nullable enable
 
         internal NamedTypeSymbol LookupTopLevelMetadataTypeWithNoPiaLocalTypeUnification(ref MetadataTypeName emittedName, out bool isNoPiaLocalType)
         {
@@ -617,8 +603,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
             return result ?? new MissingMetadataTypeSymbol.TopLevel(this, ref emittedName);
         }
 
-#nullable disable
-
         /// <summary>
         /// Returns a tuple of the assemblies this module forwards the given type to.
         /// </summary>
@@ -627,7 +611,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
         /// <remarks>
         /// The returned assemblies may also forward the type.
         /// </remarks>
-        internal (AssemblySymbol FirstSymbol, AssemblySymbol SecondSymbol) GetAssembliesForForwardedType(ref MetadataTypeName fullName)
+        internal (AssemblySymbol? FirstSymbol, AssemblySymbol? SecondSymbol) GetAssembliesForForwardedType(ref MetadataTypeName fullName)
         {
             string matchedName;
             (int firstIndex, int secondIndex) = this.Module.GetAssemblyRefsForForwardedType(fullName.FullName, ignoreCase: false, matchedName: out matchedName);
@@ -637,18 +621,16 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
                 return (null, null);
             }
 
-            AssemblySymbol firstSymbol = GetReferencedAssemblySymbol(firstIndex);
+            AssemblySymbol? firstSymbol = GetReferencedAssemblySymbol(firstIndex);
 
             if (secondIndex < 0)
             {
                 return (firstSymbol, null);
             }
 
-            AssemblySymbol secondSymbol = GetReferencedAssemblySymbol(secondIndex);
+            AssemblySymbol? secondSymbol = GetReferencedAssemblySymbol(secondIndex);
             return (firstSymbol, secondSymbol);
         }
-
-#nullable enable
 
         internal IEnumerable<NamedTypeSymbol> GetForwardedTypes()
         {
@@ -674,8 +656,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
             }
         }
 
-#nullable disable
-        public override ModuleMetadata GetMetadata() => _module.GetNonDisposableMetadata();
+        public override ModuleMetadata? GetMetadata() => _module.GetNonDisposableMetadata();
 
         internal bool ShouldDecodeNullableAttributes(Symbol symbol)
         {
@@ -712,7 +693,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
             return false;
         }
 
-#nullable enable
         internal DiagnosticInfo? GetCompilerFeatureRequiredDiagnostic()
         {
             if (_lazyCachedCompilerFeatureRequiredDiagnosticInfo == CSDiagnosticInfo.EmptyErrorInfo)
