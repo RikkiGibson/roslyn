@@ -202,7 +202,8 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         public override BoundNode? VisitSlicePattern(BoundSlicePattern node)
         {
-            BoundPattern? pattern = RewritePatternWithUnionMatchingToPropertyPattern((BoundPattern)this.Visit(node.Pattern));
+            BoundPattern? visited = (BoundPattern?)this.Visit(node.Pattern);
+            BoundPattern? pattern = visited is null ? null : RewritePatternWithUnionMatchingToPropertyPattern(visited);
             BoundExpression? indexerAccess = node.IndexerAccess;
             BoundSlicePatternReceiverPlaceholder? receiverPlaceholder = node.ReceiverPlaceholder;
             BoundSlicePatternRangePlaceholder? argumentPlaceholder = node.ArgumentPlaceholder;

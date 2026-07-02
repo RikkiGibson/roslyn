@@ -405,8 +405,8 @@
       "toggles": 1,
       "totalLines": 257,
       "disabledLines": 233,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed directives; base Visit made BoundNode?/nullable with [NotNullIfNotNull] to preserve rewriter contract; switch uses direct casts like generated VisitInternal; ref stack-guard keeps non-null return; fixed ripple in UnboundLambda.cs override param and UnionMatchingRewriter.cs slice pattern",
       "order": 37
     },
     {
