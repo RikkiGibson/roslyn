@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -41,9 +39,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         private readonly DeclarationTable _sources;
 
         private SymbolCompletionState _state;
-        private CustomAttributesBag<CSharpAttributeData> _lazyCustomAttributesBag;
+        private CustomAttributesBag<CSharpAttributeData>? _lazyCustomAttributesBag;
         private ImmutableArray<Location> _locations;
-        private NamespaceSymbol _globalNamespace;
+        private NamespaceSymbol? _globalNamespace;
 
         private bool _hasBadAttributes;
 
@@ -194,7 +192,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get
             {
-                if ((object)_globalNamespace == null)
+                if ((object?)_globalNamespace == null)
                 {
                     var diagnostics = BindingDiagnosticBag.GetInstance();
                     var globalNS = new SourceNamespaceSymbol(
@@ -208,6 +206,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     diagnostics.Free();
                 }
 
+                Debug.Assert(_globalNamespace is not null);
                 return _globalNamespace;
             }
         }
@@ -222,7 +221,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return _state.HasComplete(part);
         }
 
-#nullable enable
         internal override void ForceComplete(SourceLocation? locationOpt, Predicate<Symbol>? filter, CancellationToken cancellationToken)
         {
             while (true)
@@ -427,7 +425,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 toVisit.Free();
             }
         }
-#nullable disable
 
         public override ImmutableArray<Location> Locations
         {
@@ -544,6 +541,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 }
             }
 
+            Debug.Assert(_lazyCustomAttributesBag is not null);
             return _lazyCustomAttributesBag;
         }
 
@@ -566,7 +564,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// <remarks>
         /// Forces binding and decoding of attributes.
         /// </remarks>
-        private ModuleWellKnownAttributeData GetDecodedWellKnownAttributeData()
+        private ModuleWellKnownAttributeData? GetDecodedWellKnownAttributeData()
         {
             var attributesBag = _lazyCustomAttributesBag;
             if (attributesBag == null || !attributesBag.IsDecodedWellKnownAttributeDataComputed)
@@ -574,12 +572,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 attributesBag = this.GetAttributesBag();
             }
 
-            return (ModuleWellKnownAttributeData)attributesBag.DecodedWellKnownAttributeData;
+            return (ModuleWellKnownAttributeData?)attributesBag.DecodedWellKnownAttributeData;
         }
 
         protected override void DecodeWellKnownAttributeImpl(ref DecodeWellKnownAttributeArguments<AttributeSyntax, CSharpAttributeData, AttributeLocation> arguments)
         {
-            Debug.Assert((object)arguments.AttributeSyntaxOpt != null);
+            Debug.Assert((object?)arguments.AttributeSyntaxOpt != null);
 
             var attribute = arguments.Attribute;
             Debug.Assert(!attribute.HasErrors);
@@ -620,8 +618,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 arguments.GetOrCreateData<ModuleWellKnownAttributeData>().ExperimentalAttributeData = attribute.DecodeExperimentalAttribute();
             }
         }
-
-#nullable enable
 
         internal bool RequiresRefSafetyRulesAttribute()
         {

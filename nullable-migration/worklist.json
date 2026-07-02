@@ -680,8 +680,8 @@
       "toggles": 3,
       "totalLines": 785,
       "disabledLines": 414,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable fields _lazyCustomAttributesBag/_globalNamespace, nullable GetDecodedWellKnownAttributeData return, (object?) idiom, Debug.Assert guards",
       "order": 62
     },
     {
