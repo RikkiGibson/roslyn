@@ -49,7 +49,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         internal sealed override string? ExtensionGroupingName => null;
         internal sealed override string? ExtensionMarkerName => null;
 
-        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
+        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
         {
             base.AddSynthesizedAttributes(moduleBuilder, ref attributes);
 

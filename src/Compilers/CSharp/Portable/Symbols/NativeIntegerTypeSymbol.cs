@@ -482,7 +482,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         public override int GetHashCode() => _underlyingParameter.GetHashCode();
 
-        internal sealed override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
+        internal sealed override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
             => throw ExceptionUtilities.Unreachable();
 
 #if !DEBUG

@@ -64,13 +64,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return _containingSymbol.ContainingAssembly; }
         }
 
-        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
+        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
         {
             base.AddSynthesizedAttributes(moduleBuilder, ref attributes);
             AddSynthesizedAttributes(this, moduleBuilder, ref attributes);
         }
 
-        internal static void AddSynthesizedAttributes(ParameterSymbol parameter, PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
+        internal static void AddSynthesizedAttributes(ParameterSymbol parameter, PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
         {
             var compilation = parameter.DeclaringCompilation;
 

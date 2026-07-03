@@ -823,13 +823,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return parameters.ToImmutableAndFree();
         }
 
-        internal sealed override void AddSynthesizedReturnTypeAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
+        internal sealed override void AddSynthesizedReturnTypeAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
         {
             base.AddSynthesizedReturnTypeAttributes(moduleBuilder, ref attributes);
             AddSynthesizedReturnTypeFlowAnalysisAttributes(ref attributes);
         }
 
-        internal void AddSynthesizedReturnTypeFlowAnalysisAttributes(ref ArrayBuilder<CSharpAttributeData> attributes)
+        internal void AddSynthesizedReturnTypeFlowAnalysisAttributes(ref ArrayBuilder<CSharpAttributeData>? attributes)
         {
             var annotations = ReturnTypeFlowAnalysisAnnotations;
             if ((annotations & FlowAnalysisAnnotations.MaybeNull) != 0)

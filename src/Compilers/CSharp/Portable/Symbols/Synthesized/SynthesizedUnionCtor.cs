@@ -68,7 +68,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return c.Exists && c.IsImplicit && (c.IsIdentity || c.IsReference || c.IsBoxing);
         }
 
-        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
+        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
         {
             base.AddSynthesizedAttributes(moduleBuilder, ref attributes);
             Debug.Assert(IsImplicitlyDeclared);

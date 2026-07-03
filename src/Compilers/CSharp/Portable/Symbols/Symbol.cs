@@ -887,18 +887,14 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>
         /// Build and add synthesized attributes for this symbol.
         /// </summary>
-        // TODO2: The synthesized-attributes builder is passed by 'ref' and is genuinely nullable (allocated on demand).
-        // Annotating it cascades through 'ref' invariance into every AddSynthesizedAttributes override, so this pair is
-        // kept nullable-oblivious and enabled in a dedicated stage. See nullable-migration/found-bugs.md.
-#nullable disable
-        internal virtual void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
+        internal virtual void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
         {
         }
 
         /// <summary>
         /// Convenience helper called by subclasses to add a synthesized attribute to a collection of attributes.
         /// </summary>
-        internal static void AddSynthesizedAttribute(ref ArrayBuilder<CSharpAttributeData> attributes, CSharpAttributeData attribute)
+        internal static void AddSynthesizedAttribute(ref ArrayBuilder<CSharpAttributeData>? attributes, CSharpAttributeData? attribute)
         {
             if (attribute != null)
             {
@@ -910,7 +906,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                 attributes.Add(attribute);
             }
         }
-#nullable enable
 
         /// <summary>
         /// <see cref="CharSet"/> effective for this symbol (type or DllImport method).

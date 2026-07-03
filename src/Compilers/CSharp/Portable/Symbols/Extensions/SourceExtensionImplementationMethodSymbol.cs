@@ -64,7 +64,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         public sealed override Symbol ContainingSymbol => _originalMethod.ContainingType.ContainingSymbol;
 
-        internal sealed override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
+        internal sealed override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
         {
             // Copy some attributes from the property onto the implementation accessors
             if (_originalMethod is SourcePropertyAccessorSymbol { AssociatedSymbol: SourcePropertySymbolBase extensionProperty })
@@ -82,7 +82,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             SourceMethodSymbol.AddSynthesizedAttributes(this, moduleBuilder, ref attributes);
         }
 
-        internal override void AddSynthesizedReturnTypeAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
+        internal override void AddSynthesizedReturnTypeAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
         {
             if (_originalMethod is SourcePropertyAccessorSymbol accessor)
             {
@@ -202,7 +202,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 }
             }
 
-            internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
+            internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
             {
                 if (_underlyingParameter is SynthesizedAccessorValueParameterSymbol valueParameter)
                 {

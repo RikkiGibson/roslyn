@@ -1283,7 +1283,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         }
 
 #nullable enable
-        protected static void AddRequiredMembersMarkerAttributes(ref ArrayBuilder<CSharpAttributeData> attributes, MethodSymbol methodToAttribute)
+        protected static void AddRequiredMembersMarkerAttributes(ref ArrayBuilder<CSharpAttributeData>? attributes, MethodSymbol methodToAttribute)
         {
             if (methodToAttribute.ShouldCheckRequiredMembers() && methodToAttribute.ContainingType.HasAnyRequiredMembers)
             {
@@ -1306,7 +1306,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        protected static void AddClosedClassesFeatureRequiredAttribute(ref ArrayBuilder<CSharpAttributeData> attributes, MethodSymbol methodToAttribute)
+        protected static void AddClosedClassesFeatureRequiredAttribute(ref ArrayBuilder<CSharpAttributeData>? attributes, MethodSymbol methodToAttribute)
         {
             if (methodToAttribute.ContainingType.IsClosed)
             {

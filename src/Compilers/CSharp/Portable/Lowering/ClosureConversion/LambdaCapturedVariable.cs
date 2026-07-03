@@ -178,7 +178,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             _parameter = parameter;
         }
 
-        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
+        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
         {
             ParameterSymbol definition = _parameter.OriginalDefinition;
 

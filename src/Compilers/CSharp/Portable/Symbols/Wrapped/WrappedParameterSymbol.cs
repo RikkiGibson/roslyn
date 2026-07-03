@@ -71,7 +71,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return _underlyingParameter.GetAttributes();
         }
 
-        internal abstract override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes);
+        internal abstract override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes);
 
         internal sealed override ConstantValue? ExplicitDefaultConstantValue
         {

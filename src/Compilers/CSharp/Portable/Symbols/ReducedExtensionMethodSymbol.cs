@@ -708,7 +708,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return Hash.Combine(ContainingSymbol, _underlyingParameter.Ordinal);
             }
 
-            internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
+            internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
                 => throw ExceptionUtilities.Unreachable();
         }
     }

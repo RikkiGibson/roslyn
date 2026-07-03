@@ -116,7 +116,7 @@ internal sealed class SynthesizedCollectionBuilderProjectedMethodSymbol(
     internal override bool HasAsyncMethodBuilderAttribute(out TypeSymbol builderArgument) => throw ExceptionUtilities.Unreachable();
     internal override bool IsNullableAnalysisEnabled() => throw ExceptionUtilities.Unreachable();
 
-    internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes) => throw ExceptionUtilities.Unreachable();
+    internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes) => throw ExceptionUtilities.Unreachable();
 
     private sealed class SynthesizedCollectionBuilderProjectedParameterSymbol(
         SynthesizedCollectionBuilderProjectedMethodSymbol methodSymbol,
@@ -138,6 +138,6 @@ internal sealed class SynthesizedCollectionBuilderProjectedMethodSymbol(
 
         internal override bool HasInterpolatedStringHandlerArgumentError => this.UnderlyingParameter.HasInterpolatedStringHandlerArgumentError;
 
-        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes) => throw ExceptionUtilities.Unreachable();
+        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes) => throw ExceptionUtilities.Unreachable();
     }
 }
