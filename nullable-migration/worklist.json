@@ -1175,8 +1175,8 @@
       "toggles": 2,
       "totalLines": 1209,
       "disabledLines": 1173,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Enabled TypeWithAnnotations.cs. Kept DefaultType/_extensions oblivious (non-null) to preserve default-struct contract; made Create/CreateNonLazyType/WithTypeAndModifiers/NeedsNullableAttribute typeSymbol params nullable (already null-checked internally) which resolved all cross-file CS8604 ripple with no caller edits. Made GetUnificationUseSiteDiagnosticRecursive ref params nullable, requiring matching signature updates in already-enabled ArrayTypeSymbol/PointerTypeSymbol overrides. _resolved field nullable in LazyNullableTypeParameter.",
       "order": 107
     },
     {
