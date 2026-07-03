@@ -52,3 +52,23 @@ When you find a real bug while enabling a file:
 - Migration handling: file nullable-enabled, this single method kept in a `#nullable disable` island (order 107)
 - What we know: The method has `ref DiagnosticInfo result` / `ref HashSet<TypeSymbol> checkedTypes` params. The honest annotation is `ref DiagnosticInfo?` / `ref HashSet<TypeSymbol>?` (result/checkedTypes start null and are lazily populated). But this method delegates to the abstract `TypeSymbol.GetUnificationUseSiteDiagnosticRecursive` (declared in the still-`#nullable disable` TypeSymbol.cs) and the static overloads in Symbol.cs. Annotating the ref params forced the derived overrides in ArrayTypeSymbol/PointerTypeSymbol to also annotate, churning derived types before their base type is enabled (violates base-before-derived). Kept oblivious to avoid that ripple.
 - Proposed fix: When Symbol.cs/TypeSymbol.cs are nullable-enabled, annotate the abstract/virtual/static `GetUnificationUseSiteDiagnosticRecursive` ref params nullable there first, then remove this island and annotate the derived overrides in the same pass.
+
+### Symbol.cs high-usage genuinely-nullable members deferred to dedicated stages
+- File: src/Compilers/CSharp/Portable/Symbols/Symbol.cs (multiple members)
+- Status: open
+- Migration handling: file nullable-enabled (Stage A); the following high-usage genuinely-nullable members are kept in `#nullable disable` islands (oblivious signatures) so enabling them does not churn the ~100 already-migrated derived symbol types that override them. Each is to be enabled in its own dedicated commit (Stage B+) so its bug-catching ripple can be assessed in isolation.
+- What we know: These members are legitimately nullable, but they are dereferenced at a large number of consumer/override sites that currently assume non-null. Deferring them keeps the base-type migration loop-friendly:
+  - `ContainingSymbol` (abstract) and the `Containing*` family (`ContainingType`, `ContainingNamespace`, `ContainingAssembly`) plus `DeclaringCompilation` — return null at the top of the symbol hierarchy; ~50 derived overrides already declare `?` and ~20+ consumer deref sites assume non-null.
+  - `ContainingModule` — same shape as the `Containing*` family.
+  - virtual `Equals(Symbol other, TypeCompareKind compareKind)` — honest param is `Symbol?`; annotating churns every derived `Equals` override.
+  - `AddSynthesizedAttributes(PEModuleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)` and static `AddSynthesizedAttribute(ref ArrayBuilder<CSharpAttributeData> attributes, CSharpAttributeData attribute)` — the `ref ArrayBuilder<>` is genuinely nullable but `ref` invariance forces every override/caller to match in lockstep.
+  - `MergeUseSiteDiagnostics(ref DiagnosticInfo result, DiagnosticInfo info)` — honest signature is `ref DiagnosticInfo?`; `ref` invariance cascades into many use-site-diagnostic callers.
+  - `PrimaryDependency` — returns null for the core library; annotating cascades into several PE*/Retargeting* consumer sites that assign it to a non-nullable local and pass it to `ToUseSiteInfo(AssemblySymbol)`.
+- Proposed fix: In dedicated follow-up commits, enable each cluster (start with `ContainingSymbol`, then the rest of the `Containing*`/`DeclaringCompilation` family, then `ContainingModule`, then virtual `Equals`, then the `AddSynthesizedAttributes` ref pair, then `MergeUseSiteDiagnostics`, then `PrimaryDependency`), annotating the base member and fixing the resulting consumer/override sites in the same pass; remove the island once each is clean.
+
+### Pre-existing EE consumer nullable errors surfaced by CompilerConsumers.slnf (not from Symbol.cs)
+- File: src/ExpressionEvaluator/CSharp/Source/ExpressionCompiler/CompilationContext.cs#L1073, #L1237; src/ExpressionEvaluator/CSharp/Source/ExpressionCompiler/EETypeNameDecoder.cs#L67
+- Status: open
+- Migration handling: pre-existing (reproduce with Symbol.cs stashed); not introduced by any Stage A change.
+- What we know: Building `CompilerConsumers.slnf` with `-p:WarningsAsErrors=nullable` reports 3 errors in the EE ExpressionCompiler consumer that already exist on the branch independent of Symbol.cs: two `CS8604` passing `binder.ContainingMemberOrLambda` (nullable) to `AliasSymbol.CreateCustomDebugInfoAlias(... Symbol containingSymbol ...)`, and one `CS8602` dereferencing `Module.GetReferencedAssemblySymbol(index)` (nullable). The EE project is not part of the primary per-file feedback build, so these leaked from an earlier migration commit.
+- Proposed fix: Address as part of nullable-enabling the EE ExpressionCompiler files (or a dedicated cleanup), not as part of Symbol.cs.

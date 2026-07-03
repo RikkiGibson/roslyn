@@ -1263,8 +1263,8 @@
       "toggles": 12,
       "totalLines": 1871,
       "disabledLines": 1624,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Stage A: enabled with pure-win annotations; high-usage genuinely-nullable members (Containing*/DeclaringCompilation/ContainingModule, virtual Equals, AddSynthesizedAttributes ref pair, MergeUseSiteDiagnostics, PrimaryDependency) islanded for dedicated Stage B+ commits. See found-bugs.md.",
       "order": 115
     },
     {
