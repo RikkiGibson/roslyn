@@ -9,6 +9,8 @@ with no ad-hoc `python3 -c "..."` invocations to reason about.
 Subcommands:
   next                    Print the next pending item (order, path, project, csproj, build cmd).
   next --path             Print only the next pending path.
+  list                    List all pending items in base-before-derived processing order,
+                          showing declared types and which base file each waits on.
   status --order N --status done [--note "..."]
   status --path P --status deferred [--note "..."]
                           Update a worklist item's status/note.
@@ -198,6 +200,64 @@ def cmd_next(args) -> int:
     return 0
 
 
+def _processing_order(items):
+    """Simulate the base-before-derived pick order over all PENDING items.
+
+    Repeatedly takes the lowest-order READY item (no pending base file still
+    ahead of it), mirroring what `next` does turn by turn. Returns a list of
+    (item, blockers_at_pick_time) in the order the loop would process them.
+    Cycles fall back to plain easiest-first so this always terminates.
+    """
+    remaining = [it for it in items if it["status"] == "pending"]
+    info = {it["path"]: _declared_and_bases(it["path"]) for it in remaining}
+    ordered = []
+    done_paths = set()
+    while remaining:
+        decl_map = {}
+        for it in remaining:
+            for t in info[it["path"]][0]:
+                decl_map.setdefault(t, set()).add(it["path"])
+        ready, blocked_by = [], {}
+        for it in remaining:
+            _declared, bases = info[it["path"]]
+            blockers = set()
+            for b in bases:
+                for p in decl_map.get(b, ()):
+                    if p != it["path"]:
+                        blockers.add(p)
+            if blockers:
+                blocked_by[it["path"]] = blockers
+            else:
+                ready.append(it)
+        pool = ready if ready else remaining
+        nxt = min(pool, key=lambda it: it["order"])
+        ordered.append((nxt, sorted(blocked_by.get(nxt["path"], ()))))
+        remaining.remove(nxt)
+        done_paths.add(nxt["path"])
+    return ordered
+
+
+def cmd_list(args) -> int:
+    data = _load()
+    counts = {}
+    for it in data["items"]:
+        counts[it["status"]] = counts.get(it["status"], 0) + 1
+    summary = ", ".join(f"{k}={counts[k]}" for k in sorted(counts))
+    print(f"# {data.get('count', len(data['items']))} items: {summary}")
+    print("# pending items in base-before-derived processing order:")
+    ordered = _processing_order(data["items"])
+    for pos, (it, blockers) in enumerate(ordered, start=1):
+        declared, bases = _declared_and_bases(it["path"])
+        types = ",".join(sorted(declared)) if declared else "-"
+        line = f"{pos:>3}. order={it['order']:<4} {it['path']}"
+        print(line)
+        extra = f"       declares: {types}"
+        if blockers:
+            extra += f"  | base-first after: {', '.join(os.path.basename(b) for b in blockers)}"
+        print(extra)
+    return 0
+
+
 def cmd_status(args) -> int:
     if not args.path and args.order is None:
         print("error: provide --path or --order", file=sys.stderr)
@@ -256,6 +316,9 @@ def main() -> int:
     p_next = sub.add_parser("next", help="print the next pending item")
     p_next.add_argument("--path", action="store_true", help="print only the path")
     p_next.set_defaults(func=cmd_next)
+
+    p_list = sub.add_parser("list", help="list pending items in base-before-derived processing order")
+    p_list.set_defaults(func=cmd_list)
 
     p_status = sub.add_parser("status", help="update a worklist item's status/note")
     p_status.add_argument("--path")
