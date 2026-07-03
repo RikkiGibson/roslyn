@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -1148,11 +1149,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>
         /// Merges given diagnostic to the existing result diagnostic.
         /// </summary>
-        // TODO2: the 'ref DiagnosticInfo' merge helper is nullable-oblivious; annotating the 'ref' cascades through ref
-        // invariance into many use-site-diagnostic callers, so it is kept oblivious and enabled in a dedicated stage.
-        // See nullable-migration/found-bugs.md.
-#nullable disable
-        internal bool MergeUseSiteDiagnostics(ref DiagnosticInfo result, DiagnosticInfo info)
+        internal bool MergeUseSiteDiagnostics([NotNullIfNotNull(nameof(info))] ref DiagnosticInfo? result, DiagnosticInfo? info)
         {
             if (info == null)
             {
@@ -1176,7 +1173,6 @@ namespace Microsoft.CodeAnalysis.CSharp
             // we have a second low-pri error, continue looking for a higher priority one
             return false;
         }
-#nullable enable
 
         /// <summary>
         /// Merges given diagnostic and dependencies to the existing result.
