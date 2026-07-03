@@ -1164,8 +1164,8 @@
       "toggles": 25,
       "totalLines": 1963,
       "disabledLines": 1167,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "removed 26 directives; fields nullable; members: BackingField return !, TypeWithAnnotations _lazyType!, OverriddenOrHiddenMembers !, SynthesizedSealedAccessorOpt/MakeSynthesizedSealedAccessor/GetDecoded/GetEarlyDecoded/ObsoleteAttributeData/BoundAttributesSource nullable, PostDecodeWellKnownAttributes decodedData?, GetDocumentationCommentXml CultureInfo?, accessor-check params nullable + asserts; no cross-file ripple",
       "order": 106
     },
     {
