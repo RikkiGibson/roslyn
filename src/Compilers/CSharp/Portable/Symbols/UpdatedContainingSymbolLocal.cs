@@ -40,7 +40,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         public override Symbol ContainingSymbol { get; }
         public override TypeWithAnnotations TypeWithAnnotations { get; }
 
-        public override bool Equals(Symbol other, TypeCompareKind compareKind)
+        public override bool Equals(Symbol? other, TypeCompareKind compareKind)
         {
             if (other == (object)this)
             {

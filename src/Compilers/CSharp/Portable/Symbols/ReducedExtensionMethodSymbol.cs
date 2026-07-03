@@ -685,7 +685,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             internal override bool HasEnumeratorCancellationAttribute => throw ExceptionUtilities.Unreachable();
 
-            public sealed override bool Equals(Symbol obj, TypeCompareKind compareKind)
+            public sealed override bool Equals(Symbol? obj, TypeCompareKind compareKind)
             {
                 if ((object)this == obj)
                 {

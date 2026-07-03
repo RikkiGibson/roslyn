@@ -106,7 +106,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return assembly.GetHashCode();
         }
 
-        public override bool Equals(Symbol obj, TypeCompareKind compareKind)
+        public override bool Equals(Symbol? obj, TypeCompareKind compareKind)
         {
             if (ReferenceEquals(this, obj))
             {
@@ -226,7 +226,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return Hash.Combine(assembly.GetHashCode(), StringComparer.OrdinalIgnoreCase.GetHashCode(_name));
         }
 
-        public override bool Equals(Symbol obj, TypeCompareKind compareKind)
+        public override bool Equals(Symbol? obj, TypeCompareKind compareKind)
         {
             if (ReferenceEquals(this, obj))
             {

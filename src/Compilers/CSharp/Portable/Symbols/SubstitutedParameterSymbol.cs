@@ -107,7 +107,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return _underlyingParameter.CallerArgumentExpressionParameterIndex; }
         }
 
-        public sealed override bool Equals(Symbol obj, TypeCompareKind compareKind)
+        public sealed override bool Equals(Symbol? obj, TypeCompareKind compareKind)
         {
             if ((object)this == obj)
             {

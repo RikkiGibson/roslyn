@@ -836,13 +836,10 @@ namespace Microsoft.CodeAnalysis.CSharp
         }
 
         // By default we don't consider the compareKind, and do reference equality. This can be overridden.
-        // TODO2: annotating the virtual 'Equals(Symbol?, TypeCompareKind)' cascades into ~14 overrides; enable in a dedicated stage. See nullable-migration/found-bugs.md.
-#nullable disable
-        public virtual bool Equals(Symbol other, TypeCompareKind compareKind)
+        public virtual bool Equals(Symbol? other, TypeCompareKind compareKind)
         {
             return (object)this == other;
         }
-#nullable enable
 
         // By default, we do reference equality. This can be overridden.
         public override int GetHashCode()

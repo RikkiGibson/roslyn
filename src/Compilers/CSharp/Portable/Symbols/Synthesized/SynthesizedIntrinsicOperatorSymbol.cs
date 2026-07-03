@@ -480,7 +480,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             internal override ConstantValue? DefaultValueFromAttributes => null;
 
-            public override bool Equals(Symbol obj, TypeCompareKind compareKind)
+            public override bool Equals(Symbol? obj, TypeCompareKind compareKind)
             {
                 if (obj == (object)this)
                 {
