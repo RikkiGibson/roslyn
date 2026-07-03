@@ -685,7 +685,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
                     diagnostics.AddRange(useSiteDiagnosticsBuilder);
                 }
 
-                AssemblySymbol primaryDependency = PrimaryDependency;
+                AssemblySymbol? primaryDependency = PrimaryDependency;
                 var useSiteInfo = new UseSiteInfo<AssemblySymbol>(primaryDependency);
 
                 foreach (var diag in diagnostics)

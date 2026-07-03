@@ -493,7 +493,7 @@ namespace Microsoft.CodeAnalysis
             return secondaryDependencies;
         }
 
-        public UseSiteInfo<TAssemblySymbol> ToUseSiteInfo(TAssemblySymbol primaryDependency)
+        public UseSiteInfo<TAssemblySymbol> ToUseSiteInfo(TAssemblySymbol? primaryDependency)
         {
             Expand(_info, out var diagnosticInfo, out var dependencies);
 

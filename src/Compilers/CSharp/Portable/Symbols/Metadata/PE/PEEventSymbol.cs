@@ -504,7 +504,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
 
         internal override UseSiteInfo<AssemblySymbol> GetUseSiteInfo()
         {
-            AssemblySymbol primaryDependency = PrimaryDependency;
+            AssemblySymbol? primaryDependency = PrimaryDependency;
 
             if (!_lazyCachedUseSiteInfo.IsInitialized)
             {

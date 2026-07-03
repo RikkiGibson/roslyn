@@ -355,7 +355,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
         {
             if (!_lazyCachedUseSiteInfo.IsInitialized)
             {
-                AssemblySymbol primaryDependency = PrimaryDependency;
+                AssemblySymbol? primaryDependency = PrimaryDependency;
                 var result = new UseSiteInfo<AssemblySymbol>(primaryDependency);
                 CalculateUseSiteDiagnostic(ref result);
                 _lazyCachedUseSiteInfo.Initialize(primaryDependency, result);

@@ -390,7 +390,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
         {
             if (!_lazyCachedUseSiteInfo.IsInitialized)
             {
-                AssemblySymbol primaryDependency = PrimaryDependency;
+                AssemblySymbol? primaryDependency = PrimaryDependency;
                 _lazyCachedUseSiteInfo.Initialize(primaryDependency, new UseSiteInfo<AssemblySymbol>(primaryDependency).AdjustDiagnosticInfo(CalculateUseSiteDiagnostic()));
             }
 

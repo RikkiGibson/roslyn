@@ -1086,11 +1086,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return default;
         }
 
-        // TODO2: 'PrimaryDependency' is genuinely nullable (returns null for the core library) but consumers assume
-        // non-null; annotating it cascades into several call sites, so it is kept oblivious and enabled in a dedicated
-        // stage. See nullable-migration/found-bugs.md.
-#nullable disable
-        protected AssemblySymbol PrimaryDependency
+        protected AssemblySymbol? PrimaryDependency
         {
             get
             {
@@ -1103,7 +1099,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                 return dependency;
             }
         }
-#nullable enable
 
         /// <summary>
         /// Returns true if the error code is the highest priority while calculating use site error for this symbol. 
