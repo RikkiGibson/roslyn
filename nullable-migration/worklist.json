@@ -1142,8 +1142,8 @@
       "toggles": 4,
       "totalLines": 1193,
       "disabledLines": 1153,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable fields _currentToken/_lexedTokens/_prevTokenTrailingTrivia/_blendedTokens; ctor oldTree/changes params nullable; TryEatToken->SyntaxToken?; Debug.Assert for mutually-exclusive token arrays + ! at exclusive derefs; (SyntaxDiagnosticInfo?) casts. Ripple LanguageParser.cs: CloseBraceToken!, constructTypeDeclaration semicolon->SyntaxToken? + local.",
       "order": 104
     },
     {

@@ -511,7 +511,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                         // diagnostic saying that it was unexpected.
                         currentSibling = AddLeadingSkippedSyntax(
                             currentSibling,
-                            AddError(typeDeclaration.CloseBraceToken, ErrorCode.ERR_InvalidMemberDecl, "}"));
+                            AddError(typeDeclaration.CloseBraceToken!, ErrorCode.ERR_InvalidMemberDecl, "}"));
                     }
 
                     finalTypeDeclarationMembers.Add(currentSibling);
@@ -1839,7 +1839,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
 
                 _termState = outerSaveTerm;
 
-                SyntaxToken semicolon;
+                SyntaxToken? semicolon;
                 SyntaxToken? openBrace;
                 SyntaxToken? closeBrace;
                 if (CurrentToken.Kind == SyntaxKind.SemicolonToken)
@@ -1959,7 +1959,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
 
             static TypeDeclarationSyntax constructTypeDeclaration(ContextAwareSyntax syntaxFactory, SyntaxList<AttributeListSyntax> attributes, SyntaxListBuilder modifiers, SyntaxToken keyword, SyntaxToken? recordModifier,
                 SyntaxToken? name, TypeParameterListSyntax typeParameters, ParameterListSyntax? paramList, BaseListSyntax? baseList, SyntaxListBuilder<TypeParameterConstraintClauseSyntax> constraints,
-                SyntaxToken? openBrace, SyntaxListBuilder<MemberDeclarationSyntax> members, SyntaxToken? closeBrace, SyntaxToken semicolon)
+                SyntaxToken? openBrace, SyntaxListBuilder<MemberDeclarationSyntax> members, SyntaxToken? closeBrace, SyntaxToken? semicolon)
             {
                 var modifiersList = (SyntaxList<SyntaxToken>)modifiers.ToList();
                 var membersList = (SyntaxList<MemberDeclarationSyntax>)members;
