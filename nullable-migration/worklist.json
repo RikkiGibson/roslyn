@@ -1153,8 +1153,8 @@
       "toggles": 2,
       "totalLines": 1179,
       "disabledLines": 1161,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed 3 directives; Visit/Visit* overrides -> BoundNode? to match generated base; _staticLocalOrAnonymousFunction & CheckUnsafeType(e) & propertyAccess & method & convertedToType nullable; ImmutableArray<string?> argumentNamesOpt; (object?) idioms; node.Type! derefs; Debug.Assert(AssociatedField) under IsUsableAsField; TryPop out node!",
       "order": 105
     },
     {
