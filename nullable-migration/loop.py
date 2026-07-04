@@ -309,6 +309,52 @@ def cmd_verify(args) -> int:
     return 0 if ok else 1
 
 
+def cmd_resort(args) -> int:
+    """Persist base-before-derived ordering into worklist.json's "order" field.
+
+    `next`/`list` already compute a base-before-derived pick order on the fly
+    (see `_processing_order`), but that's a runtime overlay: the "order" field
+    on disk still reflects plain easiest-first, so anyone skimming
+    worklist.json/worklist.md sees a misleading sequence, and any other tooling
+    that just sorts by "order" would miss the constraint.
+
+    This reassigns "order" for all PENDING items to match that computed
+    sequence, one-to-one, reusing the exact same set of order numbers already
+    held by pending items (just permuted among them) -- so done/deferred/
+    blocked items keep their original order values untouched and no numbers
+    collide. This is a heuristic lexical pass (see `_declared_and_bases`), not
+    a perfect dependency sort -- it's meant to reduce re-touching derived files
+    after a later base-type edit, not guarantee zero churn.
+    """
+    data = _load()
+    pending = [it for it in data["items"] if it["status"] == "pending"]
+    if not pending:
+        print("no pending items; nothing to resort", file=sys.stderr)
+        return 0
+
+    ordered = _processing_order(data["items"])  # [(item, blockers), ...] in pick order
+    available_orders = sorted(it["order"] for it in pending)
+
+    changes = []
+    for new_order, (item, blockers) in zip(available_orders, ordered):
+        if item["order"] != new_order:
+            changes.append((item["path"], item["order"], new_order, blockers))
+        item["order"] = new_order
+
+    if args.dry_run:
+        print(f"[dry run] {len(changes)} of {len(pending)} pending item(s) would move:")
+    else:
+        _save(data)
+        print(f"{len(changes)} of {len(pending)} pending item(s) moved:")
+
+    for path, old_order, new_order, blockers in changes:
+        arrow = f"{old_order:>4} -> {new_order:<4}"
+        extra = f"  (base-first after: {', '.join(os.path.basename(b) for b in blockers)})" if blockers else ""
+        print(f"  {arrow} {path}{extra}")
+
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -330,6 +376,13 @@ def main() -> int:
     p_verify = sub.add_parser("verify", help="cheap post-subagent completion check (no build)")
     p_verify.add_argument("--order", type=int, required=True)
     p_verify.set_defaults(func=cmd_verify)
+
+    p_resort = sub.add_parser(
+        "resort",
+        help="persist base-before-derived ordering into worklist.json's order field for pending items",
+    )
+    p_resort.add_argument("--dry-run", action="store_true", help="show what would change without saving")
+    p_resort.set_defaults(func=cmd_resort)
 
     args = ap.parse_args()
     return args.func(args)

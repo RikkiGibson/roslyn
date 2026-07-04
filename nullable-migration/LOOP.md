@@ -43,27 +43,35 @@ inherits the project default, then resolving the resulting warnings.
 - Follow repo conventions: `_camelCase` private fields, `Contract.ThrowIfNull` only where a null check
   already exists, blank lines must contain no whitespace, no trailing whitespace, no `TODO` (use `TODO2`).
 
-## Feedback loop: build the project (LSP context is unreliable)
-The ideal fast path is the Roslyn language server (`get_errors`), but nullable (CS8xxx) warnings only
-appear when the file's *active project context* is a .NET Core TFM (e.g. `net10.0`). In practice **that
-context does NOT stick** — it keeps reverting to `netstandard2.0`, where Nullable is `NoWarn`'d, so
-`get_errors` reports a misleading "clean" result (zero warnings even for a file that still has disabled
-regions). Only the user can reset the context, and it reverts again quickly.
+## Feedback loop: the LSP diagnostics daemon (fast path; no build needed)
+Do **not** use the CLI's built-in `get_errors`/`lsp` tool for this. It has no reliable way to pin a
+multi-targeted project's "active" TFM context, and in practice it silently reverts to `netstandard2.0`
+(where Nullable is `NoWarn`'d), reporting a misleading "clean" result (zero warnings even for a file
+that still has disabled regions).
 
-**Therefore: use a real build as the feedback mechanism.** Build the containing project for `net10.0`
-with analyzers disabled (fast, no analyzer cost) **and nullable warnings elevated to errors** so the
-compiler short-circuits the emit/lowering phase as soon as it finds a nullable issue:
+**Use `nullable-migration/lsp/lsp_diagnostics.py` instead.** It talks to a real `roslyn-language-server`
+directly over LSP and explicitly pins every diagnostics request to the `net10.0` project context (via
+the `_vs_projectContext` VS LSP extension), bypassing the "active context" heuristic entirely. It keeps
+the server loaded as a background daemon scoped to `CompilerConsumers.slnf` (not the full `Roslyn.slnx`),
+so it is much cheaper to start than a build, and near-instant on repeat calls against already-open files:
 ```
-dotnet build <csproj> -f net10.0 -p:RunAnalyzersDuringBuild=false -p:WarningsAsErrors=nullable -p:GenerateFullPaths=true -tl:off
+python3 nullable-migration/lsp/lsp_diagnostics.py <file1.cs> [<file2.cs> ...]
 ```
-Filter output with `grep -E "error CS|Warning\(s\)|Error\(s\)"`. The `error CS8###` lines are your work
-items; iterate until `0 Warning(s)  0 Error(s)`. Because the whole project compiles, this **also
-surfaces cross-file ripple** (e.g. a caller in another file that now passes a possibly-null argument) in
-the same build — no separate ripple check needed for same-project consumers.
-
-If you *do* try `get_errors` and it shows no CS8xxx after removing a `#nullable disable`, DO NOT trust
-it — verify with a throwaway `string x = null;` (must warn CS8600); if it doesn't warn, the context is
-wrong and you must build instead.
+- **Starts the daemon automatically on first use** — you do not need to start it yourself. It stays
+  running in the background across files/iterations; leave it running (do not stop it after each file).
+  If you suspect it's stuck or a project needs a full reload (e.g. files added/removed), run
+  `python3 nullable-migration/lsp/lsp_diagnostics.py --restart <file.cs>`.
+- Pass **every file whose diagnostics you care about in one call** (the target file plus any same-project
+  callers you suspect may ripple) — this surfaces cross-file impact just like a build would, without a
+  build.
+- Output is one line per diagnostic: `path(line,col): severity CODE: message`. Filter for `CS8` codes;
+  ignore IDE0xxx/CAxxxx analyzer hints (this tool doesn't disable analyzers, unlike the build command).
+- If you inject a throwaway `string x = null;` and it does NOT report CS8600 for that file, something is
+  wrong (e.g. daemon didn't reload after an edit, or file isn't part of `CompilerConsumers.slnf`) — fall
+  back to `--restart`, and if that doesn't help, fall back to the build command below.
+- A full `dotnet build` is only needed once per file, as the **final verification** in step 8 (and
+  optionally as a **baseline** in step 3) — the LSP daemon is for the fast, iterative edit/check cycle
+  in between.
 
 ## Procedure
 
@@ -84,17 +92,19 @@ wrong and you must build instead.
    - `src/Compilers/Core/Portable/...` → `src/Compilers/Core/Portable/Microsoft.CodeAnalysis.csproj`
    - `src/Compilers/VisualBasic/Portable/...` → `src/Compilers/VisualBasic/Portable/Microsoft.CodeAnalysis.VisualBasic.vbproj`
 
-3. **Baseline build.** Optionally build the project once (command below) to confirm it is warning-clean
-   before you start, so any new warnings are attributable to your change.
+3. **Baseline check.** Optionally run the LSP daemon against the file once (command below) to confirm it
+   is warning-clean before you start, so any new warnings are attributable to your change. A full build
+   baseline is not necessary unless the LSP result looks suspicious.
 
 4. **Remove the directives.** In the target file, delete the leading `#nullable disable` and every
    interior `#nullable enable` / `#nullable disable` / `#nullable restore` line. Leave the license
    header intact. Do NOT remove qualified directives such as `#nullable disable warnings` or
    `#nullable enable annotations` without understanding them — if present, inspect and treat with care.
 
-5. **Build to read warnings.** Build the containing project for `net10.0` with nullable-as-errors:
-   `dotnet build <csproj> -f net10.0 -p:RunAnalyzersDuringBuild=false -p:WarningsAsErrors=nullable -p:GenerateFullPaths=true -tl:off`
-   The reported `error CS8###` items are your work items (in the target file **and any same-project
+5. **Check diagnostics.** Run the LSP daemon against the target file (it auto-starts if not already
+   running) — include any same-project files you suspect may ripple:
+   `python3 nullable-migration/lsp/lsp_diagnostics.py <path> [<other-suspect-paths>...]`
+   The reported `CS8###` items are your work items (in the target file **and any same-project
    callers** that now see possibly-null arguments).
 
 6. **Fix warnings** per the constraints above. In priority order:
@@ -103,7 +113,7 @@ wrong and you must build instead.
    - Add `?` to parameters/fields/locals/returns that can legitimately be null.
    - Add a local null check or `Debug.Assert(x is not null)` where that reflects the real invariant.
    - Only as a last resort, `!` (ideally with a `Debug.Assert`).
-   Re-build the project until there are zero CS8 warnings and zero errors for the file.
+   Re-run `lsp_diagnostics.py` on the file (and any rippled callers) until there are zero CS8 warnings.
 
    **If a warning reveals a REAL bug** (a genuinely missing null check — null can actually flow to a
    dereference/cast at runtime), do NOT fix the bug here. Semantic changes need higher scrutiny than a

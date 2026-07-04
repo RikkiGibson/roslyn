@@ -880,7 +880,7 @@
       "disabledLines": 611,
       "status": "pending",
       "note": "",
-      "order": 80
+      "order": 89
     },
     {
       "path": "src/Compilers/CSharp/Portable/Symbols/Source/ModifierUtils.cs",
@@ -911,7 +911,7 @@
       "toggles": 6,
       "totalLines": 1118,
       "disabledLines": 629,
-      "status": "pending",
+      "status": "in-progress",
       "note": "",
       "order": 83
     },
@@ -979,7 +979,7 @@
       "disabledLines": 683,
       "status": "pending",
       "note": "",
-      "order": 89
+      "order": 128
     },
     {
       "path": "src/Compilers/CSharp/Portable/Symbols/Metadata/PE/PETypeParameterSymbol.cs",
@@ -1133,7 +1133,7 @@
       "disabledLines": 1126,
       "status": "pending",
       "note": "",
-      "order": 103
+      "order": 80
     },
     {
       "path": "src/Compilers/CSharp/Portable/Parser/SyntaxParser.cs",
@@ -1188,7 +1188,7 @@
       "disabledLines": 1183,
       "status": "pending",
       "note": "",
-      "order": 108
+      "order": 103
     },
     {
       "path": "src/Compilers/CSharp/Portable/Symbols/Source/SourceOrdinaryMethodSymbol.cs",
@@ -1199,7 +1199,7 @@
       "disabledLines": 1189,
       "status": "pending",
       "note": "",
-      "order": 109
+      "order": 108
     },
     {
       "path": "src/Compilers/CSharp/Portable/Symbols/Retargeting/RetargetingSymbolTranslator.cs",
@@ -1210,7 +1210,7 @@
       "disabledLines": 1305,
       "status": "pending",
       "note": "",
-      "order": 110
+      "order": 109
     },
     {
       "path": "src/Compilers/CSharp/Portable/Binder/Semantics/Operators/BinaryOperatorOverloadResolution.cs",
@@ -1221,7 +1221,7 @@
       "disabledLines": 1309,
       "status": "pending",
       "note": "",
-      "order": 111
+      "order": 110
     },
     {
       "path": "src/Compilers/CSharp/Portable/Lowering/SpillSequenceSpiller.cs",
@@ -1232,7 +1232,7 @@
       "disabledLines": 1507,
       "status": "pending",
       "note": "",
-      "order": 112
+      "order": 111
     },
     {
       "path": "src/Compilers/CSharp/Portable/Symbols/NamedTypeSymbol.cs",
@@ -1243,7 +1243,7 @@
       "disabledLines": 1524,
       "status": "pending",
       "note": "",
-      "order": 113
+      "order": 126
     },
     {
       "path": "src/Compilers/CSharp/Portable/Symbols/Source/SourceNamedTypeSymbol.cs",
@@ -1254,7 +1254,7 @@
       "disabledLines": 1525,
       "status": "pending",
       "note": "",
-      "order": 114
+      "order": 117
     },
     {
       "path": "src/Compilers/CSharp/Portable/Symbols/Symbol.cs",
@@ -1276,7 +1276,7 @@
       "disabledLines": 1645,
       "status": "pending",
       "note": "",
-      "order": 116
+      "order": 112
     },
     {
       "path": "src/Compilers/CSharp/Portable/Symbols/ConstraintsHelper.cs",
@@ -1287,7 +1287,7 @@
       "disabledLines": 1646,
       "status": "pending",
       "note": "",
-      "order": 117
+      "order": 113
     },
     {
       "path": "src/Compilers/CSharp/Portable/Compiler/MethodCompiler.cs",
@@ -1298,7 +1298,7 @@
       "disabledLines": 1666,
       "status": "pending",
       "note": "",
-      "order": 118
+      "order": 114
     },
     {
       "path": "src/Compilers/CSharp/Portable/Symbols/Source/SourceMemberContainerSymbol_ImplementationChecks.cs",
@@ -1309,7 +1309,7 @@
       "disabledLines": 1668,
       "status": "pending",
       "note": "",
-      "order": 119
+      "order": 116
     },
     {
       "path": "src/Compilers/CSharp/Portable/Lowering/ClosureConversion/ClosureConversion.cs",
@@ -1320,7 +1320,7 @@
       "disabledLines": 1671,
       "status": "pending",
       "note": "",
-      "order": 120
+      "order": 118
     },
     {
       "path": "src/Compilers/CSharp/Portable/Binder/Binder_Invocation.cs",
@@ -1331,7 +1331,7 @@
       "disabledLines": 1723,
       "status": "pending",
       "note": "",
-      "order": 121
+      "order": 119
     },
     {
       "path": "src/Compilers/CSharp/Portable/CodeGen/EmitStatement.cs",
@@ -1342,7 +1342,7 @@
       "disabledLines": 1790,
       "status": "pending",
       "note": "",
-      "order": 122
+      "order": 120
     },
     {
       "path": "src/Compilers/CSharp/Portable/Emitter/Model/PEModuleBuilder.cs",
@@ -1353,7 +1353,7 @@
       "disabledLines": 1837,
       "status": "pending",
       "note": "",
-      "order": 123
+      "order": 127
     },
     {
       "path": "src/Compilers/CSharp/Portable/Symbols/Metadata/PE/PEMethodSymbol.cs",
@@ -1364,7 +1364,7 @@
       "disabledLines": 1843,
       "status": "pending",
       "note": "",
-      "order": 124
+      "order": 121
     },
     {
       "path": "src/Compilers/CSharp/Portable/Binder/Binder_Lookup.cs",
@@ -1375,7 +1375,7 @@
       "disabledLines": 2029,
       "status": "pending",
       "note": "",
-      "order": 125
+      "order": 122
     },
     {
       "path": "src/Compilers/Core/Portable/MetadataReader/MetadataDecoder.cs",
@@ -1386,7 +1386,7 @@
       "disabledLines": 2343,
       "status": "pending",
       "note": "",
-      "order": 126
+      "order": 123
     },
     {
       "path": "src/Compilers/CSharp/Portable/Compilation/MemberSemanticModel.cs",
@@ -1397,7 +1397,7 @@
       "disabledLines": 2372,
       "status": "pending",
       "note": "",
-      "order": 127
+      "order": 145
     },
     {
       "path": "src/Compilers/CSharp/Portable/CodeGen/Optimizer.cs",
@@ -1408,7 +1408,7 @@
       "disabledLines": 2418,
       "status": "pending",
       "note": "",
-      "order": 128
+      "order": 124
     },
     {
       "path": "src/Compilers/CSharp/Portable/Symbols/TypeSymbol.cs",
@@ -1419,7 +1419,7 @@
       "disabledLines": 2444,
       "status": "pending",
       "note": "",
-      "order": 129
+      "order": 125
     },
     {
       "path": "src/Compilers/CSharp/Portable/Binder/Semantics/OverloadResolution/MethodTypeInference.cs",
@@ -1430,7 +1430,7 @@
       "disabledLines": 2477,
       "status": "pending",
       "note": "",
-      "order": 130
+      "order": 129
     },
     {
       "path": "src/Compilers/CSharp/Portable/Binder/Binder_Symbols.cs",
@@ -1441,7 +1441,7 @@
       "disabledLines": 2479,
       "status": "pending",
       "note": "",
-      "order": 131
+      "order": 130
     },
     {
       "path": "src/Compilers/CSharp/Portable/FlowAnalysis/DefiniteAssignment.cs",
@@ -1452,7 +1452,7 @@
       "disabledLines": 2520,
       "status": "pending",
       "note": "",
-      "order": 132
+      "order": 131
     },
     {
       "path": "src/Compilers/CSharp/Portable/Binder/Semantics/Conversions/ConversionsBase.cs",
@@ -1463,7 +1463,7 @@
       "disabledLines": 2595,
       "status": "pending",
       "note": "",
-      "order": 133
+      "order": 143
     },
     {
       "path": "src/Compilers/CSharp/Portable/Compilation/SyntaxTreeSemanticModel.cs",
@@ -1474,7 +1474,7 @@
       "disabledLines": 2619,
       "status": "pending",
       "note": "",
-      "order": 134
+      "order": 132
     },
     {
       "path": "src/Compilers/CSharp/Portable/Symbols/Source/SourceAssemblySymbol.cs",
@@ -1485,7 +1485,7 @@
       "disabledLines": 2701,
       "status": "pending",
       "note": "",
-      "order": 135
+      "order": 133
     },
     {
       "path": "src/Compilers/Core/Portable/MetadataReader/PEModule.cs",
@@ -1496,7 +1496,7 @@
       "disabledLines": 2972,
       "status": "pending",
       "note": "",
-      "order": 136
+      "order": 134
     },
     {
       "path": "src/Compilers/CSharp/Portable/Symbols/Metadata/PE/PENamedTypeSymbol.cs",
@@ -1507,7 +1507,7 @@
       "disabledLines": 3132,
       "status": "pending",
       "note": "",
-      "order": 137
+      "order": 135
     },
     {
       "path": "src/Compilers/CSharp/Portable/FlowAnalysis/AbstractFlowPass.cs",
@@ -1518,7 +1518,7 @@
       "disabledLines": 3212,
       "status": "pending",
       "note": "",
-      "order": 138
+      "order": 136
     },
     {
       "path": "src/Compilers/CSharp/Portable/Binder/Binder_Operators.cs",
@@ -1529,7 +1529,7 @@
       "disabledLines": 3407,
       "status": "pending",
       "note": "",
-      "order": 139
+      "order": 137
     },
     {
       "path": "src/Compilers/CSharp/Portable/Binder/Binder_Statements.cs",
@@ -1540,7 +1540,7 @@
       "disabledLines": 3619,
       "status": "pending",
       "note": "",
-      "order": 140
+      "order": 144
     },
     {
       "path": "src/Compilers/CSharp/Portable/Binder/Binder.ValueChecks.cs",
@@ -1551,7 +1551,7 @@
       "disabledLines": 3943,
       "status": "pending",
       "note": "",
-      "order": 141
+      "order": 138
     },
     {
       "path": "src/Compilers/CSharp/Portable/Binder/Semantics/OverloadResolution/OverloadResolution.cs",
@@ -1562,7 +1562,7 @@
       "disabledLines": 3949,
       "status": "pending",
       "note": "",
-      "order": 142
+      "order": 139
     },
     {
       "path": "src/Compilers/Core/Portable/PEWriter/MetadataWriter.cs",
@@ -1573,7 +1573,7 @@
       "disabledLines": 4069,
       "status": "pending",
       "note": "",
-      "order": 143
+      "order": 140
     },
     {
       "path": "src/Compilers/CSharp/Portable/Compilation/CSharpSemanticModel.cs",
@@ -1584,7 +1584,7 @@
       "disabledLines": 5452,
       "status": "pending",
       "note": "",
-      "order": 144
+      "order": 141
     },
     {
       "path": "src/Compilers/CSharp/Portable/Binder/Binder_Expressions.cs",
@@ -1595,7 +1595,7 @@
       "disabledLines": 9237,
       "status": "pending",
       "note": "",
-      "order": 145
+      "order": 142
     },
     {
       "path": "src/Compilers/CSharp/Portable/Parser/LanguageParser.cs",
