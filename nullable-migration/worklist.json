@@ -878,8 +878,8 @@
       "toggles": 1,
       "totalLines": 715,
       "disabledLines": 611,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Enabled cleanly; annotated nullable-aware overrides (AssociatedSymbol, GetDllImportData, ReturnValueMarshallingInformation, GetSecurityInformation, ObsoleteAttributeData, GetUnmanagedCallersOnlyAttributeData, IsMetadataNewSlot/Virtual, CallsAreOmitted, Equals, HasAsyncMethodBuilderAttribute) to match base MethodSymbol/Symbol nullability; made Create/InferExtensionMethodTypeArguments return MethodSymbol? and compilation param nullable; fixed ripple in LocalRewriter_Call.cs (receiverOpt.Type! - guaranteed non-null when needToReduce).",
       "order": 89
     },
     {

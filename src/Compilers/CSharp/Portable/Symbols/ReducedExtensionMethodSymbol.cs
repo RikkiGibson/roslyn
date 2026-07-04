@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -35,7 +33,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// </summary>
         /// <param name="compilation">Compilation used to check constraints.
         /// The latest language version is assumed if this is null.</param>
-        public static MethodSymbol Create(MethodSymbol method, TypeSymbol receiverType, CSharpCompilation compilation, out bool wasFullyInferred)
+        public static MethodSymbol? Create(MethodSymbol method, TypeSymbol receiverType, CSharpCompilation? compilation, out bool wasFullyInferred)
         {
             Debug.Assert(method.IsExtensionMethod && method.MethodKind != MethodKind.ReducedExtension);
             Debug.Assert(method.ParameterCount > 0);
@@ -43,11 +41,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             var useSiteInfo = CompoundUseSiteInfo<AssemblySymbol>.DiscardedDependencies;
 
-            method = InferExtensionMethodTypeArguments(method, receiverType, compilation, ref useSiteInfo, out wasFullyInferred);
-            if ((object)method == null)
+            var inferredMethod = InferExtensionMethodTypeArguments(method, receiverType, compilation, ref useSiteInfo, out wasFullyInferred);
+            if (inferredMethod is null)
             {
                 return null;
             }
+            method = inferredMethod;
 
             var conversions = compilation?.Conversions ?? (ConversionsBase)method.ContainingAssembly.CorLibrary.TypeConversions;
             var conversion = conversions.ConvertExtensionMethodThisArg(method.Parameters[0].Type, receiverType, ref useSiteInfo, isMethodGroupConversion: false);
@@ -93,7 +92,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             Debug.Assert((object)reducedFrom != null);
             Debug.Assert(reducedFrom.IsExtensionMethod);
-            Debug.Assert((object)reducedFrom.ReducedFrom == null);
+            Debug.Assert((object?)reducedFrom.ReducedFrom == null);
             Debug.Assert(reducedFrom.ConstructedFrom == reducedFrom);
             Debug.Assert(reducedFrom.ParameterCount > 0);
 
@@ -110,7 +109,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// are not satisfied, the return value is null.
         /// </summary>
         /// <param name="compilation">Compilation used to check constraints.  The latest language version is assumed if this is null.</param>
-        internal static MethodSymbol InferExtensionMethodTypeArguments(MethodSymbol method, TypeSymbol thisType, CSharpCompilation compilation,
+        internal static MethodSymbol? InferExtensionMethodTypeArguments(MethodSymbol method, TypeSymbol thisType, CSharpCompilation? compilation,
             ref CompoundUseSiteInfo<AssemblySymbol> useSiteInfo, out bool wasFullyInferred)
         {
             Debug.Assert(method.IsExtensionMethod);
@@ -204,7 +203,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             // Check constraints.
             var diagnosticsBuilder = ArrayBuilder<TypeParameterDiagnosticInfo>.GetInstance();
             var substitution = new TypeMap(typeParams, typeArgsForConstraintsCheck);
-            ArrayBuilder<TypeParameterDiagnosticInfo> useSiteDiagnosticsBuilder = null;
+            ArrayBuilder<TypeParameterDiagnosticInfo>? useSiteDiagnosticsBuilder = null;
             var success = method.CheckConstraints(new ConstraintsHelper.CheckConstraintsArgs(compilation, conversions, includeNullability: false, NoLocation.Singleton, diagnostics: null, template: new CompoundUseSiteInfo<AssemblySymbol>(useSiteInfo)),
                                                   substitution, typeParams, typeArgsForConstraintsCheck, diagnosticsBuilder, nullabilityDiagnosticsBuilderOpt: null,
                                                   ref useSiteDiagnosticsBuilder,
@@ -324,7 +323,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return _reducedFrom.RequiresSecurityObject; }
         }
 
-        public override DllImportData GetDllImportData()
+        public override DllImportData? GetDllImportData()
         {
             return _reducedFrom.GetDllImportData();
         }
@@ -334,7 +333,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { throw ExceptionUtilities.Unreachable(); }
         }
 
-        internal override MarshalPseudoCustomAttributeData ReturnValueMarshallingInformation
+        internal override MarshalPseudoCustomAttributeData? ReturnValueMarshallingInformation
         {
             get { return _reducedFrom.ReturnValueMarshallingInformation; }
         }
@@ -344,7 +343,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return _reducedFrom.HasDeclarativeSecurity; }
         }
 
-        internal override IEnumerable<Microsoft.Cci.SecurityAttribute> GetSecurityInformation()
+        internal override IEnumerable<Microsoft.Cci.SecurityAttribute>? GetSecurityInformation()
         {
             return _reducedFrom.GetSecurityInformation();
         }
@@ -369,7 +368,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return _reducedFrom.DeclaringSyntaxReferences; }
         }
 
-        public override string GetDocumentationCommentXml(CultureInfo preferredCulture = null, bool expandIncludes = false, CancellationToken cancellationToken = default(CancellationToken))
+        public override string GetDocumentationCommentXml(CultureInfo? preferredCulture = null, bool expandIncludes = false, CancellationToken cancellationToken = default(CancellationToken))
         {
             return _reducedFrom.GetDocumentationCommentXml(preferredCulture, expandIncludes, cancellationToken);
         }
@@ -419,12 +418,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return true; }
         }
 
-        internal sealed override bool IsMetadataNewSlot(ModuleSymbol context, bool ignoreInterfaceImplementationChanges = false)
+        internal sealed override bool IsMetadataNewSlot(ModuleSymbol? context, bool ignoreInterfaceImplementationChanges = false)
         {
             return false;
         }
 
-        internal sealed override bool IsMetadataVirtual(ModuleSymbol context, bool ignoreInterfaceImplementationChanges = false)
+        internal sealed override bool IsMetadataVirtual(ModuleSymbol? context, bool ignoreInterfaceImplementationChanges = false)
         {
             return false;
         }
@@ -437,12 +436,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        internal sealed override ObsoleteAttributeData ObsoleteAttributeData
+        internal sealed override ObsoleteAttributeData? ObsoleteAttributeData
         {
             get { return _reducedFrom.ObsoleteAttributeData; }
         }
 
-        internal sealed override UnmanagedCallersOnlyAttributeData GetUnmanagedCallersOnlyAttributeData(bool forceComplete)
+        internal sealed override UnmanagedCallersOnlyAttributeData? GetUnmanagedCallersOnlyAttributeData(bool forceComplete)
             => _reducedFrom.GetUnmanagedCallersOnlyAttributeData(forceComplete);
 
         internal sealed override bool HasSpecialNameAttribute => throw ExceptionUtilities.Unreachable();
@@ -462,7 +461,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return _reducedFrom.GetAttributes();
         }
 
-        public override Symbol AssociatedSymbol
+        public override Symbol? AssociatedSymbol
         {
             get { return null; }
         }
@@ -553,7 +552,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return false; }
         }
 
-        internal override bool CallsAreOmitted(SyntaxTree syntaxTree)
+        internal override bool CallsAreOmitted(SyntaxTree? syntaxTree)
         {
             return _reducedFrom.CallsAreOmitted(syntaxTree);
         }
@@ -587,12 +586,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal override bool IsNullableAnalysisEnabled() => throw ExceptionUtilities.Unreachable();
 
-        public override bool Equals(Symbol obj, TypeCompareKind compareKind)
+        public override bool Equals(Symbol? obj, TypeCompareKind compareKind)
         {
             if ((object)this == obj) return true;
 
-            ReducedExtensionMethodSymbol other = obj as ReducedExtensionMethodSymbol;
-            return (object)other != null && _reducedFrom.Equals(other._reducedFrom, compareKind);
+            ReducedExtensionMethodSymbol? other = obj as ReducedExtensionMethodSymbol;
+            return (object?)other != null && _reducedFrom.Equals(other._reducedFrom, compareKind);
         }
 
         public override int GetHashCode()
@@ -608,12 +607,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal sealed override bool UseUpdatedEscapeRules => _reducedFrom.UseUpdatedEscapeRules;
 
-        internal sealed override bool HasAsyncMethodBuilderAttribute(out TypeSymbol builderArgument)
+        internal sealed override bool HasAsyncMethodBuilderAttribute(out TypeSymbol? builderArgument)
         {
             return _reducedFrom.HasAsyncMethodBuilderAttribute(out builderArgument);
         }
-
-#nullable enable
 
         internal override int TryGetOverloadResolutionPriority()
         {
