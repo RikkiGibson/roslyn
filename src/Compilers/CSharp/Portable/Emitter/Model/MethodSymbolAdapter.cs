@@ -172,7 +172,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             if (AdaptedMethodSymbol.IsDefinition && // can't be generic instantiation
                 AdaptedMethodSymbol.ContainingModule == moduleBeingBuilt.SourceModule) // must be declared in the module we are building
             {
-                Debug.Assert((object)AdaptedMethodSymbol.PartialDefinitionPart == null); // must be definition
+                Debug.Assert((object?)AdaptedMethodSymbol.PartialDefinitionPart == null); // must be definition
                 return this;
             }
 
@@ -375,7 +375,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             {
                 CheckDefinitionInvariant();
                 Debug.Assert(AdaptedMethodSymbol.HasDeclarativeSecurity);
-                return AdaptedMethodSymbol.GetSecurityInformation();
+                return AdaptedMethodSymbol.GetSecurityInformation()!;
             }
         }
 
@@ -556,7 +556,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get
             {
                 CheckDefinitionInvariant();
-                return AdaptedMethodSymbol.ReturnValueMarshallingInformation;
+                return AdaptedMethodSymbol.ReturnValueMarshallingInformation!;
             }
         }
 
@@ -581,7 +581,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
     internal partial class MethodSymbol
     {
 #if DEBUG
-        private MethodSymbolAdapter _lazyAdapter;
+        private MethodSymbolAdapter? _lazyAdapter;
 
         protected sealed override SymbolAdapter GetCciAdapterImpl() => GetCciAdapter();
 

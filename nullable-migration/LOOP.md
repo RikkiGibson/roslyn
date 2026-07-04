@@ -115,6 +115,26 @@ python3 nullable-migration/lsp/lsp_diagnostics.py <file1.cs> [<file2.cs> ...]
    - Only as a last resort, `!` (ideally with a `Debug.Assert`).
    Re-run `lsp_diagnostics.py` on the file (and any rippled callers) until there are zero CS8 warnings.
 
+   **Reassigning an `is`-pattern variable to a possibly-null value:** don't introduce a fresh local
+   just to work around `CS8600` on `if (expr is T x) { ... x = x.SomeNullableMember; ... }` — a plain
+   type pattern `is T x` always narrows `x`'s *declared* type to non-null `T`, which is why reassigning
+   a nullable value into it warns. Instead combine it with a `var` pattern: `if (expr is T and var x)`.
+   The `var` pattern designates `x` with the (nullable-preserving) type of `expr` itself narrowed by the
+   preceding `T` check, i.e. effectively `T?` when `expr`'s type permits null — so `x` can be freely
+   reassigned to a nullable value with no warning, and flow analysis still treats `x` as non-null
+   immediately after the check. This does **not** apply when the value being reassigned is a plain
+   method/local-function **parameter** rather than an `is`-pattern variable (parameters can't be
+   redeclared) — in that case a fresh nullable local for the loop/walk is the correct fix.
+
+   **Before patching a member's ripple, count its call sites — don't just silence them one by one.**
+   After annotating a member with `?`, first gather *all* the `CS8###` sites that member alone causes
+   (grep the diagnostics output by member name) — don't fix them yet. If clearing them would require
+   `!`/`Debug.Assert` at **several distinct, unrelated call sites** (different files/methods, not one
+   localized spot), STOP: that repetition is the signal that the member's declared nullability doesn't
+   match how callers actually use it, and patching every site with `!` only hides the mismatch instead
+   of fixing it. This is an **Island** decision (step 7), made from the diagnostic *list* alone, before
+   you've written any fix — do not iterate call-site-by-call-site hoping it converges.
+
    **If a warning reveals a REAL bug** (a genuinely missing null check — null can actually flow to a
    dereference/cast at runtime), do NOT fix the bug here. Semantic changes need higher scrutiny than a
    mechanical migration. Instead:
@@ -127,11 +147,25 @@ python3 nullable-migration/lsp/lsp_diagnostics.py <file1.cs> [<file2.cs> ...]
 
 7. **Decision:**
    - **Enable (default):** the file builds clean with reasonable, local changes → keep changes.
-   - **Island (preferred over deferring the whole file):** if only ONE method/region can't be enabled
-     cleanly (needs an API redesign, or a real-bug investigation), enable the REST of the file and wrap
-     JUST that method/region back in `#nullable disable` / `#nullable enable` with a short `TODO2:`
-     comment explaining why (do NOT invent a GitHub issue number). Log it in `found-bugs.md`. Prefer
-     this over deferring the whole file, and over papering the method with `!`.
+   - **Island (preferred over deferring the whole file):** if only ONE method/region/member can't be
+     enabled cleanly, keep the REST of the file enabled and put back **only that member's signature**
+     (property/method declaration, or explicit interface impl) in a `#nullable disable` / `#nullable
+     enable` pair, so the member's declared type reverts to oblivious. Reasons to island a member:
+       - It needs an API redesign to express its real nullability cleanly (the case this guidance is
+         about — see the call-site-counting rule in step 6).
+       - It needs a real-bug investigation before its nullability can be decided.
+     **What islanding means, concretely:**
+       - Wrap **only the member's own declaration line(s)** in `#nullable disable` / `#nullable enable`
+         — do NOT add `?` to it, and do NOT touch any call sites at all (no `!`, no `Debug.Assert`, no
+         casts added anywhere else). If you already added `!`s at call sites while investigating, revert
+         them (`git diff`/`git checkout -p`) once you decide to island — the whole point is that call
+         sites stay exactly as they were before your change.
+       - Add a short comment directly above the island explaining why, with a `TODO2:` reference (do NOT
+         invent a GitHub issue number), and log a matching entry in `found-bugs.md` describing the
+         desired end-state API shape.
+     Prefer this over deferring the whole file, and **prefer it over papering every call site with `!`**
+     — if you find yourself adding more than one or two `!`s for the same member, that's a sign you
+     should have islanded instead; undo them and island.
    - **Defer (whole file):** clean enablement requires an API redesign, a **public API nullability
      change**, or a large cross-file ripple that can't be islanded. Then: `git checkout -- <path>` (and
      any other files you touched), and mark deferred with a reason:

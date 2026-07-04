@@ -326,7 +326,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 if (member.Kind == SymbolKind.Method)
                 {
                     var method = (MethodSymbol)member;
-                    Debug.Assert((object)method.PartialDefinitionPart == null); // must be definition
+                    Debug.Assert((object?)method.PartialDefinitionPart == null); // must be definition
 
                     var explicitImplementations = method.ExplicitInterfaceImplementations;
                     if (explicitImplementations.Length != 0)
@@ -407,7 +407,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     var method = m.GetInternalSymbol() as MethodSymbol;
                     if ((object?)method != null)
                     {
-                        Debug.Assert((object)method.PartialDefinitionPart == null); // must be definition
+                        Debug.Assert((object?)method.PartialDefinitionPart == null); // must be definition
 
                         foreach (var implemented in method.ExplicitInterfaceImplementations)
                         {

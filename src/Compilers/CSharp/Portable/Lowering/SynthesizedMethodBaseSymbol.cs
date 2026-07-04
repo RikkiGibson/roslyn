@@ -184,7 +184,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         internal sealed override bool HasDeclarativeSecurity => InheritsBaseMethodAttributes && BaseMethod.HasDeclarativeSecurity;
 
         internal sealed override IEnumerable<SecurityAttribute> GetSecurityInformation() => InheritsBaseMethodAttributes
-                ? BaseMethod.GetSecurityInformation()
+                ? BaseMethod.GetSecurityInformation()!
                 : SpecializedCollections.EmptyEnumerable<SecurityAttribute>();
 
         public sealed override TypeWithAnnotations ReturnTypeWithAnnotations

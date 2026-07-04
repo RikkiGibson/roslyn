@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
 
 using System;
 using System.Collections.Generic;
@@ -116,7 +115,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal virtual ImmutableArray<string> NotNullWhenFalseMembers => ImmutableArray<string>.Empty;
 
-#nullable enable
         /// <summary>
         /// Returns the <see cref="UnmanagedCallersOnlyAttributeData"/> data for this method, if there is any. If forceComplete
         /// is false and the data has not yet been loaded or only early attribute binding has occurred, then either
@@ -126,7 +124,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// an attribute argument.
         /// </summary>
         internal abstract UnmanagedCallersOnlyAttributeData? GetUnmanagedCallersOnlyAttributeData(bool forceComplete);
-#nullable disable
 
         /// <summary>
         /// Returns true if this method is an extension method.
@@ -148,24 +145,22 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// </summary>
         internal abstract bool HasDeclarativeSecurity { get; }
 
-        internal abstract bool HasAsyncMethodBuilderAttribute(out TypeSymbol builderArgument);
+        internal abstract bool HasAsyncMethodBuilderAttribute(out TypeSymbol? builderArgument);
 
-#nullable enable
         /// <summary>
         /// Platform invoke information, or null if the method isn't a P/Invoke.
         /// </summary>
         public abstract DllImportData? GetDllImportData();
-#nullable disable
 
         /// <summary>
         /// Declaration security information associated with this type, or null if there is none.
         /// </summary>
-        internal abstract IEnumerable<Microsoft.Cci.SecurityAttribute> GetSecurityInformation();
+        internal abstract IEnumerable<Microsoft.Cci.SecurityAttribute>? GetSecurityInformation();
 
         /// <summary>
         /// Marshalling information for return value (FieldMarshal in metadata).
         /// </summary>
-        internal abstract MarshalPseudoCustomAttributeData ReturnValueMarshallingInformation { get; }
+        internal abstract MarshalPseudoCustomAttributeData? ReturnValueMarshallingInformation { get; }
 
         /// <summary>
         /// True if the method calls another method containing security code (metadata flag RequiresSecurityObject is set).
@@ -282,7 +277,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return TypeMap.TypeParametersAsTypeSymbolsWithAnnotations(TypeParameters);
         }
 
-#nullable enable
 
         /// <summary>
         /// Call <see cref="TryGetThisParameter"/> and throw if it returns false.
@@ -311,7 +305,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return false;
         }
 
-#nullable disable
 
         /// <summary>
         /// Optimization: in many cases, the parameter count (fast) is sufficient and we
@@ -417,14 +410,19 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// Note, the set of possible associated symbols might be expanded in the future to
         /// reflect changes in the languages.
         /// </summary>
+        // TODO2: islanded during nullable migration (see found-bugs.md) - the real nullability of
+        // this member is mixed across the many overrides in the codebase; needs an API-shape
+        // decision, not just annotation.
+#nullable disable
         public abstract Symbol AssociatedSymbol { get; }
+#nullable enable
 
         /// <summary>
         /// Returns the original virtual or abstract method which a given method symbol overrides,
         /// ignoring any other overriding methods in base classes.
         /// </summary>
         /// <param name="accessingTypeOpt">The search must respect accessibility from this type.</param>
-        internal MethodSymbol GetLeastOverriddenMethod(NamedTypeSymbol accessingTypeOpt)
+        internal MethodSymbol GetLeastOverriddenMethod(NamedTypeSymbol? accessingTypeOpt)
         {
             return GetLeastOverriddenMethodCore(accessingTypeOpt, requireSameReturnType: false);
         }
@@ -435,7 +433,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// </summary>
         /// <param name="accessingTypeOpt">The search must respect accessibility from this type.</param>
         /// <param name="requireSameReturnType">The returned method must have the same return type.</param>
-        private MethodSymbol GetLeastOverriddenMethodCore(NamedTypeSymbol accessingTypeOpt, bool requireSameReturnType)
+        private MethodSymbol GetLeastOverriddenMethodCore(NamedTypeSymbol? accessingTypeOpt, bool requireSameReturnType)
         {
             accessingTypeOpt = accessingTypeOpt?.OriginalDefinition;
             MethodSymbol m = this;
@@ -461,9 +459,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 //   }
                 //
                 // See InternalsVisibleToAndStrongNameTests: IvtVirtualCall1, IvtVirtualCall2, IvtVirtual_ParamsAndDynamic.
-                MethodSymbol overridden = m.OverriddenMethod;
+                MethodSymbol? overridden = m.OverriddenMethod;
                 var discardedUseSiteInfo = CompoundUseSiteInfo<AssemblySymbol>.Discarded;
-                if ((object)overridden == null ||
+                if ((object?)overridden == null ||
                     (accessingTypeOpt is { } && !AccessCheck.IsSymbolAccessible(overridden, accessingTypeOpt, ref discardedUseSiteInfo)) ||
                     (requireSameReturnType && !this.ReturnType.Equals(overridden.ReturnType, TypeCompareKind.AllIgnoreOptions)))
                 {
@@ -483,7 +481,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// same type arguments as the given method.
         /// </summary>
         /// <param name="requireSameReturnType">The returned method must have the same return type.</param>
-        internal MethodSymbol GetConstructedLeastOverriddenMethod(NamedTypeSymbol accessingTypeOpt, bool requireSameReturnType)
+        internal MethodSymbol GetConstructedLeastOverriddenMethod(NamedTypeSymbol? accessingTypeOpt, bool requireSameReturnType)
         {
             var m = this.ConstructedFrom.GetLeastOverriddenMethodCore(accessingTypeOpt, requireSameReturnType);
             return m.IsGenericMethod ? m.Construct(this.TypeArgumentsWithAnnotations) : m;
@@ -497,7 +495,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// method A.M. Note also that constructed generic methods are not considered to
         /// override anything.
         /// </summary>
-        public MethodSymbol OverriddenMethod
+        public MethodSymbol? OverriddenMethod
         {
             get
             {
@@ -505,10 +503,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 {
                     if (IsDefinition)
                     {
-                        return (MethodSymbol)OverriddenOrHiddenMembers.GetOverriddenMember();
+                        return (MethodSymbol?)OverriddenOrHiddenMembers.GetOverriddenMember();
                     }
 
-                    return (MethodSymbol)OverriddenOrHiddenMembersResult.GetOverriddenMember(this, OriginalDefinition.OverriddenMethod);
+                    return (MethodSymbol?)OverriddenOrHiddenMembersResult.GetOverriddenMember(this, OriginalDefinition.OverriddenMethod);
                 }
 
                 return null;
@@ -521,7 +519,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// called method is a conditional method whose condition is not true in the source file
         /// corresponding to the given syntax tree.
         /// </summary>
-        internal virtual bool CallsAreOmitted(SyntaxTree syntaxTree)
+        internal virtual bool CallsAreOmitted(SyntaxTree? syntaxTree)
         {
             return syntaxTree != null && this.CallsAreConditionallyOmitted(syntaxTree);
         }
@@ -548,7 +546,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 if (this.IsOverride)
                 {
                     var overriddenMethod = this.OverriddenMethod;
-                    if ((object)overriddenMethod != null && overriddenMethod.IsConditional)
+                    if ((object?)overriddenMethod != null && overriddenMethod.IsConditional)
                     {
                         return overriddenMethod.CallsAreConditionallyOmitted(syntaxTree);
                     }
@@ -586,7 +584,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 if (this.IsOverride)
                 {
                     var overriddenMethod = this.OverriddenMethod;
-                    if ((object)overriddenMethod != null)
+                    if ((object?)overriddenMethod != null)
                     {
                         return overriddenMethod.IsConditional;
                     }
@@ -750,7 +748,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return visitor.VisitMethod(this);
         }
 
-#nullable enable
         public MethodSymbol? ReduceExtensionMethod(TypeSymbol receiverType, CSharpCompilation? compilation)
         {
             return ReduceExtensionMethod(receiverType, compilation, wasFullyInferred: out _);
@@ -778,13 +775,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             return ReducedExtensionMethodSymbol.Create(this, receiverType, compilation, out wasFullyInferred);
         }
-#nullable disable
 
         /// <summary>
         /// If this is an extension method, returns a reduced extension method
         /// symbol representing the method. Otherwise, returns null.
         /// </summary>
-        public MethodSymbol ReduceExtensionMethod()
+        public MethodSymbol? ReduceExtensionMethod()
         {
             return (this.IsExtensionMethod && this.MethodKind != MethodKind.ReducedExtension) ? ReducedExtensionMethodSymbol.Create(this) : null;
         }
@@ -793,7 +789,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// If this method is a reduced extension method, returns the extension method that
         /// should be used at call site during ILGen. Otherwise, returns null.
         /// </summary>
-        internal virtual MethodSymbol CallsiteReducedFromMethod
+        internal virtual MethodSymbol? CallsiteReducedFromMethod
         {
             get { return null; }
         }
@@ -803,7 +799,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// has a part that implements it with a body, returns that implementing
         /// definition.  Otherwise null.
         /// </summary>
-        public virtual MethodSymbol PartialImplementationPart
+        public virtual MethodSymbol? PartialImplementationPart
         {
             get { return null; }
         }
@@ -812,7 +808,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// If this is a partial method with a body, returns the corresponding
         /// definition part (without a body).  Otherwise null.
         /// </summary>
-        public virtual MethodSymbol PartialDefinitionPart
+        public virtual MethodSymbol? PartialDefinitionPart
         {
             get { return null; }
         }
@@ -821,7 +817,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// If this method is a reduced extension method, gets the extension method definition that
         /// this method was reduced from. Otherwise, returns null.
         /// </summary>
-        public virtual MethodSymbol ReducedFrom
+        public virtual MethodSymbol? ReducedFrom
         {
             get { return null; }
         }
@@ -911,7 +907,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// <summary>
         /// As a performance optimization, cache parameter types and refkinds - overload resolution uses them a lot.
         /// </summary>
-        private ParameterSignature _lazyParameterSignature;
+        private ParameterSignature? _lazyParameterSignature;
         internal ImmutableArray<TypeWithAnnotations> ParameterTypesWithAnnotations
         {
             get
@@ -946,7 +942,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// If this is not a generic method instantiation, returns null.
         /// The map targets the original definition of the method.
         /// </summary>
-        internal virtual TypeMap TypeSubstitution
+        internal virtual TypeMap? TypeSubstitution
         {
             get { return null; }
         }
@@ -984,8 +980,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             // we check if its definition depends on a type from a unified reference.
             if (this.ContainingModule?.HasUnifiedReferences == true)
             {
-                HashSet<TypeSymbol> unificationCheckedTypes = null;
-                DiagnosticInfo diagnosticInfo = result.DiagnosticInfo;
+                HashSet<TypeSymbol>? unificationCheckedTypes = null;
+                DiagnosticInfo? diagnosticInfo = result.DiagnosticInfo;
 
                 if (this.ReturnTypeWithAnnotations.GetUnificationUseSiteDiagnosticRecursive(ref diagnosticInfo, this, ref unificationCheckedTypes) ||
                     GetUnificationUseSiteDiagnosticRecursive(ref diagnosticInfo, this.RefCustomModifiers, this, ref unificationCheckedTypes) ||
@@ -1002,7 +998,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return false;
         }
 
-#nullable enable
         internal static (bool IsCallConvs, ImmutableHashSet<INamedTypeSymbolInternal>? CallConvs) TryDecodeUnmanagedCallersOnlyCallConvsField(
             string key,
             TypedConstant value,
@@ -1084,7 +1079,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return false;
             }
         }
-#nullable disable
 
         /// <summary>
         /// Returns true if the error code is highest priority while calculating use site error for this symbol.
@@ -1095,8 +1089,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get
             {
-                DiagnosticInfo info = GetUseSiteInfo().DiagnosticInfo;
-                return (object)info != null && info.Code is (int)ErrorCode.ERR_BindToBogus or (int)ErrorCode.ERR_UnsupportedCompilerFeature;
+                DiagnosticInfo? info = GetUseSiteInfo().DiagnosticInfo;
+                return (object?)info != null && info.Code is (int)ErrorCode.ERR_BindToBogus or (int)ErrorCode.ERR_UnsupportedCompilerFeature;
             }
         }
 
@@ -1165,7 +1159,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// <summary>
         /// Build and add synthesized return type attributes for this method symbol.
         /// </summary>
-        internal virtual void AddSynthesizedReturnTypeAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
+        internal virtual void AddSynthesizedReturnTypeAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
         {
             if (this.ReturnsByRefReadonly)
             {
@@ -1234,9 +1228,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         bool IMethodSymbolInternal.RequiresSecurityObject => RequiresSecurityObject;
         MethodImplAttributes IMethodSymbolInternal.ImplementationAttributes => ImplementationAttributes;
         bool IMethodSymbolInternal.IsIterator => IsIterator;
+#nullable disable
         ISymbolInternal IMethodSymbolInternal.AssociatedSymbol => AssociatedSymbol;
-        IMethodSymbolInternal IMethodSymbolInternal.PartialImplementationPart => PartialImplementationPart;
-        IMethodSymbolInternal IMethodSymbolInternal.PartialDefinitionPart => PartialDefinitionPart;
+#nullable enable
+        IMethodSymbolInternal? IMethodSymbolInternal.PartialImplementationPart => PartialImplementationPart;
+        IMethodSymbolInternal? IMethodSymbolInternal.PartialDefinitionPart => PartialDefinitionPart;
 
         /// <summary>
         /// Gets the handle for the signature of this method as it appears in metadata. 
@@ -1262,7 +1258,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return new PublicModel.MethodSymbol(this);
         }
 
-        public override bool Equals(Symbol other, TypeCompareKind compareKind)
+        public override bool Equals(Symbol? other, TypeCompareKind compareKind)
         {
             if (other is SubstitutedMethodSymbol sms)
             {
@@ -1282,7 +1278,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return base.GetHashCode();
         }
 
-#nullable enable
         protected static void AddRequiredMembersMarkerAttributes(ref ArrayBuilder<CSharpAttributeData>? attributes, MethodSymbol methodToAttribute)
         {
             if (methodToAttribute.ShouldCheckRequiredMembers() && methodToAttribute.ContainingType.HasAnyRequiredMembers)

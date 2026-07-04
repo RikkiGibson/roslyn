@@ -190,7 +190,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get
             {
-                return OriginalDefinition.ReducedFrom;
+                // A SubstitutedMethodSymbol is only ever reached for constructions of the reduced
+                // extension method itself; the original definition is always a genuine reduced form.
+                Debug.Assert(OriginalDefinition.ReducedFrom is not null);
+                return OriginalDefinition.ReducedFrom!;
             }
         }
 
@@ -308,7 +311,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        internal sealed override bool CallsAreOmitted(SyntaxTree syntaxTree)
+        internal sealed override bool CallsAreOmitted(SyntaxTree? syntaxTree)
         {
             return OriginalDefinition.CallsAreOmitted(syntaxTree);
         }
@@ -435,7 +438,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        public sealed override bool Equals(Symbol obj, TypeCompareKind compareKind)
+        public sealed override bool Equals(Symbol? obj, TypeCompareKind compareKind)
         {
             MethodSymbol? other = obj as MethodSymbol;
             if ((object?)other == null) return false;
@@ -485,7 +488,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return code;
         }
 
-        internal sealed override bool HasAsyncMethodBuilderAttribute(out TypeSymbol builderArgument)
+        internal sealed override bool HasAsyncMethodBuilderAttribute(out TypeSymbol? builderArgument)
         {
             return _underlyingMethod.HasAsyncMethodBuilderAttribute(out builderArgument);
         }

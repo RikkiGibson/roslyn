@@ -390,7 +390,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return result;
         }
 
-        public sealed override bool Equals(Symbol symbol, TypeCompareKind compareKind)
+        public sealed override bool Equals(Symbol? symbol, TypeCompareKind compareKind)
         {
             if ((object)this == symbol) return true;
 

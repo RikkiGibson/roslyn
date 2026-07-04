@@ -1131,8 +1131,8 @@
       "toggles": 11,
       "totalLines": 1329,
       "disabledLines": 1126,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed #nullable directives from MethodSymbol.cs; nullable-enabled ~19 members (OverriddenMethod, ReducedFrom, PartialImplementationPart/DefinitionPart, CallsiteReducedFromMethod, TypeSubstitution, HasAsyncMethodBuilderAttribute out-param, ReturnValueMarshallingInformation, GetSecurityInformation, CallsAreOmitted param, Equals param). AssociatedSymbol islanded (#nullable disable) - real nullability is legitimate but needs an API-shape redesign, not blind '!' patching across ~30 call sites; see found-bugs.md. Fixed ripple in MethodSymbolAdapter, SourcePropertyAccessorSymbol, SubstitutedMethodSymbol, MemberSymbolExtensions, NullableWalker, FunctionPointerMethodSymbol, SynthesizedIntrinsicOperatorSymbol, SynthesizedMethodBaseSymbol, NamedTypeSymbolAdapter, DecisionDagBuilder, DocumentationCommentCompiler, SourceOrdinaryMethodOrUserDefinedOperatorSymbol, LambdaSymbol, LocalFunctionSymbol, SourceOrdinaryMethodSymbol, ReducedExtensionMethodSymbol. Final net10.0 build of Microsoft.CodeAnalysis.CSharp.csproj: 0 Warning(s) 0 Error(s).",
       "order": 80
     },
     {

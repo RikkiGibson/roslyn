@@ -700,7 +700,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return _lazyCallingConventionModifiers;
         }
 
-        public override bool Equals(Symbol other, TypeCompareKind compareKind)
+        public override bool Equals(Symbol? other, TypeCompareKind compareKind)
         {
             if (!(other is FunctionPointerMethodSymbol method))
             {

@@ -299,8 +299,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             {
                 // This will cause another call to SourceMethodSymbol.LazyMethodChecks,
                 // but that method already handles reentrancy for exactly this case.
-                MethodSymbol overriddenMethod = this.OverriddenMethod;
-                if ((object)overriddenMethod != null)
+                MethodSymbol? overriddenMethod = this.OverriddenMethod;
+                if ((object?)overriddenMethod != null)
                 {
                     CustomModifierUtils.CopyMethodCustomModifiers(overriddenMethod, this, out _lazyReturnType,
                                                                   out _lazyRefCustomModifiers,
@@ -736,8 +736,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     }
                     else if (IsOverride)
                     {
-                        MethodSymbol overriddenMethod = this.OverriddenMethod;
-                        if ((object)overriddenMethod != null)
+                        MethodSymbol? overriddenMethod = this.OverriddenMethod;
+                        if ((object?)overriddenMethod != null)
                         {
                             // If this accessor is overriding a method from metadata, it is possible that
                             // the name of the overridden method doesn't follow the C# get_X/set_X pattern.

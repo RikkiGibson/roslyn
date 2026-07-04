@@ -849,7 +849,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             void makeNotNullMembersMaybeNull()
             {
-                if (_symbol is MethodSymbol method)
+                if (_symbol is MethodSymbol and var method)
                 {
                     if (method.IsConstructor())
                     {
@@ -7185,7 +7185,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                 }
 
                 // check whether 'method', when called on this receiver, is an implementation of 'constructedMethod'.
-                for (var baseType = receiverType; baseType is object && method is object; baseType = baseType.BaseTypeNoUseSiteDiagnostics)
+                MethodSymbol? currentMethod = method;
+                for (var baseType = receiverType; baseType is object && currentMethod is object; baseType = baseType.BaseTypeNoUseSiteDiagnostics)
                 {
                     var implementationMethod = baseType.FindImplementationForInterfaceMember(constructedMethod);
                     if (implementationMethod is null)
@@ -7201,7 +7202,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     }
 
                     // could be calling an override of a method that implements the interface method
-                    for (var overriddenMethod = method; overriddenMethod is object; overriddenMethod = overriddenMethod.OverriddenMethod)
+                    for (var overriddenMethod = currentMethod; overriddenMethod is object; overriddenMethod = overriddenMethod.OverriddenMethod)
                     {
                         if (overriddenMethod.Equals(implementationMethod))
                         {
@@ -7225,13 +7226,13 @@ namespace Microsoft.CodeAnalysis.CSharp
                     // we know that implementationMethod.ContainingType is the same type or a base type of 'baseType',
                     // and that the implementation method will be the same between 'baseType' and 'implementationMethod.ContainingType'.
                     // we step through the intermediate bases in order to skip unnecessary override methods.
-                    while (!baseType.Equals(implementationMethod.ContainingType) && method is object)
+                    while (!baseType.Equals(implementationMethod.ContainingType) && currentMethod is object)
                     {
-                        if (baseType.Equals(method.ContainingType))
+                        if (baseType.Equals(currentMethod.ContainingType))
                         {
                             // since we're about to move on to the base of 'method.ContainingType',
                             // we know the implementation could only be an overridden method of 'method'.
-                            method = method.OverriddenMethod;
+                            currentMethod = currentMethod.OverriddenMethod;
                         }
 
                         baseType = baseType.BaseTypeNoUseSiteDiagnostics;
@@ -7241,9 +7242,9 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                     // now 'baseType == implementationMethod.ContainingType', so if 'method' is
                     // contained in that same type we should advance 'method' one more time.
-                    if (method is object && baseType.Equals(method.ContainingType))
+                    if (currentMethod is object && baseType.Equals(currentMethod.ContainingType))
                     {
-                        method = method.OverriddenMethod;
+                        currentMethod = currentMethod.OverriddenMethod;
                     }
                 }
 
@@ -7996,12 +7997,13 @@ namespace Microsoft.CodeAnalysis.CSharp
                 return;
             }
 
+            MethodSymbol? current = method;
             do
             {
-                var type = method.ContainingType;
-                var notNullMembers = method.NotNullMembers;
-                var notNullWhenTrueMembers = method.NotNullWhenTrueMembers;
-                var notNullWhenFalseMembers = method.NotNullWhenFalseMembers;
+                var type = current.ContainingType;
+                var notNullMembers = current.NotNullMembers;
+                var notNullWhenTrueMembers = current.NotNullWhenTrueMembers;
+                var notNullWhenFalseMembers = current.NotNullWhenFalseMembers;
 
                 if (IsConditionalState)
                 {
@@ -8013,7 +8015,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     applyMemberPostConditions(receiverSlot, type, notNullMembers, ref State);
                 }
 
-                if (method.ReturnType.SpecialType == SpecialType.System_Boolean)
+                if (current.ReturnType.SpecialType == SpecialType.System_Boolean)
                 {
                     if (!(notNullWhenTrueMembers.IsEmpty && notNullWhenFalseMembers.IsEmpty))
                     {
@@ -8022,9 +8024,9 @@ namespace Microsoft.CodeAnalysis.CSharp
                         applyMemberPostConditions(receiverSlot, type, notNullWhenFalseMembers, ref StateWhenFalse);
                     }
 
-                    if (Binder.HasTryGetValueSignature(method) &&
+                    if (Binder.HasTryGetValueSignature(current) &&
                         receiverType is NamedTypeSymbol { IsUnionType: true } unionType &&
-                        Binder.IsUnionTypeTryGetValueMethod(unionType, method) &&
+                        Binder.IsUnionTypeTryGetValueMethod(unionType, current) &&
                         Binder.GetUnionTypeValuePropertyNoUseSiteDiagnostics(unionType) is { } unionValue)
                     {
                         Split();
@@ -8032,9 +8034,9 @@ namespace Microsoft.CodeAnalysis.CSharp
                     }
                 }
 
-                method = method.OverriddenMethod;
+                current = current.OverriddenMethod;
             }
-            while (method != null);
+            while (current != null);
 
             void applyMemberPostConditions(int receiverSlot, TypeSymbol type, ImmutableArray<string> members, ref LocalState state)
             {
