@@ -939,8 +939,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
                 return false;
             }
 
-            if (getMethod is not null && setMethod is not null && getMethodParams is not null && setMethodParams is not null)
+            if (hasGetMethod && hasSetMethod)
             {
+                Debug.Assert(getMethod is not null && setMethod is not null && getMethodParams is not null && setMethodParams is not null);
+
                 var lastPropertyParamIndex = propertyParams.Length - 1;
                 var getHandle = getMethodParams[lastPropertyParamIndex].Handle;
                 var setHandle = setMethodParams[lastPropertyParamIndex].Handle;

@@ -37,6 +37,7 @@ Output is one line per diagnostic: `path(line,col): severity CODE: message`. We 
    - Example of an "islanded" member: `Symbol.ContainingSymbol`. While `Symbol?` is a good type for that member, it results in huge numbers of nullable warnings that we don't want to suppress as part of this work. We prefer to leave the API nullable-disabled and return later when we are ready to make potentially bigger API shape changes to make correct usage possible without `!`.
 - If a nullable warning reflects a real bug (something genuinely might be null, where non-null is needed), do not try to fix the bug. Instead record what you know about the problem in found-bugs.md and resolve the warning without semantic changes.
 - `!` is mostly justified when it should be obvious to the code reader but not the compiler that the item is non-null. For example, `bool isNotNull = x != null; if (isNotNull) x.M();`.
+- Prefer `Debug.Assert(x is not null)` over `!` when the variable is dereferenced at multiple points afterward: the assert narrows the compiler's flow state persistently from that point forward, while `!` only suppresses the warning at that one expression. Don't introduce a fresh `is not null`/`!= null` re-check as a substitute for an existing "obvious to the reader" bool/assert that already established non-nullness (e.g. don't replace `if (hasThing)` with `if (thing is not null)` just to satisfy the compiler) — add a single `Debug.Assert` instead and keep using the plain variable name afterward.
 
 ## Workflow
 
