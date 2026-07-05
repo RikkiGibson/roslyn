@@ -1197,8 +1197,8 @@
       "toggles": 2,
       "totalLines": 1254,
       "disabledLines": 1189,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Enabled cleanly; made OtherPartOfPartial/ExplicitInterfaceType/FindExplicitlyImplementedMethod/etc. nullable to match base signatures; fixed (object) null-check casts to (object?)",
       "order": 108
     },
     {
