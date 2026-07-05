@@ -1186,8 +1186,8 @@
       "toggles": 2,
       "totalLines": 1189,
       "disabledLines": 1183,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable-enabled cleanly; fixed (object) casts to (object?) for accessor null checks, nullable accessor fields/params, GetMethod/SetMethod/DeclaringCompilation/ObsoleteAttributeData override nullability.",
       "order": 103
     },
     {
