@@ -36,6 +36,7 @@ Output is one line per diagnostic: `path(line,col): severity CODE: message`. We 
 - Take note when usage of a specific API is associated with many new nullable warnings. If more than a very small number of API usages require `Assert()`/`!` to fix warnings, then, it is likely preferable to "island" the member. This means putting `#nullable disable/enable` back around that member's signature only. This reflects the fact that we likely want to make an API shape change in the future to ease nullable analysis of the usages of the API.
    - Example of an "islanded" member: `Symbol.ContainingSymbol`. While `Symbol?` is a good type for that member, it results in huge numbers of nullable warnings that we don't want to suppress as part of this work. We prefer to leave the API nullable-disabled and return later when we are ready to make potentially bigger API shape changes to make correct usage possible without `!`.
 - If a nullable warning reflects a real bug (something genuinely might be null, where non-null is needed), do not try to fix the bug. Instead record what you know about the problem in found-bugs.md and resolve the warning without semantic changes.
+- `!` is mostly justified when it should be obvious to the code reader but not the compiler that the item is non-null. For example, `bool isNotNull = x != null; if (isNotNull) x.M();`.
 
 ## Workflow
 
