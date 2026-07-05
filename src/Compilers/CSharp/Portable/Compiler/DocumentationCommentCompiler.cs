@@ -1180,7 +1180,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>
         /// Return the longest common prefix of two strings
         /// </summary>
-        private static string LongestCommonPrefix(string str1, string str2)        {
+        private static string LongestCommonPrefix(string str1, string str2)
+        {
             int pos = 0;
             int minLength = Math.Min(str1.Length, str2.Length);
 

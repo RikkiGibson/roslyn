@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -201,7 +200,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return attributeData?.HasEnumeratorCancellationAttribute == true;
             }
         }
-
 
         internal sealed override ScopedKind EffectiveScope
         {
@@ -412,7 +410,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             var value = convertedExpression.ConstantValueOpt ?? ConstantValue.Null;
             return value;
         }
-
 
         public override string MetadataName
         {
@@ -1572,7 +1569,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             DoMiscValidation();
             state.SpinWaitComplete(CompletionPart.ComplexParameterSymbolAll, cancellationToken);
         }
-
 
         private void DoMiscValidation()
         {
