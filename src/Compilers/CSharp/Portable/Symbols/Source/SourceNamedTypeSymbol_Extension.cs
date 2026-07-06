@@ -22,7 +22,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 {
     internal partial class SourceNamedTypeSymbol
     {
-        private ExtensionInfo _lazyExtensionInfo;
+        private ExtensionInfo? _lazyExtensionInfo;
 
         private class ExtensionInfo
         {

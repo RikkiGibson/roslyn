@@ -1252,8 +1252,8 @@
       "toggles": 9,
       "totalLines": 2133,
       "disabledLines": 1525,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable-enabled; fixed ~60 CS8xxx warnings (nullable fields/params/locals, (object?) casts, override signature mismatches with base nullable annotations). Also fixed a rippled field in SourceNamedTypeSymbol_Extension.cs (_lazyExtensionInfo). Pre-existing unrelated build failures in ExpressionEvaluator project confirmed via git stash to predate this change.",
       "order": 117
     },
     {
