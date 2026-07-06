@@ -237,7 +237,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     // is missing, report just the accessor.
 
                     Symbol? associatedPropertyOrEvent = interfaceMemberKind == SymbolKind.Method ? ((MethodSymbol)interfaceMember).AssociatedSymbol : null;
-                    if (associatedPropertyOrEvent is null ||
+                    if ((object?)associatedPropertyOrEvent == null ||
                         ReportAccessorOfInterfacePropertyOrEvent(associatedPropertyOrEvent) ||
                         (wasImplementingMemberFound && !implementingMember!.IsAccessor()))
                     {
@@ -366,13 +366,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     directInterface = iface;
                     break;
                 }
-                else if (directInterface is null && iface.ImplementsInterface(implementedInterface, ref discardedUseSiteInfo))
+                else if ((object?)directInterface == null && iface.ImplementsInterface(implementedInterface, ref discardedUseSiteInfo))
                 {
                     directInterface = iface;
                 }
             }
 
-            Debug.Assert(directInterface is not null);
+            Debug.Assert((object?)directInterface != null);
             return GetCorrespondingBaseListLocation(directInterface);
         }
 
@@ -418,7 +418,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
 
             // If the property or event wasn't implemented, then we'd prefer to report diagnostics about that.
-            if (implementingPropertyOrEvent is null)
+            if ((object?)implementingPropertyOrEvent == null)
             {
                 return false;
             }
@@ -560,7 +560,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                             else
                             {
                                 var sourceMethod = method as SourceMemberMethodSymbol;
-                                if (sourceMethod is not null) // skip submission initializer
+                                if ((object?)sourceMethod != null) // skip submission initializer
                                 {
                                     var isNew = sourceMethod.IsNew;
                                     CheckNonOverrideMember(method, isNew, method.OverriddenOrHiddenMembers, diagnostics, out suppressAccessors);
@@ -597,11 +597,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
                             if (!suppressAccessors)
                             {
-                                if (getMethod is not null)
+                                if ((object?)getMethod != null)
                                 {
                                     CheckOverrideMember(getMethod, getMethod.OverriddenOrHiddenMembers, diagnostics, out suppressAccessors);
                                 }
-                                if (setMethod is not null)
+                                if ((object?)setMethod != null)
                                 {
                                     CheckOverrideMember(setMethod, setMethod.OverriddenOrHiddenMembers, diagnostics, out suppressAccessors);
                                 }
@@ -614,11 +614,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
                             if (!suppressAccessors)
                             {
-                                if (getMethod is not null)
+                                if ((object?)getMethod != null)
                                 {
                                     CheckNonOverrideMember(getMethod, isNewProperty, getMethod.OverriddenOrHiddenMembers, diagnostics, out suppressAccessors);
                                 }
-                                if (setMethod is not null)
+                                if ((object?)setMethod != null)
                                 {
                                     CheckNonOverrideMember(setMethod, isNewProperty, setMethod.OverriddenOrHiddenMembers, diagnostics, out suppressAccessors);
                                 }
@@ -638,11 +638,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
                             if (!suppressAccessors)
                             {
-                                if (addMethod is not null)
+                                if ((object?)addMethod != null)
                                 {
                                     CheckOverrideMember(addMethod, addMethod.OverriddenOrHiddenMembers, diagnostics, out suppressAccessors);
                                 }
-                                if (removeMethod is not null)
+                                if ((object?)removeMethod != null)
                                 {
                                     CheckOverrideMember(removeMethod, removeMethod.OverriddenOrHiddenMembers, diagnostics, out suppressAccessors);
                                 }
@@ -655,11 +655,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
                             if (!suppressAccessors)
                             {
-                                if (addMethod is not null)
+                                if ((object?)addMethod != null)
                                 {
                                     CheckNonOverrideMember(addMethod, isNewEvent, addMethod.OverriddenOrHiddenMembers, diagnostics, out suppressAccessors);
                                 }
-                                if (removeMethod is not null)
+                                if ((object?)removeMethod != null)
                                 {
                                     CheckNonOverrideMember(removeMethod, isNewEvent, removeMethod.OverriddenOrHiddenMembers, diagnostics, out suppressAccessors);
                                 }
@@ -668,11 +668,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                         break;
                     case SymbolKind.Field:
                         var sourceField = member as SourceFieldSymbol;
-                        var isNewField = sourceField is not null && sourceField.IsNew;
+                        var isNewField = (object?)sourceField != null && sourceField.IsNew;
 
                         // We don't want to report diagnostics for field-like event backing fields (redundant),
                         // but that shouldn't be an issue since they shouldn't be in the member list.
-                        Debug.Assert(sourceField is null || (object)sourceField.AssociatedSymbol == null ||
+                        Debug.Assert((object?)sourceField == null || (object?)sourceField.AssociatedSymbol == null ||
                             sourceField.AssociatedSymbol.Kind != SymbolKind.Event);
 
                         CheckNewModifier(member, isNewField, diagnostics);
@@ -800,7 +800,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                         associatedPropertyOrEvent = ((MethodSymbol)overridingMember).AssociatedSymbol;
                     }
 
-                    if (associatedPropertyOrEvent is null)
+                    if ((object?)associatedPropertyOrEvent == null)
                     {
                         bool suppressError = false;
                         if (overridingMemberIsMethod || overridingMember.IsIndexer())
@@ -829,15 +829,15 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                         PropertySymbol associatedProperty = (PropertySymbol)associatedPropertyOrEvent;
                         PropertySymbol? overriddenProperty = associatedProperty.OverriddenProperty;
 
-                        if (overriddenProperty is null)
+                        if ((object?)overriddenProperty == null)
                         {
                             //skip remaining checks
                         }
-                        else if (associatedProperty.GetMethod == overridingMember && overriddenProperty.GetMethod is null)
+                        else if (associatedProperty.GetMethod == overridingMember && (object?)overriddenProperty.GetMethod == null)
                         {
                             diagnostics.Add(ErrorCode.ERR_NoGetToOverride, overridingMemberLocation, overridingMember, overriddenProperty);
                         }
-                        else if (associatedProperty.SetMethod == overridingMember && overriddenProperty.SetMethod is null)
+                        else if (associatedProperty.SetMethod == overridingMember && (object?)overriddenProperty.SetMethod == null)
                         {
                             diagnostics.Add(ErrorCode.ERR_NoSetToOverride, overridingMemberLocation, overridingMember, overriddenProperty);
                         }
@@ -1231,7 +1231,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal static bool IsOrContainsErrorType(TypeSymbol typeSymbol)
         {
-            return typeSymbol.VisitType((currentTypeSymbol, unused1, unused2) => currentTypeSymbol.IsErrorType(), (object?)null) is not null;
+            return (object?)typeSymbol.VisitType((currentTypeSymbol, unused1, unused2) => currentTypeSymbol.IsErrorType(), (object?)null) != null;
         }
 
         /// <summary>
@@ -1991,7 +1991,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         private static bool IsOverrideOfPossibleImplementationUnderRuntimeRules(MethodSymbol implementingMethod, NamedTypeSymbol @interface)
         {
             MethodSymbol? curr = implementingMethod;
-            while (curr is not null)
+            while ((object?)curr != null)
             {
                 if (IsPossibleImplementationUnderRuntimeRules(curr, @interface))
                 {
