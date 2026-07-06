@@ -450,6 +450,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         corLibrary = MissingCorLibrarySymbol.Instance;
                     }
 
+                    Debug.Assert(corLibrary is not null);
                     assemblySymbol.SetCorLibrary(corLibrary);
 
                     // Setup bound references for newly created AssemblySymbols

@@ -911,8 +911,8 @@
       "toggles": 6,
       "totalLines": 1118,
       "disabledLines": 629,
-      "status": "pending",
-      "note": "reverted partial edit from orphaned interrupted process; restart clean",
+      "status": "done",
+      "note": "Enabled; islanded GetSpecialTypeMember signature (too many call sites for null-return propagation); adjusted GetGuidString/GetMetadata/AssemblyVersionPattern/GetDeclaredSpecialTypeMember to nullable; fixed ripples in MetadataDecoder.cs, PublicModel/AssemblySymbol.cs, ReferenceManager.cs",
       "order": 83
     },
     {

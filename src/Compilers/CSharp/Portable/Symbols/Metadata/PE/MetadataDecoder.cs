@@ -379,7 +379,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
                 // represented by a retargeting assembly, which is supposed to hide the local type.
                 Debug.Assert(!(assembly is SourceAssemblySymbol) || !((SourceAssemblySymbol)assembly).SourceModule.MightContainNoPiaLocalTypes());
 
-                string candidateGuid;
+                string? candidateGuid;
                 bool haveCandidateGuidValue = false;
                 Guid candidateGuidValue = new Guid();
 
