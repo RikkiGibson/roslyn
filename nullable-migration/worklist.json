@@ -1296,8 +1296,8 @@
       "toggles": 6,
       "totalLines": 2539,
       "disabledLines": 1666,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Enabled; ripple fixes in LocalRewriter.cs (previousSubmissionFields/debugDocumentProvider) and ClosureConversion.cs (substitutedSourceMethod/assignLocals params)",
       "order": 114
     },
     {
