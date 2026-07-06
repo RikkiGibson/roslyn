@@ -1274,8 +1274,8 @@
       "toggles": 2,
       "totalLines": 1680,
       "disabledLines": 1645,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Made ParseXmlNode/ParseCrefType/ParseCrefParameterList/etc nullable-returning; annotated locals; used ! for guaranteed-non-null indexer/ToListNode results; Debug.Assert for checkForMember=false ParseCrefType call sites.",
       "order": 112
     },
     {
