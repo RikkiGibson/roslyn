@@ -1219,8 +1219,8 @@
       "toggles": 3,
       "totalLines": 1634,
       "disabledLines": 1309,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable-enabled; made name2Opt/constrainedToTypeOpt/operatorSourceOpt params properly nullable, fixed (object) casts to (object?), used Debug.Assert for delegate-type narrowing",
       "order": 110
     },
     {
