@@ -1285,8 +1285,8 @@
       "toggles": 12,
       "totalLines": 1697,
       "disabledLines": 1646,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed nullable directives; made ResolveBounds/CheckConstraintsArgs/useSiteDiagnosticsBuilder/etc nullable; fixed ripples in TupleTypeSymbol.cs (CheckConstraints tuple overload element locations) and MakeTypeParameterConstraintTypes/Kinds typeParameterList (local functions have no type param list)",
       "order": 113
     },
     {
