@@ -192,7 +192,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitMethodSymbol(method);
         }
 
-        public override BoundNode? VisitMethodDefIndex(BoundMethodDefIndex node)
+        public override BoundNode VisitMethodDefIndex(BoundMethodDefIndex node)
         {
             return VisitMethodDefIndex(this, node);
         }
@@ -204,7 +204,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return node.Update(method, type);
         }
 
-        public override BoundNode? VisitDelegateCreationExpression(BoundDelegateCreationExpression node)
+        public override BoundNode VisitDelegateCreationExpression(BoundDelegateCreationExpression node)
         {
             return VisitDelegateCreationExpression(this, node);
         }

@@ -45,7 +45,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return RewritePatternWithUnionMatchingToPropertyPattern((BoundPattern)result);
         }
 
-        protected override BoundNode? VisitExpressionOrPatternWithoutStackGuard(BoundNode node)
+        protected override BoundNode VisitExpressionOrPatternWithoutStackGuard(BoundNode node)
         {
             return Visit(node);
         }
@@ -69,7 +69,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 inputType: unionMatchingInputType).MakeCompilerGenerated();
         }
 
-        public override BoundNode? VisitConstantPattern(BoundConstantPattern node)
+        public override BoundNode VisitConstantPattern(BoundConstantPattern node)
         {
             node = (BoundConstantPattern)base.VisitConstantPattern(node)!;
             if (node.IsUnionMatching)
@@ -101,7 +101,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return node;
         }
 
-        public override BoundNode? VisitRecursivePattern(BoundRecursivePattern node)
+        public override BoundNode VisitRecursivePattern(BoundRecursivePattern node)
         {
             node = (BoundRecursivePattern)base.VisitRecursivePattern(node)!;
             if (node.IsUnionMatching)
@@ -116,7 +116,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return node;
         }
 
-        public override BoundNode? VisitListPattern(BoundListPattern node)
+        public override BoundNode VisitListPattern(BoundListPattern node)
         {
             Symbol? variable = node.Variable;
             ImmutableArray<BoundPattern> subpatterns = this.VisitList(node.Subpatterns).SelectAsArray(RewritePatternWithUnionMatchingToPropertyPattern);
@@ -139,7 +139,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return node.Update(subpatterns, node.HasSlice, lengthAccess, indexerAccess, receiverPlaceholder, argumentPlaceholder, variable, variableAccess, isUnionMatching: false, inputType, narrowedType);
         }
 
-        public override BoundNode? VisitITuplePattern(BoundITuplePattern node)
+        public override BoundNode VisitITuplePattern(BoundITuplePattern node)
         {
             node = (BoundITuplePattern)base.VisitITuplePattern(node)!;
             if (node.IsUnionMatching)
@@ -153,7 +153,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return node;
         }
 
-        public override BoundNode? VisitDeclarationPattern(BoundDeclarationPattern node)
+        public override BoundNode VisitDeclarationPattern(BoundDeclarationPattern node)
         {
             node = (BoundDeclarationPattern)base.VisitDeclarationPattern(node)!;
             if (node.IsUnionMatching)
@@ -167,7 +167,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return node;
         }
 
-        public override BoundNode? VisitTypePattern(BoundTypePattern node)
+        public override BoundNode VisitTypePattern(BoundTypePattern node)
         {
             node = (BoundTypePattern)base.VisitTypePattern(node)!;
             if (node.IsUnionMatching)
@@ -180,7 +180,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return node;
         }
 
-        public override BoundNode? VisitRelationalPattern(BoundRelationalPattern node)
+        public override BoundNode VisitRelationalPattern(BoundRelationalPattern node)
         {
             node = (BoundRelationalPattern)base.VisitRelationalPattern(node)!;
             if (node.IsUnionMatching)
@@ -193,14 +193,14 @@ namespace Microsoft.CodeAnalysis.CSharp
             return node;
         }
 
-        public override BoundNode? VisitNegatedPattern(BoundNegatedPattern node)
+        public override BoundNode VisitNegatedPattern(BoundNegatedPattern node)
         {
             Debug.Assert(!node.IsUnionMatching);
             BoundPattern negated = RewritePatternWithUnionMatchingToPropertyPattern((BoundPattern)this.Visit(node.Negated));
             return node.Update(negated, node.InputType, node.NarrowedType);
         }
 
-        public override BoundNode? VisitSlicePattern(BoundSlicePattern node)
+        public override BoundNode VisitSlicePattern(BoundSlicePattern node)
         {
             BoundPattern? visited = (BoundPattern?)this.Visit(node.Pattern);
             BoundPattern? pattern = visited is null ? null : RewritePatternWithUnionMatchingToPropertyPattern(visited);
@@ -212,21 +212,21 @@ namespace Microsoft.CodeAnalysis.CSharp
             return node.Update(pattern, indexerAccess, receiverPlaceholder, argumentPlaceholder, inputType, narrowedType);
         }
 
-        public override BoundNode? VisitPositionalSubpattern(BoundPositionalSubpattern node)
+        public override BoundNode VisitPositionalSubpattern(BoundPositionalSubpattern node)
         {
             Symbol? symbol = node.Symbol;
             BoundPattern pattern = RewritePatternWithUnionMatchingToPropertyPattern((BoundPattern)this.Visit(node.Pattern));
             return node.Update(symbol, pattern);
         }
 
-        public override BoundNode? VisitPropertySubpattern(BoundPropertySubpattern node)
+        public override BoundNode VisitPropertySubpattern(BoundPropertySubpattern node)
         {
             BoundPropertySubpatternMember? member = node.Member;
             BoundPattern pattern = RewritePatternWithUnionMatchingToPropertyPattern((BoundPattern)this.Visit(node.Pattern));
             return node.Update(member, node.IsLengthOrCount, pattern);
         }
 
-        public override BoundNode? VisitBinaryPattern(BoundBinaryPattern node)
+        public override BoundNode VisitBinaryPattern(BoundBinaryPattern node)
         {
             var binaryPatternStack = ArrayBuilder<BoundBinaryPattern>.GetInstance();
             BoundBinaryPattern? currentNode = node;

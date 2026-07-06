@@ -277,7 +277,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             => _resumableStateAllocator.GenerateThrowMissingStateDispatch(F, F.Local(cachedState), EncMissingStateErrorCode);
 
 #if DEBUG
-        public override BoundNode? VisitSequence(BoundSequence node)
+        public override BoundNode VisitSequence(BoundSequence node)
         {
             // Spilled local temps do not appear here in a sequence expression, because any temps in a
             // sequence expression that need to be spilled would have been moved up to the
@@ -604,15 +604,15 @@ namespace Microsoft.CodeAnalysis.CSharp
             throw ExceptionUtilities.Unreachable(); // using statements have been lowered away by now
         }
 
-        public override BoundNode? VisitExpressionStatement(BoundExpressionStatement node)
+        public override BoundNode VisitExpressionStatement(BoundExpressionStatement node)
         {
             // ref assignments might be translated away (into nothing).  If so just
             // return no statement.  The enclosing statement list will just omit it.
             BoundExpression? expression = (BoundExpression?)this.Visit(node.Expression);
-            return (expression == null) ? null : node.Update(expression);
+            return (expression == null) ? null! : node.Update(expression);
         }
 
-        public override BoundNode? VisitAssignmentOperator(BoundAssignmentOperator node)
+        public override BoundNode VisitAssignmentOperator(BoundAssignmentOperator node)
         {
             if (node.Left.Kind != BoundKind.Local)
             {
@@ -652,7 +652,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 createHoistedSymbol,
                 createHoistedAccess,
                 this,
-                isRuntimeAsync: false);
+                isRuntimeAsync: false)!;
 
             static StateMachineFieldSymbol createHoistedSymbol(TypeSymbol type, MethodToStateMachineRewriter @this, LocalSymbol assignedLocal)
             {

@@ -11,14 +11,14 @@ namespace Microsoft.CodeAnalysis.CSharp
 {
     internal sealed partial class LocalRewriter
     {
-        public override BoundNode? VisitMultipleLocalDeclarations(BoundMultipleLocalDeclarations node)
+        public override BoundNode VisitMultipleLocalDeclarations(BoundMultipleLocalDeclarations node)
         {
-            return VisitMultipleLocalDeclarationsBase(node);
+            return VisitMultipleLocalDeclarationsBase(node)!;
         }
 
-        public override BoundNode? VisitUsingLocalDeclarations(BoundUsingLocalDeclarations node)
+        public override BoundNode VisitUsingLocalDeclarations(BoundUsingLocalDeclarations node)
         {
-            return VisitMultipleLocalDeclarationsBase(node);
+            return VisitMultipleLocalDeclarationsBase(node)!;
         }
 
         private BoundNode? VisitMultipleLocalDeclarationsBase(BoundMultipleLocalDeclarationsBase node)

@@ -79,7 +79,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         protected override TypeMap TypeMap => _rewrittenContainingMethod.TypeMap;
 
-        public override BoundNode? VisitThisReference(BoundThisReference node)
+        public override BoundNode VisitThisReference(BoundThisReference node)
         {
             throw ExceptionUtilities.Unreachable();
         }
@@ -89,7 +89,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return (ParameterSymbol)_symbolMap[symbol];
         }
 
-        public override BoundNode? VisitLambda(BoundLambda node)
+        public override BoundNode VisitLambda(BoundLambda node)
         {
             var rewritten = new RewrittenLambdaOrLocalFunctionSymbol(node.Symbol, _rewrittenContainingMethod);
 
@@ -105,7 +105,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return node.Update(node.UnboundLambda, rewritten, body, node.Diagnostics, node.Binder, type);
         }
 
-        public override BoundNode? VisitLocalFunctionStatement(BoundLocalFunctionStatement node)
+        public override BoundNode VisitLocalFunctionStatement(BoundLocalFunctionStatement node)
         {
             MethodSymbol symbol = this.VisitMethodSymbol(node.Symbol);
             var savedState = EnterMethod(node.Symbol, (RewrittenLambdaOrLocalFunctionSymbol)symbol);
@@ -166,12 +166,12 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        public override BoundNode? VisitCall(BoundCall node)
+        public override BoundNode VisitCall(BoundCall node)
         {
             return ExtensionMethodReferenceRewriter.VisitCall(this, node);
         }
 
-        public override BoundNode? VisitDelegateCreationExpression(BoundDelegateCreationExpression node)
+        public override BoundNode VisitDelegateCreationExpression(BoundDelegateCreationExpression node)
         {
             return ExtensionMethodReferenceRewriter.VisitDelegateCreationExpression(this, node);
         }
@@ -198,7 +198,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return ExtensionMethodReferenceRewriter.VisitBinaryOperatorData(this, node);
         }
 
-        public override BoundNode? VisitMethodDefIndex(BoundMethodDefIndex node)
+        public override BoundNode VisitMethodDefIndex(BoundMethodDefIndex node)
         {
             return ExtensionMethodReferenceRewriter.VisitMethodDefIndex(this, node);
         }

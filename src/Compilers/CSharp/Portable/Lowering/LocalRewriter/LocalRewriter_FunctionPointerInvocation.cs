@@ -11,7 +11,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 {
     internal sealed partial class LocalRewriter
     {
-        public override BoundNode? VisitFunctionPointerInvocation(BoundFunctionPointerInvocation node)
+        public override BoundNode VisitFunctionPointerInvocation(BoundFunctionPointerInvocation node)
         {
             var rewrittenExpression = VisitExpression(node.InvokedExpression);
             Debug.Assert(rewrittenExpression != null);

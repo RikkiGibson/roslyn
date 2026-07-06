@@ -243,7 +243,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             : base(recursionDepth)
         { }
 
-        public sealed override BoundNode? VisitBinaryOperator(BoundBinaryOperator node)
+        public sealed override BoundNode VisitBinaryOperator(BoundBinaryOperator node)
         {
             BoundExpression child = node.Left;
 
@@ -294,7 +294,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return node.Data;
         }
 
-        public sealed override BoundNode? VisitIfStatement(BoundIfStatement node)
+        public sealed override BoundNode VisitIfStatement(BoundIfStatement node)
         {
             if (node.AlternativeOpt is not BoundIfStatement ifStatement)
             {
@@ -337,7 +337,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return alternative;
         }
 
-        public sealed override BoundNode? VisitBinaryPattern(BoundBinaryPattern node)
+        public sealed override BoundNode VisitBinaryPattern(BoundBinaryPattern node)
         {
             BoundPattern child = node.Left;
 

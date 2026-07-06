@@ -226,12 +226,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return base.VisitLocal(node)!;
         }
 
-        public override BoundNode? VisitLocalId(BoundLocalId node)
+        public override BoundNode VisitLocalId(BoundLocalId node)
             => TryGetHoistedField(node.Local, out var fieldSymbol) ?
                 node.Update(node.Local, fieldSymbol, node.Type) :
                 base.VisitLocalId(node);
 
-        public override BoundNode? VisitParameterId(BoundParameterId node)
+        public override BoundNode VisitParameterId(BoundParameterId node)
             => TryGetHoistedField(node.Parameter, out var fieldSymbol) ?
                 node.Update(node.Parameter, fieldSymbol, node.Type) :
                 base.VisitParameterId(node);
@@ -254,7 +254,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return false;
         }
 
-        public override BoundNode? VisitAssignmentOperator(BoundAssignmentOperator node)
+        public override BoundNode VisitAssignmentOperator(BoundAssignmentOperator node)
         {
             BoundExpression originalLeft = node.Left;
 

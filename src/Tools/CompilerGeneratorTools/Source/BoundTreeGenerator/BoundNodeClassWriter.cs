@@ -1410,10 +1410,10 @@ namespace BoundTreeGenerator
                         {
                             if (!AllNodeOrNodeListFields(node).Any() && !AllTypeFields(node).Any() && !AllNonTypeSymbolOrNonTypeSymbolListFields(node).Any())
                             {
-                                WriteLine($"{GetVisitFunctionDeclaration(node.Name, isOverride: true)} => node;");
+                                WriteLine($"{GetVisitFunctionDeclaration(node.Name, isOverride: true, nullableReturn: false)} => node;");
                                 continue;
                             }
-                            WriteLine(GetVisitFunctionDeclaration(node.Name, isOverride: true));
+                            WriteLine(GetVisitFunctionDeclaration(node.Name, isOverride: true, nullableReturn: false));
                             Brace();
                             bool hadField = false;
 
@@ -1566,7 +1566,7 @@ namespace BoundTreeGenerator
                             }
 
                             Blank();
-                            WriteLine(GetVisitFunctionDeclaration(node.Name, isOverride: true));
+                            WriteLine(GetVisitFunctionDeclaration(node.Name, isOverride: true, nullableReturn: false));
                             Brace();
                             bool hadField = false;
 
@@ -1920,12 +1920,12 @@ namespace BoundTreeGenerator
             }
         }
 
-        private string GetVisitFunctionDeclaration(string nodeName, bool isOverride)
+        private string GetVisitFunctionDeclaration(string nodeName, bool isOverride, bool nullableReturn = true)
         {
             switch (_targetLang)
             {
                 case TargetLanguage.CSharp:
-                    return $"public {(isOverride ? "override" : "virtual")} BoundNode? Visit{StripBound(nodeName)}({nodeName} node)";
+                    return $"public {(isOverride ? "override" : "virtual")} BoundNode{(nullableReturn ? "?" : "")} Visit{StripBound(nodeName)}({nodeName} node)";
 
                 case TargetLanguage.VB:
                     return $"Public {(isOverride ? "Overrides" : "Overridable")} Function Visit{StripBound(nodeName)}(node As {nodeName}) As BoundNode";

@@ -314,7 +314,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return node.Kind == BoundKind.DeconstructionAssignmentOperator && !((BoundDeconstructionAssignmentOperator)node).IsUsed;
         }
 
-        public override BoundNode? VisitParameter(BoundParameter node)
+        public override BoundNode VisitParameter(BoundParameter node)
         {
             if (node.ParameterSymbol.ContainingSymbol is SynthesizedPrimaryConstructor primaryCtor &&
                 primaryCtor.GetCapturedParameters().TryGetValue(node.ParameterSymbol, out var field))
@@ -472,7 +472,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return PlaceholderReplacement(node);
         }
 
-        public override BoundNode? VisitCollectionBuilderElementsPlaceholder(BoundCollectionBuilderElementsPlaceholder node)
+        public override BoundNode VisitCollectionBuilderElementsPlaceholder(BoundCollectionBuilderElementsPlaceholder node)
         {
             return PlaceholderReplacement(node);
         }
@@ -495,10 +495,10 @@ namespace Microsoft.CodeAnalysis.CSharp
         public override BoundNode VisitInterpolatedStringArgumentPlaceholder(BoundInterpolatedStringArgumentPlaceholder node)
             => PlaceholderReplacement(node);
 
-        public override BoundNode? VisitInterpolatedStringHandlerPlaceholder(BoundInterpolatedStringHandlerPlaceholder node)
+        public override BoundNode VisitInterpolatedStringHandlerPlaceholder(BoundInterpolatedStringHandlerPlaceholder node)
             => PlaceholderReplacement(node);
 
-        public override BoundNode? VisitCollectionExpressionSpreadExpressionPlaceholder(BoundCollectionExpressionSpreadExpressionPlaceholder node)
+        public override BoundNode VisitCollectionExpressionSpreadExpressionPlaceholder(BoundCollectionExpressionSpreadExpressionPlaceholder node)
         {
             return PlaceholderReplacement(node);
         }

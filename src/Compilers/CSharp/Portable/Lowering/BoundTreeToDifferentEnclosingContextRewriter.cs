@@ -166,7 +166,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return BoundBinaryOperator.UncommonData.CreateIfNeeded(node.ConstantValueOpt, VisitMethodSymbol(node.BinaryOperatorMethod), VisitType(node.ConstrainedToType), node.OriginalUserDefinedOperatorsOpt);
         }
 
-        public override BoundNode? VisitConversion(BoundConversion node)
+        public override BoundNode VisitConversion(BoundConversion node)
         {
             var conversion = node.Conversion;
 
@@ -238,7 +238,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 .AsMember((NamedTypeSymbol)TypeMap.SubstituteType(field.ContainingType).AsTypeSymbolOnly());
         }
 
-        public override BoundNode? VisitMethodDefIndex(BoundMethodDefIndex node)
+        public override BoundNode VisitMethodDefIndex(BoundMethodDefIndex node)
         {
             // Cannot replace a MethodDefIndex's Method/Type with a substituted symbol.
             Debug.Assert(node.Type.Equals(VisitType(node.Type), TypeCompareKind.ConsiderEverything));
