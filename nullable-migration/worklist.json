@@ -911,8 +911,8 @@
       "toggles": 6,
       "totalLines": 1118,
       "disabledLines": 629,
-      "status": "in-progress",
-      "note": "",
+      "status": "pending",
+      "note": "reverted partial edit from orphaned interrupted process; restart clean",
       "order": 83
     },
     {
@@ -1208,8 +1208,8 @@
       "toggles": 2,
       "totalLines": 1391,
       "disabledLines": 1305,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Enabled; islanded nothing. Fixed (object)x!=null non-narrowing pattern, made MethodSymbol/PropertySymbol/EventSymbol comparer-overload Retarget + Find* helpers return nullable, nullable-annotated MarshalPseudoCustomAttributeData/local var types, fixed ripples in RetargetingMethodSymbol.cs/RetargetingParameterSymbol.cs/RetargetingNamedTypeSymbol.cs (ReturnValueMarshallingInformation, MarshallingInformation now nullable; Debug.Assert/! for guaranteed-non-null cases).",
       "order": 109
     },
     {

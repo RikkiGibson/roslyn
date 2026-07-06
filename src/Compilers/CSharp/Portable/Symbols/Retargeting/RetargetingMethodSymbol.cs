@@ -202,7 +202,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
             }
         }
 
-        internal override MarshalPseudoCustomAttributeData ReturnValueMarshallingInformation
+        internal override MarshalPseudoCustomAttributeData? ReturnValueMarshallingInformation
         {
             get
             {
@@ -328,7 +328,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
             for (int i = 0; i < impls.Length; i++)
             {
                 var retargeted = this.RetargetingTranslator.Retarget(impls[i], MemberSignatureComparer.RetargetedExplicitImplementationComparer);
-                if ((object)retargeted != null)
+                if (retargeted is not null)
                 {
                     builder.Add(retargeted);
                 }
@@ -346,7 +346,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
             {
                 return
                     _underlyingMethod.RequiresExplicitOverride(out _)
-                        ? this.RetargetingTranslator.Retarget(_underlyingMethod.OverriddenMethod, MemberSignatureComparer.RetargetedExplicitImplementationComparer)
+                        // OverriddenMethod is non-null whenever RequiresExplicitOverride returns true.
+                        ? this.RetargetingTranslator.Retarget(_underlyingMethod.OverriddenMethod!, MemberSignatureComparer.RetargetedExplicitImplementationComparer)
                         : null;
             }
         }
@@ -386,6 +387,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
         {
             if (_underlyingMethod.HasAsyncMethodBuilderAttribute(out builderArgument))
             {
+                Debug.Assert(builderArgument is not null);
                 builderArgument = this.RetargetingTranslator.Retarget(builderArgument, RetargetOptions.RetargetPrimitiveTypesByTypeCode);
                 return true;
             }

@@ -218,7 +218,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
         {
             foreach (EventSymbol e in _underlyingType.GetEventsToEmit())
             {
-                yield return this.RetargetingTranslator.Retarget(e);
+                // e is a member of the underlying type itself, so retargeting is guaranteed to find it.
+                yield return this.RetargetingTranslator.Retarget(e)!;
             }
         }
 
