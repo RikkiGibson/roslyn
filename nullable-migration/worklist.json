@@ -1307,8 +1307,8 @@
       "toggles": 6,
       "totalLines": 2010,
       "disabledLines": 1668,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed #nullable directives; fixed CS8xxx via ?-annotating genuinely-nullable locals (directInterface, implementingPropertyOrEvent, useSiteDiagnostic, overriddenProperty, overriddenGetMethod, ownOrInherited(Get|Set)Method, symbolLocation, curr), replacing (object)x==null idiom with is null/is not null, Debug.Assert(x is not null) for bool-flag-guarded or contextual invariants, and inline ! for compound conditions. No behavior changes; no found-bugs entry needed. Full enable, no islands.",
       "order": 116
     },
     {
