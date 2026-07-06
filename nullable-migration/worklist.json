@@ -1230,8 +1230,8 @@
       "toggles": 2,
       "totalLines": 1541,
       "disabledLines": 1507,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Nullable-enabled; islanded VisitExpression and Spill helpers (return null in side-effect-only cases, dereferenced widely by callers).",
       "order": 111
     },
     {
