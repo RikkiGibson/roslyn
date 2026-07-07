@@ -1571,8 +1571,8 @@
       "toggles": 8,
       "totalLines": 4399,
       "disabledLines": 4069,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Removed #nullable directives; added ? annotations, Debug.Assert narrowing, notnull constraints; fixed ripples in FullMetadataWriter.cs and TypeSpecComparer.cs",
       "order": 140
     },
     {

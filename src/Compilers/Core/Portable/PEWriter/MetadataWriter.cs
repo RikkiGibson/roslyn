@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 // We're not actually doing formatter-based serialization in this file.
 // We're simply propagating along the attributes of symbols we are emitting to metadata.
 #pragma warning disable SYSLIB0050 // 'FieldAttributes.NotSerialized' is obsolete: 'Formatter-based serialization is obsolete and should not be used.'
@@ -92,8 +90,8 @@ namespace Microsoft.Cci
 
         protected MetadataWriter(
             MetadataBuilder metadata,
-            MetadataBuilder debugMetadataOpt,
-            DynamicAnalysisDataWriter dynamicAnalysisDataWriterOpt,
+            MetadataBuilder? debugMetadataOpt,
+            DynamicAnalysisDataWriter? dynamicAnalysisDataWriterOpt,
             EmitContext context,
             CommonMessageProvider messageProvider,
             bool metadataOnly,
@@ -419,21 +417,22 @@ namespace Microsoft.Cci
         private bool _usingNonSourceDocumentNameEnumerator;
         private ImmutableArray<string>.Enumerator _nonSourceDocumentNameEnumerator;
 
-        private EntityHandle[] _pseudoSymbolTokenToTokenMap;
-        private object[] _pseudoSymbolTokenToReferenceMap;
-        private UserStringHandle[] _pseudoStringTokenToTokenMap;
+        // These are populated by CreateIndices(), which is always called before they are used.
+        private EntityHandle[] _pseudoSymbolTokenToTokenMap = null!;
+        private object?[] _pseudoSymbolTokenToReferenceMap = null!;
+        private UserStringHandle[] _pseudoStringTokenToTokenMap = null!;
         private bool _userStringTokenOverflow;
-        private string[] _pseudoStringTokenToStringMap;
-        private ReferenceIndexer _referenceVisitor;
+        private string?[] _pseudoStringTokenToStringMap = null!;
+        private ReferenceIndexer _referenceVisitor = null!;
 
         protected readonly MetadataBuilder metadata;
 
         // A builder for Portable or Embedded PDB metadata, or null if we are not emitting Portable/Embedded PDB.
-        protected readonly MetadataBuilder _debugMetadataOpt;
+        protected readonly MetadataBuilder? _debugMetadataOpt;
 
         internal bool EmitPortableDebugMetadata => _debugMetadataOpt != null;
 
-        private readonly DynamicAnalysisDataWriter _dynamicAnalysisDataWriterOpt;
+        private readonly DynamicAnalysisDataWriter? _dynamicAnalysisDataWriterOpt;
 
         private readonly Dictionary<ICustomAttribute, BlobHandle> _customAttributeSignatureIndex = new Dictionary<ICustomAttribute, BlobHandle>();
         private readonly Dictionary<ITypeReference, BlobHandle> _typeSpecSignatureIndex = new Dictionary<ITypeReference, BlobHandle>(ReferenceEqualityComparer.Instance);
@@ -531,9 +530,9 @@ namespace Microsoft.Cci
         {
         }
 
-        protected IEnumerable<IGenericTypeParameter> GetConsolidatedTypeParameters(ITypeDefinition typeDef)
+        protected IEnumerable<IGenericTypeParameter>? GetConsolidatedTypeParameters(ITypeDefinition typeDef)
         {
-            INestedTypeDefinition nestedTypeDef = typeDef.AsNestedTypeDefinition(Context);
+            INestedTypeDefinition? nestedTypeDef = typeDef.AsNestedTypeDefinition(Context);
             if (nestedTypeDef == null || !nestedTypeDef.InheritsEnclosingTypeTypeParameters)
             {
                 if (typeDef.IsGeneric)
@@ -546,10 +545,10 @@ namespace Microsoft.Cci
 
             return getConsolidatedTypeParameters(typeDef, typeDef);
 
-            List<IGenericTypeParameter> getConsolidatedTypeParameters(ITypeDefinition typeDef, ITypeDefinition owner)
+            List<IGenericTypeParameter>? getConsolidatedTypeParameters(ITypeDefinition typeDef, ITypeDefinition owner)
             {
-                List<IGenericTypeParameter> result = null;
-                INestedTypeDefinition nestedTypeDef = typeDef.AsNestedTypeDefinition(Context);
+                List<IGenericTypeParameter>? result = null;
+                INestedTypeDefinition? nestedTypeDef = typeDef.AsNestedTypeDefinition(Context);
                 if (nestedTypeDef != null && nestedTypeDef.InheritsEnclosingTypeTypeParameters)
                 {
                     result = getConsolidatedTypeParameters(nestedTypeDef.ContainingTypeDefinition, owner);
@@ -596,7 +595,7 @@ namespace Microsoft.Cci
 
         private ImmutableArray<IParameterDefinition> GetParametersToEmitCore(IMethodDefinition methodDef)
         {
-            ArrayBuilder<IParameterDefinition> builder = null;
+            ArrayBuilder<IParameterDefinition>? builder = null;
             var parameters = methodDef.Parameters;
 
             if (methodDef.ReturnValueIsMarshalledExplicitly || IteratorHelper.EnumerableIsNotEmpty(methodDef.GetReturnValueAttributes(Context)))
@@ -638,9 +637,9 @@ namespace Microsoft.Cci
         /// Returns a reference to the unit that defines the given referenced type. If the referenced type is a structural type, such as a pointer or a generic type instance,
         /// then the result is null.
         /// </summary>
-        public static IUnitReference GetDefiningUnitReference(ITypeReference typeReference, EmitContext context)
+        public static IUnitReference? GetDefiningUnitReference(ITypeReference typeReference, EmitContext context)
         {
-            INestedTypeReference nestedTypeReference = typeReference.AsNestedTypeReference;
+            INestedTypeReference? nestedTypeReference = typeReference.AsNestedTypeReference;
             while (nestedTypeReference != null)
             {
                 if (nestedTypeReference.AsGenericTypeInstanceReference != null)
@@ -652,7 +651,7 @@ namespace Microsoft.Cci
                 nestedTypeReference = typeReference.AsNestedTypeReference;
             }
 
-            INamespaceTypeReference namespaceTypeReference = typeReference.AsNamespaceTypeReference;
+            INamespaceTypeReference? namespaceTypeReference = typeReference.AsNamespaceTypeReference;
             if (namespaceTypeReference == null)
             {
                 return null;
@@ -678,7 +677,8 @@ namespace Microsoft.Cci
 
             foreach (IFileReference fileRef in module.GetFiles(Context))
             {
-                string key = fileRef.FileName;
+                string key = fileRef.FileName!;
+                Debug.Assert(key != null);
                 if (!_fileRefIndex.ContainsKey(key))
                 {
                     _fileRefList.Add(fileRef);
@@ -722,8 +722,8 @@ namespace Microsoft.Cci
 
         private EntityHandle GetCustomAttributeTypeCodedIndex(IMethodReference methodReference)
         {
-            IMethodDefinition methodDef = null;
-            IUnitReference definingUnit = GetDefiningUnitReference(methodReference.GetContainingType(Context), Context);
+            IMethodDefinition? methodDef = null;
+            IUnitReference? definingUnit = GetDefiningUnitReference(methodReference.GetContainingType(Context), Context);
             if (definingUnit != null && ReferenceEquals(definingUnit, this.module))
             {
                 methodDef = methodReference.GetResolvedMethod(Context);
@@ -804,7 +804,7 @@ namespace Microsoft.Cci
         internal BlobHandle GetFieldSignatureIndex(IFieldReference fieldReference)
         {
             BlobHandle result;
-            ISpecializedFieldReference specializedFieldReference = fieldReference.AsSpecializedFieldReference;
+            ISpecializedFieldReference? specializedFieldReference = fieldReference.AsSpecializedFieldReference;
             if (specializedFieldReference != null)
             {
                 fieldReference = specializedFieldReference.UnspecializedVersion;
@@ -825,8 +825,8 @@ namespace Microsoft.Cci
 
         internal EntityHandle GetFieldHandle(IFieldReference fieldReference)
         {
-            IFieldDefinition fieldDef = null;
-            IUnitReference definingUnit = GetDefiningUnitReference(fieldReference.GetContainingType(Context), Context);
+            IFieldDefinition? fieldDef = null;
+            IUnitReference? definingUnit = GetDefiningUnitReference(fieldReference.GetContainingType(Context), Context);
             if (definingUnit != null && ReferenceEquals(definingUnit, this.module))
             {
                 fieldDef = fieldReference.GetResolvedField(Context);
@@ -839,7 +839,8 @@ namespace Microsoft.Cci
 
         internal AssemblyFileHandle GetAssemblyFileHandle(IFileReference fileReference)
         {
-            string key = fileReference.FileName;
+            string key = fileReference.FileName!;
+            Debug.Assert(key != null);
             int index;
             if (!_fileRefIndex.TryGetValue(key, out index))
             {
@@ -853,7 +854,9 @@ namespace Microsoft.Cci
 
         private AssemblyFileHandle GetAssemblyFileHandle(IModuleReference mref)
         {
-            return MetadataTokens.AssemblyFileHandle(_fileRefIndex[mref.Name]);
+            string? name = mref.Name;
+            Debug.Assert(name != null);
+            return MetadataTokens.AssemblyFileHandle(_fileRefIndex[name]);
         }
 
         private static GenericParameterAttributes GetGenericParameterAttributes(IGenericParameter genPar)
@@ -909,8 +912,10 @@ namespace Microsoft.Cci
 
         public static string GetMetadataName(INamedTypeReference namedType, int generation)
         {
-            string nameWithGeneration = (generation == 0) ? namedType.Name : namedType.Name + "#" + generation;
-            string fileIdentifier = namedType.AssociatedFileIdentifier;
+            string name = namedType.Name!;
+            Debug.Assert(name != null);
+            string nameWithGeneration = (generation == 0) ? name : name + "#" + generation;
+            string? fileIdentifier = namedType.AssociatedFileIdentifier;
             return namedType.MangleName || fileIdentifier != null
                 ? MetadataHelpers.ComposeAritySuffixedMetadataName(nameWithGeneration, namedType.GenericParameterCount, fileIdentifier)
                 : nameWithGeneration;
@@ -923,7 +928,7 @@ namespace Microsoft.Cci
 
         internal EntityHandle GetMemberReferenceParent(ITypeMemberReference memberRef)
         {
-            ITypeDefinition parentTypeDef = memberRef.GetContainingType(Context).AsTypeDefinition(Context);
+            ITypeDefinition? parentTypeDef = memberRef.GetContainingType(Context).AsTypeDefinition(Context);
             if (parentTypeDef != null)
             {
                 TypeDefinitionHandle parentTypeDefHandle;
@@ -941,7 +946,8 @@ namespace Microsoft.Cci
                         if (methodRef.AcceptsExtraArguments)
                         {
                             MethodDefinitionHandle methodHandle;
-                            if (this.TryGetMethodDefinitionHandle(methodRef.GetResolvedMethod(Context), out methodHandle))
+                            IMethodDefinition? resolvedMethod = methodRef.GetResolvedMethod(Context);
+                            if (resolvedMethod != null && this.TryGetMethodDefinitionHandle(resolvedMethod, out methodHandle))
                             {
                                 return methodHandle;
                             }
@@ -962,8 +968,8 @@ namespace Microsoft.Cci
 
         internal EntityHandle GetMethodDefinitionOrReferenceHandle(IMethodReference methodReference)
         {
-            IMethodDefinition methodDef = null;
-            IUnitReference definingUnit = GetDefiningUnitReference(methodReference.GetContainingType(Context), Context);
+            IMethodDefinition? methodDef = null;
+            IUnitReference? definingUnit = GetDefiningUnitReference(methodReference.GetContainingType(Context), Context);
             if (definingUnit != null && ReferenceEquals(definingUnit, this.module))
             {
                 methodDef = methodReference.GetResolvedMethod(Context);
@@ -1114,7 +1120,7 @@ namespace Microsoft.Cci
         private BlobHandle GetMethodSignatureHandleAndBlob(IMethodReference methodReference, out ImmutableArray<byte> signatureBlob)
         {
             BlobHandle result;
-            ISpecializedMethodReference specializedMethodReference = methodReference.AsSpecializedMethodReference;
+            ISpecializedMethodReference? specializedMethodReference = methodReference.AsSpecializedMethodReference;
             if (specializedMethodReference != null)
             {
                 methodReference = specializedMethodReference.UnspecializedVersion;
@@ -1167,8 +1173,8 @@ namespace Microsoft.Cci
             }
 
             MethodDefinitionHandle methodDefHandle;
-            IMethodDefinition methodDef = null;
-            IUnitReference definingUnit = GetDefiningUnitReference(methodReference.GetContainingType(Context), Context);
+            IMethodDefinition? methodDef = null;
+            IUnitReference? definingUnit = GetDefiningUnitReference(methodReference.GetContainingType(Context), Context);
             if (definingUnit != null && ReferenceEquals(definingUnit, this.module))
             {
                 methodDef = methodReference.GetResolvedMethod(Context);
@@ -1179,7 +1185,7 @@ namespace Microsoft.Cci
                 return methodDefHandle;
             }
 
-            IGenericMethodInstanceReference methodSpec = methodReference.AsGenericMethodInstanceReference;
+            IGenericMethodInstanceReference? methodSpec = methodReference.AsGenericMethodInstanceReference;
             return methodSpec != null
                 ? (EntityHandle)GetMethodSpecificationHandle(methodSpec)
                 : GetMemberReferenceHandle(methodReference);
@@ -1308,17 +1314,21 @@ namespace Microsoft.Cci
                 return GetAssemblyReferenceHandle(aref);
             }
 
-            return GetModuleReferenceHandle(mref.Name);
+            string? moduleName = mref.Name;
+            Debug.Assert(moduleName != null);
+            return GetModuleReferenceHandle(moduleName);
         }
 
-        private StringHandle GetStringHandleForPathAndCheckLength(string path, INamedEntity errorEntity = null)
+        private StringHandle GetStringHandleForPathAndCheckLength(string? path, INamedEntity? errorEntity = null)
         {
+            Debug.Assert(path != null);
             CheckPathLength(path, errorEntity);
             return metadata.GetOrAddString(path);
         }
 
-        private StringHandle GetStringHandleForNameAndCheckLength(string name, INamedEntity errorEntity = null)
+        private StringHandle GetStringHandleForNameAndCheckLength(string? name, INamedEntity? errorEntity = null)
         {
+            Debug.Assert(name != null);
             CheckNameLength(name, errorEntity);
             return metadata.GetOrAddString(name);
         }
@@ -1344,7 +1354,7 @@ namespace Microsoft.Cci
             return metadata.GetOrAddString(namespaceName);
         }
 
-        private void CheckNameLength(string name, INamedEntity errorEntity)
+        private void CheckNameLength(string? name, INamedEntity? errorEntity)
         {
             // NOTE: ildasm shows quotes around some names (e.g. explicit implementations of members of generic interfaces)
             // but that seems to be tool-specific - they don't seem to and up in the string heap (so they don't count against
@@ -1352,15 +1362,17 @@ namespace Microsoft.Cci
 
             if (IsTooLongInternal(name, NameLengthLimit))
             {
+                Debug.Assert(name != null);
                 Location location = GetNamedEntityLocation(errorEntity);
                 this.Context.Diagnostics.Add(this.messageProvider.CreateDiagnostic(this.messageProvider.ERR_MetadataNameTooLong, location, name));
             }
         }
 
-        private void CheckPathLength(string path, INamedEntity errorEntity = null)
+        private void CheckPathLength(string? path, INamedEntity? errorEntity = null)
         {
             if (IsTooLongInternal(path, PathLengthLimit))
             {
+                Debug.Assert(path != null);
                 Location location = GetNamedEntityLocation(errorEntity);
                 this.Context.Diagnostics.Add(this.messageProvider.CreateDiagnostic(this.messageProvider.ERR_MetadataNameTooLong, location, path));
             }
@@ -1391,7 +1403,7 @@ namespace Microsoft.Cci
             }
         }
 
-        internal bool IsUsingStringTooLong(string usingString, INamedEntity errorEntity = null)
+        internal bool IsUsingStringTooLong(string usingString, INamedEntity? errorEntity = null)
         {
             if (IsTooLongInternal(usingString, PdbLengthLimit))
             {
@@ -1405,7 +1417,8 @@ namespace Microsoft.Cci
 
         internal bool IsLocalNameTooLong(ILocalDefinition localDefinition)
         {
-            string name = localDefinition.Name;
+            string? name = localDefinition.Name;
+            Debug.Assert(name != null);
             if (IsTooLongInternal(name, PdbLengthLimit))
             {
                 this.Context.Diagnostics.Add(this.messageProvider.CreateDiagnostic(this.messageProvider.WRN_PdbLocalNameTooLong, localDefinition.Location, name));
@@ -1422,7 +1435,7 @@ namespace Microsoft.Cci
         /// <param name="maxLength">Max length for name.  (Expected to be at least 5.)</param>
         /// <returns>True if the name is too long.</returns>
         /// <remarks>Internal for test purposes.</remarks>
-        internal static bool IsTooLongInternal(string str, int maxLength)
+        internal static bool IsTooLongInternal(string? str, int maxLength)
         {
             Debug.Assert(str != null); // No need to handle in an internal utility.
 
@@ -1435,9 +1448,9 @@ namespace Microsoft.Cci
             return utf8Length > maxLength;
         }
 
-        private static Location GetNamedEntityLocation(INamedEntity errorEntity)
+        private static Location GetNamedEntityLocation(INamedEntity? errorEntity)
         {
-            ISymbolInternal symbol;
+            ISymbolInternal? symbol;
 
             if (errorEntity is Cci.INamespace ns)
             {
@@ -1451,7 +1464,7 @@ namespace Microsoft.Cci
             return GetSymbolLocation(symbol);
         }
 
-        protected static Location GetSymbolLocation(ISymbolInternal symbolOpt)
+        protected static Location GetSymbolLocation(ISymbolInternal? symbolOpt)
         {
             return symbolOpt?.GetFirstLocationOrNone() ?? Location.None;
         }
@@ -1544,7 +1557,7 @@ namespace Microsoft.Cci
                 result |= TypeAttributes.BeforeFieldInit;
             }
 
-            INestedTypeDefinition nestedTypeDef = typeDef.AsNestedTypeDefinition(context);
+            INestedTypeDefinition? nestedTypeDef = typeDef.AsNestedTypeDefinition(context);
             if (nestedTypeDef != null)
             {
                 switch (((ITypeDefinitionMember)typeDef).Visibility)
@@ -1572,7 +1585,7 @@ namespace Microsoft.Cci
                 return result;
             }
 
-            INamespaceTypeDefinition namespaceTypeDef = typeDef.AsNamespaceTypeDefinition(context);
+            INamespaceTypeDefinition? namespaceTypeDef = typeDef.AsNamespaceTypeDefinition(context);
             if (namespaceTypeDef != null && namespaceTypeDef.IsPublic)
             {
                 result |= TypeAttributes.Public;
@@ -1583,13 +1596,13 @@ namespace Microsoft.Cci
 
         private EntityHandle GetDeclaringTypeOrMethodHandle(IGenericParameter genPar)
         {
-            IGenericTypeParameter genTypePar = genPar.AsGenericTypeParameter;
+            IGenericTypeParameter? genTypePar = genPar.AsGenericTypeParameter;
             if (genTypePar != null)
             {
                 return GetTypeDefinitionHandle(genTypePar.DefiningType);
             }
 
-            IGenericMethodParameter genMethPar = genPar.AsGenericMethodParameter;
+            IGenericMethodParameter? genMethPar = genPar.AsGenericMethodParameter;
             if (genMethPar != null)
             {
                 return GetMethodDefinitionHandle(genMethPar.DefiningMethod);
@@ -1612,7 +1625,7 @@ namespace Microsoft.Cci
             // NOTE: ResolutionScope for its nested types should appear in TypeRef table
             // NOTE: *before* any of its nested types.
             // SEE ALSO: bug#570975 and test Bug570975()
-            INestedTypeReference nestedTypeRef = typeReference.AsNestedTypeReference;
+            INestedTypeReference? nestedTypeRef = typeReference.AsNestedTypeReference;
             if (nestedTypeRef != null)
             {
                 GetTypeReferenceHandle(nestedTypeRef.GetContainingType(this.Context));
@@ -1640,7 +1653,7 @@ namespace Microsoft.Cci
             return GetMethodDef(MetadataTokens.MethodDefinitionHandle(token));
         }
 
-        internal INestedTypeReference GetNestedTypeReference(int token)
+        internal INestedTypeReference? GetNestedTypeReference(int token)
         {
             // Must be a def table. (See comment in GetTypeDefinition.)
             return GetTypeDef(MetadataTokens.TypeDefinitionHandle(token)).AsNestedTypeReference;
@@ -1690,7 +1703,6 @@ namespace Microsoft.Cci
             };
         }
 
-#nullable enable
         public void WriteMetadataAndIL(PdbWriter? nativePdbWriterOpt, Stream metadataStream, Stream ilStream, Stream? portablePdbStreamOpt, out MetadataSizes metadataSizes)
         {
             Debug.Assert(nativePdbWriterOpt == null ^ portablePdbStreamOpt == null);
@@ -1864,7 +1876,6 @@ namespace Microsoft.Cci
             PopulateTypeSystemTables(methodBodyOffsets, mappedFieldDataStartOffset, out mappedFieldDataBuilder, out managedResourceDataBuilder, dynamicAnalysisData, out mvidFixup);
             dynamicAnalysisData?.Free();
         }
-#nullable disable
 
         public virtual void PopulateEncTables(ImmutableArray<int> typeSystemRowCounts)
         {
@@ -1878,8 +1889,9 @@ namespace Microsoft.Cci
             return new MetadataRootBuilder(metadata, module.SerializationProperties.TargetRuntimeVersion, suppressValidation: true);
         }
 
-        public PortablePdbBuilder GetPortablePdbBuilder(ImmutableArray<int> typeSystemRowCounts, MethodDefinitionHandle debugEntryPoint, Func<IEnumerable<Blob>, BlobContentId> deterministicIdProviderOpt)
+        public PortablePdbBuilder GetPortablePdbBuilder(ImmutableArray<int> typeSystemRowCounts, MethodDefinitionHandle debugEntryPoint, Func<IEnumerable<Blob>, BlobContentId>? deterministicIdProviderOpt)
         {
+            Debug.Assert(_debugMetadataOpt != null);
             return new PortablePdbBuilder(_debugMetadataOpt, typeSystemRowCounts, debugEntryPoint, deterministicIdProviderOpt);
         }
 
@@ -1888,14 +1900,25 @@ namespace Microsoft.Cci
             if (IsFullMetadata)
             {
                 // PE entry point is set for executable programs
-                IMethodReference entryPoint = module.PEEntryPoint;
-                entryPointHandle = entryPoint != null ? (MethodDefinitionHandle)GetMethodHandle((IMethodDefinition)entryPoint.AsDefinition(Context)) : default(MethodDefinitionHandle);
+                IMethodReference? entryPoint = module.PEEntryPoint;
+                if (entryPoint != null)
+                {
+                    IDefinition? entryPointDef = entryPoint.AsDefinition(Context);
+                    Debug.Assert(entryPointDef is IMethodDefinition);
+                    entryPointHandle = (MethodDefinitionHandle)GetMethodHandle((IMethodDefinition)entryPointDef);
+                }
+                else
+                {
+                    entryPointHandle = default(MethodDefinitionHandle);
+                }
 
                 // debug entry point may be different from PE entry point, it may also be set for libraries
-                IMethodReference debugEntryPoint = module.DebugEntryPoint;
+                IMethodReference? debugEntryPoint = module.DebugEntryPoint;
                 if (debugEntryPoint != null && debugEntryPoint != entryPoint)
                 {
-                    debugEntryPointHandle = (MethodDefinitionHandle)GetMethodHandle((IMethodDefinition)debugEntryPoint.AsDefinition(Context));
+                    IDefinition? debugEntryPointDef = debugEntryPoint.AsDefinition(Context);
+                    Debug.Assert(debugEntryPointDef is IMethodDefinition);
+                    debugEntryPointHandle = (MethodDefinitionHandle)GetMethodHandle((IMethodDefinition)debugEntryPointDef);
                 }
                 else
                 {
@@ -1923,7 +1946,6 @@ namespace Microsoft.Cci
             }).ToImmutableArray();
         }
 
-#nullable enable
         private void PopulateTypeSystemTables(int[] methodBodyOffsets, int mappedFieldDataStartOffset, out PooledBlobBuilder? mappedFieldDataWriter, out PooledBlobBuilder? resourceWriter, BlobBuilder? dynamicAnalysisData, out Blob mvidFixup)
         {
             var sortedGenericParameters = GetSortedGenericParameters();
@@ -1964,7 +1986,6 @@ namespace Microsoft.Cci
             // This table is populated after the others because it depends on the order of the entries of the generic parameter table.
             this.PopulateCustomAttributeTableRows(sortedGenericParameters);
         }
-#nullable disable
 
         private void PopulateAssemblyRefTableRows()
         {
@@ -2187,7 +2208,7 @@ namespace Microsoft.Cci
 
         private void PopulateDeclSecurityTableRowsFor(EntityHandle parentHandle, IEnumerable<SecurityAttribute> attributes)
         {
-            OrderPreservingMultiDictionary<DeclarativeSecurityAction, ICustomAttribute> groupedSecurityAttributes = null;
+            OrderPreservingMultiDictionary<DeclarativeSecurityAction, ICustomAttribute>? groupedSecurityAttributes = null;
 
             foreach (SecurityAttribute securityAttribute in attributes)
             {
@@ -2242,8 +2263,8 @@ namespace Microsoft.Cci
 
             foreach (var exportedType in exportedTypes)
             {
-                INestedTypeReference nestedRef;
-                INamespaceTypeReference namespaceTypeRef;
+                INestedTypeReference? nestedRef;
+                INamespaceTypeReference? namespaceTypeRef;
                 TypeAttributes attributes;
                 StringHandle typeName;
                 StringHandle typeNamespace;
@@ -2339,7 +2360,6 @@ namespace Microsoft.Cci
             }
         }
 
-#nullable enable
         private void PopulateFieldRvaTableRows(int mappedFieldDataStartOffset, out PooledBlobBuilder? mappedFieldDataBuilder)
         {
             mappedFieldDataBuilder = null;
@@ -2377,7 +2397,6 @@ namespace Microsoft.Cci
                     offset: offset);
             }
         }
-#nullable disable
 
         private void PopulateFieldTableRows()
         {
@@ -2442,7 +2461,7 @@ namespace Microsoft.Cci
 
         private void PopulateFileTableRows()
         {
-            ISourceAssemblySymbolInternal assembly = module.SourceAssemblyOpt;
+            ISourceAssemblySymbolInternal? assembly = module.SourceAssemblyOpt;
             if (assembly == null)
             {
                 return;
@@ -2494,17 +2513,22 @@ namespace Microsoft.Cci
                 }
 
                 var data = methodDef.PlatformInvokeData;
-                string entryPointName = data.EntryPointName;
+                string? entryPointName = data.EntryPointName;
+                string methodDefName = methodDef.Name!;
+                Debug.Assert(methodDefName != null);
 
-                StringHandle importName = entryPointName != null && entryPointName != methodDef.Name
+                StringHandle importName = entryPointName != null && entryPointName != methodDefName
                     ? GetStringHandleForNameAndCheckLength(entryPointName, methodDef)
-                    : metadata.GetOrAddString(methodDef.Name); // Length checked while populating the method def table.
+                    : metadata.GetOrAddString(methodDefName); // Length checked while populating the method def table.
+
+                string moduleName = data.ModuleName!;
+                Debug.Assert(moduleName != null);
 
                 metadata.AddMethodImport(
                     method: GetMethodDefinitionHandle(methodDef),
                     attributes: data.Flags,
                     name: importName,
-                    module: GetModuleReferenceHandle(data.ModuleName));
+                    module: GetModuleReferenceHandle(moduleName));
             }
         }
 
@@ -2523,7 +2547,6 @@ namespace Microsoft.Cci
             }
         }
 
-#nullable enable
         private void PopulateManifestResourceTableRows(out PooledBlobBuilder? resourceDataWriter, BlobBuilder? dynamicAnalysisData)
         {
             resourceDataWriter = null;
@@ -2596,7 +2619,6 @@ namespace Microsoft.Cci
                 return (uint)result;
             }
         }
-#nullable disable
 
         private void PopulateMemberRefTableRows()
         {
@@ -2706,7 +2728,7 @@ namespace Microsoft.Cci
                     metadata.AddMethodSemantics(
                         association: association,
                         semantics: semantics,
-                        methodDefinition: GetMethodDefinitionHandle(accessorMethod.GetResolvedMethod(Context)));
+                        methodDefinition: GetMethodDefinitionHandle(GetResolvedAccessorMethodDefinition(accessorMethod)));
                 }
             }
 
@@ -2742,9 +2764,16 @@ namespace Microsoft.Cci
                     metadata.AddMethodSemantics(
                         association: association,
                         semantics: semantics,
-                        methodDefinition: GetMethodDefinitionHandle(accessorMethod.GetResolvedMethod(Context)));
+                        methodDefinition: GetMethodDefinitionHandle(GetResolvedAccessorMethodDefinition(accessorMethod)));
                 }
             }
+        }
+
+        private IMethodDefinition GetResolvedAccessorMethodDefinition(IMethodReference accessorMethod)
+        {
+            IMethodDefinition? resolvedMethod = accessorMethod.GetResolvedMethod(Context);
+            Debug.Assert(resolvedMethod != null);
+            return resolvedMethod;
         }
 
         private void PopulateModuleRefTableRows()
@@ -2822,13 +2851,13 @@ namespace Microsoft.Cci
 
             foreach (INamedTypeDefinition typeDef in typeDefs)
             {
-                INamespaceTypeDefinition namespaceType = typeDef.AsNamespaceTypeDefinition(Context);
+                INamespaceTypeDefinition? namespaceType = typeDef.AsNamespaceTypeDefinition(Context);
 
                 var moduleBuilder = Context.Module;
                 int generation = moduleBuilder.GetTypeDefinitionGeneration(typeDef);
 
                 string metadataTypeName = GetMetadataName(typeDef, generation);
-                ITypeReference baseType = typeDef.GetBaseClass(Context);
+                ITypeReference? baseType = typeDef.GetBaseClass(Context);
 
                 metadata.AddTypeDefinition(
                     attributes: GetTypeAttributes(typeDef),
@@ -2844,7 +2873,7 @@ namespace Microsoft.Cci
         {
             foreach (ITypeDefinition typeDef in this.GetTypeDefs())
             {
-                INestedTypeDefinition nestedTypeDef = typeDef.AsNestedTypeDefinition(Context);
+                INestedTypeDefinition? nestedTypeDef = typeDef.AsNestedTypeDefinition(Context);
                 if (nestedTypeDef == null)
                 {
                     continue;
@@ -2883,12 +2912,12 @@ namespace Microsoft.Cci
                 StringHandle name;
                 StringHandle @namespace;
 
-                INestedTypeReference nestedTypeRef = typeRef.AsNestedTypeReference;
+                INestedTypeReference? nestedTypeRef = typeRef.AsNestedTypeReference;
                 if (nestedTypeRef != null)
                 {
                     ITypeReference scopeTypeRef;
 
-                    ISpecializedNestedTypeReference sneTypeRef = nestedTypeRef.AsSpecializedNestedTypeReference;
+                    ISpecializedNestedTypeReference? sneTypeRef = nestedTypeRef.AsSpecializedNestedTypeReference;
                     if (sneTypeRef != null)
                     {
                         scopeTypeRef = sneTypeRef.GetUnspecializedVersion(Context).GetContainingType(Context);
@@ -2909,7 +2938,7 @@ namespace Microsoft.Cci
                 }
                 else
                 {
-                    INamespaceTypeReference namespaceTypeRef = typeRef.AsNamespaceTypeReference;
+                    INamespaceTypeReference? namespaceTypeRef = typeRef.AsNamespaceTypeReference;
                     if (namespaceTypeRef == null)
                     {
                         throw ExceptionUtilities.UnexpectedValue(typeRef);
@@ -2982,11 +3011,11 @@ namespace Microsoft.Cci
             return bodyOffsets;
         }
 
-        private int[] SerializeMethodBodies(BlobBuilder ilBuilder, PdbWriter nativePdbWriterOpt, out Blob mvidStringFixup)
+        private int[] SerializeMethodBodies(BlobBuilder ilBuilder, PdbWriter? nativePdbWriterOpt, out Blob mvidStringFixup)
         {
             Debug.Assert(!MetadataOnly);
 
-            CustomDebugInfoWriter customDebugInfoWriter = (nativePdbWriterOpt != null) ? new CustomDebugInfoWriter(nativePdbWriterOpt) : null;
+            CustomDebugInfoWriter? customDebugInfoWriter = (nativePdbWriterOpt != null) ? new CustomDebugInfoWriter(nativePdbWriterOpt) : null;
 
             var methods = this.GetMethodDefs();
             int[] bodyOffsets = new int[methods.Count];
@@ -3004,7 +3033,7 @@ namespace Microsoft.Cci
             {
                 _cancellationToken.ThrowIfCancellationRequested();
                 int bodyOffset;
-                IMethodBody body;
+                IMethodBody? body;
                 StandaloneSignatureHandle localSignatureHandleOpt;
 
                 if (method.HasBody)
@@ -3017,7 +3046,8 @@ namespace Microsoft.Cci
                     // TODO: consider parallelizing these (local signature tokens can be piped into IL serialization & debug info generation)
                     bodyOffset = SerializeMethodBody(encoder, body, localSignatureHandleOpt, ref mvidStringHandle, ref mvidStringFixup);
 
-                    nativePdbWriterOpt?.SerializeDebugInfo(body, localSignatureHandleOpt, customDebugInfoWriter);
+                    // customDebugInfoWriter is non-null whenever nativePdbWriterOpt is non-null.
+                    nativePdbWriterOpt?.SerializeDebugInfo(body, localSignatureHandleOpt, customDebugInfoWriter!);
                 }
                 else
                 {
@@ -3339,6 +3369,7 @@ namespace Microsoft.Cci
                                             break;
 
                                         case RawTokenEncoding.DocumentRowId:
+                                            Debug.Assert(_dynamicAnalysisDataWriterOpt != null);
                                             token = _dynamicAnalysisDataWriterOpt.GetOrAddDocument(module.GetSourceDocumentFromIndex((uint)(pseudoToken & 0x00ffffff)));
                                             break;
 
@@ -3595,7 +3626,7 @@ namespace Microsoft.Cci
             else
             {
                 ScalarEncoder scalarEncoder;
-                MetadataConstant c = expression as MetadataConstant;
+                MetadataConstant? c = expression as MetadataConstant;
 
                 if (this.module.IsPlatformType(targetType, PlatformType.SystemObject))
                 {
@@ -3795,7 +3826,7 @@ namespace Microsoft.Cci
                 string typeName = customAttribute.GetType(context).GetSerializedTypeName(context, ref isAssemblyQualified);
                 if (!isAssemblyQualified)
                 {
-                    INamespaceTypeReference namespaceType = customAttribute.GetType(context).AsNamespaceTypeReference;
+                    INamespaceTypeReference? namespaceType = customAttribute.GetType(context).AsNamespaceTypeReference;
                     if (namespaceType?.GetUnit(context) is IAssemblyReference referencedAssembly)
                     {
                         typeName = typeName + ", " + StrongName(referencedAssembly);
@@ -3904,7 +3935,7 @@ namespace Microsoft.Cci
                     return;
                 }
 
-                IGenericTypeParameterReference genericTypeParameterReference = typeReference.AsGenericTypeParameterReference;
+                IGenericTypeParameterReference? genericTypeParameterReference = typeReference.AsGenericTypeParameterReference;
                 if (genericTypeParameterReference != null)
                 {
                     encoder.GenericTypeParameter(
@@ -3939,7 +3970,7 @@ namespace Microsoft.Cci
                     return;
                 }
 
-                IGenericMethodParameterReference genericMethodParameterReference = typeReference.AsGenericMethodParameterReference;
+                IGenericMethodParameterReference? genericMethodParameterReference = typeReference.AsGenericMethodParameterReference;
                 if (genericMethodParameterReference != null)
                 {
                     encoder.GenericMethodTypeParameter(genericMethodParameterReference.Index);
@@ -4167,13 +4198,13 @@ namespace Microsoft.Cci
 
         private int GetNumberOfInheritedTypeParameters(ITypeReference type)
         {
-            INestedTypeReference nestedType = type.AsNestedTypeReference;
+            INestedTypeReference? nestedType = type.AsNestedTypeReference;
             if (nestedType == null || !nestedType.InheritsEnclosingTypeTypeParameters)
             {
                 return 0;
             }
 
-            ISpecializedNestedTypeReference specializedNestedType = nestedType.AsSpecializedNestedTypeReference;
+            ISpecializedNestedTypeReference? specializedNestedType = nestedType.AsSpecializedNestedTypeReference;
             if (specializedNestedType != null)
             {
                 nestedType = specializedNestedType.GetUnspecializedVersion(Context);
@@ -4195,7 +4226,9 @@ namespace Microsoft.Cci
                 nestedType = type.AsNestedTypeReference;
             }
 
-            result += type.AsNamespaceTypeReference.GenericParameterCount;
+            INamespaceTypeReference? namespaceTypeReference = type.AsNamespaceTypeReference;
+            Debug.Assert(namespaceTypeReference != null);
+            result += namespaceTypeReference.GenericParameterCount;
             return result;
         }
 
@@ -4243,7 +4276,7 @@ namespace Microsoft.Cci
             return locals.SelectAsArray(variable => variable.SlotInfo);
         }
 
-        protected abstract class HeapOrReferenceIndexBase<T>
+        protected abstract class HeapOrReferenceIndexBase<T> where T : notnull
         {
             private readonly MetadataWriter _writer;
             private readonly List<T> _rows;
@@ -4290,7 +4323,7 @@ namespace Microsoft.Cci
             protected abstract void AddItem(T item, int index);
         }
 
-        protected sealed class HeapOrReferenceIndex<T> : HeapOrReferenceIndexBase<T>
+        protected sealed class HeapOrReferenceIndex<T> : HeapOrReferenceIndexBase<T> where T : notnull
         {
             private readonly Dictionary<T, int> _index;
 

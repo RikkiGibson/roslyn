@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using Roslyn.Utilities;
 
 namespace Microsoft.Cci
 {
@@ -18,7 +19,13 @@ namespace Microsoft.Cci
 
         public bool Equals(ITypeReference? x, ITypeReference? y)
         {
-            return x == y || _metadataWriter.GetTypeSpecSignatureIndex(x).Equals(_metadataWriter.GetTypeSpecSignatureIndex(y));
+            if (x == y)
+            {
+                return true;
+            }
+            RoslynDebug.Assert(x is object && y is object);
+
+            return _metadataWriter.GetTypeSpecSignatureIndex(x).Equals(_metadataWriter.GetTypeSpecSignatureIndex(y));
         }
 
         public int GetHashCode(ITypeReference typeReference)
