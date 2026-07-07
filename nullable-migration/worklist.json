@@ -977,8 +977,8 @@
       "toggles": 5,
       "totalLines": 779,
       "disabledLines": 683,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 128
     },
     {
@@ -1241,8 +1241,8 @@
       "toggles": 12,
       "totalLines": 2152,
       "disabledLines": 1524,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 126
     },
     {
@@ -1318,8 +1318,8 @@
       "toggles": 4,
       "totalLines": 1898,
       "disabledLines": 1671,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 118
     },
     {
@@ -1329,8 +1329,8 @@
       "toggles": 9,
       "totalLines": 2629,
       "disabledLines": 1723,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 119
     },
     {
@@ -1340,8 +1340,8 @@
       "toggles": 6,
       "totalLines": 2055,
       "disabledLines": 1790,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 120
     },
     {
@@ -1351,8 +1351,8 @@
       "toggles": 10,
       "totalLines": 2337,
       "disabledLines": 1837,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 127
     },
     {
@@ -1362,8 +1362,8 @@
       "toggles": 4,
       "totalLines": 1880,
       "disabledLines": 1843,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 121
     },
     {
@@ -1373,8 +1373,8 @@
       "toggles": 6,
       "totalLines": 2156,
       "disabledLines": 2029,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 122
     },
     {
@@ -1395,8 +1395,8 @@
       "toggles": 10,
       "totalLines": 2597,
       "disabledLines": 2372,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 145
     },
     {
@@ -1406,8 +1406,8 @@
       "toggles": 2,
       "totalLines": 2496,
       "disabledLines": 2418,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 124
     },
     {
@@ -1417,8 +1417,8 @@
       "toggles": 9,
       "totalLines": 2592,
       "disabledLines": 2444,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 125
     },
     {
@@ -1428,8 +1428,8 @@
       "toggles": 13,
       "totalLines": 3534,
       "disabledLines": 2477,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 129
     },
     {
@@ -1439,8 +1439,8 @@
       "toggles": 5,
       "totalLines": 2860,
       "disabledLines": 2479,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 130
     },
     {
@@ -1450,8 +1450,8 @@
       "toggles": 8,
       "totalLines": 2917,
       "disabledLines": 2520,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 131
     },
     {
@@ -1461,8 +1461,8 @@
       "toggles": 17,
       "totalLines": 4067,
       "disabledLines": 2595,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 143
     },
     {
@@ -1472,8 +1472,8 @@
       "toggles": 0,
       "totalLines": 2624,
       "disabledLines": 2619,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 132
     },
     {
@@ -1483,8 +1483,8 @@
       "toggles": 10,
       "totalLines": 2971,
       "disabledLines": 2701,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 133
     },
     {
@@ -1505,8 +1505,8 @@
       "toggles": 10,
       "totalLines": 3416,
       "disabledLines": 3132,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 135
     },
     {
@@ -1516,8 +1516,8 @@
       "toggles": 14,
       "totalLines": 3884,
       "disabledLines": 3212,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 136
     },
     {
@@ -1527,8 +1527,8 @@
       "toggles": 20,
       "totalLines": 6118,
       "disabledLines": 3407,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 137
     },
     {
@@ -1538,8 +1538,8 @@
       "toggles": 12,
       "totalLines": 4293,
       "disabledLines": 3619,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 144
     },
     {
@@ -1549,8 +1549,8 @@
       "toggles": 8,
       "totalLines": 5975,
       "disabledLines": 3943,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 138
     },
     {
@@ -1560,8 +1560,8 @@
       "toggles": 6,
       "totalLines": 4796,
       "disabledLines": 3949,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 139
     },
     {
@@ -1582,8 +1582,8 @@
       "toggles": 4,
       "totalLines": 5531,
       "disabledLines": 5452,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 141
     },
     {
@@ -1593,8 +1593,8 @@
       "toggles": 34,
       "totalLines": 12560,
       "disabledLines": 9237,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 142
     },
     {
@@ -1604,8 +1604,8 @@
       "toggles": 18,
       "totalLines": 14765,
       "disabledLines": 11506,
-      "status": "pending",
-      "note": "",
+      "status": "blocked",
+      "note": "Temporarily blocked: restricting loop to Compilers/Core files only",
       "order": 146
     }
   ]
