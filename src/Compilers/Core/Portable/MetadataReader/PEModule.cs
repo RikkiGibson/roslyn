@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -39,11 +37,11 @@ namespace Microsoft.CodeAnalysis
         private readonly ModuleMetadata _owner;
 
         // Either we have PEReader or we have pointer and size of the metadata blob:
-        private readonly PEReader _peReaderOpt;
+        private readonly PEReader? _peReaderOpt;
         private readonly IntPtr _metadataPointerOpt;
         private readonly int _metadataSizeOpt;
 
-        private MetadataReader _lazyMetadataReader;
+        private MetadataReader? _lazyMetadataReader;
 
         private ImmutableArray<AssemblyIdentity> _lazyAssemblyReferences;
 
@@ -56,19 +54,19 @@ namespace Microsoft.CodeAnalysis
         /// keep a second one as well to use it for error reporting.
         /// We use -1 in case there was no forward.
         /// </summary>
-        private Dictionary<string, (int FirstIndex, int SecondIndex)> _lazyForwardedTypesToAssemblyIndexMap;
+        private Dictionary<string, (int FirstIndex, int SecondIndex)>? _lazyForwardedTypesToAssemblyIndexMap;
 
         /// <summary>
         /// Case-insensitive version of <see cref="_lazyForwardedTypesToAssemblyIndexMap"/>, only populated if case-insensitive search is
         /// requested. We only keep the first instance of a type name, regardless of case, as this is only used for error recovery purposes
         /// in VB.
         /// </summary>
-        private Dictionary<string, (string OriginalName, int FirstIndex, int SecondIndex)> _lazyCaseInsensitiveForwardedTypesToAssemblyIndexMap;
+        private Dictionary<string, (string OriginalName, int FirstIndex, int SecondIndex)>? _lazyCaseInsensitiveForwardedTypesToAssemblyIndexMap;
 
         private readonly Lazy<IdentifierCollection> _lazyTypeNameCollection;
         private readonly Lazy<IdentifierCollection> _lazyNamespaceNameCollection;
 
-        private string _lazyName;
+        private string? _lazyName;
         private bool _isDisposed;
 
         /// <summary>
@@ -82,20 +80,19 @@ namespace Microsoft.CodeAnalysis
         /// local type. If the bit is 1, local type will have an entry 
         /// in m_lazyTypeDefToTypeIdentifierMap.
         /// </summary>
-        private int[] _lazyNoPiaLocalTypeCheckBitMap;
+        private int[]? _lazyNoPiaLocalTypeCheckBitMap;
 
         /// <summary>
         /// For each TypeDef that has 1 in m_lazyNoPiaLocalTypeCheckBitMap,
         /// this map stores corresponding TypeIdentifier AttributeInfo. 
         /// </summary>
-        private ConcurrentDictionary<TypeDefinitionHandle, AttributeInfo> _lazyTypeDefToTypeIdentifierMap;
+        private ConcurrentDictionary<TypeDefinitionHandle, AttributeInfo>? _lazyTypeDefToTypeIdentifierMap;
 
         // The module can be used by different compilations or different versions of the "same"
         // compilation, which use different hash algorithms. Let's cache result for each distinct 
         // algorithm.
-        private readonly CryptographicHashProvider _hashesOpt;
+        private readonly CryptographicHashProvider? _hashesOpt;
 
-#nullable enable
         private delegate bool AttributeValueExtractor<T>(out T value, ref BlobReader sigReader);
         private static readonly AttributeValueExtractor<string?> s_attributeStringValueExtractor = CrackStringInAttributeValue;
         private static readonly AttributeValueExtractor<(int, int)> s_attributeIntAndIntValueExtractor = CrackIntAndIntInAttributeValue;
@@ -138,12 +135,10 @@ namespace Microsoft.CodeAnalysis
             public readonly bool Sense;
             public readonly string? String;
         }
-#nullable disable
-
         // 'ignoreAssemblyRefs' is used by the EE only, when debugging
         // .NET Native, where the corlib may have assembly references
         // (see https://github.com/dotnet/roslyn/issues/13275).
-        internal PEModule(ModuleMetadata owner, PEReader peReader, IntPtr metadataOpt, int metadataSizeOpt, bool includeEmbeddedInteropTypes, bool ignoreAssemblyRefs)
+        internal PEModule(ModuleMetadata owner, PEReader? peReader, IntPtr metadataOpt, int metadataSizeOpt, bool includeEmbeddedInteropTypes, bool ignoreAssemblyRefs)
         {
             // shall not throw
 
@@ -205,7 +200,7 @@ namespace Microsoft.CodeAnalysis
         }
 
         // for testing
-        internal PEReader PEReaderOpt
+        internal PEReader? PEReaderOpt
         {
             get
             {
@@ -234,6 +229,7 @@ namespace Microsoft.CodeAnalysis
             }
         }
 
+        [MemberNotNull(nameof(_lazyMetadataReader))]
         private unsafe void InitializeMetadataReader()
         {
             MetadataReader newReader;
@@ -336,7 +332,7 @@ namespace Microsoft.CodeAnalysis
                     return false;
                 }
 
-                return (_peReaderOpt.PEHeaders.CorHeader.Flags & CorFlags.Requires32Bit) != 0;
+                return (_peReaderOpt.PEHeaders.CorHeader!.Flags & CorFlags.Requires32Bit) != 0;
             }
         }
 
@@ -646,8 +642,6 @@ namespace Microsoft.CodeAnalysis
             }
         }
 
-#nullable enable
-
         /// <summary>
         /// The function groups types defined in the module by their fully-qualified namespace name.
         /// The case-sensitivity of the grouping depends upon the provided StringComparer.
@@ -845,8 +839,6 @@ namespace Microsoft.CodeAnalysis
                 }
             }
         }
-
-#nullable disable
 
         private IdentifierCollection ComputeTypeNameCollection()
         {
@@ -1053,6 +1045,7 @@ namespace Microsoft.CodeAnalysis
             return FindTargetAttribute(token, AttributeDescription.InterpolatedStringHandlerAttribute).HasValue;
         }
 
+#nullable disable
         internal bool HasDefaultMemberAttribute(EntityHandle token, out string memberName)
         {
             return HasStringValuedAttribute(token, AttributeDescription.DefaultMemberAttribute, out memberName);
@@ -1072,12 +1065,14 @@ namespace Microsoft.CodeAnalysis
         {
             return HasStringValuedAttribute(token, AttributeDescription.ImportedFromTypeLibAttribute, out libValue);
         }
+#nullable enable
 
         internal bool HasPrimaryInteropAssemblyAttribute(EntityHandle token, out int majorValue, out int minorValue)
         {
             return HasIntAndIntValuedAttribute(token, AttributeDescription.PrimaryInteropAssemblyAttribute, out majorValue, out minorValue);
         }
 
+#nullable disable
         internal bool HasFixedBufferAttribute(EntityHandle token, out string elementTypeName, out int bufferSize)
         {
             return HasStringAndIntValuedAttribute(token, AttributeDescription.FixedBufferAttribute, out elementTypeName, out bufferSize);
@@ -1087,13 +1082,15 @@ namespace Microsoft.CodeAnalysis
         {
             return HasStringValuedAttribute(token, AttributeDescription.AccessedThroughPropertyAttribute, out propertyName);
         }
+#nullable enable
+
 
         internal bool HasRequiredAttributeAttribute(EntityHandle token)
         {
             return FindTargetAttribute(token, AttributeDescription.RequiredAttributeAttribute).HasValue;
         }
 
-        internal bool HasCollectionBuilderAttribute(EntityHandle token, out string builderTypeName, out string methodName)
+        internal bool HasCollectionBuilderAttribute(EntityHandle token, out string? builderTypeName, out string? methodName)
         {
             AttributeInfo info = FindTargetAttribute(token, AttributeDescription.CollectionBuilderAttribute);
             if (info.HasValue)
@@ -1218,14 +1215,14 @@ namespace Microsoft.CodeAnalysis
             return false;
         }
 
-        internal bool HasTupleElementNamesAttribute(EntityHandle token, out ImmutableArray<string> tupleElementNames)
+        internal bool HasTupleElementNamesAttribute(EntityHandle token, out ImmutableArray<string?> tupleElementNames)
         {
             var info = FindTargetAttribute(token, AttributeDescription.TupleElementNamesAttribute);
             Debug.Assert(!info.HasValue || info.SignatureIndex == 0 || info.SignatureIndex == 1);
 
             if (!info.HasValue)
             {
-                tupleElementNames = default(ImmutableArray<string>);
+                tupleElementNames = default(ImmutableArray<string?>);
                 return false;
             }
 
@@ -1246,7 +1243,7 @@ namespace Microsoft.CodeAnalysis
         internal const string RequiredMembersMarker = "Constructors of types with required members are not supported in this version of your compiler.";
 
         /// <remarks>Should be kept in sync with <see cref="IsMoreImportantObsoleteKind(ObsoleteAttributeKind, ObsoleteAttributeKind)"/></remarks>
-        internal ObsoleteAttributeData TryGetDeprecatedOrExperimentalOrObsoleteAttribute(
+        internal ObsoleteAttributeData? TryGetDeprecatedOrExperimentalOrObsoleteAttribute(
             EntityHandle token,
             IAttributeNamedArgumentDecoder decoder,
             bool ignoreByRefLikeMarker,
@@ -1263,7 +1260,7 @@ namespace Microsoft.CodeAnalysis
             info = FindTargetAttribute(token, AttributeDescription.ObsoleteAttribute);
             if (info.HasValue)
             {
-                ObsoleteAttributeData obsoleteData = TryExtractObsoleteDataFromAttribute(info, decoder);
+                ObsoleteAttributeData? obsoleteData = TryExtractObsoleteDataFromAttribute(info, decoder);
                 switch (obsoleteData?.Message)
                 {
                     case ByRefLikeMarker when ignoreByRefLikeMarker:
@@ -1291,7 +1288,6 @@ namespace Microsoft.CodeAnalysis
             return null;
         }
 
-#nullable enable
         /// <summary>
         /// Indicates whether the first attribute should be prioritized over the second one.
         /// Same order of priority as
@@ -1511,8 +1507,6 @@ namespace Microsoft.CodeAnalysis
 
             return (default, true);
         }
-#nullable disable
-
         internal bool HasMaybeNullWhenOrNotNullWhenOrDoesNotReturnIfAttribute(EntityHandle token, AttributeDescription description, out bool when)
         {
             Debug.Assert(description.Namespace == "System.Diagnostics.CodeAnalysis");
@@ -1541,7 +1535,7 @@ namespace Microsoft.CodeAnalysis
 
             foreach (var attributeInfo in attributeInfos)
             {
-                if (TryExtractStringValueFromAttribute(attributeInfo.Handle, out string parameterName))
+                if (TryExtractStringValueFromAttribute(attributeInfo.Handle, out string? parameterName) && parameterName != null)
                 {
                     result = result.Add(parameterName);
                 }
@@ -1577,10 +1571,10 @@ namespace Microsoft.CodeAnalysis
                                     switch (namedArgValues.nameValuePair.Key)
                                     {
                                         case "AllowMultiple":
-                                            allowMultiple = (bool)namedArgValues.nameValuePair.Value.ValueInternal;
+                                            allowMultiple = (bool)namedArgValues.nameValuePair.Value.ValueInternal!;
                                             break;
                                         case "Inherited":
-                                            inherited = (bool)namedArgValues.nameValuePair.Value.ValueInternal;
+                                            inherited = (bool)namedArgValues.nameValuePair.Value.ValueInternal!;
                                             break;
                                     }
                                 }
@@ -1622,7 +1616,7 @@ namespace Microsoft.CodeAnalysis
             return false;
         }
 
-        internal bool HasDateTimeConstantAttribute(EntityHandle token, out ConstantValue defaultValue)
+        internal bool HasDateTimeConstantAttribute(EntityHandle token, out ConstantValue? defaultValue)
         {
             long value;
             AttributeInfo info = FindLastTargetAttribute(token, AttributeDescription.DateTimeConstantAttribute);
@@ -1645,7 +1639,7 @@ namespace Microsoft.CodeAnalysis
             return false;
         }
 
-        internal bool HasDecimalConstantAttribute(EntityHandle token, out ConstantValue defaultValue)
+        internal bool HasDecimalConstantAttribute(EntityHandle token, out ConstantValue? defaultValue)
         {
             decimal value;
             AttributeInfo info = FindLastTargetAttribute(token, AttributeDescription.DecimalConstantAttribute);
@@ -1677,15 +1671,15 @@ namespace Microsoft.CodeAnalysis
 
         internal ImmutableArray<string> GetInternalsVisibleToAttributeValues(EntityHandle token)
         {
-            List<AttributeInfo> attrInfos = FindTargetAttributes(token, AttributeDescription.InternalsVisibleToAttribute);
-            ArrayBuilder<string> result = ExtractStringValuesFromAttributes(attrInfos);
+            List<AttributeInfo>? attrInfos = FindTargetAttributes(token, AttributeDescription.InternalsVisibleToAttribute);
+            ArrayBuilder<string>? result = ExtractStringValuesFromAttributes(attrInfos);
             return result?.ToImmutableAndFree() ?? ImmutableArray<string>.Empty;
         }
 
         internal ImmutableArray<string> GetConditionalAttributeValues(EntityHandle token)
         {
-            List<AttributeInfo> attrInfos = FindTargetAttributes(token, AttributeDescription.ConditionalAttribute);
-            ArrayBuilder<string> result = ExtractStringValuesFromAttributes(attrInfos);
+            List<AttributeInfo>? attrInfos = FindTargetAttributes(token, AttributeDescription.ConditionalAttribute);
+            ArrayBuilder<string>? result = ExtractStringValuesFromAttributes(attrInfos);
             return result?.ToImmutableAndFree() ?? ImmutableArray<string>.Empty;
         }
 
@@ -1694,7 +1688,7 @@ namespace Microsoft.CodeAnalysis
         /// </summary>
         internal ImmutableArray<string> GetMemberNotNullAttributeValues(EntityHandle token)
         {
-            List<AttributeInfo> attrInfos = FindTargetAttributes(token, AttributeDescription.MemberNotNullAttribute);
+            List<AttributeInfo>? attrInfos = FindTargetAttributes(token, AttributeDescription.MemberNotNullAttribute);
             if (attrInfos is null || attrInfos.Count == 0)
             {
                 return ImmutableArray<string>.Empty;
@@ -1706,7 +1700,7 @@ namespace Microsoft.CodeAnalysis
             {
                 if (ai.SignatureIndex == 0)
                 {
-                    if (TryExtractStringValueFromAttribute(ai.Handle, out string extracted))
+                    if (TryExtractStringValueFromAttribute(ai.Handle, out string? extracted))
                     {
                         if (extracted is object)
                         {
@@ -1714,7 +1708,7 @@ namespace Microsoft.CodeAnalysis
                         }
                     }
                 }
-                else if (TryExtractStringArrayValueFromAttribute(ai.Handle, out ImmutableArray<string> extracted2))
+                else if (TryExtractStringArrayValueFromAttribute(ai.Handle, out ImmutableArray<string?> extracted2))
                 {
                     foreach (var value in extracted2)
                     {
@@ -1734,7 +1728,7 @@ namespace Microsoft.CodeAnalysis
         /// </summary>
         internal (ImmutableArray<string> whenTrue, ImmutableArray<string> whenFalse) GetMemberNotNullWhenAttributeValues(EntityHandle token)
         {
-            List<AttributeInfo> attrInfos = FindTargetAttributes(token, AttributeDescription.MemberNotNullWhenAttribute);
+            List<AttributeInfo>? attrInfos = FindTargetAttributes(token, AttributeDescription.MemberNotNullWhenAttribute);
             if (attrInfos is null || attrInfos.Count == 0)
             {
                 return (ImmutableArray<string>.Empty, ImmutableArray<string>.Empty);
@@ -1773,7 +1767,7 @@ namespace Microsoft.CodeAnalysis
         }
 
         // This method extracts all the non-null string values from the given attributes.
-        private ArrayBuilder<string> ExtractStringValuesFromAttributes(List<AttributeInfo> attrInfos)
+        private ArrayBuilder<string>? ExtractStringValuesFromAttributes(List<AttributeInfo>? attrInfos)
         {
             if (attrInfos == null)
             {
@@ -1784,7 +1778,7 @@ namespace Microsoft.CodeAnalysis
 
             foreach (var ai in attrInfos)
             {
-                string extractedStr;
+                string? extractedStr;
                 if (TryExtractStringValueFromAttribute(ai.Handle, out extractedStr) && extractedStr != null)
                 {
                     result.Add(extractedStr);
@@ -1794,7 +1788,6 @@ namespace Microsoft.CodeAnalysis
             return result;
         }
 
-#nullable enable
         private ObsoleteAttributeData? TryExtractObsoleteDataFromAttribute(AttributeInfo attributeInfo, IAttributeNamedArgumentDecoder decoder)
         {
             Debug.Assert(attributeInfo.HasValue);
@@ -1860,9 +1853,7 @@ namespace Microsoft.CodeAnalysis
             blobReader = default;
             return false;
         }
-#nullable disable
-
-        private ObsoleteAttributeData TryExtractDeprecatedDataFromAttribute(AttributeInfo attributeInfo)
+        private ObsoleteAttributeData? TryExtractDeprecatedDataFromAttribute(AttributeInfo attributeInfo)
         {
             Debug.Assert(attributeInfo.HasValue);
 
@@ -1980,7 +1971,6 @@ namespace Microsoft.CodeAnalysis
             return false;
         }
 
-#nullable enable
         internal bool TryExtractStringValueFromAttribute(CustomAttributeHandle handle, out string? value)
         {
             return TryExtractValueFromAttribute(handle, out value, s_attributeStringValueExtractor);
@@ -2073,7 +2063,6 @@ namespace Microsoft.CodeAnalysis
             return false;
         }
 #nullable disable
-
         internal bool HasStateMachineAttribute(MethodDefinitionHandle handle, out string stateMachineTypeName)
             => HasStringValuedAttribute(handle, AttributeDescription.AsyncStateMachineAttribute, out stateMachineTypeName) ||
                HasStringValuedAttribute(handle, AttributeDescription.IteratorStateMachineAttribute, out stateMachineTypeName) ||
@@ -2090,6 +2079,7 @@ namespace Microsoft.CodeAnalysis
             value = null;
             return false;
         }
+#nullable enable
 
         private bool HasIntAndIntValuedAttribute(EntityHandle token, AttributeDescription description, out int value1, out int value2)
         {
@@ -2104,6 +2094,7 @@ namespace Microsoft.CodeAnalysis
             return false;
         }
 
+#nullable disable
         private bool HasStringAndIntValuedAttribute(EntityHandle token, AttributeDescription description, out string stringValue, out int intValue)
         {
             AttributeInfo info = FindTargetAttribute(token, description);
@@ -2116,12 +2107,14 @@ namespace Microsoft.CodeAnalysis
             intValue = 0;
             return false;
         }
+#nullable enable
+
 
         internal bool IsNoPiaLocalType(
             TypeDefinitionHandle typeDef,
-            out string interfaceGuid,
-            out string scope,
-            out string identifier)
+            out string? interfaceGuid,
+            out string? scope,
+            out string? identifier)
         {
             AttributeInfo typeIdentifierInfo;
 
@@ -2177,7 +2170,6 @@ namespace Microsoft.CodeAnalysis
             }
         }
 
-#nullable enable
         /// <summary>
         /// Gets the well-known optional named properties on ObsoleteAttribute, if present.
         /// Both 'diagnosticId' and 'urlFormat' may be present, or only one, or neither.
@@ -2505,8 +2497,6 @@ namespace Microsoft.CodeAnalysis
             value = default(ImmutableArray<byte>);
             return false;
         }
-#nullable disable
-
         internal readonly struct AttributeInfo
         {
             public readonly CustomAttributeHandle Handle;
@@ -2525,7 +2515,6 @@ namespace Microsoft.CodeAnalysis
             }
         }
 
-#nullable enable
         internal List<AttributeInfo>? FindTargetAttributes(EntityHandle hasAttribute, AttributeDescription description)
         {
             List<AttributeInfo>? result = null;
@@ -2552,8 +2541,6 @@ namespace Microsoft.CodeAnalysis
 
             return result;
         }
-#nullable disable
-
         internal AttributeInfo FindTargetAttribute(EntityHandle hasAttribute, AttributeDescription description)
         {
             return FindTargetAttribute(MetadataReader, hasAttribute, description, out _);
@@ -3433,7 +3420,7 @@ namespace Microsoft.CodeAnalysis
             return MetadataReader.GetMethodDefinition(methodDef).GetParameters();
         }
 
-        internal DllImportData GetDllImportData(MethodDefinitionHandle methodDef)
+        internal DllImportData? GetDllImportData(MethodDefinitionHandle methodDef)
         {
             try
             {
@@ -3790,7 +3777,7 @@ namespace Microsoft.CodeAnalysis
             return ConstantValue.Bad;
         }
 
-        internal (int FirstIndex, int SecondIndex) GetAssemblyRefsForForwardedType(string fullName, bool ignoreCase, out string matchedName)
+        internal (int FirstIndex, int SecondIndex) GetAssemblyRefsForForwardedType(string fullName, bool ignoreCase, out string? matchedName)
         {
             EnsureForwardTypeToAssemblyMap();
 
@@ -3819,6 +3806,7 @@ namespace Microsoft.CodeAnalysis
             matchedName = null;
             return (FirstIndex: -1, SecondIndex: -1);
 
+            [MemberNotNull(nameof(_lazyCaseInsensitiveForwardedTypesToAssemblyIndexMap))]
             void ensureCaseInsensitiveDictionary()
             {
                 if (_lazyCaseInsensitiveForwardedTypesToAssemblyIndexMap != null)
@@ -3849,7 +3837,6 @@ namespace Microsoft.CodeAnalysis
             return _lazyForwardedTypesToAssemblyIndexMap;
         }
 
-#nullable enable
         [MemberNotNull(nameof(_lazyForwardedTypesToAssemblyIndexMap))]
         private void EnsureForwardTypeToAssemblyMap()
         {
@@ -3934,8 +3921,6 @@ namespace Microsoft.CodeAnalysis
                 }
             }
         }
-#nullable disable
-
         internal IdentifierCollection TypeNames
         {
             get
@@ -3992,7 +3977,7 @@ namespace Microsoft.CodeAnalysis
         }
 
         /// <exception cref="BadImageFormatException">Invalid metadata.</exception>
-        internal MethodBodyBlock GetMethodBodyOrThrow(MethodDefinitionHandle methodHandle)
+        internal MethodBodyBlock? GetMethodBodyOrThrow(MethodDefinitionHandle methodHandle)
         {
             // we shouldn't ask for method IL if we don't have PE image
             Debug.Assert(_peReaderOpt != null);

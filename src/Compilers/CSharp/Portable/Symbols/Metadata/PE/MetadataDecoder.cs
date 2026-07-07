@@ -266,9 +266,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
         protected override TypeSymbol SubstituteNoPiaLocalType(
             TypeDefinitionHandle typeDef,
             ref MetadataTypeName name,
-            string interfaceGuid,
-            string scope,
-            string identifier)
+            string? interfaceGuid,
+            string? scope,
+            string? identifier)
         {
             TypeSymbol result;
 

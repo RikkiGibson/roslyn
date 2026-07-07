@@ -676,9 +676,9 @@ namespace Microsoft.CodeAnalysis
 
                 // Check if this is NoPia local type which should be substituted 
                 // with corresponding canonical type
-                string interfaceGuid;
-                string scope;
-                string identifier;
+                string? interfaceGuid;
+                string? scope;
+                string? identifier;
                 if (Module.IsNoPiaLocalType(
                     typeDef,
                     out interfaceGuid,
@@ -2136,7 +2136,7 @@ tryAgain:
         protected abstract ConcurrentDictionary<TypeDefinitionHandle, TypeSymbol> GetTypeHandleToTypeMap();
         protected abstract ConcurrentDictionary<TypeReferenceHandle, TypeSymbol> GetTypeRefHandleToTypeMap();
 
-        protected abstract TypeSymbol SubstituteNoPiaLocalType(TypeDefinitionHandle typeDef, ref MetadataTypeName name, string interfaceGuid, string scope, string identifier);
+        protected abstract TypeSymbol SubstituteNoPiaLocalType(TypeDefinitionHandle typeDef, ref MetadataTypeName name, string? interfaceGuid, string? scope, string? identifier);
 
         protected abstract TypeSymbol LookupTopLevelTypeDefSymbol(string moduleName, ref MetadataTypeName emittedName, out bool isNoPiaLocalType);
 

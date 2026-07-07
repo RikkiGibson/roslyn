@@ -1494,8 +1494,8 @@
       "toggles": 16,
       "totalLines": 4037,
       "disabledLines": 2972,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Enabled; islanded HasStringValuedAttribute/HasStringAndIntValuedAttribute cluster (9 thin wrapper methods) due to wide external ripple; fixed ripples in MetadataDecoder.cs (Core+CSharp, IsNoPiaLocalType out-params), AnalyzerFileReference.cs (Type.Namespace! at IsTargetAttribute call), PEModule ctor peReader now nullable (ModuleMetadata.cs ripple), PENamedTypeSymbol.cs/PEModuleSymbol.cs minor call-site nullability updates. Confirmed pre-existing unrelated EE ExpressionCompiler CS8602/CS8604 failures (already logged in found-bugs.md) via git-stash A/B test; not caused by this change.",
       "order": 134
     },
     {
