@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -77,12 +75,12 @@ namespace Microsoft.CodeAnalysis
     internal readonly struct LocalInfo<TypeSymbol>
         where TypeSymbol : class
     {
-        internal readonly byte[] SignatureOpt;
+        internal readonly byte[]? SignatureOpt;
         internal readonly TypeSymbol Type;
         internal readonly ImmutableArray<ModifierInfo<TypeSymbol>> CustomModifiers;
         internal readonly LocalSlotConstraints Constraints;
 
-        internal LocalInfo(TypeSymbol type, ImmutableArray<ModifierInfo<TypeSymbol>> customModifiers, LocalSlotConstraints constraints, byte[] signatureOpt)
+        internal LocalInfo(TypeSymbol type, ImmutableArray<ModifierInfo<TypeSymbol>> customModifiers, LocalSlotConstraints constraints, byte[]? signatureOpt)
         {
             Debug.Assert(type != null);
 
@@ -102,7 +100,6 @@ namespace Microsoft.CodeAnalysis
         public bool IsPinned => (Constraints & LocalSlotConstraints.Pinned) != 0;
     }
 
-#nullable enable
     internal interface IAttributeNamedArgumentDecoder
     {
         (KeyValuePair<string, TypedConstant> nameValuePair, bool isProperty, SerializationTypeCode typeCode, SerializationTypeCode elementTypeCode) DecodeCustomAttributeNamedArgumentOrThrow(ref BlobReader argReader);
@@ -116,14 +113,13 @@ namespace Microsoft.CodeAnalysis
         where MethodSymbol : class, Symbol, IMethodSymbolInternal
         where FieldSymbol : class, Symbol, IFieldSymbolInternal
         where Symbol : class, ISymbolInternal
-#nullable disable
     {
         public readonly PEModule Module;
 
         // Identity of an assembly containing the module, or null if the module is a standalone module
-        private readonly AssemblyIdentity _containingAssemblyIdentity;
+        private readonly AssemblyIdentity? _containingAssemblyIdentity;
 
-        internal MetadataDecoder(PEModule module, AssemblyIdentity containingAssemblyIdentity, SymbolFactory<ModuleSymbol, TypeSymbol> factory, ModuleSymbol moduleSymbol) :
+        internal MetadataDecoder(PEModule module, AssemblyIdentity? containingAssemblyIdentity, SymbolFactory<ModuleSymbol, TypeSymbol> factory, ModuleSymbol moduleSymbol) :
             base(factory, moduleSymbol)
         {
             Debug.Assert(module != null);
@@ -296,7 +292,7 @@ namespace Microsoft.CodeAnalysis
                     }
                     else
                     {
-                        ArrayBuilder<int> builder = countOfLowerBounds != countOfDimensions ? ArrayBuilder<int>.GetInstance(countOfLowerBounds, 0) : null;
+                        ArrayBuilder<int>? builder = countOfLowerBounds != countOfDimensions ? ArrayBuilder<int>.GetInstance(countOfLowerBounds, 0) : null;
 
                         for (int i = 0; i < countOfLowerBounds; i++)
                         {
@@ -500,7 +496,7 @@ namespace Microsoft.CodeAnalysis
             ConcurrentDictionary<TypeReferenceHandle, TypeSymbol> cache = GetTypeRefHandleToTypeMap();
             TypeSymbol result;
 
-            if (cache != null && cache.TryGetValue(typeRef, out result))
+            if (cache != null && cache.TryGetValue(typeRef, out result!))
             {
                 isNoPiaLocalType = false; // We do not cache otherwise.
                 return result;
@@ -618,7 +614,7 @@ namespace Microsoft.CodeAnalysis
 
                 TypeSymbol result;
 
-                if (cache != null && cache.TryGetValue(typeDef, out result))
+                if (cache != null && cache.TryGetValue(typeDef, out result!))
                 {
                     if (!Module.IsNestedTypeDefOrThrow(typeDef) && Module.IsNoPiaLocalType(typeDef))
                     {
@@ -732,7 +728,7 @@ namespace Microsoft.CodeAnalysis
             ref BlobReader signatureReader,
             out SignatureTypeCode typeCode)
         {
-            ArrayBuilder<ModifierInfo<TypeSymbol>> modifiers = null;
+            ArrayBuilder<ModifierInfo<TypeSymbol>>? modifiers = null;
 
             for (; ; )
             {
@@ -1202,9 +1198,9 @@ tryAgain:
         }
 
         // MetaImport::DecodeMethodSignature
-        internal ParamInfo<TypeSymbol>[] GetSignatureForMethod(MethodDefinitionHandle methodDef, out SignatureHeader signatureHeader, out BadImageFormatException metadataException, bool setParamHandles = true)
+        internal ParamInfo<TypeSymbol>[] GetSignatureForMethod(MethodDefinitionHandle methodDef, out SignatureHeader signatureHeader, out BadImageFormatException? metadataException, bool setParamHandles = true)
         {
-            ParamInfo<TypeSymbol>[] paramInfo = null;
+            ParamInfo<TypeSymbol>[]? paramInfo = null;
             signatureHeader = default(SignatureHeader);
 
             try
@@ -1263,9 +1259,9 @@ tryAgain:
             GetSignatureCountsOrThrow(ref signatureReader, signatureHeader, out parameterCount, out typeParameterCount);
         }
 
-        internal ParamInfo<TypeSymbol>[] GetSignatureForProperty(PropertyDefinitionHandle handle, out SignatureHeader signatureHeader, out BadImageFormatException BadImageFormatException)
+        internal ParamInfo<TypeSymbol>[] GetSignatureForProperty(PropertyDefinitionHandle handle, out SignatureHeader signatureHeader, out BadImageFormatException? BadImageFormatException)
         {
-            ParamInfo<TypeSymbol>[] paramInfo = null;
+            ParamInfo<TypeSymbol>[]? paramInfo = null;
             signatureHeader = default(SignatureHeader);
 
             try
@@ -1315,7 +1311,7 @@ tryAgain:
         /// </summary>
         /// <exception cref="UnsupportedSignatureContent">If the encoded argument type is invalid.</exception>
         /// <exception cref="BadImageFormatException">An exception from metadata reader.</exception>
-        private void DecodeCustomAttributeFieldOrPropTypeOrThrow(ref BlobReader argReader, out SerializationTypeCode typeCode, out TypeSymbol type, out SerializationTypeCode elementTypeCode, out TypeSymbol elementType, bool isElementType)
+        private void DecodeCustomAttributeFieldOrPropTypeOrThrow(ref BlobReader argReader, out SerializationTypeCode typeCode, out TypeSymbol type, out SerializationTypeCode elementTypeCode, out TypeSymbol? elementType, bool isElementType)
         {
             typeCode = argReader.ReadSerializationTypeCode();
 
@@ -1340,9 +1336,9 @@ tryAgain:
                 }
 
                 SerializationTypeCode unusedElementTypeCode;
-                TypeSymbol unusedElementType;
+                TypeSymbol? unusedElementType;
                 DecodeCustomAttributeFieldOrPropTypeOrThrow(ref argReader, out elementTypeCode, out elementType, out unusedElementTypeCode, out unusedElementType, isElementType: true);
-                type = GetSZArrayTypeSymbol(elementType, customModifiers: default(ImmutableArray<ModifierInfo<TypeSymbol>>));
+                type = GetSZArrayTypeSymbol(elementType!, customModifiers: default(ImmutableArray<ModifierInfo<TypeSymbol>>));
                 return;
             }
 
@@ -1356,12 +1352,13 @@ tryAgain:
                     return;
 
                 case SerializationTypeCode.Enum:
-                    string enumTypeName;
+                    string? enumTypeName;
                     if (!PEModule.CrackStringInAttributeValue(out enumTypeName, ref argReader))
                     {
                         throw new UnsupportedSignatureContent();
                     }
 
+                    Debug.Assert(enumTypeName is not null);
                     type = GetTypeSymbolForSerializedType(enumTypeName);
                     var underlyingType = GetEnumUnderlyingType(type);
                     if ((object)underlyingType == null)
@@ -1440,11 +1437,12 @@ tryAgain:
             {
                 // Spec: If the parameter kind is System.Object, the value stored represents the "boxed" instance of that value-type.
                 SerializationTypeCode elementTypeCode;
-                TypeSymbol elementType;
+                TypeSymbol? elementType;
                 DecodeCustomAttributeFieldOrPropTypeOrThrow(ref argReader, out typeCode, out type, out elementTypeCode, out elementType, isElementType: false);
 
                 if (typeCode == SerializationTypeCode.SZArray)
                 {
+                    Debug.Assert(elementType is not null);
                     return DecodeCustomAttributeElementArrayOrThrow(ref argReader, elementTypeCode, elementType, type);
                 }
             }
@@ -1457,7 +1455,7 @@ tryAgain:
         private TypedConstant DecodeCustomAttributeElementArrayOrThrow(ref BlobReader argReader, SerializationTypeCode elementTypeCode, TypeSymbol elementType, TypeSymbol arrayType)
         {
             int count = argReader.ReadInt32();
-            TypedConstant[] values;
+            TypedConstant[]? values;
 
             if (count == -1)
             {
@@ -1524,7 +1522,7 @@ tryAgain:
                     return CreateTypedConstant(type, GetPrimitiveOrEnumTypedConstantKind(type), argReader.ReadChar());
 
                 case SerializationTypeCode.String:
-                    string s;
+                    string? s;
                     TypedConstantKind kind = PEModule.CrackStringInAttributeValue(out s, ref argReader) ?
                         TypedConstantKind.Primitive :
                         TypedConstantKind.Error;
@@ -1532,8 +1530,8 @@ tryAgain:
                     return CreateTypedConstant(type, kind, s);
 
                 case SerializationTypeCode.Type:
-                    string typeName;
-                    TypeSymbol serializedType = PEModule.CrackStringInAttributeValue(out typeName, ref argReader) ?
+                    string? typeName;
+                    TypeSymbol? serializedType = PEModule.CrackStringInAttributeValue(out typeName, ref argReader) ?
                         (typeName != null ? GetTypeSymbolForSerializedType(typeName) : null) :
                         GetUnsupportedMetadataTypeSymbol();
 
@@ -1565,20 +1563,28 @@ tryAgain:
             }
 
             SerializationTypeCode typeCode, elementTypeCode;
-            TypeSymbol type, elementType;
+            TypeSymbol type;
+            TypeSymbol? elementType;
             DecodeCustomAttributeFieldOrPropTypeOrThrow(ref argReader, out typeCode, out type, out elementTypeCode, out elementType, isElementType: false);
 
-            string name;
+            string? name;
             if (!PEModule.CrackStringInAttributeValue(out name, ref argReader))
             {
                 throw new UnsupportedSignatureContent();
             }
 
-            TypedConstant value = typeCode == SerializationTypeCode.SZArray
-                ? DecodeCustomAttributeElementArrayOrThrow(ref argReader, elementTypeCode, elementType, type)
-                : DecodeCustomAttributeElementOrThrow(ref argReader, typeCode, type);
+            TypedConstant value;
+            if (typeCode == SerializationTypeCode.SZArray)
+            {
+                Debug.Assert(elementType is not null);
+                value = DecodeCustomAttributeElementArrayOrThrow(ref argReader, elementTypeCode, elementType, type);
+            }
+            else
+            {
+                value = DecodeCustomAttributeElementOrThrow(ref argReader, typeCode, type);
+            }
 
-            return (new KeyValuePair<string, TypedConstant>(name, value), kind == CustomAttributeNamedArgumentKind.Property, typeCode, elementTypeCode);
+            return (new KeyValuePair<string, TypedConstant>(name!, value), kind == CustomAttributeNamedArgumentKind.Property, typeCode, elementTypeCode);
         }
 
         internal bool IsTargetAttribute(
@@ -1618,7 +1624,7 @@ tryAgain:
 
         internal bool GetCustomAttribute(
             CustomAttributeHandle handle,
-            IMethodSymbolInternal attributeConstructor,
+            IMethodSymbolInternal? attributeConstructor,
             out TypedConstant[] positionalArgs,
             out KeyValuePair<string, TypedConstant>[] namedArgs)
         {
@@ -1678,7 +1684,6 @@ tryAgain:
             return false;
         }
 
-#nullable enable
         internal bool GetCustomAttribute(CustomAttributeHandle handle, [NotNullWhen(true)] out TypeSymbol? attributeClass, [NotNullWhen(true)] out MethodSymbol? attributeCtor)
         {
             EntityHandle attributeType;
@@ -1704,7 +1709,6 @@ tryAgain:
             attributeCtor = GetMethodSymbolForMethodDefOrMemberRef(ctor, attributeClass);
             return true;
         }
-#nullable disable
 
         internal bool GetCustomAttributeWellKnownType(CustomAttributeHandle handle, out WellKnownType wellKnownAttribute)
         {
@@ -1927,7 +1931,7 @@ tryAgain:
                         {
                             HandleKind implementedMethodTokenType = implementedMethodHandle.Kind;
 
-                            MethodSymbol methodSymbol = null;
+                            MethodSymbol? methodSymbol = null;
 
                             if (implementedMethodTokenType == HandleKind.MethodDefinition)
                             {
@@ -1963,7 +1967,7 @@ tryAgain:
         /// <param name="searchTypeDef">TypeDef token of the type from which the search should begin.</param>
         /// <param name="targetMethodDef">MethodDef token of the target method.</param>
         /// <returns>Corresponding <typeparamref name="MethodSymbol"/> or null, if none is found.</returns>
-        private MethodSymbol FindMethodSymbolInSuperType(TypeDefinitionHandle searchTypeDef, MethodDefinitionHandle targetMethodDef)
+        private MethodSymbol? FindMethodSymbolInSuperType(TypeDefinitionHandle searchTypeDef, MethodDefinitionHandle targetMethodDef)
         {
             try
             {
@@ -2104,7 +2108,7 @@ tryAgain:
         /// <param name="implementingTypeSymbol">Scope the search to supertypes of the implementing type.</param>
         /// <param name="methodsOnly">True to only return method symbols, null if the token resolves to a field.</param>
         /// <returns>The corresponding MethodSymbol or null.</returns>
-        internal abstract Symbol GetSymbolForMemberRef(MemberReferenceHandle memberRef, TypeSymbol implementingTypeSymbol = null, bool methodsOnly = false);
+        internal abstract Symbol GetSymbolForMemberRef(MemberReferenceHandle memberRef, TypeSymbol? implementingTypeSymbol = null, bool methodsOnly = false);
 
         internal MethodSymbol GetMethodSymbolForMemberRef(MemberReferenceHandle methodRef, TypeSymbol implementingTypeSymbol)
         {
@@ -2150,7 +2154,7 @@ tryAgain:
             return new TypedConstant(type, array);
         }
 
-        private static TypedConstant CreateTypedConstant(TypeSymbol type, TypedConstantKind kind, object value)
+        private static TypedConstant CreateTypedConstant(TypeSymbol type, TypedConstantKind kind, object? value)
         {
             if (type.TypeKind == TypeKind.Error)
             {
@@ -2169,7 +2173,7 @@ tryAgain:
         /// Returns a symbol that given token resolves to or null of the token represents an entity that isn't represented by a symbol,
         /// such as vararg MemberRef.
         /// </summary>
-        internal Symbol GetSymbolForILToken(EntityHandle token)
+        internal Symbol? GetSymbolForILToken(EntityHandle token)
         {
             try
             {
@@ -2224,7 +2228,7 @@ tryAgain:
                         BlobHandle instantiation;
                         this.Module.GetMethodSpecificationOrThrow((MethodSpecificationHandle)token, out method, out instantiation);
 
-                        var genericDefinition = (MethodSymbol)GetSymbolForILToken(method);
+                        var genericDefinition = (MethodSymbol?)GetSymbolForILToken(method);
                         if (genericDefinition == null)
                         {
                             // error
@@ -2248,7 +2252,7 @@ tryAgain:
         /// <summary>
         /// Given a MemberRef token, return the TypeSymbol for its Class field.
         /// </summary>
-        internal TypeSymbol GetMemberRefTypeSymbol(MemberReferenceHandle memberRef)
+        internal TypeSymbol? GetMemberRefTypeSymbol(MemberReferenceHandle memberRef)
         {
             try
             {

@@ -520,7 +520,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
 
         internal override Symbol GetSymbolForMemberRef(MemberReferenceHandle memberRef, TypeSymbol? scope = null, bool methodsOnly = false)
         {
-            TypeSymbol targetTypeSymbol = GetMemberRefTypeSymbol(memberRef);
+            TypeSymbol? targetTypeSymbol = GetMemberRefTypeSymbol(memberRef);
 
             if (targetTypeSymbol is null)
             {

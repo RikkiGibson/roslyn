@@ -1384,8 +1384,8 @@
       "toggles": 4,
       "totalLines": 2387,
       "disabledLines": 2343,
-      "status": "pending",
-      "note": "",
+      "status": "done",
+      "note": "Enabled nullable; fixed local null builders/out-params, widened GetSignatureFor{Method,Property} exception out-param and CreateTypedConstant/DecodeCustomAttributeFieldOrPropTypeOrThrow to honest nullable annotations, made GetSymbolForILToken/GetMemberRefTypeSymbol/GetSymbolForMemberRef genuinely nullable (fixed 2 cross-project call sites), fixed pre-existing AssemblyIdentity ctor param and DoPropertySignaturesMatch/GetCustomAttribute(attributeConstructor) ripple in PE symbol files. Zero CS8xxx warnings; verified via CompilerConsumers.slnf (3 pre-existing unrelated EE errors remain, confirmed via stash).",
       "order": 123
     },
     {
