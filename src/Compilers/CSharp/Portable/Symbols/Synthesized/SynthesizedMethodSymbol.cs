@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Threading;
@@ -14,7 +16,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
     /// </summary>
     internal abstract class SynthesizedMethodSymbol : MethodSymbol
     {
-        private ParameterSymbol? _lazyThisParameter;
+        private ParameterSymbol _lazyThisParameter;
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences
         {
@@ -42,6 +44,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         public abstract override bool IsStatic { get; }
 
+#nullable enable
+
         internal override bool TryGetThisParameter(out ParameterSymbol? thisParameter)
         {
             Debug.Assert(!this.IsExtensionBlockMember());
@@ -52,7 +56,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return true;
             }
 
-            if (_lazyThisParameter is null)
+            if ((object)_lazyThisParameter == null)
             {
                 Interlocked.CompareExchange(ref _lazyThisParameter, new ThisParameterSymbol(this), null);
             }
@@ -61,16 +65,18 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return true;
         }
 
+#nullable disable
+
         /// <summary>
         /// Returns data decoded from Obsolete attribute or null if there is no Obsolete attribute.
         /// This property returns ObsoleteAttributeData.Uninitialized if attribute arguments haven't been decoded yet.
         /// </summary>
-        internal sealed override ObsoleteAttributeData? ObsoleteAttributeData
+        internal sealed override ObsoleteAttributeData ObsoleteAttributeData
         {
             get { return null; }
         }
 
-        internal sealed override UnmanagedCallersOnlyAttributeData? GetUnmanagedCallersOnlyAttributeData(bool forceComplete) => null;
+        internal sealed override UnmanagedCallersOnlyAttributeData GetUnmanagedCallersOnlyAttributeData(bool forceComplete) => null;
 
         internal sealed override bool HasSpecialNameAttribute => throw ExceptionUtilities.Unreachable();
 
@@ -95,7 +101,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal sealed override CallerUnsafeMode GetCallerUnsafeMode(ConsList<FieldSymbol> fieldsBeingBound) => CallerUnsafeMode.None;
 
-        internal sealed override bool HasAsyncMethodBuilderAttribute(out TypeSymbol? builderArgument)
+        internal sealed override bool HasAsyncMethodBuilderAttribute(out TypeSymbol builderArgument)
         {
             builderArgument = null;
             return false;

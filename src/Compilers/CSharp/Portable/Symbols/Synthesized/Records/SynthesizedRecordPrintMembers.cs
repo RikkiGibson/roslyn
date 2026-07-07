@@ -330,7 +330,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 }
 
                 var getterMethod = property.GetMethod;
-                if (getterMethod is not null && !getterMethod.IsEffectivelyReadOnly)
+                if (property.GetMethod is not null && !getterMethod.IsEffectivelyReadOnly)
                 {
                     return false;
                 }

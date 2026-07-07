@@ -12,22 +12,22 @@ namespace Microsoft.CodeAnalysis.CSharp
 {
     internal sealed partial class NullabilityRewriter : BoundTreeRewriter
     {
-        protected override BoundNode VisitExpressionOrPatternWithoutStackGuard(BoundNode node)
+        protected override BoundNode? VisitExpressionOrPatternWithoutStackGuard(BoundNode node)
         {
             return Visit(node);
         }
 
-        public override BoundNode VisitBinaryOperator(BoundBinaryOperator node)
+        public override BoundNode? VisitBinaryOperator(BoundBinaryOperator node)
         {
             return VisitBinaryOperatorBase(node);
         }
 
-        public override BoundNode VisitUserDefinedConditionalLogicalOperator(BoundUserDefinedConditionalLogicalOperator node)
+        public override BoundNode? VisitUserDefinedConditionalLogicalOperator(BoundUserDefinedConditionalLogicalOperator node)
         {
             return VisitBinaryOperatorBase(node);
         }
 
-        public override BoundNode VisitIfStatement(BoundIfStatement node)
+        public override BoundNode? VisitIfStatement(BoundIfStatement node)
         {
             var stack = ArrayBuilder<(BoundIfStatement, BoundExpression, BoundStatement)>.GetInstance();
 
@@ -135,7 +135,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return currentBinary!;
         }
 
-        public override BoundNode VisitBinaryPattern(BoundBinaryPattern node)
+        public override BoundNode? VisitBinaryPattern(BoundBinaryPattern node)
         {
             // Use an explicit stack to avoid blowing the managed stack when visiting deeply-recursive
             // binary nodes
@@ -171,7 +171,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return currentBinary;
         }
 
-        public override BoundNode VisitCompoundAssignmentOperator(BoundCompoundAssignmentOperator node)
+        public override BoundNode? VisitCompoundAssignmentOperator(BoundCompoundAssignmentOperator node)
         {
             ImmutableArray<MethodSymbol> originalUserDefinedOperatorsOpt = GetUpdatedArray(node, node.OriginalUserDefinedOperatorsOpt);
             BoundExpression left = (BoundExpression)this.Visit(node.Left);
@@ -284,7 +284,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        public override BoundNode VisitImplicitIndexerAccess(BoundImplicitIndexerAccess node)
+        public override BoundNode? VisitImplicitIndexerAccess(BoundImplicitIndexerAccess node)
         {
             BoundExpression receiver = (BoundExpression)this.Visit(node.Receiver);
             BoundExpression argument = (BoundExpression)this.Visit(node.Argument);

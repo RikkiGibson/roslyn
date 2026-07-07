@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -103,9 +105,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         internal override bool MangleName => false;
 
         internal sealed override bool IsFileLocal => false;
-        internal sealed override FileIdentifier? AssociatedFileIdentifier => null;
+        internal sealed override FileIdentifier AssociatedFileIdentifier => null;
 
-        internal override bool GetGuidString(out string? guidString)
+        internal override bool GetGuidString(out string guidString)
         {
             guidString = null;
             return false;
@@ -119,9 +121,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal override bool IsInterpolatedStringHandlerType => false;
 
+#nullable enable
         internal sealed override ParameterSymbol? ExtensionParameter => null;
         internal sealed override string? ExtensionGroupingName => null;
         internal sealed override string? ExtensionMarkerName => null;
+#nullable disable
 
         internal override bool HasSpecialName => false;
 
@@ -145,7 +149,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal override NamedTypeSymbol BaseTypeNoUseSiteDiagnostics => _baseType;
 
-        internal override ObsoleteAttributeData? ObsoleteAttributeData => null;
+        internal override ObsoleteAttributeData ObsoleteAttributeData => null;
 
         protected override NamedTypeSymbol WithTupleDataCore(TupleExtraData newData) => throw ExceptionUtilities.Unreachable();
 
@@ -175,15 +179,15 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal override ImmutableArray<NamedTypeSymbol> GetInterfacesToEmit() => ImmutableArray<NamedTypeSymbol>.Empty;
 
-        internal override IEnumerable<SecurityAttribute>? GetSecurityInformation() => null;
+        internal override IEnumerable<SecurityAttribute> GetSecurityInformation() => null;
 
-        internal override ImmutableArray<NamedTypeSymbol> InterfacesNoUseSiteDiagnostics(ConsList<TypeSymbol>? basesBeingResolved = null) => ImmutableArray<NamedTypeSymbol>.Empty;
+        internal override ImmutableArray<NamedTypeSymbol> InterfacesNoUseSiteDiagnostics(ConsList<TypeSymbol> basesBeingResolved = null) => ImmutableArray<NamedTypeSymbol>.Empty;
 
         internal sealed override bool IsRecord => false;
         internal sealed override bool IsRecordStruct => false;
         internal sealed override bool HasPossibleWellKnownCloneMethod() => false;
 
-        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
+        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
         {
             base.AddSynthesizedAttributes(moduleBuilder, ref attributes);
 
@@ -206,7 +210,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal sealed override NamedTypeSymbol AsNativeInteger() => throw ExceptionUtilities.Unreachable();
 
-        internal sealed override NamedTypeSymbol? NativeIntegerUnderlyingType => null;
+        internal sealed override NamedTypeSymbol NativeIntegerUnderlyingType => null;
 
         internal sealed override IEnumerable<(MethodSymbol Body, MethodSymbol Implemented)> SynthesizedInterfaceMethodImpls()
         {
@@ -219,6 +223,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return false;
         }
 
+#nullable enable
         internal sealed override bool HasCollectionBuilderAttribute(out TypeSymbol? builderType, out string? methodName)
         {
             builderType = null;
@@ -231,6 +236,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             builderArgument = null;
             return false;
         }
+#nullable disable
     }
 
     /// <summary>

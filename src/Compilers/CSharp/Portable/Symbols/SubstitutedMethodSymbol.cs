@@ -2,9 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using Microsoft.CodeAnalysis.Collections;
 using Microsoft.CodeAnalysis.CSharp.Emit;
@@ -26,14 +27,14 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         private readonly TypeMap _inputMap;
         private readonly MethodSymbol _constructedFrom;
 
-        private TypeWithAnnotations.Boxed? _lazyReturnType;
+        private TypeWithAnnotations.Boxed _lazyReturnType;
         private ImmutableArray<ParameterSymbol> _lazyParameters;
-        private TypeMap? _lazyMap;
+        private TypeMap _lazyMap;
         private ImmutableArray<TypeParameterSymbol> _lazyTypeParameters;
 
         //we want to compute these lazily since it may be expensive for the underlying symbol
         private ImmutableArray<MethodSymbol> _lazyExplicitInterfaceImplementations;
-        private OverriddenOrHiddenMembersResult? _lazyOverriddenOrHiddenMembers;
+        private OverriddenOrHiddenMembersResult _lazyOverriddenOrHiddenMembers;
 
         private int _hashCode; // computed on demand
 
@@ -44,14 +45,14 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             Debug.Assert(TypeSymbol.Equals(originalDefinition.ContainingType, containingSymbol.OriginalDefinition, TypeCompareKind.ConsiderEverything2));
         }
 
-        protected SubstitutedMethodSymbol(Symbol containingSymbol, TypeMap map, MethodSymbol originalDefinition, MethodSymbol? constructedFrom)
+        protected SubstitutedMethodSymbol(Symbol containingSymbol, TypeMap map, MethodSymbol originalDefinition, MethodSymbol constructedFrom)
         {
-            Debug.Assert((object?)originalDefinition != null);
+            Debug.Assert((object)originalDefinition != null);
             Debug.Assert(originalDefinition.IsDefinition);
             _containingSymbol = containingSymbol;
             _underlyingMethod = originalDefinition;
             _inputMap = map;
-            if ((object?)constructedFrom != null)
+            if ((object)constructedFrom != null)
             {
                 _constructedFrom = constructedFrom;
                 Debug.Assert(ReferenceEquals(constructedFrom.ConstructedFrom, constructedFrom));
@@ -98,12 +99,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        [MemberNotNull(nameof(_lazyMap))]
         private void EnsureMapAndTypeParameters()
         {
             if (!RoslynImmutableInterlocked.VolatileRead(ref _lazyTypeParameters).IsDefault)
             {
-                Debug.Assert(_lazyMap is not null);
                 return;
             }
 
@@ -123,7 +122,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             ImmutableInterlocked.InterlockedCompareExchange(ref _lazyTypeParameters, typeParameters, default(ImmutableArray<TypeParameterSymbol>));
             Debug.Assert(_lazyTypeParameters != null);
-            Debug.Assert(_lazyMap is not null);
         }
 
         public sealed override AssemblySymbol ContainingAssembly
@@ -150,12 +148,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        internal sealed override MethodSymbol? CallsiteReducedFromMethod
+        internal sealed override MethodSymbol CallsiteReducedFromMethod
         {
             get
             {
                 var method = OriginalDefinition.ReducedFrom;
-                return ((object?)method == null) ? null : method.Construct(this.TypeArgumentsWithAnnotations);
+                return ((object)method == null) ? null : method.Construct(this.TypeArgumentsWithAnnotations);
             }
         }
 
@@ -164,7 +162,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get
             {
                 var reduced = this.CallsiteReducedFromMethod;
-                if ((object?)reduced == null)
+                if ((object)reduced == null)
                 {
                     return this.ContainingType;
                 }
@@ -190,10 +188,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get
             {
-                // A SubstitutedMethodSymbol is only ever reached for constructions of the reduced
-                // extension method itself; the original definition is always a genuine reduced form.
-                Debug.Assert(OriginalDefinition.ReducedFrom is not null);
-                return OriginalDefinition.ReducedFrom!;
+                return OriginalDefinition.ReducedFrom;
             }
         }
 
@@ -223,17 +218,17 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return this.OriginalDefinition.GetReturnTypeAttributes();
         }
 
-        internal sealed override UnmanagedCallersOnlyAttributeData? GetUnmanagedCallersOnlyAttributeData(bool forceComplete)
+        internal sealed override UnmanagedCallersOnlyAttributeData GetUnmanagedCallersOnlyAttributeData(bool forceComplete)
             => this.OriginalDefinition.GetUnmanagedCallersOnlyAttributeData(forceComplete);
 
         internal sealed override bool HasSpecialNameAttribute => throw ExceptionUtilities.Unreachable();
 
-        public sealed override Symbol? AssociatedSymbol
+        public sealed override Symbol AssociatedSymbol
         {
             get
             {
-                Symbol? underlying = OriginalDefinition.AssociatedSymbol;
-                return ((object?)underlying == null) ? null : underlying.SymbolAsMember(ContainingType);
+                Symbol underlying = OriginalDefinition.AssociatedSymbol;
+                return ((object)underlying == null) ? null : underlying.SymbolAsMember(ContainingType);
             }
         }
 
@@ -241,7 +236,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get
             {
-                if (_lazyReturnType is null)
+                if (_lazyReturnType == null)
                 {
                     var returnType = Map.SubstituteType(OriginalDefinition.ReturnTypeWithAnnotations);
                     Interlocked.CompareExchange(ref _lazyReturnType, new TypeWithAnnotations.Boxed(returnType), null);
@@ -311,7 +306,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        internal sealed override bool CallsAreOmitted(SyntaxTree? syntaxTree)
+        internal sealed override bool CallsAreOmitted(SyntaxTree syntaxTree)
         {
             return OriginalDefinition.CallsAreOmitted(syntaxTree);
         }
@@ -320,6 +315,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get { return this.Map; }
         }
+
+#nullable enable
 
         internal sealed override bool TryGetThisParameter(out ParameterSymbol? thisParameter)
         {
@@ -340,6 +337,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 : null;
             return true;
         }
+
+#nullable disable
 
         internal override int TryGetOverloadResolutionPriority()
             => OriginalDefinition.TryGetOverloadResolutionPriority();
@@ -438,10 +437,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        public sealed override bool Equals(Symbol? obj, TypeCompareKind compareKind)
+        public sealed override bool Equals(Symbol obj, TypeCompareKind compareKind)
         {
-            MethodSymbol? other = obj as MethodSymbol;
-            if ((object?)other == null) return false;
+            MethodSymbol other = obj as MethodSymbol;
+            if ((object)other == null) return false;
 
             if ((object)this.OriginalDefinition != (object)other.OriginalDefinition &&
                 this.OriginalDefinition != other.OriginalDefinition)
@@ -488,7 +487,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return code;
         }
 
-        internal sealed override bool HasAsyncMethodBuilderAttribute(out TypeSymbol? builderArgument)
+        internal sealed override bool HasAsyncMethodBuilderAttribute(out TypeSymbol builderArgument)
         {
             return _underlyingMethod.HasAsyncMethodBuilderAttribute(out builderArgument);
         }

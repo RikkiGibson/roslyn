@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -106,16 +108,16 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return assembly.GetHashCode();
         }
 
-        public override bool Equals(Symbol? obj, TypeCompareKind compareKind)
+        public override bool Equals(Symbol obj, TypeCompareKind compareKind)
         {
             if (ReferenceEquals(this, obj))
             {
                 return true;
             }
 
-            MissingModuleSymbol? other = obj as MissingModuleSymbol;
+            MissingModuleSymbol other = obj as MissingModuleSymbol;
 
-            return (object?)other != null && assembly.Equals(other.assembly, compareKind);
+            return (object)other != null && assembly.Equals(other.assembly, compareKind);
         }
 
         public override ImmutableArray<Location> Locations
@@ -142,10 +144,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable enable
         internal override NamedTypeSymbol? LookupTopLevelMetadataType(ref MetadataTypeName emittedName)
         {
             return null;
         }
+#nullable disable
 
         internal override ImmutableArray<AssemblyIdentity> GetReferencedAssemblies()
         {
@@ -157,7 +161,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return ImmutableArray<AssemblySymbol>.Empty;
         }
 
-        internal override void SetReferences(ModuleReferences<AssemblySymbol> moduleReferences, SourceAssemblySymbol? originatingSourceAssemblyDebugOnly)
+        internal override void SetReferences(ModuleReferences<AssemblySymbol> moduleReferences, SourceAssemblySymbol originatingSourceAssemblyDebugOnly)
         {
             throw ExceptionUtilities.Unreachable();
         }
@@ -187,7 +191,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return null; }
         }
 
-        public override ModuleMetadata? GetMetadata() => null;
+        public override ModuleMetadata GetMetadata() => null;
 
         public sealed override bool AreLocalsZeroed
         {
@@ -198,7 +202,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal sealed override bool UseUpdatedMemorySafetyRules => false;
 
+#nullable enable
         internal sealed override ObsoleteAttributeData? ObsoleteAttributeData => null;
+#nullable disable
     }
 
     internal sealed class MissingModuleSymbolWithName : MissingModuleSymbol
@@ -226,16 +232,16 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return Hash.Combine(assembly.GetHashCode(), StringComparer.OrdinalIgnoreCase.GetHashCode(_name));
         }
 
-        public override bool Equals(Symbol? obj, TypeCompareKind compareKind)
+        public override bool Equals(Symbol obj, TypeCompareKind compareKind)
         {
             if (ReferenceEquals(this, obj))
             {
                 return true;
             }
 
-            MissingModuleSymbolWithName? other = obj as MissingModuleSymbolWithName;
+            MissingModuleSymbolWithName other = obj as MissingModuleSymbolWithName;
 
-            return (object?)other != null && assembly.Equals(other.assembly, compareKind) && string.Equals(_name, other._name, StringComparison.OrdinalIgnoreCase);
+            return (object)other != null && assembly.Equals(other.assembly, compareKind) && string.Equals(_name, other._name, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

@@ -393,7 +393,7 @@ Done:
         /// </remarks>
         internal IEnumerable<NamespaceOrTypeSymbol>? GetNamespaceOrTypeByQualifiedName(IEnumerable<string> qualifiedName)
         {
-            NamespaceOrTypeSymbol? namespaceOrType = this;
+            NamespaceOrTypeSymbol namespaceOrType = this;
             IEnumerable<NamespaceOrTypeSymbol>? symbols = null;
             foreach (string name in qualifiedName)
             {
@@ -401,7 +401,7 @@ Done:
                 {
                     // there might be multiple types of different arity, prefer a non-generic type:
                     namespaceOrType = symbols.OfMinimalArity();
-                    if ((object?)namespaceOrType == null)
+                    if ((object)namespaceOrType == null)
                     {
                         return SpecializedCollections.EmptyEnumerable<NamespaceOrTypeSymbol>();
                     }

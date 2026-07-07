@@ -53,7 +53,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         protected override int GetParameterCountFromSyntax()
         {
-            ParameterListSyntax parameterList = (ParameterListSyntax)syntaxReferenceOpt!.GetSyntax();
+            ParameterListSyntax parameterList = (ParameterListSyntax)syntaxReferenceOpt.GetSyntax();
             return parameterList.Parameters is [{ IsArgList: false }, ..] ? 1 : 0;
         }
 
@@ -64,7 +64,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             ParameterSymbol? makeExtensionParameter(BindingDiagnosticBag diagnostics)
             {
-                ParameterListSyntax parameterList = (ParameterListSyntax)syntaxReferenceOpt!.GetSyntax();
+                ParameterListSyntax parameterList = (ParameterListSyntax)syntaxReferenceOpt.GetSyntax();
                 int count = parameterList.Parameters.Count;
 
                 if (count == 0)

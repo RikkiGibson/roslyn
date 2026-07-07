@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -83,7 +85,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
 
                 var eoc = this.EatToken(SyntaxKind.EndOfDocumentationCommentToken);
 
-                isTerminated = !_isDelimited || (eoc.LeadingTrivia.Count > 0 && eoc.LeadingTrivia[eoc.LeadingTrivia.Count - 1]!.ToString() == "*/");
+                isTerminated = !_isDelimited || (eoc.LeadingTrivia.Count > 0 && eoc.LeadingTrivia[eoc.LeadingTrivia.Count - 1].ToString() == "*/");
                 SyntaxKind kind = _isDelimited ? SyntaxKind.MultiLineDocumentationCommentTrivia : SyntaxKind.SingleLineDocumentationCommentTrivia;
 
                 return SyntaxFactory.DocumentationCommentTrivia(kind, nodes.ToList(), eoc);
@@ -140,7 +142,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             }
         }
 
-        private XmlNodeSyntax? ParseXmlNode()
+        private XmlNodeSyntax ParseXmlNode()
         {
             switch (this.CurrentToken.Kind)
             {
@@ -368,7 +370,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
 
         private SkipResult SkipBadTokens<T>(
             ref T startNode,
-            SyntaxListBuilder? list,
+            SyntaxListBuilder list,
             Func<DocumentationCommentParser, bool> isNotExpectedFunction,
             Func<DocumentationCommentParser, bool> abortFunction,
             XmlParseErrorCode error
@@ -409,11 +411,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                     // use skipped text since cannot nest structured trivia under structured trivia
                     if (list == null || list.Count == 0)
                     {
-                        startNode = AddTrailingSkippedSyntax(startNode, badTokens.ToListNode()!);
+                        startNode = AddTrailingSkippedSyntax(startNode, badTokens.ToListNode());
                     }
                     else
                     {
-                        list[list.Count - 1] = AddTrailingSkippedSyntax((CSharpSyntaxNode)list[list.Count - 1]!, badTokens.ToListNode()!);
+                        list[list.Count - 1] = AddTrailingSkippedSyntax((CSharpSyntaxNode)list[list.Count - 1], badTokens.ToListNode());
                     }
 
                     return result;
@@ -679,7 +681,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         private XmlNameSyntax ParseXmlName()
         {
             var id = this.EatToken(SyntaxKind.IdentifierToken);
-            XmlPrefixSyntax? prefix = null;
+            XmlPrefixSyntax prefix = null;
             if (this.CurrentToken.Kind == SyntaxKind.ColonToken)
             {
                 var colon = this.EatToken();
@@ -886,7 +888,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         {
             CrefSyntax result;
 
-            TypeSyntax? type = ParseCrefType(typeArgumentsMustBeIdentifiers: true, checkForMember: true);
+            TypeSyntax type = ParseCrefType(typeArgumentsMustBeIdentifiers: true, checkForMember: true);
             if (type == null)
             {
                 result = ParseMemberCref();
@@ -898,7 +900,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             else if (type.Kind != SyntaxKind.QualifiedName && this.CurrentToken.Kind == SyntaxKind.OpenParenToken)
             {
                 // Special case for crefs like "string()" and "A::B()".
-                CrefParameterListSyntax? parameters = ParseCrefParameterList();
+                CrefParameterListSyntax parameters = ParseCrefParameterList();
                 result = SyntaxFactory.NameMemberCref(type, parameters);
             }
             else
@@ -917,7 +919,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                 {
                     badTokens.Add(this.EatToken());
                 }
-                result = AddTrailingSkippedSyntax(result, badTokens.ToListNode()!);
+                result = AddTrailingSkippedSyntax(result, badTokens.ToListNode());
                 _pool.Free(badTokens);
             }
 
@@ -958,7 +960,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         private NameMemberCrefSyntax ParseNameMemberCref()
         {
             SimpleNameSyntax name = ParseCrefName(typeArgumentsMustBeIdentifiers: true);
-            CrefParameterListSyntax? parameters = ParseCrefParameterList();
+            CrefParameterListSyntax parameters = ParseCrefParameterList();
 
             return SyntaxFactory.NameMemberCref(name, parameters);
         }
@@ -970,11 +972,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         {
             Debug.Assert(CurrentToken.Kind == SyntaxKind.ThisKeyword);
             SyntaxToken thisKeyword = EatToken();
-            CrefBracketedParameterListSyntax? parameters = ParseBracketedCrefParameterList();
+            CrefBracketedParameterListSyntax parameters = ParseBracketedCrefParameterList();
 
             return SyntaxFactory.IndexerMemberCref(thisKeyword, parameters);
         }
 
+#nullable enable
         /// <summary>
         /// If we have `extension` (with optional type arguments) and parameter list and a dot, then we have an extension member cref.
         /// Otherwise, we fall back to producing the same result as <see cref="ParseNameMemberCref"/>
@@ -1005,6 +1008,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
 
             return SyntaxFactory.ExtensionMemberCref(ConvertToKeyword(identifierToken), typeArguments, parameters, dotToken, member);
         }
+#nullable disable
 
         /// <summary>
         /// Parse an overloadable operator, with optional parameters.
@@ -1013,7 +1017,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         {
             Debug.Assert(CurrentToken.Kind == SyntaxKind.OperatorKeyword);
             SyntaxToken operatorKeyword = EatToken();
-            SyntaxToken? checkedKeyword = TryEatCheckedKeyword(isConversion: false, ref operatorKeyword);
+            SyntaxToken checkedKeyword = TryEatCheckedKeyword(isConversion: false, ref operatorKeyword);
 
             SyntaxToken operatorToken;
 
@@ -1146,7 +1150,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
 
             Debug.Assert(SyntaxFacts.IsAnyOverloadableOperator(operatorToken.Kind));
 
-            CrefParameterListSyntax? parameters = ParseCrefParameterList();
+            CrefParameterListSyntax parameters = ParseCrefParameterList();
 
             return SyntaxFactory.OperatorMemberCref(operatorKeyword, checkedKeyword, operatorToken, parameters);
 
@@ -1169,9 +1173,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             }
         }
 
-        private SyntaxToken? TryEatCheckedKeyword(bool isConversion, ref SyntaxToken operatorKeyword)
+        private SyntaxToken TryEatCheckedKeyword(bool isConversion, ref SyntaxToken operatorKeyword)
         {
-            SyntaxToken? checkedKeyword = tryEatCheckedOrHandleUnchecked(ref operatorKeyword);
+            SyntaxToken checkedKeyword = tryEatCheckedOrHandleUnchecked(ref operatorKeyword);
 
             if (checkedKeyword is not null &&
                 (isConversion || SyntaxFacts.IsAnyOverloadableOperator(CurrentToken.Kind)))
@@ -1181,7 +1185,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
 
             return checkedKeyword;
 
-            SyntaxToken? tryEatCheckedOrHandleUnchecked(ref SyntaxToken operatorKeyword)
+            SyntaxToken tryEatCheckedOrHandleUnchecked(ref SyntaxToken operatorKeyword)
             {
                 if (CurrentToken.Kind == SyntaxKind.UncheckedKeyword)
                 {
@@ -1205,12 +1209,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             SyntaxToken implicitOrExplicit = EatToken();
 
             SyntaxToken operatorKeyword = EatToken(SyntaxKind.OperatorKeyword);
-            SyntaxToken? checkedKeyword = TryEatCheckedKeyword(isConversion: true, ref operatorKeyword);
+            SyntaxToken checkedKeyword = TryEatCheckedKeyword(isConversion: true, ref operatorKeyword);
 
-            TypeSyntax? type = ParseCrefType(typeArgumentsMustBeIdentifiers: false);
-            Debug.Assert(type is not null); // Only possible to get a null type back when checkForMember is true.
+            TypeSyntax type = ParseCrefType(typeArgumentsMustBeIdentifiers: false);
 
-            CrefParameterListSyntax? parameters = ParseCrefParameterList();
+            CrefParameterListSyntax parameters = ParseCrefParameterList();
 
             return SyntaxFactory.ConversionOperatorMemberCref(implicitOrExplicit, operatorKeyword, checkedKeyword, type, parameters);
         }
@@ -1218,23 +1221,23 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         /// <summary>
         /// Parse a parenthesized parameter list.
         /// </summary>
-        private CrefParameterListSyntax? ParseCrefParameterList()
+        private CrefParameterListSyntax ParseCrefParameterList()
         {
-            return (CrefParameterListSyntax?)ParseBaseCrefParameterList(useSquareBrackets: false);
+            return (CrefParameterListSyntax)ParseBaseCrefParameterList(useSquareBrackets: false);
         }
 
         /// <summary>
         /// Parse a bracketed parameter list.
         /// </summary>
-        private CrefBracketedParameterListSyntax? ParseBracketedCrefParameterList()
+        private CrefBracketedParameterListSyntax ParseBracketedCrefParameterList()
         {
-            return (CrefBracketedParameterListSyntax?)ParseBaseCrefParameterList(useSquareBrackets: true);
+            return (CrefBracketedParameterListSyntax)ParseBaseCrefParameterList(useSquareBrackets: true);
         }
 
         /// <summary>
         /// Parse the parameter list (if any) of a cref member (name, indexer, operator, or conversion).
         /// </summary>
-        private BaseCrefParameterListSyntax? ParseBaseCrefParameterList(bool useSquareBrackets)
+        private BaseCrefParameterListSyntax ParseBaseCrefParameterList(bool useSquareBrackets)
         {
             SyntaxKind openKind = useSquareBrackets ? SyntaxKind.OpenBracketToken : SyntaxKind.OpenParenToken;
             SyntaxKind closeKind = useSquareBrackets ? SyntaxKind.CloseBracketToken : SyntaxKind.CloseParenToken;
@@ -1310,7 +1313,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         /// </remarks>
         private CrefParameterSyntax ParseCrefParameter()
         {
-            SyntaxToken? refKindOpt = null;
+            SyntaxToken refKindOpt = null;
             switch (CurrentToken.Kind)
             {
                 case SyntaxKind.RefKeyword:
@@ -1320,7 +1323,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                     break;
             }
 
-            SyntaxToken? readOnlyOpt = null;
+            SyntaxToken readOnlyOpt = null;
             if (CurrentToken.Kind == SyntaxKind.ReadOnlyKeyword && refKindOpt is not null)
             {
                 if (refKindOpt.Kind != SyntaxKind.RefKeyword)
@@ -1335,8 +1338,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                 }
             }
 
-            TypeSyntax? type = ParseCrefType(typeArgumentsMustBeIdentifiers: false);
-            Debug.Assert(type is not null); // Only possible to get a null type back when checkForMember is true.
+            TypeSyntax type = ParseCrefType(typeArgumentsMustBeIdentifiers: false);
             return SyntaxFactory.CrefParameter(refKindKeyword: refKindOpt, readOnlyKeyword: readOnlyOpt, type);
         }
 
@@ -1367,8 +1369,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
             {
                 while (true)
                 {
-                    TypeSyntax? typeSyntax = ParseCrefType(typeArgumentsMustBeIdentifiers);
-                    Debug.Assert(typeSyntax is not null); // Only possible to get a null type back when checkForMember is true.
+                    TypeSyntax typeSyntax = ParseCrefType(typeArgumentsMustBeIdentifiers);
 
                     if (typeArgumentsMustBeIdentifiers && typeSyntax.Kind != SyntaxKind.IdentifierName)
                     {
@@ -1416,12 +1417,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         /// type argument is seen, false to accept.  No change in the shape of the tree.</param>
         /// <param name="checkForMember">True means that the last name should not be consumed
         /// if it is followed by a parameter list.</param>
-        private TypeSyntax? ParseCrefType(bool typeArgumentsMustBeIdentifiers, bool checkForMember = false)
+        private TypeSyntax ParseCrefType(bool typeArgumentsMustBeIdentifiers, bool checkForMember = false)
         {
-            TypeSyntax? typeWithoutSuffix = ParseCrefTypeHelper(typeArgumentsMustBeIdentifiers, checkForMember);
+            TypeSyntax typeWithoutSuffix = ParseCrefTypeHelper(typeArgumentsMustBeIdentifiers, checkForMember);
             return typeArgumentsMustBeIdentifiers
                 ? typeWithoutSuffix
-                : (typeWithoutSuffix is null ? null : ParseCrefTypeSuffix(typeWithoutSuffix));
+                : ParseCrefTypeSuffix(typeWithoutSuffix);
         }
 
         /// <summary>
@@ -1436,7 +1437,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
         /// type argument is seen, false to accept.  No change in the shape of the tree.</param>
         /// <param name="checkForMember">True means that the last name should not be consumed
         /// if it is followed by a parameter list.</param>
-        private TypeSyntax? ParseCrefTypeHelper(bool typeArgumentsMustBeIdentifiers, bool checkForMember = false)
+        private TypeSyntax ParseCrefTypeHelper(bool typeArgumentsMustBeIdentifiers, bool checkForMember = false)
         {
             NameSyntax leftName;
 
@@ -1640,7 +1641,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax.InternalSyntax
                 {
                     badTokens.Add(this.EatToken());
                 }
-                identifierToken = AddTrailingSkippedSyntax(identifierToken, badTokens.ToListNode()!);
+                identifierToken = AddTrailingSkippedSyntax(identifierToken, badTokens.ToListNode());
                 _pool.Free(badTokens);
             }
 

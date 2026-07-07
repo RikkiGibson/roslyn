@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp.Symbols;
@@ -24,7 +26,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         private readonly MethodSymbol _containingSymbol;
 
         // Containing static local function, static anonymous function, or static lambda.
-        private SourceMethodSymbol? _staticLocalOrAnonymousFunction;
+        private SourceMethodSymbol _staticLocalOrAnonymousFunction;
 
         public static void IssueDiagnostics(CSharpCompilation compilation, BoundNode node, BindingDiagnosticBag diagnostics, MethodSymbol containingSymbol)
         {
@@ -59,9 +61,9 @@ namespace Microsoft.CodeAnalysis.CSharp
             _diagnostics.Add(code, node.Syntax.Location, args);
         }
 
-        private void CheckUnsafeType(BoundExpression? e)
+        private void CheckUnsafeType(BoundExpression e)
         {
-            if (e != null && (object?)e.Type != null && e.Type.IsPointerOrFunctionPointer()) NoteUnsafe(e);
+            if (e != null && (object)e.Type != null && e.Type.IsPointerOrFunctionPointer()) NoteUnsafe(e);
         }
 
         private void NoteUnsafe(BoundNode node)
@@ -73,9 +75,9 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        public override BoundNode? VisitArrayCreation(BoundArrayCreation node)
+        public override BoundNode VisitArrayCreation(BoundArrayCreation node)
         {
-            var arrayType = (ArrayTypeSymbol)node.Type!;
+            var arrayType = (ArrayTypeSymbol)node.Type;
             if (_inExpressionLambda && node.InitializerOpt != null && !arrayType.IsSZArray)
             {
                 Error(ErrorCode.ERR_ExpressionTreeContainsMultiDimensionalArrayInitializer, node);
@@ -84,11 +86,11 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitArrayCreation(node);
         }
 
-        public override BoundNode? VisitArrayAccess(BoundArrayAccess node)
+        public override BoundNode VisitArrayAccess(BoundArrayAccess node)
         {
             if (_inExpressionLambda &&
                 node.Indices.Length == 1 &&
-                !node.Indices[0].Type!.SpecialType.CanOptimizeBehavior())
+                !node.Indices[0].Type.SpecialType.CanOptimizeBehavior())
             {
                 Error(ErrorCode.ERR_ExpressionTreeContainsPatternImplicitIndexer, node);
             }
@@ -96,7 +98,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitArrayAccess(node);
         }
 
-        public override BoundNode? VisitImplicitIndexerAccess(BoundImplicitIndexerAccess node)
+        public override BoundNode VisitImplicitIndexerAccess(BoundImplicitIndexerAccess node)
         {
             if (_inExpressionLambda)
             {
@@ -106,7 +108,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitImplicitIndexerAccess(node);
         }
 
-        public override BoundNode? VisitInlineArrayAccess(BoundInlineArrayAccess node)
+        public override BoundNode VisitInlineArrayAccess(BoundInlineArrayAccess node)
         {
             if (_inExpressionLambda)
             {
@@ -116,7 +118,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitInlineArrayAccess(node);
         }
 
-        public override BoundNode? VisitFromEndIndexExpression(BoundFromEndIndexExpression node)
+        public override BoundNode VisitFromEndIndexExpression(BoundFromEndIndexExpression node)
         {
             if (_inExpressionLambda)
             {
@@ -126,7 +128,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitFromEndIndexExpression(node);
         }
 
-        public override BoundNode? VisitRangeExpression(BoundRangeExpression node)
+        public override BoundNode VisitRangeExpression(BoundRangeExpression node)
         {
             if (_inExpressionLambda)
             {
@@ -136,7 +138,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitRangeExpression(node);
         }
 
-        public override BoundNode? VisitSizeOfOperator(BoundSizeOfOperator node)
+        public override BoundNode VisitSizeOfOperator(BoundSizeOfOperator node)
         {
             if (_inExpressionLambda && node.ConstantValueOpt == null)
             {
@@ -146,7 +148,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitSizeOfOperator(node);
         }
 
-        public override BoundNode? VisitLocalFunctionStatement(BoundLocalFunctionStatement node)
+        public override BoundNode VisitLocalFunctionStatement(BoundLocalFunctionStatement node)
         {
             ExecutableCodeBinder.ValidateIteratorMethod(_compilation, node.Symbol, _diagnostics);
 
@@ -160,13 +162,13 @@ namespace Microsoft.CodeAnalysis.CSharp
             return result;
         }
 
-        public override BoundNode? VisitThisReference(BoundThisReference node)
+        public override BoundNode VisitThisReference(BoundThisReference node)
         {
             CheckReferenceToThisOrBase(node);
             return base.VisitThisReference(node);
         }
 
-        public override BoundNode? VisitBaseReference(BoundBaseReference node)
+        public override BoundNode VisitBaseReference(BoundBaseReference node)
         {
             if (_inExpressionLambda)
             {
@@ -176,13 +178,13 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitBaseReference(node);
         }
 
-        public override BoundNode? VisitLocal(BoundLocal node)
+        public override BoundNode VisitLocal(BoundLocal node)
         {
             CheckReferenceToVariable(node, node.LocalSymbol);
             return base.VisitLocal(node);
         }
 
-        public override BoundNode? VisitParameter(BoundParameter node)
+        public override BoundNode VisitParameter(BoundParameter node)
         {
             CheckReferenceToVariable(node, node.ParameterSymbol);
             return base.VisitParameter(node);
@@ -200,6 +202,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
+#nullable enable
         private void CheckReferenceToVariable(BoundExpression node, Symbol symbol)
         {
             Debug.Assert(symbol.Kind == SymbolKind.Local || symbol.Kind == SymbolKind.Parameter || symbol is LocalFunctionSymbol);
@@ -213,8 +216,9 @@ namespace Microsoft.CodeAnalysis.CSharp
                 Error(diagnostic, node, new FormattedSymbol(symbol, SymbolDisplayFormat.ShortFormat));
             }
         }
+#nullable disable
 
-        private void CheckReferenceToMethodIfLocalFunction(BoundExpression node, MethodSymbol? method)
+        private void CheckReferenceToMethodIfLocalFunction(BoundExpression node, MethodSymbol method)
         {
             if (method?.OriginalDefinition is LocalFunctionSymbol localFunction)
             {
@@ -222,7 +226,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        public override BoundNode? VisitConvertedSwitchExpression(BoundConvertedSwitchExpression node)
+        public override BoundNode VisitConvertedSwitchExpression(BoundConvertedSwitchExpression node)
         {
             if (_inExpressionLambda)
             {
@@ -232,7 +236,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitConvertedSwitchExpression(node);
         }
 
-        public override BoundNode? VisitDeconstructionAssignmentOperator(BoundDeconstructionAssignmentOperator node)
+        public override BoundNode VisitDeconstructionAssignmentOperator(BoundDeconstructionAssignmentOperator node)
         {
             if (!node.HasAnyErrors)
             {
@@ -242,7 +246,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitDeconstructionAssignmentOperator(node);
         }
 
-        public override BoundNode? VisitAssignmentOperator(BoundAssignmentOperator node)
+        public override BoundNode VisitAssignmentOperator(BoundAssignmentOperator node)
         {
             CheckForAssignmentToSelf(node);
 
@@ -254,7 +258,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitAssignmentOperator(node);
         }
 
-        public override BoundNode? VisitDynamicObjectInitializerMember(BoundDynamicObjectInitializerMember node)
+        public override BoundNode VisitDynamicObjectInitializerMember(BoundDynamicObjectInitializerMember node)
         {
             if (_inExpressionLambda)
             {
@@ -264,13 +268,12 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitDynamicObjectInitializerMember(node);
         }
 
-        public override BoundNode? VisitEventAccess(BoundEventAccess node)
+        public override BoundNode VisitEventAccess(BoundEventAccess node)
         {
             // Don't bother reporting an obsolete diagnostic if the access is already wrong for other reasons
             // (specifically, we can't use it as a field here).
             if (node.IsUsableAsField)
             {
-                Debug.Assert(node.EventSymbol.AssociatedField is not null);
                 bool hasBaseReceiver = node.ReceiverOpt != null && node.ReceiverOpt.Kind == BoundKind.BaseReference;
                 Binder.ReportDiagnosticsIfObsolete(_diagnostics, node.EventSymbol.AssociatedField, node.Syntax, hasBaseReceiver, _containingSymbol, _containingSymbol.ContainingType, BinderFlags.None);
                 Binder.AssertNotUnsafeMemberAccess(node.EventSymbol.AssociatedField);
@@ -279,7 +282,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitEventAccess(node);
         }
 
-        public override BoundNode? VisitEventAssignmentOperator(BoundEventAssignmentOperator node)
+        public override BoundNode VisitEventAssignmentOperator(BoundEventAssignmentOperator node)
         {
             if (_inExpressionLambda)
             {
@@ -293,7 +296,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitEventAssignmentOperator(node);
         }
 
-        public override BoundNode? VisitCompoundAssignmentOperator(BoundCompoundAssignmentOperator node)
+        public override BoundNode VisitCompoundAssignmentOperator(BoundCompoundAssignmentOperator node)
         {
             CheckCompoundAssignmentOperator(node);
 
@@ -302,16 +305,16 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         private void VisitCall(
             MethodSymbol method,
-            PropertySymbol? propertyAccess,
+            PropertySymbol propertyAccess,
             ImmutableArray<BoundExpression> arguments,
             ImmutableArray<RefKind> argumentRefKindsOpt,
-            ImmutableArray<string?> argumentNamesOpt,
+            ImmutableArray<string> argumentNamesOpt,
             ImmutableArray<int> argsToParamsOpt,
             BitVector defaultArguments,
             BoundNode node)
         {
             Debug.Assert((object)method != null);
-            Debug.Assert(((object?)propertyAccess == null) ||
+            Debug.Assert(((object)propertyAccess == null) ||
                 (method == propertyAccess.GetOwnOrInheritedGetMethod()) ||
                 (method == propertyAccess.GetOwnOrInheritedSetMethod()) ||
                 propertyAccess.MustCallMethodsDirectly);
@@ -324,7 +327,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 {
                     Error(ErrorCode.ERR_PartialMethodInExpressionTree, node);
                 }
-                else if ((object?)propertyAccess != null && propertyAccess.IsIndexedProperty() && !propertyAccess.IsIndexer)
+                else if ((object)propertyAccess != null && propertyAccess.IsIndexedProperty() && !propertyAccess.IsIndexer)
                 {
                     Error(ErrorCode.ERR_ExpressionTreeContainsIndexedProperty, node);
                 }
@@ -392,7 +395,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        public override BoundNode? Visit(BoundNode? node)
+        public override BoundNode Visit(BoundNode node)
         {
             if (_inExpressionLambda &&
                 // Ignoring BoundConversion nodes prevents redundant diagnostics
@@ -406,7 +409,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.Visit(node);
         }
 
-        public override BoundNode? VisitRefTypeOperator(BoundRefTypeOperator node)
+        public override BoundNode VisitRefTypeOperator(BoundRefTypeOperator node)
         {
             if (_inExpressionLambda)
             {
@@ -416,7 +419,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitRefTypeOperator(node);
         }
 
-        public override BoundNode? VisitRefValueOperator(BoundRefValueOperator node)
+        public override BoundNode VisitRefValueOperator(BoundRefValueOperator node)
         {
             if (_inExpressionLambda)
             {
@@ -426,7 +429,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitRefValueOperator(node);
         }
 
-        public override BoundNode? VisitMakeRefOperator(BoundMakeRefOperator node)
+        public override BoundNode VisitMakeRefOperator(BoundMakeRefOperator node)
         {
             if (_inExpressionLambda)
             {
@@ -436,7 +439,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitMakeRefOperator(node);
         }
 
-        public override BoundNode? VisitArgListOperator(BoundArgListOperator node)
+        public override BoundNode VisitArgListOperator(BoundArgListOperator node)
         {
             if (_inExpressionLambda)
             {
@@ -446,7 +449,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitArgListOperator(node);
         }
 
-        public override BoundNode? VisitConditionalAccess(BoundConditionalAccess node)
+        public override BoundNode VisitConditionalAccess(BoundConditionalAccess node)
         {
             if (_inExpressionLambda)
             {
@@ -456,7 +459,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitConditionalAccess(node);
         }
 
-        public override BoundNode? VisitObjectInitializerMember(BoundObjectInitializerMember node)
+        public override BoundNode VisitObjectInitializerMember(BoundObjectInitializerMember node)
         {
             if (_inExpressionLambda && !node.Arguments.IsDefaultOrEmpty)
             {
@@ -478,7 +481,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitObjectInitializerMember(node);
         }
 
-        public override BoundNode? VisitCall(BoundCall node)
+        public override BoundNode VisitCall(BoundCall node)
         {
             if (node.ReceiverOpt is BoundCall receiver1)
             {
@@ -502,7 +505,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     CheckReferenceToMethodIfLocalFunction(node, node.Method);
                     this.VisitList(node.Arguments);
                 }
-                while (calls.TryPop(out node!));
+                while (calls.TryPop(out node));
 
                 calls.Free();
             }
@@ -542,24 +545,24 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        public override BoundNode? VisitCollectionElementInitializer(BoundCollectionElementInitializer node)
+        public override BoundNode VisitCollectionElementInitializer(BoundCollectionElementInitializer node)
         {
             if (_inExpressionLambda && (node.AddMethod.IsStatic || node.AddMethod.IsExtensionBlockMember()))
             {
                 Error(ErrorCode.ERR_ExtensionCollectionElementInitializerInExpressionTree, node);
             }
 
-            VisitCall(node.AddMethod, null, node.Arguments, default(ImmutableArray<RefKind>), default(ImmutableArray<string?>), default(ImmutableArray<int>), node.DefaultArguments, node);
+            VisitCall(node.AddMethod, null, node.Arguments, default(ImmutableArray<RefKind>), default(ImmutableArray<string>), default(ImmutableArray<int>), node.DefaultArguments, node);
             return base.VisitCollectionElementInitializer(node);
         }
 
-        public override BoundNode? VisitObjectCreationExpression(BoundObjectCreationExpression node)
+        public override BoundNode VisitObjectCreationExpression(BoundObjectCreationExpression node)
         {
             VisitCall(node.Constructor, null, node.Arguments, node.ArgumentRefKindsOpt, node.ArgumentNamesOpt, node.ArgsToParamsOpt, node.DefaultArguments, node);
             return base.VisitObjectCreationExpression(node);
         }
 
-        public override BoundNode? VisitIndexerAccess(BoundIndexerAccess node)
+        public override BoundNode VisitIndexerAccess(BoundIndexerAccess node)
         {
             var indexer = node.Indexer;
 
@@ -569,7 +572,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
 
             var method = indexer.GetOwnOrInheritedGetMethod() ?? indexer.GetOwnOrInheritedSetMethod();
-            if ((object?)method != null)
+            if ((object)method != null)
             {
                 VisitCall(method, indexer, node.Arguments, node.ArgumentRefKindsOpt, node.ArgumentNamesOpt, node.ArgsToParamsOpt, node.DefaultArguments, node);
             }
@@ -585,7 +588,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        public override BoundNode? VisitPropertyAccess(BoundPropertyAccess node)
+        public override BoundNode VisitPropertyAccess(BoundPropertyAccess node)
         {
             var property = node.PropertySymbol;
             CheckRefReturningPropertyAccess(node, property);
@@ -606,7 +609,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitPropertyAccess(node);
         }
 
-        public override BoundNode? VisitLambda(BoundLambda node)
+        public override BoundNode VisitLambda(BoundLambda node)
         {
             if (_inExpressionLambda)
             {
@@ -695,7 +698,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return result;
         }
 
-        public override BoundNode? VisitBinaryOperator(BoundBinaryOperator node)
+        public override BoundNode VisitBinaryOperator(BoundBinaryOperator node)
         {
             // It is very common for bound trees to be left-heavy binary operators, eg,
             // a + b + c + d + ...
@@ -725,7 +728,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return null;
         }
 
-        public override BoundNode? VisitBinaryPattern(BoundBinaryPattern node)
+        public override BoundNode VisitBinaryPattern(BoundBinaryPattern node)
         {
             // Do not use left recursion because we can have many nested binary patterns.
 
@@ -747,7 +750,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return null;
         }
 
-        public override BoundNode? VisitUserDefinedConditionalLogicalOperator(BoundUserDefinedConditionalLogicalOperator node)
+        public override BoundNode VisitUserDefinedConditionalLogicalOperator(BoundUserDefinedConditionalLogicalOperator node)
         {
             CheckLiftedUserDefinedConditionalLogicalOperator(node);
 
@@ -797,7 +800,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        public override BoundNode? VisitUnaryOperator(BoundUnaryOperator node)
+        public override BoundNode VisitUnaryOperator(BoundUnaryOperator node)
         {
             CheckUnsafeType(node);
             CheckLiftedUnaryOp(node);
@@ -811,7 +814,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitUnaryOperator(node);
         }
 
-        public override BoundNode? VisitAddressOfOperator(BoundAddressOfOperator node)
+        public override BoundNode VisitAddressOfOperator(BoundAddressOfOperator node)
         {
             CheckUnsafeType(node);
             BoundExpression operand = node.Operand;
@@ -822,7 +825,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitAddressOfOperator(node);
         }
 
-        public override BoundNode? VisitIncrementOperator(BoundIncrementOperator node)
+        public override BoundNode VisitIncrementOperator(BoundIncrementOperator node)
         {
             if (_inExpressionLambda)
             {
@@ -832,19 +835,19 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitIncrementOperator(node);
         }
 
-        public override BoundNode? VisitPointerElementAccess(BoundPointerElementAccess node)
+        public override BoundNode VisitPointerElementAccess(BoundPointerElementAccess node)
         {
             NoteUnsafe(node);
             return base.VisitPointerElementAccess(node);
         }
 
-        public override BoundNode? VisitPointerIndirectionOperator(BoundPointerIndirectionOperator node)
+        public override BoundNode VisitPointerIndirectionOperator(BoundPointerIndirectionOperator node)
         {
             NoteUnsafe(node);
             return base.VisitPointerIndirectionOperator(node);
         }
 
-        public override BoundNode? VisitConversion(BoundConversion node)
+        public override BoundNode VisitConversion(BoundConversion node)
         {
             CheckUnsafeType(node.Operand);
             CheckUnsafeType(node);
@@ -858,7 +861,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return node;
 
                 case ConversionKind.AnonymousFunction:
-                    if (!wasInExpressionLambda && node.Type!.IsExpressionTree())
+                    if (!wasInExpressionLambda && node.Type.IsExpressionTree())
                     {
                         _inExpressionLambda = true;
                         // we report "unsafe in expression tree" at most once for each expression tree
@@ -920,7 +923,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return result;
         }
 
-        public override BoundNode? VisitDelegateCreationExpression(BoundDelegateCreationExpression node)
+        public override BoundNode VisitDelegateCreationExpression(BoundDelegateCreationExpression node)
         {
             if (node.Argument.Kind != BoundKind.MethodGroup)
             {
@@ -934,13 +937,13 @@ namespace Microsoft.CodeAnalysis.CSharp
             return null;
         }
 
-        public override BoundNode? VisitMethodGroup(BoundMethodGroup node)
+        public override BoundNode VisitMethodGroup(BoundMethodGroup node)
         {
             CheckMethodGroup(node, method: null, isExtensionMethod: false, parentIsConversion: false, convertedToType: null);
             return null;
         }
 
-        private void CheckMethodGroup(BoundMethodGroup node, MethodSymbol? method, bool isExtensionMethod, bool parentIsConversion, TypeSymbol? convertedToType)
+        private void CheckMethodGroup(BoundMethodGroup node, MethodSymbol method, bool isExtensionMethod, bool parentIsConversion, TypeSymbol convertedToType)
         {
             // Formerly reported ERR_MemGroupInExpressionTree when this occurred, but the expanded 
             // ERR_LambdaInIsAs makes this impossible (since the node will always be wrapped in
@@ -953,7 +956,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 {
                     Error(ErrorCode.ERR_ExpressionTreeContainsLocalFunction, node);
                 }
-                else if (parentIsConversion && convertedToType!.IsFunctionPointer())
+                else if (parentIsConversion && convertedToType.IsFunctionPointer())
                 {
                     Error(ErrorCode.ERR_AddressOfMethodGroupInExpressionTree, node);
                 }
@@ -972,14 +975,14 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        public override BoundNode? VisitNameOfOperator(BoundNameOfOperator node)
+        public override BoundNode VisitNameOfOperator(BoundNameOfOperator node)
         {
             // The nameof(...) operator collapses to a constant in an expression tree,
             // so it does not matter what is recursively within it.
             return node;
         }
 
-        public override BoundNode? VisitNullCoalescingOperator(BoundNullCoalescingOperator node)
+        public override BoundNode VisitNullCoalescingOperator(BoundNullCoalescingOperator node)
         {
             if (_inExpressionLambda && (node.LeftOperand.IsLiteralNull() || node.LeftOperand.IsLiteralDefault()))
             {
@@ -989,7 +992,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitNullCoalescingOperator(node);
         }
 
-        public override BoundNode? VisitNullCoalescingAssignmentOperator(BoundNullCoalescingAssignmentOperator node)
+        public override BoundNode VisitNullCoalescingAssignmentOperator(BoundNullCoalescingAssignmentOperator node)
         {
             if (_inExpressionLambda)
             {
@@ -999,7 +1002,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitNullCoalescingAssignmentOperator(node);
         }
 
-        public override BoundNode? VisitDynamicInvocation(BoundDynamicInvocation node)
+        public override BoundNode VisitDynamicInvocation(BoundDynamicInvocation node)
         {
             if (_inExpressionLambda)
             {
@@ -1015,7 +1018,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitDynamicInvocation(node);
         }
 
-        public override BoundNode? VisitDynamicIndexerAccess(BoundDynamicIndexerAccess node)
+        public override BoundNode VisitDynamicIndexerAccess(BoundDynamicIndexerAccess node)
         {
             if (_inExpressionLambda)
             {
@@ -1026,7 +1029,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitDynamicIndexerAccess(node);
         }
 
-        public override BoundNode? VisitDynamicMemberAccess(BoundDynamicMemberAccess node)
+        public override BoundNode VisitDynamicMemberAccess(BoundDynamicMemberAccess node)
         {
             if (_inExpressionLambda)
             {
@@ -1036,7 +1039,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitDynamicMemberAccess(node);
         }
 
-        public override BoundNode? VisitDynamicCollectionElementInitializer(BoundDynamicCollectionElementInitializer node)
+        public override BoundNode VisitDynamicCollectionElementInitializer(BoundDynamicCollectionElementInitializer node)
         {
             if (_inExpressionLambda)
             {
@@ -1046,7 +1049,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitDynamicCollectionElementInitializer(node);
         }
 
-        public override BoundNode? VisitDynamicObjectCreationExpression(BoundDynamicObjectCreationExpression node)
+        public override BoundNode VisitDynamicObjectCreationExpression(BoundDynamicObjectCreationExpression node)
         {
             if (_inExpressionLambda)
             {
@@ -1056,7 +1059,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitDynamicObjectCreationExpression(node);
         }
 
-        public override BoundNode? VisitIsPatternExpression(BoundIsPatternExpression node)
+        public override BoundNode VisitIsPatternExpression(BoundIsPatternExpression node)
         {
             if (_inExpressionLambda)
             {
@@ -1066,7 +1069,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitIsPatternExpression(node);
         }
 
-        public override BoundNode? VisitConvertedTupleLiteral(BoundConvertedTupleLiteral node)
+        public override BoundNode VisitConvertedTupleLiteral(BoundConvertedTupleLiteral node)
         {
             if (_inExpressionLambda)
             {
@@ -1076,7 +1079,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitConvertedTupleLiteral(node);
         }
 
-        public override BoundNode? VisitTupleLiteral(BoundTupleLiteral node)
+        public override BoundNode VisitTupleLiteral(BoundTupleLiteral node)
         {
             if (_inExpressionLambda)
             {
@@ -1086,7 +1089,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitTupleLiteral(node);
         }
 
-        public override BoundNode? VisitTupleBinaryOperator(BoundTupleBinaryOperator node)
+        public override BoundNode VisitTupleBinaryOperator(BoundTupleBinaryOperator node)
         {
             if (_inExpressionLambda)
             {
@@ -1096,7 +1099,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitTupleBinaryOperator(node);
         }
 
-        public override BoundNode? VisitThrowExpression(BoundThrowExpression node)
+        public override BoundNode VisitThrowExpression(BoundThrowExpression node)
         {
             if (_inExpressionLambda)
             {
@@ -1106,7 +1109,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitThrowExpression(node);
         }
 
-        public override BoundNode? VisitWithExpression(BoundWithExpression node)
+        public override BoundNode VisitWithExpression(BoundWithExpression node)
         {
             if (_inExpressionLambda)
             {
@@ -1116,7 +1119,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitWithExpression(node);
         }
 
-        public override BoundNode? VisitFunctionPointerInvocation(BoundFunctionPointerInvocation node)
+        public override BoundNode VisitFunctionPointerInvocation(BoundFunctionPointerInvocation node)
         {
             if (_inExpressionLambda)
             {
@@ -1126,7 +1129,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitFunctionPointerInvocation(node);
         }
 
-        public override BoundNode? VisitCollectionExpression(BoundCollectionExpression node)
+        public override BoundNode VisitCollectionExpression(BoundCollectionExpression node)
         {
             if (_inExpressionLambda)
             {
@@ -1140,7 +1143,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitCollectionExpression(node);
         }
 
-        public override BoundNode? VisitIfStatement(BoundIfStatement node)
+        public override BoundNode VisitIfStatement(BoundIfStatement node)
         {
             while (true)
             {
@@ -1167,7 +1170,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return null;
         }
 
-        public override BoundNode? VisitInterpolatedString(BoundInterpolatedString node)
+        public override BoundNode VisitInterpolatedString(BoundInterpolatedString node)
         {
             Visit(node.InterpolationData?.Construction);
             return base.VisitInterpolatedString(node);

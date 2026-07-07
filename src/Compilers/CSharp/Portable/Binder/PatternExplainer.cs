@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -30,16 +32,16 @@ namespace Microsoft.CodeAnalysis.CSharp
             ImmutableArray<BoundDecisionDagNode> nodes,
             BoundDecisionDagNode node,
             bool nullPaths,
-            HashSet<NullableWalker.DecisionDagReachabilityInfo>? reachabilityInfo,
+            HashSet<NullableWalker.DecisionDagReachabilityInfo> reachabilityInfo,
             out bool requiresFalseWhenClause)
         {
             Debug.Assert(nullPaths == (reachabilityInfo is not null));
 
             // compute the distance from each node to the endpoint.
-            var dist = PooledDictionary<BoundDecisionDagNode, (int distance, BoundDecisionDagNode? next)>.GetInstance();
+            var dist = PooledDictionary<BoundDecisionDagNode, (int distance, BoundDecisionDagNode next)>.GetInstance();
             int nodeCount = nodes.Length;
             int infinity = 2 * nodeCount + 2;
-            int distance(BoundDecisionDagNode? x)
+            int distance(BoundDecisionDagNode x)
             {
                 if (x == null)
                     return infinity;
@@ -53,7 +55,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 var n = nodes[i];
 
-                (int distance, BoundDecisionDagNode? next) distanceInfo;
+                (int distance, BoundDecisionDagNode next) distanceInfo;
 
                 switch (n)
                 {
@@ -91,9 +93,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             var distanceToNode = dist[nodes[0]].distance;
             requiresFalseWhenClause = distanceToNode > nodeCount;
             var result = ArrayBuilder<BoundDecisionDagNode>.GetInstance(capacity: distanceToNode);
-            for (BoundDecisionDagNode? n = nodes[0]; n != node;)
+            for (BoundDecisionDagNode n = nodes[0]; n != node;)
             {
-                Debug.Assert(n is not null);
                 result.Add(n);
                 switch (n)
                 {
@@ -101,7 +102,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         n = e.Next;
                         break;
                     case BoundTestDecisionDagNode t:
-                        (int d, BoundDecisionDagNode? next) = dist[t];
+                        (int d, BoundDecisionDagNode next) = dist[t];
                         Debug.Assert(next != null);
                         Debug.Assert(distance(next) == (d - 1));
                         n = next;
@@ -131,6 +132,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         private static void VisitPathsToNode(BoundDecisionDagNode rootNode, BoundDecisionDagNode targetNode, bool nullPaths,
             Func<ImmutableArray<BoundDecisionDagNode>, bool, bool> handler)
         {
+#nullable enable
             var pathBuilder = ArrayBuilder<BoundDecisionDagNode>.GetInstance();
             var stack = ArrayBuilder<BoundDecisionDagNode?>.GetInstance();
             exploreToNode(rootNode, currentRequiresFalseWhenClause: false);
@@ -226,6 +228,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                 return true;
             }
+#nullable disable
         }
 
         /// <summary>
@@ -241,7 +244,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             ImmutableArray<BoundDecisionDagNode> nodes,
             BoundDecisionDagNode targetNode,
             bool nullPaths,
-            HashSet<NullableWalker.DecisionDagReachabilityInfo>? reachabilityInfo,
+            HashSet<NullableWalker.DecisionDagReachabilityInfo> reachabilityInfo,
             out bool requiresFalseWhenClause,
             out bool unnamedEnumValue)
         {
@@ -273,7 +276,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             static string samplePatternFromOtherPaths(Binder binder, BoundDagTemp rootIdentifier, BoundDecisionDagNode rootNode,
                 BoundDecisionDagNode targetNode, bool nullPaths, out bool requiresFalseWhenClause, out bool unnamedEnumValue)
             {
-                string? altSamplePatternForTemp = null;
+                string altSamplePatternForTemp = null;
                 bool altRequiresFalseWhenClause = false;
                 bool altUnnamedEnumValue = false;
 
@@ -379,7 +382,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
 
             // Handle the special case of a single test that is not handled.
-            string? tryHandleSingleTest()
+            string tryHandleSingleTest()
             {
                 if (evaluations.IsEmpty && constraints.Length == 1)
                 {
@@ -399,11 +402,11 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
 
             // Handle the special case of a type test and a type evaluation.
-            string? tryHandleTypeTestAndTypeEvaluation(ref bool unnamedEnumValue)
+            string tryHandleTypeTestAndTypeEvaluation(ref bool unnamedEnumValue)
             {
                 if (evaluations is [BoundDagTypeEvaluation { Type: var evaluationType } te])
                 {
-                    TypeSymbol? constraintType = null;
+                    TypeSymbol constraintType = null;
                     bool sense = false;
 
                     if (constraints is [(BoundDagTypeTest { Type: var constraintType1 }, true)])
@@ -429,7 +432,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
 
             // Handle the special case of a null test and a type evaluation to unbox a nullable value type
-            string? tryHandleUnboxNullableValueType(ref bool unnamedEnumValue)
+            string tryHandleUnboxNullableValueType(ref bool unnamedEnumValue)
             {
                 if (evaluations.Length == 1 && constraints.Length == 1 &&
                     constraints[0] is (BoundDagNonNullTest _, true) &&
@@ -446,7 +449,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
 
             // Handle the special case of a list pattern
-            string? tryHandleListPattern(ref bool unnamedEnumValue)
+            string tryHandleListPattern(ref bool unnamedEnumValue)
             {
                 if (constraints.IsEmpty && evaluations.IsEmpty)
                     return null;
@@ -459,7 +462,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                 if (evaluations[0] is BoundDagPropertyEvaluation { IsLengthOrCount: true } lengthOrCount)
                 {
-                    BoundDagSliceEvaluation? slice = null;
+                    BoundDagSliceEvaluation slice = null;
                     for (int i = 1; i < evaluations.Length; i++)
                     {
                         switch (evaluations[i])
@@ -482,7 +485,6 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                     var lengthTemp = lengthOrCount.MakeResultTemp();
                     var lengthValues = (IConstantValueSet<int>)computeRemainingValues(ValueSetFactory.ForLength, getArray(constraintMap, lengthTemp));
-                    Debug.Assert(lengthValues.Sample is not null);
                     int lengthValue = lengthValues.Sample.Int32Value;
                     if (slice != null)
                     {
@@ -545,7 +547,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
 
             // Handle the special case of a tuple pattern
-            string? tryHandleTuplePattern(ref bool unnamedEnumValue)
+            string tryHandleTuplePattern(ref bool unnamedEnumValue)
             {
                 if (input.Type.IsTupleType &&
                     constraints.IsEmpty &&
@@ -574,7 +576,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
 
             // Handle the special case of numeric limits
-            string? tryHandleNumericLimits(ref bool unnamedEnumValue)
+            string tryHandleNumericLimits(ref bool unnamedEnumValue)
             {
                 if (evaluations.IsEmpty &&
                     constraints.All(t => t switch
@@ -598,7 +600,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 return null;
             }
 
-            string? tryHandleTypeUnionLimits()
+            string tryHandleTypeUnionLimits()
             {
                 if (evaluations.IsEmpty && ValueSetFactory.TypeUnionValueSetFactoryForInput(binder.Compilation, input) is { } factory &&
                     constraints.All(t => t switch
@@ -657,7 +659,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
 
             // Handle the special case of a recursive pattern
-            string? tryHandleRecursivePattern(ref bool unnamedEnumValue)
+            string tryHandleRecursivePattern(ref bool unnamedEnumValue)
             {
                 if (constraints.IsEmpty && evaluations.IsEmpty)
                     return null;
@@ -668,7 +670,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     return null;
                 }
 
-                string? deconstruction = null;
+                string deconstruction = null;
                 var properties = new Dictionary<Symbol, string>();
                 bool needsPropertyString = false;
 
@@ -742,7 +744,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     }
                 }
 
-                string? typeName = requireExactType ? input.Type.ToDisplayString() : null;
+                string typeName = requireExactType ? input.Type.ToDisplayString() : null;
                 needsPropertyString |= deconstruction == null && typeName == null || properties.Count != 0;
                 var propertyString = needsPropertyString ? (deconstruction != null ? " {" : "{") + string.Join(", ", properties.Select(kvp => $" {kvp.Key.Name}: {kvp.Value}")) + " }" : null;
                 Debug.Assert(typeName != null || deconstruction != null || propertyString != null);
@@ -894,7 +896,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 case SpecialType.System_Decimal:
                 case SpecialType.System_Char:
                 case SpecialType.System_String:
-                    return ObjectDisplay.FormatPrimitive(value.Value, ObjectDisplayOptions.EscapeNonPrintableCharacters | ObjectDisplayOptions.IncludeTypeSuffix | ObjectDisplayOptions.UseQuotes)!;
+                    return ObjectDisplay.FormatPrimitive(value.Value, ObjectDisplayOptions.EscapeNonPrintableCharacters | ObjectDisplayOptions.IncludeTypeSuffix | ObjectDisplayOptions.UseQuotes);
 
                 case SpecialType.System_Single:
                     return value.SingleValue switch
@@ -902,7 +904,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         float.NaN => "float.NaN",
                         float.NegativeInfinity => "float.NegativeInfinity",
                         float.PositiveInfinity => "float.PositiveInfinity",
-                        var x => ObjectDisplay.FormatPrimitive(x, ObjectDisplayOptions.IncludeTypeSuffix)!
+                        var x => ObjectDisplay.FormatPrimitive(x, ObjectDisplayOptions.IncludeTypeSuffix)
                     };
 
                 case SpecialType.System_Double:
@@ -911,7 +913,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         double.NaN => "double.NaN",
                         double.NegativeInfinity => "double.NegativeInfinity",
                         double.PositiveInfinity => "double.PositiveInfinity",
-                        var x => ObjectDisplay.FormatPrimitive(x, ObjectDisplayOptions.IncludeTypeSuffix)!
+                        var x => ObjectDisplay.FormatPrimitive(x, ObjectDisplayOptions.IncludeTypeSuffix)
                     };
 
                 default:

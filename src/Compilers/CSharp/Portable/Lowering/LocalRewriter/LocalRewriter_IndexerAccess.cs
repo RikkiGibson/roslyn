@@ -237,7 +237,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        public override BoundNode VisitInlineArrayAccess(BoundInlineArrayAccess node)
+        public override BoundNode? VisitInlineArrayAccess(BoundInlineArrayAccess node)
         {
             Debug.Assert(_factory.ModuleBuilderOpt is { });
             Debug.Assert(_diagnostics.DiagnosticBag is { });
@@ -460,32 +460,32 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        public override BoundNode VisitListPatternIndexPlaceholder(BoundListPatternIndexPlaceholder node)
+        public override BoundNode? VisitListPatternIndexPlaceholder(BoundListPatternIndexPlaceholder node)
         {
             throw ExceptionUtilities.Unreachable();
         }
 
-        public override BoundNode VisitListPatternReceiverPlaceholder(BoundListPatternReceiverPlaceholder node)
+        public override BoundNode? VisitListPatternReceiverPlaceholder(BoundListPatternReceiverPlaceholder node)
         {
             throw ExceptionUtilities.Unreachable();
         }
 
-        public override BoundNode VisitSlicePatternRangePlaceholder(BoundSlicePatternRangePlaceholder node)
+        public override BoundNode? VisitSlicePatternRangePlaceholder(BoundSlicePatternRangePlaceholder node)
         {
             throw ExceptionUtilities.Unreachable();
         }
 
-        public override BoundNode VisitSlicePatternReceiverPlaceholder(BoundSlicePatternReceiverPlaceholder node)
+        public override BoundNode? VisitSlicePatternReceiverPlaceholder(BoundSlicePatternReceiverPlaceholder node)
         {
             throw ExceptionUtilities.Unreachable();
         }
 
-        public override BoundNode VisitImplicitIndexerReceiverPlaceholder(BoundImplicitIndexerReceiverPlaceholder node)
+        public override BoundNode? VisitImplicitIndexerReceiverPlaceholder(BoundImplicitIndexerReceiverPlaceholder node)
         {
             return PlaceholderReplacement(node);
         }
 
-        public override BoundNode VisitImplicitIndexerValuePlaceholder(BoundImplicitIndexerValuePlaceholder node)
+        public override BoundNode? VisitImplicitIndexerValuePlaceholder(BoundImplicitIndexerValuePlaceholder node)
         {
             return PlaceholderReplacement(node);
         }

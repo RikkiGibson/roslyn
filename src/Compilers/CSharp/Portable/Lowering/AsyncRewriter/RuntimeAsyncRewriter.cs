@@ -128,7 +128,7 @@ internal sealed class RuntimeAsyncRewriter : BoundTreeRewriterWithStackGuard
         return (BoundExpression?)result;
     }
 
-    public override BoundNode VisitAwaitExpression(BoundAwaitExpression node)
+    public override BoundNode? VisitAwaitExpression(BoundAwaitExpression node)
     {
         var nodeType = node.Expression.Type;
         Debug.Assert(nodeType is not null);
@@ -156,7 +156,7 @@ internal sealed class RuntimeAsyncRewriter : BoundTreeRewriterWithStackGuard
             // System.Runtime.CompilerServices.RuntimeHelpers.Await(awaitedExpression)
             var expr = VisitExpression(node.Expression);
             _placeholderMap.Add(awaitableInfo.RuntimeAsyncAwaitCallPlaceholder, expr);
-            var call = Visit(runtimeAsyncAwaitCall);
+            var call = Visit(awaitableInfo.RuntimeAsyncAwaitCall);
             _placeholderMap.Remove(awaitableInfo.RuntimeAsyncAwaitCallPlaceholder);
             return call;
         }
@@ -315,7 +315,7 @@ internal sealed class RuntimeAsyncRewriter : BoundTreeRewriterWithStackGuard
         return _placeholderMap[node];
     }
 
-    public override BoundNode VisitAssignmentOperator(BoundAssignmentOperator node)
+    public override BoundNode? VisitAssignmentOperator(BoundAssignmentOperator node)
     {
         if (node.Left is not BoundLocal leftLocal)
         {
@@ -337,7 +337,7 @@ internal sealed class RuntimeAsyncRewriter : BoundTreeRewriterWithStackGuard
                 createHoistedLocal,
                 createHoistedAccess,
                 this,
-                isRuntimeAsync: true)!;
+                isRuntimeAsync: true);
         }
 
         var visitedLeftOrProxy = VisitExpression(leftLocal);
@@ -388,7 +388,7 @@ internal sealed class RuntimeAsyncRewriter : BoundTreeRewriterWithStackGuard
         return base.VisitLocal(node)!;
     }
 
-    public override BoundNode VisitParameter(BoundParameter node)
+    public override BoundNode? VisitParameter(BoundParameter node)
     {
         if (TryReplaceWithProxy(node.ParameterSymbol, node.Syntax, out BoundNode? replacement))
         {
@@ -402,7 +402,7 @@ internal sealed class RuntimeAsyncRewriter : BoundTreeRewriterWithStackGuard
         return base.VisitParameter(node);
     }
 
-    public override BoundNode VisitThisReference(BoundThisReference node)
+    public override BoundNode? VisitThisReference(BoundThisReference node)
     {
         Debug.Assert(_factory.CurrentFunction is not null);
         var thisParameter = this._factory.CurrentFunction.ThisParameter;
@@ -416,7 +416,7 @@ internal sealed class RuntimeAsyncRewriter : BoundTreeRewriterWithStackGuard
         return base.VisitThisReference(node);
     }
 
-    public override BoundNode VisitExpressionStatement(BoundExpressionStatement node)
+    public override BoundNode? VisitExpressionStatement(BoundExpressionStatement node)
     {
         if (node.Expression is BoundAwaitExpression { AwaitableInfo.IsDynamic: true } awaitExpression)
         {

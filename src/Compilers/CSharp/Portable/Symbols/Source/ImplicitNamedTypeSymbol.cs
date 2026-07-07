@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -51,7 +53,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// Returns null for a submission class.
         /// This ensures that a submission class does not inherit methods such as ToString or GetHashCode.
         /// </summary>
-        internal override NamedTypeSymbol? BaseTypeNoUseSiteDiagnostics
+        internal override NamedTypeSymbol BaseTypeNoUseSiteDiagnostics
             => IsScriptClass ? null : this.DeclaringCompilation.GetSpecialType(Microsoft.CodeAnalysis.SpecialType.System_Object);
 
         protected override void CheckBase(BindingDiagnosticBag diagnostics)
@@ -61,7 +63,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             diagnostics.ReportUseSite(this.DeclaringCompilation.GetSpecialType(SpecialType.System_Object), GetFirstLocation());
         }
 
-        internal override NamedTypeSymbol? GetDeclaredBaseType(ConsList<TypeSymbol> basesBeingResolved)
+        internal override NamedTypeSymbol GetDeclaredBaseType(ConsList<TypeSymbol> basesBeingResolved)
         {
             return BaseTypeNoUseSiteDiagnostics;
         }
@@ -101,7 +103,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return false; }
         }
 
-        internal override NamedTypeSymbol? ComImportCoClass
+        internal override NamedTypeSymbol ComImportCoClass
         {
             get { return null; }
         }
@@ -146,7 +148,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return false; }
         }
 
-        internal override bool GetGuidString(out string? guidString)
+        internal override bool GetGuidString(out string guidString)
         {
             guidString = null;
             return false;
@@ -162,7 +164,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return ImmutableArray<string>.Empty;
         }
 
-        internal override ObsoleteAttributeData? ObsoleteAttributeData
+        internal override ObsoleteAttributeData ObsoleteAttributeData
         {
             get { return null; }
         }
@@ -175,11 +177,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal override bool IsInterpolatedStringHandlerType => false;
 
-        internal sealed override ParameterSymbol? ExtensionParameter => null;
+        internal sealed override ParameterSymbol ExtensionParameter => null;
 
         internal sealed override NamedTypeSymbol AsNativeInteger() => throw ExceptionUtilities.Unreachable();
 
-        internal sealed override NamedTypeSymbol? NativeIntegerUnderlyingType => null;
+        internal sealed override NamedTypeSymbol NativeIntegerUnderlyingType => null;
 
         internal sealed override bool HasInlineArrayAttribute(out int length)
         {
@@ -187,6 +189,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return false;
         }
 
+#nullable enable
         internal sealed override bool HasCollectionBuilderAttribute(out TypeSymbol? builderType, out string? methodName)
         {
             builderType = null;

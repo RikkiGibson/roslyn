@@ -164,13 +164,13 @@ namespace Microsoft.CodeAnalysis.CSharp
             ParameterSymbol? thisParameter,
             MethodSymbol method,
             int methodOrdinal,
-            MethodSymbol? substitutedSourceMethod,
+            MethodSymbol substitutedSourceMethod,
             ArrayBuilder<EncLambdaInfo> lambdaDebugInfoBuilder,
             ArrayBuilder<LambdaRuntimeRudeEditInfo> lambdaRuntimeRudeEditsBuilder,
             VariableSlotAllocator? slotAllocator,
             TypeCompilationState compilationState,
             BindingDiagnosticBag diagnostics,
-            HashSet<LocalSymbol>? assignLocals)
+            HashSet<LocalSymbol> assignLocals)
             : base(slotAllocator, compilationState, diagnostics)
         {
             RoslynDebug.Assert(analysis != null);
@@ -234,14 +234,14 @@ namespace Microsoft.CodeAnalysis.CSharp
             ParameterSymbol? thisParameter,
             MethodSymbol method,
             int methodOrdinal,
-            MethodSymbol? substitutedSourceMethod,
+            MethodSymbol substitutedSourceMethod,
             ArrayBuilder<EncLambdaInfo> lambdaDebugInfoBuilder,
             ArrayBuilder<LambdaRuntimeRudeEditInfo> lambdaRuntimeRudeEditsBuilder,
             ArrayBuilder<EncClosureInfo> closureDebugInfoBuilder,
             VariableSlotAllocator? slotAllocator,
             TypeCompilationState compilationState,
             BindingDiagnosticBag diagnostics,
-            HashSet<LocalSymbol>? assignLocals)
+            HashSet<LocalSymbol> assignLocals)
         {
             Debug.Assert(thisType is not null);
             Debug.Assert(thisParameter is null || TypeSymbol.Equals(thisParameter.Type, thisType, TypeCompareKind.ConsiderEverything2));

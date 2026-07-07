@@ -268,9 +268,9 @@ namespace Microsoft.CodeAnalysis.CSharp
             PropertySymbol? invocationListProperty;
             if (TryGetWellKnownTypeMember(syntax, WellKnownMember.System_Runtime_InteropServices_WindowsRuntime_EventRegistrationTokenTable_T__InvocationList, out invocationListProperty))
             {
-                MethodSymbol? invocationListAccessor = invocationListProperty.GetMethod;
+                MethodSymbol invocationListAccessor = invocationListProperty.GetMethod;
 
-                if ((object?)invocationListAccessor == null)
+                if ((object)invocationListAccessor == null)
                 {
                     string accessorName = SourcePropertyAccessorSymbol.GetAccessorName(invocationListProperty.Name,
                         getNotSet: true,

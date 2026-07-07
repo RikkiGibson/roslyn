@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Threading;
@@ -11,7 +13,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
     internal sealed class PropertySymbol : Symbol, IPropertySymbol
     {
         private readonly Symbols.PropertySymbol _underlying;
-        private ITypeSymbol? _lazyType;
+        private ITypeSymbol _lazyType;
 
         public PropertySymbol(Symbols.PropertySymbol underlying)
         {
@@ -46,12 +48,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
             get { return _underlying.Parameters.GetPublicSymbols(); }
         }
 
-        IMethodSymbol? IPropertySymbol.GetMethod
+        IMethodSymbol IPropertySymbol.GetMethod
         {
             get { return _underlying.GetMethod.GetPublicSymbol(); }
         }
 
-        IMethodSymbol? IPropertySymbol.SetMethod
+        IMethodSymbol IPropertySymbol.SetMethod
         {
             get { return _underlying.SetMethod.GetPublicSymbol(); }
         }
@@ -64,7 +66,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
             }
         }
 
-        IPropertySymbol? IPropertySymbol.OverriddenProperty
+        IPropertySymbol IPropertySymbol.OverriddenProperty
         {
             get { return _underlying.OverriddenProperty.GetPublicSymbol(); }
         }
@@ -107,6 +109,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
 
         RefKind IPropertySymbol.RefKind => _underlying.RefKind;
 
+#nullable enable
         IPropertySymbol? IPropertySymbol.PartialDefinitionPart => _underlying.PartialDefinitionPart.GetPublicSymbol();
 
         IPropertySymbol? IPropertySymbol.PartialImplementationPart => _underlying.PartialImplementationPart.GetPublicSymbol();
@@ -123,6 +126,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
 
             return null;
         }
+#nullable disable
 
         #region ISymbol Members
 
@@ -131,8 +135,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
             visitor.VisitProperty(this);
         }
 
-        protected override TResult? Accept<TResult>(SymbolVisitor<TResult> visitor)
-            where TResult : default
+        protected override TResult Accept<TResult>(SymbolVisitor<TResult> visitor)
         {
             return visitor.VisitProperty(this);
         }

@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp.Symbols;
@@ -25,7 +27,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                                      Symbol symbol,
                                      Binder rootBinder,
                                      PublicSemanticModel containingPublicSemanticModel,
-                                     ImmutableDictionary<Symbol, Symbol>? parentRemappedSymbolsOpt = null) :
+                                     ImmutableDictionary<Symbol, Symbol> parentRemappedSymbolsOpt = null) :
             base(syntax, symbol, rootBinder, containingPublicSemanticModel, parentRemappedSymbolsOpt)
         {
             Debug.Assert(!(syntax is ConstructorInitializerSyntax || syntax is PrimaryConstructorBaseTypeSyntax));
@@ -80,11 +82,11 @@ namespace Microsoft.CodeAnalysis.CSharp
             switch (rootSyntax.Kind())
             {
                 case SyntaxKind.VariableDeclarator:
-                    rootSyntax = ((VariableDeclaratorSyntax)rootSyntax).Initializer!;
+                    rootSyntax = ((VariableDeclaratorSyntax)rootSyntax).Initializer;
                     break;
 
                 case SyntaxKind.Parameter:
-                    rootSyntax = ((ParameterSyntax)rootSyntax).Default!;
+                    rootSyntax = ((ParameterSyntax)rootSyntax).Default;
                     break;
 
                 case SyntaxKind.EqualsValueClause:
@@ -92,11 +94,11 @@ namespace Microsoft.CodeAnalysis.CSharp
                     break;
 
                 case SyntaxKind.EnumMemberDeclaration:
-                    rootSyntax = ((EnumMemberDeclarationSyntax)rootSyntax).EqualsValue!;
+                    rootSyntax = ((EnumMemberDeclarationSyntax)rootSyntax).EqualsValue;
                     break;
 
                 case SyntaxKind.PropertyDeclaration:
-                    rootSyntax = ((PropertyDeclarationSyntax)rootSyntax).Initializer!;
+                    rootSyntax = ((PropertyDeclarationSyntax)rootSyntax).Initializer;
                     break;
 
                 default:
@@ -108,7 +110,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         internal override BoundNode Bind(Binder binder, CSharpSyntaxNode node, BindingDiagnosticBag diagnostics)
         {
-            EqualsValueClauseSyntax? equalsValue = null;
+            EqualsValueClauseSyntax equalsValue = null;
 
             switch (node.Kind())
             {
@@ -149,7 +151,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     {
                         var field = (FieldSymbol)this.MemberSymbol;
                         var enumField = field as SourceEnumConstantSymbol;
-                        if ((object?)enumField != null)
+                        if ((object)enumField != null)
                         {
                             return binder.BindEnumConstantInitializer(enumField, equalsValue, diagnostics);
                         }
@@ -198,7 +200,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        internal override bool TryGetSpeculativeSemanticModelCore(SyntaxTreeSemanticModel parentModel, int position, EqualsValueClauseSyntax initializer, out PublicSemanticModel? speculativeModel)
+        internal override bool TryGetSpeculativeSemanticModelCore(SyntaxTreeSemanticModel parentModel, int position, EqualsValueClauseSyntax initializer, out PublicSemanticModel speculativeModel)
         {
             var binder = this.GetEnclosingBinder(position);
             if (binder == null)
@@ -212,37 +214,37 @@ namespace Microsoft.CodeAnalysis.CSharp
             return true;
         }
 
-        internal override bool TryGetSpeculativeSemanticModelCore(SyntaxTreeSemanticModel parentModel, int position, ConstructorInitializerSyntax constructorInitializer, out PublicSemanticModel? speculativeModel)
+        internal override bool TryGetSpeculativeSemanticModelCore(SyntaxTreeSemanticModel parentModel, int position, ConstructorInitializerSyntax constructorInitializer, out PublicSemanticModel speculativeModel)
         {
             speculativeModel = null;
             return false;
         }
 
-        internal override bool TryGetSpeculativeSemanticModelCore(SyntaxTreeSemanticModel parentModel, int position, PrimaryConstructorBaseTypeSyntax constructorInitializer, out PublicSemanticModel? speculativeModel)
+        internal override bool TryGetSpeculativeSemanticModelCore(SyntaxTreeSemanticModel parentModel, int position, PrimaryConstructorBaseTypeSyntax constructorInitializer, out PublicSemanticModel speculativeModel)
         {
             speculativeModel = null;
             return false;
         }
 
-        internal override bool TryGetSpeculativeSemanticModelCore(SyntaxTreeSemanticModel parentModel, int position, ArrowExpressionClauseSyntax expressionBody, out PublicSemanticModel? speculativeModel)
+        internal override bool TryGetSpeculativeSemanticModelCore(SyntaxTreeSemanticModel parentModel, int position, ArrowExpressionClauseSyntax expressionBody, out PublicSemanticModel speculativeModel)
         {
             speculativeModel = null;
             return false;
         }
 
-        internal override bool TryGetSpeculativeSemanticModelCore(SyntaxTreeSemanticModel parentModel, int position, StatementSyntax statement, out PublicSemanticModel? speculativeModel)
+        internal override bool TryGetSpeculativeSemanticModelCore(SyntaxTreeSemanticModel parentModel, int position, StatementSyntax statement, out PublicSemanticModel speculativeModel)
         {
             speculativeModel = null;
             return false;
         }
 
-        internal override bool TryGetSpeculativeSemanticModelForMethodBodyCore(SyntaxTreeSemanticModel parentModel, int position, BaseMethodDeclarationSyntax method, out PublicSemanticModel? speculativeModel)
+        internal override bool TryGetSpeculativeSemanticModelForMethodBodyCore(SyntaxTreeSemanticModel parentModel, int position, BaseMethodDeclarationSyntax method, out PublicSemanticModel speculativeModel)
         {
             speculativeModel = null;
             return false;
         }
 
-        internal override bool TryGetSpeculativeSemanticModelForMethodBodyCore(SyntaxTreeSemanticModel parentModel, int position, AccessorDeclarationSyntax accessor, out PublicSemanticModel? speculativeModel)
+        internal override bool TryGetSpeculativeSemanticModelForMethodBodyCore(SyntaxTreeSemanticModel parentModel, int position, AccessorDeclarationSyntax accessor, out PublicSemanticModel speculativeModel)
         {
             speculativeModel = null;
             return false;
@@ -253,8 +255,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             Binder binder,
             DiagnosticBag diagnostics,
             bool createSnapshots,
-            out NullableWalker.SnapshotManager? snapshotManager,
-            ref ImmutableDictionary<Symbol, Symbol>? remappedSymbols)
+            out NullableWalker.SnapshotManager snapshotManager,
+            ref ImmutableDictionary<Symbol, Symbol> remappedSymbols)
         {
             // https://github.com/dotnet/roslyn/issues/46424
             // Bind and analyze preceding field initializers in order to give an accurate initial nullable state.
@@ -265,6 +267,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         {
             NullableWalker.AnalyzeWithoutRewrite(Compilation, MemberSymbol, boundRoot, binder, diagnostics, createSnapshots);
         }
+
+#nullable enable
 
         protected override bool IsNullableAnalysisEnabledCore()
         {

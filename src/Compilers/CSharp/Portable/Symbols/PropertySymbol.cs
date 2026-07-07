@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -19,7 +21,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// <summary>
         /// As a performance optimization, cache parameter types and refkinds - overload resolution uses them a lot.
         /// </summary>
-        private ParameterSignature? _lazyParameterSignature;
+        private ParameterSignature _lazyParameterSignature;
 
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // Changes to the public interface of this class should remain synchronized with the VB version.
@@ -198,7 +200,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// <summary>
         /// The 'get' accessor of the property, or null if the property is write-only.
         /// </summary>
-        public abstract MethodSymbol? GetMethod
+        public abstract MethodSymbol GetMethod
         {
             get;
         }
@@ -206,7 +208,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// <summary>
         /// The 'set' accessor of the property, or null if the property is read-only.
         /// </summary>
-        public abstract MethodSymbol? SetMethod
+        public abstract MethodSymbol SetMethod
         {
             get;
         }
@@ -220,7 +222,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// <summary>
         /// Returns the overridden property, or null.
         /// </summary>
-        public PropertySymbol? OverriddenProperty
+        public PropertySymbol OverriddenProperty
         {
             get
             {
@@ -250,14 +252,14 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get
             {
                 // Dev10 gives preference to the getter.
-                MethodSymbol? accessor = GetMethod ?? SetMethod;
+                MethodSymbol accessor = GetMethod ?? SetMethod;
 
                 // false is a reasonable default if there are no accessors (e.g. not done typing).
-                return (object?)accessor != null && accessor.HidesBaseMethodsByName;
+                return (object)accessor != null && accessor.HidesBaseMethodsByName;
             }
         }
 
-        internal PropertySymbol GetLeastOverriddenProperty(NamedTypeSymbol? accessingTypeOpt)
+        internal PropertySymbol GetLeastOverriddenProperty(NamedTypeSymbol accessingTypeOpt)
         {
             accessingTypeOpt = accessingTypeOpt?.OriginalDefinition;
             PropertySymbol p = this;
@@ -283,9 +285,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 //   }
                 //
                 // See InternalsVisibleToAndStrongNameTests: IvtVirtualCall1, IvtVirtualCall2, IvtVirtual_ParamsAndDynamic.
-                PropertySymbol? overridden = p.OverriddenProperty;
+                PropertySymbol overridden = p.OverriddenProperty;
                 var discardedUseSiteInfo = CompoundUseSiteInfo<AssemblySymbol>.Discarded;
-                if ((object?)overridden == null ||
+                if ((object)overridden == null ||
                     (accessingTypeOpt is { } && !AccessCheck.IsSymbolAccessible(overridden, accessingTypeOpt, ref discardedUseSiteInfo)))
                 {
                     break;
@@ -318,11 +320,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// </remarks>
         public abstract ImmutableArray<PropertySymbol> ExplicitInterfaceImplementations { get; }
 
+#nullable enable
         internal virtual PropertySymbol? PartialImplementationPart => null;
         internal virtual PropertySymbol? PartialDefinitionPart => null;
 
         IPropertySymbolInternal? IPropertySymbolInternal.PartialImplementationPart => PartialImplementationPart;
         IPropertySymbolInternal? IPropertySymbolInternal.PartialDefinitionPart => PartialDefinitionPart;
+#nullable disable
 
         /// <summary>
         /// Gets the kind of this symbol.
@@ -406,8 +410,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             // we check if its definition depends on a type from a unified reference.
             if (this.ContainingModule.HasUnifiedReferences)
             {
-                HashSet<TypeSymbol>? unificationCheckedTypes = null;
-                DiagnosticInfo? diagnosticInfo = result.DiagnosticInfo;
+                HashSet<TypeSymbol> unificationCheckedTypes = null;
+                DiagnosticInfo diagnosticInfo = result.DiagnosticInfo;
                 if (this.TypeWithAnnotations.GetUnificationUseSiteDiagnosticRecursive(ref diagnosticInfo, this, ref unificationCheckedTypes) ||
                     GetUnificationUseSiteDiagnosticRecursive(ref diagnosticInfo, this.RefCustomModifiers, this, ref unificationCheckedTypes) ||
                     GetUnificationUseSiteDiagnosticRecursive(ref diagnosticInfo, this.Parameters, this, ref unificationCheckedTypes))
@@ -431,8 +435,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get
             {
-                DiagnosticInfo? info = GetUseSiteInfo().DiagnosticInfo;
-                return (object?)info != null && info.Code is (int)ErrorCode.ERR_BindToBogus or (int)ErrorCode.ERR_UnsupportedCompilerFeature;
+                DiagnosticInfo info = GetUseSiteInfo().DiagnosticInfo;
+                return (object)info != null && info.Code is (int)ErrorCode.ERR_BindToBogus or (int)ErrorCode.ERR_UnsupportedCompilerFeature;
             }
         }
 
@@ -445,9 +449,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         #region Equality
 
-        public override bool Equals(Symbol? symbol, TypeCompareKind compareKind)
+        public override bool Equals(Symbol symbol, TypeCompareKind compareKind)
         {
-            PropertySymbol? other = symbol as PropertySymbol;
+            PropertySymbol other = symbol as PropertySymbol;
 
             if (ReferenceEquals(null, other))
             {

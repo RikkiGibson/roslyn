@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -38,7 +40,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 (isStatic ? DeclarationModifiers.Static : DeclarationModifiers.None);
         }
 
-        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
+        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
         {
             base.AddSynthesizedAttributes(moduleBuilder, ref attributes);
 
@@ -58,7 +60,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         public override string Name
             => _name;
 
-        internal override ConstantValue? GetConstantValue(ConstantFieldsInProgress inProgress, bool earlyDecodingWellKnownAttributes)
+        internal override ConstantValue GetConstantValue(ConstantFieldsInProgress inProgress, bool earlyDecodingWellKnownAttributes)
             => null;
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences
@@ -129,6 +131,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         internal override TypeWithAnnotations GetFieldType(ConsList<FieldSymbol> fieldsBeingBound)
             => _property.TypeWithAnnotations;
 
+#nullable enable
         internal bool InfersNullableAnnotation
         {
             get
@@ -238,13 +241,14 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return filteredDiagnostics;
             }
         }
+#nullable disable
 
         internal override bool HasPointerType
             => _property.HasPointerType;
 
         protected sealed override void DecodeWellKnownAttributeImpl(ref DecodeWellKnownAttributeArguments<AttributeSyntax, CSharpAttributeData, AttributeLocation> arguments)
         {
-            Debug.Assert((object?)arguments.AttributeSyntaxOpt != null);
+            Debug.Assert((object)arguments.AttributeSyntaxOpt != null);
             Debug.Assert(arguments.Diagnostics is BindingDiagnosticBag);
 
             var attribute = arguments.Attribute;
@@ -268,7 +272,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         public override NamedTypeSymbol ContainingType
             => _property.ContainingType;
 
-        internal override void PostDecodeWellKnownAttributes(ImmutableArray<CSharpAttributeData> boundAttributes, ImmutableArray<AttributeSyntax> allAttributeSyntaxNodes, BindingDiagnosticBag diagnostics, AttributeLocation symbolPart, WellKnownAttributeData? decodedData)
+        internal override void PostDecodeWellKnownAttributes(ImmutableArray<CSharpAttributeData> boundAttributes, ImmutableArray<AttributeSyntax> allAttributeSyntaxNodes, BindingDiagnosticBag diagnostics, AttributeLocation symbolPart, WellKnownAttributeData decodedData)
         {
             base.PostDecodeWellKnownAttributes(boundAttributes, allAttributeSyntaxNodes, diagnostics, symbolPart, decodedData);
 

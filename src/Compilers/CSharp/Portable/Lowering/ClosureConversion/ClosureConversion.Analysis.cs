@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Immutable;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -23,6 +25,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// </summary>
         internal sealed partial class Analysis
         {
+#nullable enable
             /// <summary>
             /// If a local function is in the set, at some point in the code it is converted to a delegate and should then not be optimized to a struct closure.
             /// Also contains all lambdas (as they are converted to delegates implicitly).
@@ -62,12 +65,13 @@ namespace Microsoft.CodeAnalysis.CSharp
                 _slotAllocator = slotAllocator;
                 _compilationState = compilationState;
             }
+#nullable disable
 
             public static Analysis Analyze(
                 BoundNode node,
                 MethodSymbol method,
                 int topLevelMethodOrdinal,
-                VariableSlotAllocator? slotAllocatorOpt,
+                VariableSlotAllocator slotAllocatorOpt,
                 TypeCompilationState compilationState,
                 DiagnosticBag diagnostics)
             {
@@ -105,11 +109,11 @@ namespace Microsoft.CodeAnalysis.CSharp
                     switch (node.Kind)
                     {
                         case BoundKind.SequencePoint:
-                            node = ((BoundSequencePoint)node).StatementOpt!;
+                            node = ((BoundSequencePoint)node).StatementOpt;
                             break;
 
                         case BoundKind.SequencePointWithSpan:
-                            node = ((BoundSequencePointWithSpan)node).StatementOpt!;
+                            node = ((BoundSequencePointWithSpan)node).StatementOpt;
                             break;
 
                         case BoundKind.Block:
@@ -174,7 +178,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                             {
                                 if (!env.IsStruct)
                                 {
-                                    Debug.Assert(oldEnv is not null);
                                     Debug.Assert(!oldEnv.IsStruct);
                                     Debug.Assert(oldEnv.Parent == null || oldEnv.Parent == env);
                                     oldEnv.Parent = env;
@@ -437,7 +440,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                         continue;
 
                     var scopeEnv = scope.DeclaredEnvironment;
-                    Debug.Assert(scopeEnv is not null);
 
                     // structs don't allocate, so no point merging them
                     if (scopeEnv.IsStruct)
@@ -485,7 +487,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                     // do the actual work of merging the closure environments
 
                     var targetEnv = bestScope.DeclaredEnvironment;
-                    Debug.Assert(targetEnv is not null);
 
                     foreach (var variable in scopeEnv.CapturedVariables)
                     {
@@ -521,7 +522,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             internal DebugId GetTopLevelMethodId()
             {
-                return _slotAllocator?.MethodId ?? new DebugId(_topLevelMethodOrdinal, _compilationState.ModuleBuilderOpt!.CurrentGenerationOrdinal);
+                return _slotAllocator?.MethodId ?? new DebugId(_topLevelMethodOrdinal, _compilationState.ModuleBuilderOpt.CurrentGenerationOrdinal);
             }
 
             internal DebugId GetClosureId(ClosureEnvironment environment, SyntaxNode syntax, ArrayBuilder<EncClosureInfo> closureDebugInfo, out RuntimeRudeEdit? rudeEdit)
@@ -551,7 +552,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 }
                 else
                 {
-                    closureId = new DebugId(closureDebugInfo.Count, _compilationState.ModuleBuilderOpt!.CurrentGenerationOrdinal);
+                    closureId = new DebugId(closureDebugInfo.Count, _compilationState.ModuleBuilderOpt.CurrentGenerationOrdinal);
                 }
 
                 int syntaxOffset = _topLevelMethod.CalculateLocalSyntaxOffset(LambdaUtilities.GetDeclaratorPosition(syntax), syntax.SyntaxTree);
@@ -563,7 +564,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             /// <summary>
             /// Walk up the scope tree looking for a variable declaration.
             /// </summary>
-            public static Scope? GetVariableDeclarationScope(Scope startingScope, Symbol variable)
+            public static Scope GetVariableDeclarationScope(Scope startingScope, Symbol variable)
             {
                 if (variable is ParameterSymbol p && p.IsThis)
                 {
@@ -605,7 +606,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             /// Find the parent <see cref="Scope"/> of the <see cref="Scope"/> corresponding to
             /// the given <see cref="BoundNode"/>.
             /// </summary>
-            public static Scope? GetScopeParent(Scope treeRoot, BoundNode scopeNode)
+            public static Scope GetScopeParent(Scope treeRoot, BoundNode scopeNode)
             {
                 var correspondingScope = GetScopeWithMatchingBoundNode(treeRoot, scopeNode);
                 return correspondingScope.Parent;
@@ -619,7 +620,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 return Helper(treeRoot) ?? throw ExceptionUtilities.Unreachable();
 
-                Scope? Helper(Scope currentScope)
+                Scope Helper(Scope currentScope)
                 {
                     if (currentScope.BoundNode == node)
                     {
@@ -669,7 +670,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             {
                 return helper(treeRoot) ?? throw ExceptionUtilities.Unreachable();
 
-                NestedFunction? helper(Scope scope)
+                NestedFunction helper(Scope scope)
                 {
                     foreach (var function in scope.NestedFunctions)
                     {

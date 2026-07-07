@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -38,7 +40,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
 
         private readonly GenericParameterAttributes _flags;
         private ThreeState _lazyHasIsUnmanagedConstraint;
-        private TypeParameterBounds? _lazyBounds = TypeParameterBounds.Unset;
+        private TypeParameterBounds _lazyBounds = TypeParameterBounds.Unset;
         private ImmutableArray<TypeWithAnnotations> _lazyDeclaredConstraintTypes;
         private ImmutableArray<CSharpAttributeData> _lazyCustomAttributes;
 
@@ -81,7 +83,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
             }
             catch (BadImageFormatException)
             {
-                if ((object?)_name == null)
+                if ((object)_name == null)
                 {
                     _name = string.Empty;
                 }
@@ -664,7 +666,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
             }
         }
 
-        private TypeParameterBounds? GetBounds(ConsList<TypeParameterSymbol> inProgress)
+        private TypeParameterBounds GetBounds(ConsList<TypeParameterSymbol> inProgress)
         {
             Debug.Assert(!inProgress.ContainsReference(this));
             Debug.Assert(!inProgress.Any() || ReferenceEquals(inProgress.Head.ContainingSymbol, this.ContainingSymbol));
@@ -675,7 +677,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
                 Debug.Assert(!constraintTypes.IsDefault);
 
                 var diagnostics = ArrayBuilder<TypeParameterDiagnosticInfo>.GetInstance();
-                ArrayBuilder<TypeParameterDiagnosticInfo>? useSiteDiagnosticsBuilder = null;
+                ArrayBuilder<TypeParameterDiagnosticInfo> useSiteDiagnosticsBuilder = null;
                 bool inherited = (_containingSymbol.Kind == SymbolKind.Method) && ((MethodSymbol)_containingSymbol).IsOverride;
                 var bounds = this.ResolveBounds(this.ContainingAssembly.CorLibrary, inProgress.Prepend(this), constraintTypes, inherited, currentCompilation: null,
                                                 diagnosticsBuilder: diagnostics, useSiteDiagnosticsBuilder: ref useSiteDiagnosticsBuilder, template: default);
@@ -685,7 +687,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
                     diagnostics.AddRange(useSiteDiagnosticsBuilder);
                 }
 
-                AssemblySymbol? primaryDependency = PrimaryDependency;
+                AssemblySymbol primaryDependency = PrimaryDependency;
                 var useSiteInfo = new UseSiteInfo<AssemblySymbol>(primaryDependency);
 
                 foreach (var diag in diagnostics)
@@ -721,9 +723,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
 
         internal sealed override CSharpCompilation DeclaringCompilation // perf, not correctness
         {
-            get { return null!; }
+            get { return null; }
         }
 
+#nullable enable
         internal DiagnosticInfo? DeriveCompilerFeatureRequiredDiagnostic(MetadataDecoder decoder)
             => PEUtilities.DeriveCompilerFeatureRequiredAttributeDiagnostic(this, (PEModuleSymbol)ContainingModule, Handle, CompilerFeatureRequiredFeatures.None, decoder);
 

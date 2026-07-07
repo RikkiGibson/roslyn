@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -26,8 +28,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         private SymbolCompletionState _state;
         private ImmutableArray<Location> _locations;
-        private Dictionary<ReadOnlyMemory<char>, ImmutableArray<NamespaceOrTypeSymbol>>? _nameToMembersMap;
-        private Dictionary<ReadOnlyMemory<char>, ImmutableArray<NamedTypeSymbol>>? _nameToTypeMembersMap;
+        private Dictionary<ReadOnlyMemory<char>, ImmutableArray<NamespaceOrTypeSymbol>> _nameToMembersMap;
+        private Dictionary<ReadOnlyMemory<char>, ImmutableArray<NamedTypeSymbol>> _nameToTypeMembersMap;
         private ImmutableArray<Symbol> _lazyAllMembers;
         private ImmutableArray<NamedTypeSymbol> _lazyTypeMembersUnordered;
 
@@ -41,7 +43,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// </summary>
         private ImmutableDictionary<SingleNamespaceDeclaration, AliasesAndUsings> _aliasesAndUsingsForAsserts_doNotAccessDirectly = s_emptyMap;
 #endif
-        private MergedGlobalAliasesAndUsings? _lazyMergedGlobalAliasesAndUsings;
+        private MergedGlobalAliasesAndUsings _lazyMergedGlobalAliasesAndUsings;
 
         private const int LazyAllMembersIsSorted = 0x1;   // Set if "lazyAllMembers" is sorted.
         private int _flags;
@@ -98,8 +100,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable enable
         public override Location? TryGetFirstLocation()
             => _mergedDeclaration.Declarations is [var declaration, ..] ? declaration.NameLocation : null;
+#nullable disable
 
         public override bool HasLocationContainedWithin(SyntaxTree tree, TextSpan declarationSpan, out bool wasZeroWidthMatch)
         {
@@ -238,7 +242,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 diagnostics.Free();
             }
 
-            Debug.Assert(_nameToMembersMap is not null);
             return _nameToMembersMap;
         }
 
@@ -255,7 +258,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     comparand: null);
             }
 
-            Debug.Assert(_nameToTypeMembersMap is not null);
             return _nameToTypeMembersMap;
         }
 
@@ -288,8 +290,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         private static void CheckMembers(NamespaceSymbol @namespace, Dictionary<ReadOnlyMemory<char>, ImmutableArray<NamespaceOrTypeSymbol>> result, BindingDiagnosticBag diagnostics)
         {
-            var memberOfArity = new Symbol?[10];
-            MergedNamespaceSymbol? mergedAssemblyNamespace = null;
+            var memberOfArity = new Symbol[10];
+            MergedNamespaceSymbol mergedAssemblyNamespace = null;
 
             if (@namespace.ContainingAssembly.Modules.Length > 1)
             {
@@ -303,9 +305,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 {
                     var nts = symbol as SourceMemberContainerTypeSymbol;
                     // It should be impossible to have a type member of a source namespace symbol which is not a SourceMemberContainerTypeSymbol
-                    Debug.Assert((object?)nts != null || symbol is not TypeSymbol);
+                    Debug.Assert((object)nts != null || symbol is not TypeSymbol);
 
-                    var arity = ((object?)nts != null) ? nts.Arity : 0;
+                    var arity = ((object)nts != null) ? nts.Arity : 0;
                     if (arity >= memberOfArity.Length)
                     {
                         Array.Resize(ref memberOfArity, arity + 1);
@@ -315,7 +317,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
                     var other = memberOfArity[arity];
 
-                    if ((object?)other == null && (object?)mergedAssemblyNamespace != null)
+                    if ((object)other == null && (object)mergedAssemblyNamespace != null)
                     {
                         // Check for collision with declarations from added modules.
                         foreach (NamespaceSymbol constituent in mergedAssemblyNamespace.ConstituentNamespaces)
@@ -339,10 +341,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                         }
                     }
 
-                    if ((object?)other != null)
+                    if ((object)other != null)
                     {
                         // To decide whether type declarations are duplicates, we need to access members which are only meaningful on source original definition symbols.
-                        Debug.Assert((object?)nts?.OriginalDefinition == nts && (object)other.OriginalDefinition == other);
+                        Debug.Assert((object)nts?.OriginalDefinition == nts && (object)other.OriginalDefinition == other);
 
                         switch (nts, other)
                         {
@@ -364,7 +366,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
                     memberOfArity[arity] = symbol;
 
-                    if ((object?)nts != null)
+                    if ((object)nts != null)
                     {
                         //types declared at the namespace level may only have declared accessibility of public or internal (Section 3.5.1)
                         Accessibility declaredAccessibility = nts.DeclaredAccessibility;
@@ -386,11 +388,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 var leftTree = possibleFileLocalType.MergedDeclaration.Declarations[0].Location.SourceTree;
                 if (otherSymbol is SourceNamedTypeSymbol { MergedDeclaration.NameLocations: var typeNameLocations })
                 {
-                    return !typeNameLocations.Any(static (loc, leftTree) => (object?)loc.SourceTree == leftTree, leftTree);
+                    return !typeNameLocations.Any(static (loc, leftTree) => (object)loc.SourceTree == leftTree, leftTree);
                 }
                 else if (otherSymbol is SourceNamespaceSymbol { MergedDeclaration.NameLocations: var namespaceNameLocations })
                 {
-                    return !namespaceNameLocations.Any(static (loc, leftTree) => (object?)loc.SourceTree == leftTree, leftTree);
+                    return !namespaceNameLocations.Any(static (loc, leftTree) => (object)loc.SourceTree == leftTree, leftTree);
                 }
 
                 throw ExceptionUtilities.UnexpectedValue(otherSymbol);
@@ -434,8 +436,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             if (containingAssembly.KeepLookingForDeclaredSpecialTypes)
             {
-                Debug.Assert(_nameToMembersMap is not null);
-
                 // Register newly declared COR types
                 foreach (var array in _nameToMembersMap.Values)
                 {
@@ -443,7 +443,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     {
                         var type = member as NamedTypeSymbol;
 
-                        if ((object?)type != null && type.SpecialType != SpecialType.None)
+                        if ((object)type != null && type.SpecialType != SpecialType.None)
                         {
                             containingAssembly.RegisterDeclaredSpecialType(type);
 

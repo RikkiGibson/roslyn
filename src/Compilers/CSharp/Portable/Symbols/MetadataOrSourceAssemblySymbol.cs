@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -22,16 +24,18 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// An array of cached Cor types defined in this assembly.
         /// Lazily filled by GetDeclaredSpecialType method.
         /// </summary>
-        private NamedTypeSymbol[]? _lazySpecialTypes;
+        private NamedTypeSymbol[] _lazySpecialTypes;
 
-        private TypeConversions? _lazyTypeConversions;
+        private TypeConversions _lazyTypeConversions;
 
         /// <summary>
         /// How many Cor types have we cached so far.
         /// </summary>
         private int _cachedSpecialTypes;
 
-        private NativeIntegerTypeSymbol[]? _lazyNativeIntegerTypes;
+        private NativeIntegerTypeSymbol[] _lazyNativeIntegerTypes;
+
+#nullable enable 
 
         /// <summary>
         /// Lookup declaration for predefined CorLib type in this Assembly.
@@ -66,6 +70,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             Debug.Assert(_lazySpecialTypes is not null);
             return _lazySpecialTypes[(int)type];
         }
+
+#nullable disable
 
         /// <summary>
         /// Register declaration of predefined CorLib type in this Assembly.
@@ -110,8 +116,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        private ICollection<string>? _lazyTypeNames;
-        private ICollection<string>? _lazyNamespaceNames;
+        private ICollection<string> _lazyTypeNames;
+        private ICollection<string> _lazyNamespaceNames;
 
         public override ICollection<string> TypeNames
         {
@@ -166,13 +172,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// <summary>
         /// Not yet known value is represented by ErrorTypeSymbol.UnknownResultType
         /// </summary>
-        private Symbol?[]? _lazySpecialTypeMembers;
+        private Symbol[] _lazySpecialTypeMembers;
 
         /// <summary>
         /// Lookup member declaration in predefined CorLib type in this Assembly. Only valid if this 
         /// assembly is the Cor Library
         /// </summary>
-        internal override Symbol? GetDeclaredSpecialTypeMember(SpecialMember member)
+        internal override Symbol GetDeclaredSpecialTypeMember(SpecialMember member)
         {
 #if DEBUG
             foreach (var module in this.Modules)
@@ -185,7 +191,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             {
                 if (_lazySpecialTypeMembers == null)
                 {
-                    var specialTypeMembers = new Symbol?[(int)SpecialMember.Count];
+                    var specialTypeMembers = new Symbol[(int)SpecialMember.Count];
 
                     for (int i = 0; i < specialTypeMembers.Length; i++)
                     {
@@ -197,7 +203,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
                 var descriptor = SpecialMembers.GetDescriptor(member);
                 NamedTypeSymbol type = GetDeclaredSpecialType(descriptor.DeclaringSpecialType);
-                Symbol? result = null;
+                Symbol result = null;
 
                 if (!type.IsErrorType())
                 {

@@ -1659,7 +1659,7 @@ oneMoreTime:
         {
             if (isSpanOrReadOnlySpan)
             {
-                var spanTLengthMethod = (MethodSymbol?)Binder.GetWellKnownTypeMember(_module.Compilation,
+                var spanTLengthMethod = (MethodSymbol)Binder.GetWellKnownTypeMember(_module.Compilation,
                     (isReadOnlySpan ? WellKnownMember.System_ReadOnlySpan_T__get_Length : WellKnownMember.System_Span_T__get_Length),
                     _diagnostics, syntax: syntaxNode);
 
@@ -1683,7 +1683,7 @@ oneMoreTime:
         {
             if (isSpanOrReadOnlySpan)
             {
-                var spanTIndexerMethod = (MethodSymbol?)Binder.GetWellKnownTypeMember(_module.Compilation,
+                var spanTIndexerMethod = (MethodSymbol)Binder.GetWellKnownTypeMember(_module.Compilation,
                     (isReadOnlySpan ? WellKnownMember.System_ReadOnlySpan_T__get_Item : WellKnownMember.System_Span_T__get_Item),
                     _diagnostics, syntax: syntaxNode);
 

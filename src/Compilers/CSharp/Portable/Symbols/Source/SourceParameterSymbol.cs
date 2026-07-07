@@ -25,6 +25,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         private readonly Location? _location;
         private readonly RefKind _refKind;
         private readonly ScopedKind _scope;
+#nullable disable
 
         public static SourceParameterSymbol Create(
             Binder context,
@@ -51,7 +52,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 Binder.ReportUseSiteDiagnosticForSynthesizedAttribute(context.Compilation,
                     WellKnownMember.System_ParamArrayAttribute__ctor,
                     declarationDiagnostics,
-                    identifier.Parent!.GetLocation());
+                    identifier.Parent.GetLocation());
             }
 
             ImmutableArray<CustomModifier> inModifiers = ParameterHelpers.ConditionallyCreateInModifiers(refKind, addRefReadOnlyModifier, context, declarationDiagnostics, syntax);
@@ -104,7 +105,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             RefKind refKind,
             ScopedKind scope,
             string name,
-            Location? location)
+            Location location)
             : base(owner, ordinal)
         {
             Debug.Assert((owner.Kind == SymbolKind.Method) || (owner.Kind == SymbolKind.Property) || owner is NamedTypeSymbol { IsExtension: true });
@@ -169,7 +170,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return state.HasComplete(part);
         }
 
-        internal override void ForceComplete(SourceLocation? locationOpt, Predicate<Symbol>? filter, CancellationToken cancellationToken)
+        internal override void ForceComplete(SourceLocation locationOpt, Predicate<Symbol> filter, CancellationToken cancellationToken)
         {
             Debug.Assert(filter == null);
             state.DefaultForceComplete(this, cancellationToken);
@@ -207,7 +208,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         internal override void AddDeclarationDiagnostics(BindingDiagnosticBag diagnostics)
             => ContainingSymbol.AddDeclarationDiagnostics(diagnostics);
 
-        internal abstract SyntaxReference? SyntaxReference { get; }
+        internal abstract SyntaxReference SyntaxReference { get; }
 
         internal abstract bool IsExtensionMethodThis { get; }
 
@@ -263,8 +264,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         public sealed override ImmutableArray<Location> Locations
             => _location is null ? ImmutableArray<Location>.Empty : ImmutableArray.Create(_location);
 
+#nullable enable
+
         public override Location? TryGetFirstLocation()
             => _location;
+
+#nullable disable
 
         public sealed override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences
         {
@@ -282,8 +287,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             {
                 // Parameters of accessors are always synthesized. (e.g., parameter of indexer accessors).
                 // The non-synthesized accessors are on the property/event itself.
-                MethodSymbol? owningMethod = ContainingSymbol as MethodSymbol;
-                return (object?)owningMethod != null && owningMethod.IsAccessor();
+                MethodSymbol owningMethod = ContainingSymbol as MethodSymbol;
+                return (object)owningMethod != null && owningMethod.IsAccessor();
             }
         }
 

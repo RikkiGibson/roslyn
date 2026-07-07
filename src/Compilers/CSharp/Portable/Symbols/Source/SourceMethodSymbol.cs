@@ -148,13 +148,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return SourceMemberContainerTypeSymbol.HasAsyncMethodBuilderAttribute(this, out builderArgument);
         }
 
-        internal sealed override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
+        internal sealed override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
         {
             base.AddSynthesizedAttributes(moduleBuilder, ref attributes);
             AddSynthesizedAttributes(this, moduleBuilder, ref attributes);
         }
 
-        internal static void AddSynthesizedAttributes(MethodSymbol target, PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
+        internal static void AddSynthesizedAttributes(MethodSymbol target, PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
         {
             Debug.Assert(target is not (LambdaSymbol or LocalFunctionSymbol));
 

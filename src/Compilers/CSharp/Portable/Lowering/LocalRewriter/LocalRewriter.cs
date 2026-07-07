@@ -24,7 +24,7 @@ namespace Microsoft.CodeAnalysis.CSharp
     {
         private readonly CSharpCompilation _compilation;
         private readonly SyntheticBoundNodeFactory _factory;
-        private readonly SynthesizedSubmissionFields? _previousSubmissionFields;
+        private readonly SynthesizedSubmissionFields _previousSubmissionFields;
         private readonly bool _allowOmissionOfConditionalCalls;
         private LoweredDynamicOperationFactory _dynamicFactory;
         private bool _sawLambdas;
@@ -60,7 +60,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             BoundStatement rootStatement,
             NamedTypeSymbol? containingType,
             SyntheticBoundNodeFactory factory,
-            SynthesizedSubmissionFields? previousSubmissionFields,
+            SynthesizedSubmissionFields previousSubmissionFields,
             bool allowOmissionOfConditionalCalls,
             BindingDiagnosticBag diagnostics)
         {
@@ -89,10 +89,10 @@ namespace Microsoft.CodeAnalysis.CSharp
             NamedTypeSymbol containingType,
             BoundStatement statement,
             TypeCompilationState compilationState,
-            SynthesizedSubmissionFields? previousSubmissionFields,
+            SynthesizedSubmissionFields previousSubmissionFields,
             bool allowOmissionOfConditionalCalls,
             MethodInstrumentation instrumentation,
-            DebugDocumentProvider? debugDocumentProvider,
+            DebugDocumentProvider debugDocumentProvider,
             BindingDiagnosticBag diagnostics,
             out ImmutableArray<SourceSpan> codeCoverageSpans,
             out bool sawLambdas,
@@ -119,7 +119,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                 CodeCoverageInstrumenter? codeCoverageInstrumenter = null;
                 if (instrumentation.Kinds.Contains(InstrumentationKind.TestCoverage) &&
-                    CodeCoverageInstrumenter.TryCreate(method, statement, factory, diagnostics, debugDocumentProvider!, instrumenter, out codeCoverageInstrumenter))
+                    CodeCoverageInstrumenter.TryCreate(method, statement, factory, diagnostics, debugDocumentProvider, instrumenter, out codeCoverageInstrumenter))
                 {
                     instrumenter = codeCoverageInstrumenter;
                 }
@@ -314,7 +314,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return node.Kind == BoundKind.DeconstructionAssignmentOperator && !((BoundDeconstructionAssignmentOperator)node).IsUsed;
         }
 
-        public override BoundNode VisitParameter(BoundParameter node)
+        public override BoundNode? VisitParameter(BoundParameter node)
         {
             if (node.ParameterSymbol.ContainingSymbol is SynthesizedPrimaryConstructor primaryCtor &&
                 primaryCtor.GetCapturedParameters().TryGetValue(node.ParameterSymbol, out var field))
@@ -472,7 +472,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return PlaceholderReplacement(node);
         }
 
-        public override BoundNode VisitCollectionBuilderElementsPlaceholder(BoundCollectionBuilderElementsPlaceholder node)
+        public override BoundNode? VisitCollectionBuilderElementsPlaceholder(BoundCollectionBuilderElementsPlaceholder node)
         {
             return PlaceholderReplacement(node);
         }
@@ -495,10 +495,10 @@ namespace Microsoft.CodeAnalysis.CSharp
         public override BoundNode VisitInterpolatedStringArgumentPlaceholder(BoundInterpolatedStringArgumentPlaceholder node)
             => PlaceholderReplacement(node);
 
-        public override BoundNode VisitInterpolatedStringHandlerPlaceholder(BoundInterpolatedStringHandlerPlaceholder node)
+        public override BoundNode? VisitInterpolatedStringHandlerPlaceholder(BoundInterpolatedStringHandlerPlaceholder node)
             => PlaceholderReplacement(node);
 
-        public override BoundNode VisitCollectionExpressionSpreadExpressionPlaceholder(BoundCollectionExpressionSpreadExpressionPlaceholder node)
+        public override BoundNode? VisitCollectionExpressionSpreadExpressionPlaceholder(BoundCollectionExpressionSpreadExpressionPlaceholder node)
         {
             return PlaceholderReplacement(node);
         }

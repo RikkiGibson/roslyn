@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -12,7 +14,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
 {
     internal abstract class AssemblySymbol : Symbol, IAssemblySymbol
     {
-        private IEnumerable<IModuleSymbol>? _lazyModules;
+        private IEnumerable<IModuleSymbol> _lazyModules;
 
         internal abstract Symbols.AssemblySymbol UnderlyingAssemblySymbol { get; }
 
@@ -45,9 +47,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
 
         bool IAssemblySymbol.MightContainExtensionMethods => UnderlyingAssemblySymbol.MightContainExtensions;
 
-        AssemblyMetadata? IAssemblySymbol.GetMetadata() => UnderlyingAssemblySymbol.GetMetadata();
+        AssemblyMetadata IAssemblySymbol.GetMetadata() => UnderlyingAssemblySymbol.GetMetadata();
 
-        INamedTypeSymbol? IAssemblySymbol.ResolveForwardedType(string fullyQualifiedMetadataName)
+        INamedTypeSymbol IAssemblySymbol.ResolveForwardedType(string fullyQualifiedMetadataName)
         {
             return UnderlyingAssemblySymbol.ResolveForwardedType(fullyQualifiedMetadataName).GetPublicSymbol();
         }
@@ -99,10 +101,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
             return false;
         }
 
+#nullable enable
         INamedTypeSymbol? IAssemblySymbol.GetTypeByMetadataName(string metadataName)
         {
             return UnderlyingAssemblySymbol.GetTypeByMetadataName(metadataName).GetPublicSymbol();
         }
+#nullable disable
 
         #region ISymbol Members
 
@@ -111,8 +115,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
             visitor.VisitAssembly(this);
         }
 
-        protected override TResult? Accept<TResult>(SymbolVisitor<TResult> visitor)
-            where TResult : default
+        protected override TResult Accept<TResult>(SymbolVisitor<TResult> visitor)
         {
             return visitor.VisitAssembly(this);
         }

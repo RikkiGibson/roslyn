@@ -107,7 +107,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return _underlyingParameter.CallerArgumentExpressionParameterIndex; }
         }
 
-        public sealed override bool Equals(Symbol? obj, TypeCompareKind compareKind)
+        public sealed override bool Equals(Symbol obj, TypeCompareKind compareKind)
         {
             if ((object)this == obj)
             {
@@ -130,7 +130,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return Roslyn.Utilities.Hash.Combine(ContainingSymbol, _underlyingParameter.Ordinal);
         }
 
-        internal sealed override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
+        internal sealed override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
             => throw ExceptionUtilities.Unreachable();
     }
 }

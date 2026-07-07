@@ -70,7 +70,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         public override NamedTypeSymbol ContainingType
             => ParameterSymbol.ContainingSymbol.ContainingType;
 
-        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
+        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
         {
             foreach (CSharpAttributeData attr in ParameterSymbol.GetAttributes())
             {

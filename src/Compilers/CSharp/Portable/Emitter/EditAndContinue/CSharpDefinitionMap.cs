@@ -132,7 +132,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Emit
             => _metadataDecoder.Module.HasStateMachineAttribute(methodHandle, out var typeName) ? _metadataDecoder.GetTypeSymbolForSerializedType(typeName) : null;
 
         protected override IMethodSymbolInternal GetMethodSymbol(MethodDefinitionHandle methodHandle)
-            => (IMethodSymbolInternal)_metadataDecoder.GetSymbolForILToken(methodHandle)!;
+            => (IMethodSymbolInternal)_metadataDecoder.GetSymbolForILToken(methodHandle);
 
         /// <summary>
         /// Match local declarations to names to generate a map from
@@ -182,7 +182,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Emit
             {
                 if (result[i].IsDefault)
                 {
-                    result[i] = new EncLocalInfo(slotMetadata[i].SignatureOpt!);
+                    result[i] = new EncLocalInfo(slotMetadata[i].SignatureOpt);
                 }
             }
 

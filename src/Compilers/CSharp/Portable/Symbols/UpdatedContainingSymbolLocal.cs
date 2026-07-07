@@ -40,7 +40,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         public override Symbol ContainingSymbol { get; }
         public override TypeWithAnnotations TypeWithAnnotations { get; }
 
-        public override bool Equals(Symbol? other, TypeCompareKind compareKind)
+        public override bool Equals(Symbol other, TypeCompareKind compareKind)
         {
             if (other == (object)this)
             {
@@ -83,14 +83,14 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         public override bool IsImplicitlyDeclared => _underlyingLocal.IsImplicitlyDeclared;
         internal override LocalDeclarationKind DeclarationKind => _underlyingLocal.DeclarationKind;
         internal override SynthesizedLocalKind SynthesizedKind => _underlyingLocal.SynthesizedKind;
-        internal override SyntaxNode? ScopeDesignatorOpt => _underlyingLocal.ScopeDesignatorOpt;
+        internal override SyntaxNode ScopeDesignatorOpt => _underlyingLocal.ScopeDesignatorOpt;
         internal override bool IsImportedFromMetadata => _underlyingLocal.IsImportedFromMetadata;
         internal override SyntaxToken IdentifierToken => _underlyingLocal.IdentifierToken;
         internal override bool IsPinned => _underlyingLocal.IsPinned;
         internal override bool IsKnownToReferToTempIfReferenceType => _underlyingLocal.IsKnownToReferToTempIfReferenceType;
         internal override bool IsCompilerGenerated => _underlyingLocal.IsCompilerGenerated;
         internal override ScopedKind Scope => _underlyingLocal.Scope;
-        internal override ConstantValue? GetConstantValue(SyntaxNode node, LocalSymbol inProgress, BindingDiagnosticBag? diagnostics = null) =>
+        internal override ConstantValue GetConstantValue(SyntaxNode node, LocalSymbol inProgress, BindingDiagnosticBag? diagnostics = null) =>
             _underlyingLocal.GetConstantValue(node, inProgress, diagnostics);
         internal override ReadOnlyBindingDiagnostic<AssemblySymbol> GetConstantValueDiagnostics(BoundExpression boundInitValue) =>
             _underlyingLocal.GetConstantValueDiagnostics(boundInitValue);

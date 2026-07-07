@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
@@ -20,7 +22,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         private TypeWithAnnotations _lazyReturnType;
         private ImmutableArray<CustomModifier> _lazyRefCustomModifiers;
         private ImmutableArray<MethodSymbol> _lazyExplicitInterfaceImplementations;
-        private string? _lazyName;
+        private string _lazyName;
         private readonly bool _isAutoPropertyAccessor;
         private readonly bool _usesInit;
 
@@ -79,6 +81,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 diagnostics);
         }
 
+#nullable enable
         public static SourcePropertyAccessorSymbol CreateAccessorSymbol(
             bool isGetMethod,
             bool usesInit,
@@ -148,6 +151,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 isNullableAnalysisEnabled: false,
                 diagnostics);
         }
+#nullable disable
 
         internal sealed override ImmutableArray<string> NotNullMembers
             => _property.NotNullMembers.Concat(base.NotNullMembers);
@@ -191,6 +195,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             this.CheckModifiers(location, hasBody: true, isAutoPropertyOrExpressionBodied: true, diagnostics: diagnostics);
         }
 
+#nullable enable
         protected SourcePropertyAccessorSymbol(
             NamedTypeSymbol containingType,
             SourcePropertySymbolBase property,
@@ -267,8 +272,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             return (declarationModifiers, flags);
         }
+#nullable disable
 
-        internal override ExecutableCodeBinder? TryGetBodyBinder(BinderFactory? binderFactoryOpt = null, bool ignoreAccessibility = false)
+        internal override ExecutableCodeBinder TryGetBodyBinder(BinderFactory binderFactoryOpt = null, bool ignoreAccessibility = false)
         {
             if (_property is SynthesizedUnionValuePropertySymbol or SynthesizedRecordEqualityContractProperty or SynthesizedRecordPropertySymbol)
             {
@@ -299,8 +305,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             {
                 // This will cause another call to SourceMethodSymbol.LazyMethodChecks,
                 // but that method already handles reentrancy for exactly this case.
-                MethodSymbol? overriddenMethod = this.OverriddenMethod;
-                if ((object?)overriddenMethod != null)
+                MethodSymbol overriddenMethod = this.OverriddenMethod;
+                if ((object)overriddenMethod != null)
                 {
                     CustomModifierUtils.CopyMethodCustomModifiers(overriddenMethod, this, out _lazyReturnType,
                                                                   out _lazyRefCustomModifiers,
@@ -636,6 +642,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable enable
         public sealed override ImmutableArray<MethodSymbol> ExplicitInterfaceImplementations
         {
             get
@@ -651,11 +658,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     }
                     else
                     {
-                        MethodSymbol? implementedAccessor = this.MethodKind == MethodKind.PropertyGet
+                        MethodSymbol implementedAccessor = this.MethodKind == MethodKind.PropertyGet
                             ? explicitlyImplementedPropertyOpt.GetMethod
                             : explicitlyImplementedPropertyOpt.SetMethod;
 
-                        explicitInterfaceImplementations = (object?)implementedAccessor == null
+                        explicitInterfaceImplementations = (object)implementedAccessor == null
                             ? ImmutableArray<MethodSymbol>.Empty
                             : ImmutableArray.Create<MethodSymbol>(implementedAccessor);
                     }
@@ -666,6 +673,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return _lazyExplicitInterfaceImplementations;
             }
         }
+#nullable disable
 
         internal sealed override OneOrMany<SyntaxList<AttributeListSyntax>> GetAttributeDeclarations()
         {
@@ -706,6 +714,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable enable
         public sealed override string Name
         {
             get
@@ -725,7 +734,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                                 ? explicitlyImplementedPropertyOpt.GetMethod
                                 : explicitlyImplementedPropertyOpt.SetMethod;
 
-                            string accessorName = (object?)implementedAccessor != null
+                            string accessorName = (object)implementedAccessor != null
                                 ? implementedAccessor.Name
                                 : GetAccessorName(explicitlyImplementedPropertyOpt.MetadataName,
                                     isGetMethod, isWinMdOutput: _property.IsCompilationOutputWinMdObj()); //Not name - could be indexer placeholder
@@ -736,8 +745,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     }
                     else if (IsOverride)
                     {
-                        MethodSymbol? overriddenMethod = this.OverriddenMethod;
-                        if ((object?)overriddenMethod != null)
+                        MethodSymbol overriddenMethod = this.OverriddenMethod;
+                        if ((object)overriddenMethod != null)
                         {
                             // If this accessor is overriding a method from metadata, it is possible that
                             // the name of the overridden method doesn't follow the C# get_X/set_X pattern.
@@ -757,6 +766,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return _lazyName;
             }
         }
+#nullable disable
 
         public override bool IsImplicitlyDeclared
         {
@@ -823,13 +833,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return parameters.ToImmutableAndFree();
         }
 
-        internal sealed override void AddSynthesizedReturnTypeAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
+        internal sealed override void AddSynthesizedReturnTypeAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
         {
             base.AddSynthesizedReturnTypeAttributes(moduleBuilder, ref attributes);
             AddSynthesizedReturnTypeFlowAnalysisAttributes(ref attributes);
         }
 
-        internal void AddSynthesizedReturnTypeFlowAnalysisAttributes(ref ArrayBuilder<CSharpAttributeData>? attributes)
+        internal void AddSynthesizedReturnTypeFlowAnalysisAttributes(ref ArrayBuilder<CSharpAttributeData> attributes)
         {
             var annotations = ReturnTypeFlowAnalysisAnnotations;
             if ((annotations & FlowAnalysisAnnotations.MaybeNull) != 0)
@@ -842,6 +852,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable enable
         protected sealed override SourceMemberMethodSymbol? BoundAttributesSource => (SourceMemberMethodSymbol?)PartialDefinitionPart;
 
         public sealed override MethodSymbol? PartialImplementationPart => _property is SourcePropertySymbol { IsPartialDefinition: true, OtherPartOfPartial: { } other }

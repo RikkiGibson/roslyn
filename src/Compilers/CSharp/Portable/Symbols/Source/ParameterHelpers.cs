@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -58,6 +60,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 });
         }
 
+#nullable enable
         public static SourceParameterSymbol? MakeExtensionReceiverParameter(
             Binder withTypeParametersBinder,
             Symbol owner,
@@ -107,6 +110,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 firstDefault: ref firstDefault,
                 ParameterContext.ExtensionReceiverParameter);
         }
+#nullable disable
 
         public static ImmutableArray<FunctionPointerParameterSymbol> MakeFunctionPointerParameters(
             Binder binder,
@@ -158,6 +162,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 parsingFunctionPointer: true);
         }
 
+#nullable enable
         private static ImmutableArray<TParameterSymbol> MakeParameters<TParameterSyntax, TParameterSymbol, TOwningSymbol>(
             Binder withTypeParametersBinder,
             TOwningSymbol owner,
@@ -901,6 +906,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable disable
+
         internal static bool ReportDefaultParameterErrors(
             Binder binder,
             Symbol owner,
@@ -910,7 +917,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             BoundExpression convertedExpression,
             BindingDiagnosticBag diagnostics)
         {
-            Debug.Assert(parameterSyntax.Default is not null);
             bool hasErrors = false;
 
             // SPEC VIOLATION: The spec says that the conversion from the initializer to the 
@@ -982,7 +988,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             else if (!conversion.Exists ||
                 conversion.IsUserDefined ||
                 conversion.IsUnion ||
-                conversion.IsIdentity && parameterType.SpecialType == SpecialType.System_Object && defaultExpression.Type is { } identityType && identityType.IsDynamic())
+                conversion.IsIdentity && parameterType.SpecialType == SpecialType.System_Object && defaultExpression.Type.IsDynamic())
             {
                 // If we had no implicit conversion, or a user-defined conversion, report an error.
                 //
@@ -996,7 +1002,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 hasErrors = true;
             }
             else if (conversion.IsReference &&
-                (object?)defaultExpression.Type != null &&
+                (object)defaultExpression.Type != null &&
                 defaultExpression.Type.SpecialType == SpecialType.System_String ||
                 conversion.IsBoxing)
             {
@@ -1007,8 +1013,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
                 hasErrors = true;
             }
-            else if (((conversion.IsNullable && defaultExpression.Type is { } nullableSourceType && !nullableSourceType.IsNullableType()) ||
-                      (conversion.IsObjectCreation && convertedExpression.Type is { } objectCreationType && objectCreationType.IsNullableType())) &&
+            else if (((conversion.IsNullable && !defaultExpression.Type.IsNullableType()) ||
+                      (conversion.IsObjectCreation && convertedExpression.Type.IsNullableType())) &&
                 !(parameterType.GetNullableUnderlyingType().IsEnumType() || parameterType.GetNullableUnderlyingType().IsIntrinsicType()))
             {
                 // We can do:
@@ -1025,7 +1031,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 // error CS1770: 
                 // A value of type '{0}' cannot be used as default parameter for nullable parameter '{1}' because '{0}' is not a simple type
                 diagnostics.Add(ErrorCode.ERR_NoConversionForNubDefaultParam, parameterSyntax.Identifier.GetLocation(),
-                    (defaultExpression.IsImplicitObjectCreation() ? convertedExpression.Type!.StrippedType() : defaultExpression.Type!), parameterSyntax.Identifier.ValueText);
+                    (defaultExpression.IsImplicitObjectCreation() ? convertedExpression.Type.StrippedType() : defaultExpression.Type), parameterSyntax.Identifier.ValueText);
 
                 hasErrors = true;
             }
@@ -1108,7 +1114,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return expression.Constructor.IsDefaultValueTypeConstructor() && expression.InitializerExpressionOpt == null;
         }
 
-        internal static MethodSymbol? FindContainingGenericMethod(Symbol symbol)
+        internal static MethodSymbol FindContainingGenericMethod(Symbol symbol)
         {
             for (Symbol current = symbol; (object)current != null; current = current.ContainingSymbol)
             {

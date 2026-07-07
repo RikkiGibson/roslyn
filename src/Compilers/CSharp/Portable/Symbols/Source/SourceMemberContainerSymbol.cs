@@ -764,7 +764,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
                     foreach (var member in membersAndInitializers.NonTypeMembers)
                     {
-                        FieldSymbol? field;
+                        FieldSymbol field;
                         if (!member.IsFieldOrFieldLikeEvent(out field) || field.IsConst || field.IsFixedSizeBuffer)
                         {
                             continue;
@@ -4531,9 +4531,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             Debug.Assert(!propertySymbol.IsExplicitInterfaceImplementation); // checked by caller
 
-            MethodSymbol? accessor = getNotSet ? propertySymbol.GetMethod : propertySymbol.SetMethod;
+            MethodSymbol accessor = getNotSet ? propertySymbol.GetMethod : propertySymbol.SetMethod;
             string accessorName;
-            if ((object?)accessor != null)
+            if ((object)accessor != null)
             {
                 accessorName = accessor.Name;
             }
@@ -4612,7 +4612,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// </summary>
         private static Location GetAccessorOrPropertyLocation(PropertySymbol propertySymbol, bool getNotSet)
         {
-            var locationFrom = (Symbol?)(getNotSet ? propertySymbol.GetMethod : propertySymbol.SetMethod) ?? propertySymbol;
+            var locationFrom = (Symbol)(getNotSet ? propertySymbol.GetMethod : propertySymbol.SetMethod) ?? propertySymbol;
             return locationFrom.GetFirstLocation();
         }
 
@@ -5532,7 +5532,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 {
                     equalityContract = new SynthesizedRecordEqualityContractProperty(this, diagnostics);
                     members.Add(equalityContract);
-                    members.Add(equalityContract.GetMethod!);
+                    members.Add(equalityContract.GetMethod);
                 }
                 else
                 {
@@ -6194,7 +6194,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 membersAndInitializers.IsNullableEnabledForInstanceConstructorsAndFields;
         }
 
-        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
+        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
         {
             base.AddSynthesizedAttributes(moduleBuilder, ref attributes);
 

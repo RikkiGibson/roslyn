@@ -263,7 +263,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get
             {
-                return ImmutableArray.Create<SyntaxReference>(syntaxReferenceOpt!);
+                return ImmutableArray.Create<SyntaxReference>(syntaxReferenceOpt);
             }
         }
 
@@ -390,7 +390,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return result;
         }
 
-        public sealed override bool Equals(Symbol? symbol, TypeCompareKind compareKind)
+        public sealed override bool Equals(Symbol symbol, TypeCompareKind compareKind)
         {
             if ((object)this == symbol) return true;
 

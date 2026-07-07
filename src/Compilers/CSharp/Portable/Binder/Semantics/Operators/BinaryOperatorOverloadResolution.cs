@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -20,7 +22,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             BinaryOperatorKind kind,
             bool isChecked,
             string name1,
-            string? name2Opt,
+            string name2Opt,
             BoundExpression left,
             BoundExpression right,
             BinaryOperatorOverloadResolutionResult result,
@@ -56,7 +58,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             BinaryOperatorKind kind,
             bool isChecked,
             string name1,
-            string? name2Opt,
+            string name2Opt,
             BoundExpression left,
             BoundExpression right,
             BinaryOperatorOverloadResolutionResult result,
@@ -73,8 +75,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             // SPEC: The set of candidate user-defined operators provided by the types (if any) of x and y for the 
             // SPEC operation operator op(x, y) is determined. 
 
-            TypeSymbol? leftOperatorSourceOpt = left.Type?.StrippedType();
-            TypeSymbol? rightOperatorSourceOpt = right.Type?.StrippedType();
+            TypeSymbol leftOperatorSourceOpt = left.Type?.StrippedType();
+            TypeSymbol rightOperatorSourceOpt = right.Type?.StrippedType();
             bool leftSourceIsInterface = leftOperatorSourceOpt?.IsInterfaceType() == true;
             bool rightSourceIsInterface = rightOperatorSourceOpt?.IsInterfaceType() == true;
 
@@ -103,7 +105,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             // In order to preserve backward compatibility, at first we ignore interface sources.
 
-            if ((object?)leftOperatorSourceOpt != null && !leftSourceIsInterface)
+            if ((object)leftOperatorSourceOpt != null && !leftSourceIsInterface)
             {
                 hadApplicableCandidates = GetUserDefinedOperators(kind, isChecked, name1, name2Opt, leftOperatorSourceOpt, left, right, result.Results, ref useSiteInfo);
                 if (!hadApplicableCandidates)
@@ -114,7 +116,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             bool isShift = kind.IsShift();
 
-            if (!isShift && (object?)rightOperatorSourceOpt != null && !rightSourceIsInterface && !rightOperatorSourceOpt.Equals(leftOperatorSourceOpt))
+            if (!isShift && (object)rightOperatorSourceOpt != null && !rightSourceIsInterface && !rightOperatorSourceOpt.Equals(leftOperatorSourceOpt))
             {
                 var rightOperators = ArrayBuilder<BinaryOperatorAnalysisResult>.GetInstance();
                 if (GetUserDefinedOperators(kind, isChecked, name1, name2Opt, rightOperatorSourceOpt, left, right, rightOperators, ref useSiteInfo))
@@ -135,8 +137,8 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                 var lookedInInterfaces = PooledDictionary<TypeSymbol, bool>.GetInstance();
 
-                TypeSymbol? firstOperatorSourceOpt;
-                TypeSymbol? secondOperatorSourceOpt;
+                TypeSymbol firstOperatorSourceOpt;
+                TypeSymbol secondOperatorSourceOpt;
                 bool firstSourceIsInterface;
                 bool secondSourceIsInterface;
 
@@ -164,7 +166,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     result.Results.Clear();
                 }
 
-                if (!isShift && (object?)secondOperatorSourceOpt != null && !secondOperatorSourceOpt.Equals(firstOperatorSourceOpt))
+                if (!isShift && (object)secondOperatorSourceOpt != null && !secondOperatorSourceOpt.Equals(firstOperatorSourceOpt))
                 {
                     var rightOperators = ArrayBuilder<BinaryOperatorAnalysisResult>.GetInstance();
                     if (GetUserDefinedBinaryOperatorsFromInterfaces(kind, isChecked, name1, name2Opt,
@@ -217,21 +219,21 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         private bool GetUserDefinedBinaryOperatorsFromInterfaces(BinaryOperatorKind kind, bool isChecked,
             string name1,
-            string? name2Opt,
-            TypeSymbol? operatorSourceOpt, bool sourceIsInterface,
+            string name2Opt,
+            TypeSymbol operatorSourceOpt, bool sourceIsInterface,
             BoundExpression left, BoundExpression right, ref CompoundUseSiteInfo<AssemblySymbol> useSiteInfo,
             Dictionary<TypeSymbol, bool> lookedInInterfaces, ArrayBuilder<BinaryOperatorAnalysisResult> candidates)
         {
             Debug.Assert(candidates.Count == 0);
 
-            if ((object?)operatorSourceOpt == null)
+            if ((object)operatorSourceOpt == null)
             {
                 return false;
             }
 
             bool hadUserDefinedCandidateFromInterfaces = false;
             ImmutableArray<NamedTypeSymbol> interfaces = default;
-            TypeSymbol? constrainedToTypeOpt = null;
+            TypeSymbol constrainedToTypeOpt = null;
 
             if (sourceIsInterface)
             {
@@ -369,9 +371,9 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
 
             var leftType = left.Type;
-            var leftDelegate = (object?)leftType != null && leftType.IsDelegateType();
+            var leftDelegate = (object)leftType != null && leftType.IsDelegateType();
             var rightType = right.Type;
-            var rightDelegate = (object?)rightType != null && rightType.IsDelegateType();
+            var rightDelegate = (object)rightType != null && rightType.IsDelegateType();
 
             // If no operands have delegate types then add nothing.
             if (!leftDelegate && !rightDelegate)
@@ -444,9 +446,6 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             if (leftDelegate && rightDelegate)
             {
-                Debug.Assert(leftType is not null);
-                Debug.Assert(rightType is not null);
-
                 // They are both delegate types. Add them both if they are different types.
                 AddDelegateOperation(kind, leftType, operators);
 
@@ -463,20 +462,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
 
             // One of them is a delegate, the other is not.
-            TypeSymbol delegateType;
-            BoundExpression nonDelegate;
-            if (leftDelegate)
-            {
-                Debug.Assert(leftType is not null);
-                delegateType = leftType;
-                nonDelegate = right;
-            }
-            else
-            {
-                Debug.Assert(rightType is not null);
-                delegateType = rightType;
-                nonDelegate = left;
-            }
+            TypeSymbol delegateType = leftDelegate ? leftType : rightType;
+            BoundExpression nonDelegate = leftDelegate ? right : left;
 
             if ((kind == BinaryOperatorKind.Equal || kind == BinaryOperatorKind.NotEqual)
                 && nonDelegate.Kind == BoundKind.UnboundLambda)
@@ -489,7 +476,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         private void GetEnumOperation(BinaryOperatorKind kind, TypeSymbol enumType, BoundExpression right, ArrayBuilder<BinaryOperatorSignature> operators)
         {
-            Debug.Assert((object?)enumType != null);
+            Debug.Assert((object)enumType != null);
             AssertNotChecked(kind);
 
             if (!enumType.IsValidEnumType())
@@ -498,7 +485,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
 
             var underlying = enumType.GetEnumUnderlyingType();
-            Debug.Assert((object?)underlying != null);
+            Debug.Assert((object)underlying != null);
             Debug.Assert(underlying.SpecialType != SpecialType.None);
 
             var nullableEnum = Compilation.GetOrCreateNullableType(enumType);
@@ -568,7 +555,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             PointerTypeSymbol pointerType,
             ArrayBuilder<BinaryOperatorSignature> operators)
         {
-            Debug.Assert((object?)pointerType != null);
+            Debug.Assert((object)pointerType != null);
             AssertNotChecked(kind);
 
             switch (kind)
@@ -632,13 +619,13 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
 
             var leftType = left.Type;
-            if ((object?)leftType != null)
+            if ((object)leftType != null)
             {
                 leftType = leftType.StrippedType();
             }
 
             var rightType = right.Type;
-            if ((object?)rightType != null)
+            if ((object)rightType != null)
             {
                 rightType = rightType.StrippedType();
             }
@@ -685,12 +672,12 @@ namespace Microsoft.CodeAnalysis.CSharp
                     throw ExceptionUtilities.UnexpectedValue(kind);
             }
 
-            if ((object?)leftType != null)
+            if ((object)leftType != null)
             {
                 GetEnumOperation(kind, leftType, right, results);
             }
 
-            if ((object?)rightType != null && ((object?)leftType == null || !(useIdentityConversion ? Conversions.HasIdentityConversion(rightType, leftType) : rightType.Equals(leftType))))
+            if ((object)rightType != null && ((object)leftType == null || !(useIdentityConversion ? Conversions.HasIdentityConversion(rightType, leftType) : rightType.Equals(leftType))))
             {
                 GetEnumOperation(kind, rightType, right, results);
             }
@@ -709,7 +696,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             var leftType = left.Type as PointerTypeSymbol;
             var rightType = right.Type as PointerTypeSymbol;
 
-            if ((object?)leftType != null)
+            if ((object)leftType != null)
             {
                 GetPointerArithmeticOperators(kind, leftType, results);
             }
@@ -717,12 +704,12 @@ namespace Microsoft.CodeAnalysis.CSharp
             // The only arithmetic operator that is applicable on two distinct pointer types is
             //   long operator –(T* x, T* y)
             // This operator returns long and so it's not ambiguous to apply it on T1 and T2 that are identity convertible to each other.
-            if ((object?)rightType != null && ((object?)leftType == null || !Conversions.HasIdentityConversion(rightType, leftType)))
+            if ((object)rightType != null && ((object)leftType == null || !Conversions.HasIdentityConversion(rightType, leftType)))
             {
                 GetPointerArithmeticOperators(kind, rightType, results);
             }
 
-            if ((object?)leftType != null || (object?)rightType != null || left.Type is FunctionPointerTypeSymbol || right.Type is FunctionPointerTypeSymbol)
+            if ((object)leftType != null || (object)rightType != null || left.Type is FunctionPointerTypeSymbol || right.Type is FunctionPointerTypeSymbol)
             {
                 // The pointer comparison operators are all "void* OP void*".
                 GetPointerComparisonOperators(kind, results);
@@ -791,8 +778,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                 // We consider the `null` literal, but not the `default` literal, since the latter does not require a reference equality
                 return
                     BuiltInOperators.IsValidObjectEquality(conversions, left.Type, left.IsLiteralNull(), leftIsDefault: false, right.Type, right.IsLiteralNull(), rightIsDefault: false, ref useSiteInfo) &&
-                    ((object?)left.Type == null || (!left.Type.IsDelegateType() && left.Type.SpecialType != SpecialType.System_String && left.Type.SpecialType != SpecialType.System_Delegate)) &&
-                    ((object?)right.Type == null || (!right.Type.IsDelegateType() && right.Type.SpecialType != SpecialType.System_String && right.Type.SpecialType != SpecialType.System_Delegate));
+                    ((object)left.Type == null || (!left.Type.IsDelegateType() && left.Type.SpecialType != SpecialType.System_String && left.Type.SpecialType != SpecialType.System_Delegate)) &&
+                    ((object)right.Type == null || (!right.Type.IsDelegateType() && right.Type.SpecialType != SpecialType.System_String && right.Type.SpecialType != SpecialType.System_Delegate));
             }
 
             static bool isUtf8ByteRepresentation(BoundExpression value)
@@ -878,7 +865,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             BinaryOperatorKind kind,
             bool isChecked,
             string name1,
-            string? name2Opt,
+            string name2Opt,
             TypeSymbol type0,
             BoundExpression left,
             BoundExpression right,
@@ -886,7 +873,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             ref CompoundUseSiteInfo<AssemblySymbol> useSiteInfo)
         {
             Debug.Assert(results.Count == 0);
-            if ((object?)type0 == null || OperatorFacts.DefinitelyHasNoUserDefinedOperators(type0))
+            if ((object)type0 == null || OperatorFacts.DefinitelyHasNoUserDefinedOperators(type0))
             {
                 return false;
             }
@@ -912,18 +899,18 @@ namespace Microsoft.CodeAnalysis.CSharp
             var operators = ArrayBuilder<BinaryOperatorSignature>.GetInstance();
             bool hadApplicableCandidates = false;
 
-            NamedTypeSymbol? current = type0 as NamedTypeSymbol;
-            if ((object?)current == null)
+            NamedTypeSymbol current = type0 as NamedTypeSymbol;
+            if ((object)current == null)
             {
                 current = type0.BaseTypeWithDefinitionUseSiteDiagnostics(ref useSiteInfo);
             }
 
-            if ((object?)current == null && type0.IsTypeParameter())
+            if ((object)current == null && type0.IsTypeParameter())
             {
                 current = ((TypeParameterSymbol)type0).EffectiveBaseClass(ref useSiteInfo);
             }
 
-            for (; (object?)current != null; current = current.BaseTypeWithDefinitionUseSiteDiagnostics(ref useSiteInfo))
+            for (; (object)current != null; current = current.BaseTypeWithDefinitionUseSiteDiagnostics(ref useSiteInfo))
             {
                 operators.Clear();
                 GetUserDefinedBinaryOperatorsFromType(constrainedToTypeOpt: null, current, kind, name1, name2Opt, operators);
@@ -941,6 +928,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             return hadApplicableCandidates;
         }
 
+#nullable enable
+
         internal static void GetStaticUserDefinedBinaryOperatorMethodNames(BinaryOperatorKind kind, bool isChecked, out string name1, out string? name2Opt)
         {
             name1 = OperatorFacts.BinaryOperatorNameFromOperatorKind(kind, isChecked);
@@ -956,7 +945,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         }
 
         private void GetUserDefinedBinaryOperatorsFromType(
-            TypeSymbol? constrainedToTypeOpt,
+            TypeSymbol constrainedToTypeOpt,
             NamedTypeSymbol type,
             BinaryOperatorKind kind,
             string name1,
@@ -1053,6 +1042,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                 }
             }
         }
+
+#nullable disable
 
         private enum LiftingResult
         {
@@ -1381,7 +1372,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         private BetterResult MoreSpecificOperator(BinaryOperatorSignature op1, BinaryOperatorSignature op2, ref CompoundUseSiteInfo<AssemblySymbol> useSiteInfo)
         {
             TypeSymbol op1Left, op1Right, op2Left, op2Right;
-            if ((object?)op1.Method != null)
+            if ((object)op1.Method != null)
             {
                 var p = op1.Method.OriginalDefinition.GetParameters();
                 op1Left = p[0].Type;
@@ -1398,7 +1389,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 op1Right = op1.RightType;
             }
 
-            if ((object?)op2.Method != null)
+            if ((object)op2.Method != null)
             {
                 var p = op2.Method.OriginalDefinition.GetParameters();
                 op2Left = p[0].Type;
@@ -1434,6 +1425,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         {
             Debug.Assert((kind & ~BinaryOperatorKind.Checked) == kind, "Did not expect operator to be checked.  Consider using .Operator() to mask.");
         }
+
+#nullable enable 
 
         public bool BinaryOperatorExtensionOverloadResolutionInSingleScope(
             ArrayBuilder<Symbol> extensionCandidatesInSingleScope,

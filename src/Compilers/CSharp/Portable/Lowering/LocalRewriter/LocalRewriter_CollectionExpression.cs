@@ -15,13 +15,13 @@ namespace Microsoft.CodeAnalysis.CSharp
 {
     internal sealed partial class LocalRewriter
     {
-        public override BoundNode VisitCollectionExpression(BoundCollectionExpression node)
+        public override BoundNode? VisitCollectionExpression(BoundCollectionExpression node)
         {
             // BoundCollectionExpression should be handled in VisitConversion().
             throw ExceptionUtilities.Unreachable();
         }
 
-        public override BoundNode VisitUnconvertedCollectionExpression(BoundUnconvertedCollectionExpression node)
+        public override BoundNode? VisitUnconvertedCollectionExpression(BoundUnconvertedCollectionExpression node)
         {
             throw ExceptionUtilities.Unreachable();
         }

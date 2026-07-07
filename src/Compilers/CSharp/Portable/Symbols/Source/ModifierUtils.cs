@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Roslyn.Utilities;
@@ -119,15 +121,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return result;
 
             bool checkFeature(DeclarationModifiers modifier, MessageID featureID)
-            {
-                if ((result & modifier) == 0)
-                {
-                    return false;
-                }
-
-                Debug.Assert(errorLocation.SourceTree is not null);
-                return !Binder.CheckFeatureAvailability(errorLocation.SourceTree, featureID, diagnostics, errorLocation);
-            }
+                => ((result & modifier) != 0) && !Binder.CheckFeatureAvailability(errorLocation.SourceTree, featureID, diagnostics, errorLocation);
         }
 
         internal static void CheckScopedModifierAvailability(CSharpSyntaxNode syntax, SyntaxToken modifier, BindingDiagnosticBag diagnostics)
@@ -165,7 +159,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             if ((modifiers & defaultInterfaceImplementationModifiers) != 0)
             {
-                Debug.Assert(errorLocation.SourceTree is not null);
                 LanguageVersion availableVersion = ((CSharpParseOptions)errorLocation.SourceTree.Options).LanguageVersion;
                 LanguageVersion requiredVersion;
 
@@ -239,6 +232,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable enable
         internal static void CheckFeatureAvailabilityForPartialEventsAndConstructors(Location location, BindingDiagnosticBag diagnostics)
         {
             Debug.Assert(location.SourceTree is not null);
@@ -256,6 +250,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     requiredVersion);
             }
         }
+#nullable disable
 
         internal static DeclarationModifiers AdjustModifiersForAnInterfaceMember(DeclarationModifiers mods, bool hasBody, bool isExplicitInterfaceImplementation, bool forMethod)
         {
@@ -551,7 +546,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             if ((modifiers & DeclarationModifiers.Required) != 0)
             {
-                Debug.Assert(symbol.ContainingType is not null);
                 var useSiteInfo = new CompoundUseSiteInfo<AssemblySymbol>(futureDestination: diagnostics, assemblyBeingBuilt: symbol.ContainingAssembly);
                 bool reportedError = false;
 

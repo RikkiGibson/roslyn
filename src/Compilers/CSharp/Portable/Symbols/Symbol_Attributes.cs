@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -129,6 +131,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         {
         }
 
+#nullable enable
         /// <summary>
         /// Method to early decode applied well-known attribute which can be queried by the binder.
         /// This method is called during attribute binding after we have bound the attribute types for all attributes,
@@ -234,6 +237,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             DecodeWellKnownAttributeImpl(ref arguments);
         }
+#nullable disable
 
         protected virtual void DecodeWellKnownAttributeImpl(ref DecodeWellKnownAttributeArguments<AttributeSyntax, CSharpAttributeData, AttributeLocation> arguments)
         {
@@ -257,10 +261,11 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <param name="diagnostics">Diagnostic bag.</param>
         /// <param name="symbolPart">Specific part of the symbol to which the attributes apply, or <see cref="AttributeLocation.None"/> if the attributes apply to the symbol itself.</param>
         /// <param name="decodedData">Decoded well-known attribute data, could be null.</param>
-        internal virtual void PostDecodeWellKnownAttributes(ImmutableArray<CSharpAttributeData> boundAttributes, ImmutableArray<AttributeSyntax> allAttributeSyntaxNodes, BindingDiagnosticBag diagnostics, AttributeLocation symbolPart, WellKnownAttributeData? decodedData)
+        internal virtual void PostDecodeWellKnownAttributes(ImmutableArray<CSharpAttributeData> boundAttributes, ImmutableArray<AttributeSyntax> allAttributeSyntaxNodes, BindingDiagnosticBag diagnostics, AttributeLocation symbolPart, WellKnownAttributeData decodedData)
         {
         }
 
+#nullable enable
         /// <summary>
         /// This method does the following set of operations in the specified order:
         /// (1) GetAttributesToBind: Merge attributes from the given attributesSyntaxLists and filter out attributes by attribute target.
@@ -557,6 +562,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
             return boundAttributeArrayBuilder.ToImmutableAndFree();
         }
+#nullable disable
 
         private void RecordPresenceOfBadAttributes(ImmutableArray<CSharpAttributeData> boundAttributes)
         {
@@ -585,14 +591,14 @@ namespace Microsoft.CodeAnalysis.CSharp
             AttributeLocation symbolPart,
             BindingDiagnosticBag diagnostics,
             CSharpCompilation compilation,
-            Func<AttributeSyntax, Binder?, bool>? attributeMatchesOpt,
-            Binder? rootBinderOpt,
+            Func<AttributeSyntax, Binder, bool> attributeMatchesOpt,
+            Binder rootBinderOpt,
             out ImmutableArray<Binder> binders)
         {
             var attributeTarget = (IAttributeTargetSymbol)this;
 
-            ArrayBuilder<AttributeSyntax>? syntaxBuilder = null;
-            ArrayBuilder<Binder>? bindersBuilder = null;
+            ArrayBuilder<AttributeSyntax> syntaxBuilder = null;
+            ArrayBuilder<Binder> bindersBuilder = null;
             int attributesToBindCount = 0;
 
             for (int listIndex = 0; listIndex < attributeDeclarationSyntaxLists.Count; listIndex++)
@@ -649,7 +655,6 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             if (syntaxBuilder != null)
             {
-                Debug.Assert(bindersBuilder is not null);
                 binders = bindersBuilder.ToImmutableAndFree();
                 return syntaxBuilder.ToImmutableAndFree();
             }
@@ -665,6 +670,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return true;
         }
 
+#nullable enable
         protected Binder GetAttributeBinder(SyntaxList<AttributeListSyntax> attributeDeclarationSyntaxList, CSharpCompilation compilation, Binder? rootBinder = null)
         {
             var binder = rootBinder ?? compilation.GetBinderFactory(attributeDeclarationSyntaxList.Node!.SyntaxTree).GetBinder(attributeDeclarationSyntaxList.Node);
@@ -672,6 +678,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             Debug.Assert(!binder.InAttributeArgument || this is MethodSymbol { MethodKind: MethodKind.LambdaMethod or MethodKind.LocalFunction }, "Possible cycle in attribute binding");
             return binder;
         }
+#nullable disable
 
         private static bool MatchAttributeTarget(IAttributeTargetSymbol attributeTarget, AttributeLocation symbolPart, AttributeListSyntax attributeList, BindingDiagnosticBag diagnostics)
         {
@@ -688,7 +695,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             // We need to report diagnostics only once, so do it when visiting attributes for the owner.
             bool isOwner = symbolPart == AttributeLocation.None && ReferenceEquals(attributesOwner, attributeTarget);
 
-            AttributeTargetSpecifierSyntax? targetOpt = attributeList.Target;
+            AttributeTargetSpecifierSyntax targetOpt = attributeList.Target;
             if (targetOpt == null)
             {
                 // only attributes with an explicit target match if the symbol doesn't own the attributes:
@@ -759,6 +766,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
+#nullable enable
         /// <summary>
         /// Method to early decode certain well-known attributes which can be queried by the binder.
         /// This method is called during attribute binding after we have bound the attribute types for all attributes,
@@ -813,6 +821,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             return arguments.HasDecodedData ? arguments.DecodedData : null;
         }
+#nullable disable
 
         private void EarlyDecodeWellKnownAttributeTypes(ImmutableArray<NamedTypeSymbol> attributeTypes, ImmutableArray<AttributeSyntax> attributeSyntaxList)
         {
@@ -837,7 +846,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// the symbol can extract data from the attribute arguments and potentially perform validation specific to
         /// some well known attributes.
         /// </summary>
-        private WellKnownAttributeData? ValidateAttributeUsageAndDecodeWellKnownAttributes(
+        private WellKnownAttributeData ValidateAttributeUsageAndDecodeWellKnownAttributes(
             ImmutableArray<Binder> binders,
             ImmutableArray<AttributeSyntax> attributeSyntaxList,
             ImmutableArray<CSharpAttributeData> boundAttributes,

@@ -20,7 +20,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         private readonly string _name;
         private readonly SourceEventAccessorSymbol? _addMethod;
         private readonly SourceEventAccessorSymbol? _removeMethod;
-        private readonly TypeSymbol? _explicitInterfaceType;
+        private readonly TypeSymbol _explicitInterfaceType;
         private readonly ImmutableArray<EventSymbol> _explicitInterfaceImplementations;
 
         internal SourceCustomEventSymbol(SourceMemberContainerTypeSymbol containingType, Binder binder, EventDeclarationSyntax syntax, BindingDiagnosticBag diagnostics) :
@@ -68,7 +68,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     }
                 }
             }
-            else if ((object?)explicitlyImplementedEvent != null)
+            else if ((object)explicitlyImplementedEvent != null)
             {
                 CopyEventCustomModifiers(explicitlyImplementedEvent, ref _type, ContainingAssembly);
             }
@@ -216,7 +216,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             base.AfterAddingTypeMembersChecks(conversions, diagnostics);
 
-            if ((object?)_explicitInterfaceType != null)
+            if ((object)_explicitInterfaceType != null)
             {
                 var explicitInterfaceSpecifier = this.ExplicitInterfaceSpecifier;
                 RoslynDebug.Assert(explicitInterfaceSpecifier != null);

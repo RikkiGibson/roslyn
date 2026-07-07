@@ -30,12 +30,12 @@ namespace Microsoft.CodeAnalysis.CSharp
             return result;
         }
 
-        public override BoundNode VisitLabel(BoundLabel node)
+        public override BoundNode? VisitLabel(BoundLabel node)
         {
             // we are removing the label expressions from the bound tree because this expression is no longer needed
             // for the emit phase. It is even doing harm to e.g. the stack depth calculation because this expression
             // would not need to be pushed to the stack.
-            return null!;
+            return null;
         }
     }
 }

@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -30,7 +32,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         bool Cci.IDefinition.IsEncDeleted
             => false;
 
-        Cci.IGenericMethodInstanceReference? Cci.IMethodReference.AsGenericMethodInstanceReference
+        Cci.IGenericMethodInstanceReference Cci.IMethodReference.AsGenericMethodInstanceReference
         {
             get
             {
@@ -46,7 +48,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        Cci.ISpecializedMethodReference? Cci.IMethodReference.AsSpecializedMethodReference
+        Cci.ISpecializedMethodReference Cci.IMethodReference.AsSpecializedMethodReference
         {
             get
             {
@@ -64,7 +66,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        Cci.IDefinition? Cci.IReference.AsDefinition(EmitContext context)
+        Cci.IDefinition Cci.IReference.AsDefinition(EmitContext context)
         {
             return ResolvedMethodImpl(context);
         }
@@ -74,7 +76,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             Debug.Assert(this.IsDefinitionOrDistinct());
 
             var synthesizedGlobalMethod = AdaptedMethodSymbol.OriginalDefinition as SynthesizedGlobalMethodSymbol;
-            if ((object?)synthesizedGlobalMethod != null)
+            if ((object)synthesizedGlobalMethod != null)
             {
                 return synthesizedGlobalMethod.ContainingPrivateImplementationDetailsType;
             }
@@ -93,7 +95,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             var moduleBeingBuilt = (PEModuleBuilder)context.Module;
 
             return moduleBeingBuilt.Translate(containingType,
-                syntaxNodeOpt: (CSharpSyntaxNode?)context.SyntaxNode,
+                syntaxNodeOpt: (CSharpSyntaxNode)context.SyntaxNode,
                 diagnostics: context.Diagnostics,
                 needDeclaration: AdaptedMethodSymbol.IsDefinition);
         }
@@ -159,12 +161,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        Cci.IMethodDefinition? Cci.IMethodReference.GetResolvedMethod(EmitContext context)
+        Cci.IMethodDefinition Cci.IMethodReference.GetResolvedMethod(EmitContext context)
         {
             return ResolvedMethodImpl(context);
         }
 
-        private Cci.IMethodDefinition? ResolvedMethodImpl(EmitContext context)
+        private Cci.IMethodDefinition ResolvedMethodImpl(EmitContext context)
         {
             Debug.Assert(this.IsDefinitionOrDistinct());
             PEModuleBuilder moduleBeingBuilt = (PEModuleBuilder)context.Module;
@@ -172,7 +174,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             if (AdaptedMethodSymbol.IsDefinition && // can't be generic instantiation
                 AdaptedMethodSymbol.ContainingModule == moduleBeingBuilt.SourceModule) // must be declared in the module we are building
             {
-                Debug.Assert((object?)AdaptedMethodSymbol.PartialDefinitionPart == null); // must be definition
+                Debug.Assert((object)AdaptedMethodSymbol.PartialDefinitionPart == null); // must be definition
                 return this;
             }
 
@@ -248,7 +250,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         Cci.ITypeReference Cci.ISignature.GetType(EmitContext context)
         {
             return ((PEModuleBuilder)context.Module).Translate(AdaptedMethodSymbol.ReturnType,
-                syntaxNodeOpt: (CSharpSyntaxNode?)context.SyntaxNode,
+                syntaxNodeOpt: (CSharpSyntaxNode)context.SyntaxNode,
                 diagnostics: context.Diagnostics);
         }
 
@@ -262,7 +264,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             {
                 Debug.Assert(arg.CustomModifiers.IsEmpty);
                 yield return moduleBeingBuilt.Translate(arg.Type,
-                                                        syntaxNodeOpt: (CSharpSyntaxNode?)context.SyntaxNode,
+                                                        syntaxNodeOpt: (CSharpSyntaxNode)context.SyntaxNode,
                                                         diagnostics: context.Diagnostics);
             }
         }
@@ -278,7 +280,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 // NoPia method might come through here.
                 return ((PEModuleBuilder)context.Module).Translate(
                     (MethodSymbol)AdaptedMethodSymbol.OriginalDefinition,
-                    syntaxNodeOpt: (CSharpSyntaxNode?)context.SyntaxNode,
+                    syntaxNodeOpt: (CSharpSyntaxNode)context.SyntaxNode,
                     diagnostics: context.Diagnostics,
                     needDeclaration: true);
             }
@@ -296,7 +298,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return ((MethodSymbol)AdaptedMethodSymbol.OriginalDefinition).GetCciAdapter();
             }
         }
-
+#nullable enable
         Cci.ITypeDefinition Cci.ITypeDefinitionMember.ContainingTypeDefinition
         {
             get
@@ -375,7 +377,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             {
                 CheckDefinitionInvariant();
                 Debug.Assert(AdaptedMethodSymbol.HasDeclarativeSecurity);
-                return AdaptedMethodSymbol.GetSecurityInformation()!;
+                return AdaptedMethodSymbol.GetSecurityInformation();
             }
         }
 
@@ -443,12 +445,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return !AdaptedMethodSymbol.ContainingType.IsExtension && AdaptedMethodSymbol.GetDllImportData() != null;
             }
         }
-
 #nullable disable
-        // TODO2: Cci.IMethodDefinition.PlatformInvokeData is non-nullable in the Cci interface but this
-        // adapter returns null when the member is not a P/Invoke (it is only accessed when IsPlatformInvoke
-        // is true). Islanding this member avoids annotating the shared Cci interface. See
-        // nullable-migration/found-bugs.md.
         Cci.IPlatformInvokeInformation Cci.IMethodDefinition.PlatformInvokeData
         {
             get
@@ -457,7 +454,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return AdaptedMethodSymbol.ContainingType.IsExtension ? null : AdaptedMethodSymbol.GetDllImportData();
             }
         }
-#nullable enable
 
         System.Reflection.MethodImplAttributes Cci.IMethodDefinition.GetImplementationAttributes(EmitContext context)
         {
@@ -534,7 +530,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             CheckDefinitionInvariant();
 
             ImmutableArray<CSharpAttributeData> userDefined = AdaptedMethodSymbol.GetReturnTypeAttributes();
-            ArrayBuilder<CSharpAttributeData>? synthesized = null;
+            ArrayBuilder<CSharpAttributeData> synthesized = null;
             AdaptedMethodSymbol.AddSynthesizedReturnTypeAttributes((PEModuleBuilder)context.Module, ref synthesized);
 
             // Note that callers of this method (CCI and ReflectionEmitter) have to enumerate 
@@ -556,7 +552,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get
             {
                 CheckDefinitionInvariant();
-                return AdaptedMethodSymbol.ReturnValueMarshallingInformation!;
+                return AdaptedMethodSymbol.ReturnValueMarshallingInformation;
             }
         }
 
@@ -581,7 +577,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
     internal partial class MethodSymbol
     {
 #if DEBUG
-        private MethodSymbolAdapter? _lazyAdapter;
+        private MethodSymbolAdapter _lazyAdapter;
 
         protected sealed override SymbolAdapter GetCciAdapterImpl() => GetCciAdapter();
 
@@ -653,7 +649,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// </summary>
         /// <param name="context">See <see cref="IsMetadataVirtual(ModuleSymbol?, bool)"/></param>
         /// <param name="ignoreInterfaceImplementationChanges">See summary.</param>
+#nullable enable
         internal abstract bool IsMetadataNewSlot(ModuleSymbol? context, bool ignoreInterfaceImplementationChanges = false);
+#nullable disable
 
         internal virtual bool HasRuntimeSpecialName
         {
@@ -697,7 +695,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// Fine to pass null if <paramref name="ignoreInterfaceImplementationChanges"/> is 'true'.
         /// </param>
         /// <param name="ignoreInterfaceImplementationChanges">See summary.</param>
+#nullable enable
         internal abstract bool IsMetadataVirtual(ModuleSymbol? context, bool ignoreInterfaceImplementationChanges = false);
+#nullable disable
 
         internal virtual bool ReturnValueIsMarshalledExplicitly
         {

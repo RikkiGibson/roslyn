@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -40,7 +42,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// the main module. If there is no existing assembly that can be used as a source for the primitive types, 
         /// the value is a Compilation.MissingCorLibrary. 
         /// </summary>
-        private AssemblySymbol _corLibrary = null!;
+        private AssemblySymbol _corLibrary;
 
         /// <summary>
         /// The system assembly, which provides primitive types like Object, String, etc., e.g. mscorlib.dll. 
@@ -102,7 +104,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         ///   AssemblyVersion("1.2.*") is represented as 1.2.65535.65535,
         ///   AssemblyVersion("1.2.3.*") is represented as 1.2.3.65535.
         /// </summary>
-        public abstract Version? AssemblyVersionPattern { get; }
+        public abstract Version AssemblyVersionPattern { get; }
 
         /// <summary>
         /// Target architecture of the machine.
@@ -139,16 +141,16 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// <summary>
         /// Given a namespace symbol, returns the corresponding assembly specific namespace symbol
         /// </summary>
-        internal NamespaceSymbol? GetAssemblyNamespace(NamespaceSymbol namespaceSymbol)
+        internal NamespaceSymbol GetAssemblyNamespace(NamespaceSymbol namespaceSymbol)
         {
             if (namespaceSymbol.IsGlobalNamespace)
             {
                 return this.GlobalNamespace;
             }
 
-            NamespaceSymbol? container = namespaceSymbol.ContainingNamespace;
+            NamespaceSymbol container = namespaceSymbol.ContainingNamespace;
 
-            if ((object?)container == null)
+            if ((object)container == null)
             {
                 return this.GlobalNamespace;
             }
@@ -159,15 +161,15 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return namespaceSymbol;
             }
 
-            NamespaceSymbol? assemblyContainer = GetAssemblyNamespace(container);
+            NamespaceSymbol assemblyContainer = GetAssemblyNamespace(container);
 
-            if ((object?)assemblyContainer == (object)container)
+            if ((object)assemblyContainer == (object)container)
             {
                 // Trivial case, container isn't merged.
                 return namespaceSymbol;
             }
 
-            if ((object?)assemblyContainer == null)
+            if ((object)assemblyContainer == null)
             {
                 return null;
             }
@@ -208,7 +210,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get
             {
-                return null!;
+                return null;
             }
         }
 
@@ -304,7 +306,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get
             {
-                return null!;
+                return null;
             }
         }
 
@@ -314,6 +316,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal abstract bool HasPrimaryInteropAssemblyAttribute { get; }
 
+#nullable enable
         /// <summary>
         /// Lookup a top level type referenced from metadata, names should be
         /// compared case-sensitively.
@@ -374,6 +377,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         }
 
         internal abstract IEnumerable<NamedTypeSymbol> GetAllTopLevelForwardedTypes();
+
+#nullable disable
 
         /// <summary>
         /// Lookup declaration for predefined CorLib type in this Assembly.
@@ -510,9 +515,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable enable
         // Keep in sync with VB's AssemblySymbol.RuntimeSupportsAsyncMethods
         internal bool RuntimeSupportsAsyncMethods
             => GetSpecialType(InternalSpecialType.System_Runtime_CompilerServices_AsyncHelpers) is { TypeKind: TypeKind.Class, IsStatic: true };
+#nullable disable
 
         protected bool RuntimeSupportsFeature(SpecialMember feature)
         {
@@ -572,8 +579,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal abstract IEnumerable<string> GetInternalsVisibleToAssemblyNames();
 
-        bool IAssemblySymbolInternal.AreInternalsVisibleToThisAssembly(IAssemblySymbolInternal? otherAssembly)
-            => AreInternalsVisibleToThisAssembly((AssemblySymbol)otherAssembly!);
+        bool IAssemblySymbolInternal.AreInternalsVisibleToThisAssembly(IAssemblySymbolInternal otherAssembly)
+            => AreInternalsVisibleToThisAssembly((AssemblySymbol)otherAssembly);
 
         internal abstract bool AreInternalsVisibleToThisAssembly(AssemblySymbol other);
 
@@ -587,7 +594,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// the string might be null or an invalid guid representation. False, 
         /// if there is no GuidAttribute with string argument.
         /// </summary>
-        internal abstract bool GetGuidString(out string? guidString);
+        internal abstract bool GetGuidString(out string guidString);
 
         /// <summary>
         /// Gets the set of type identifiers from this assembly.
@@ -656,6 +663,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return GetSpecialType(SpecialTypes.GetTypeFromMetadataName(type));
         }
 
+#nullable enable
         /// <summary>
         /// Lookup a type within the assembly using the canonical CLR metadata name of the type.
         /// </summary>
@@ -1074,12 +1082,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             return result;
         }
+#nullable disable
 
         /// <summary>
         /// Lookup member declaration in predefined CorLib type in this Assembly. Only valid if this 
         /// assembly is the Cor Library
         /// </summary>
-        internal virtual Symbol? GetDeclaredSpecialTypeMember(SpecialMember member)
+        internal virtual Symbol GetDeclaredSpecialTypeMember(SpecialMember member)
         {
             return null;
         }
@@ -1087,12 +1096,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// <summary>
         /// Lookup member declaration in predefined CorLib type used by this Assembly.
         /// </summary>
-#nullable disable
         internal virtual Symbol GetSpecialTypeMember(SpecialMember member)
         {
             return CorLibrary.GetDeclaredSpecialTypeMember(member);
         }
-#nullable enable
 
         internal abstract ImmutableArray<byte> PublicKey { get; }
 
@@ -1101,7 +1108,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// 
         /// Otherwise, this returns <see langword="null"/>.
         /// </summary>
-        public abstract AssemblyMetadata? GetMetadata();
+        public abstract AssemblyMetadata GetMetadata();
 
         protected override ISymbol CreateISymbol()
         {

@@ -2,12 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
@@ -48,6 +49,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
         private readonly Dictionary<AssemblySymbol, DestinationData> _retargetingAssemblyMap =
             new Dictionary<AssemblySymbol, DestinationData>();
 
+#nullable enable
+
         private struct DestinationData
         {
             public AssemblySymbol To;
@@ -55,6 +58,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
 
             public ConcurrentDictionary<NamedTypeSymbol, NamedTypeSymbol> SymbolMap => LazyInitializer.EnsureInitialized(ref _symbolMap);
         }
+
+#nullable disable
 
         internal readonly RetargetingSymbolTranslator RetargetingTranslator;
 
@@ -147,7 +152,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
             }
         }
 
-        public override string GetDocumentationCommentXml(CultureInfo? preferredCulture = null, bool expandIncludes = false, CancellationToken cancellationToken = default(CancellationToken))
+        public override string GetDocumentationCommentXml(CultureInfo preferredCulture = null, bool expandIncludes = false, CancellationToken cancellationToken = default(CancellationToken))
         {
             return _underlyingModule.GetDocumentationCommentXml(preferredCulture, expandIncludes, cancellationToken);
         }
@@ -180,7 +185,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
         /// A helper method for ReferenceManager to set AssemblySymbols for assemblies 
         /// referenced by this module.
         /// </summary>
-        internal override void SetReferences(ModuleReferences<AssemblySymbol> moduleReferences, SourceAssemblySymbol? originatingSourceAssemblyDebugOnly)
+        internal override void SetReferences(ModuleReferences<AssemblySymbol> moduleReferences, SourceAssemblySymbol originatingSourceAssemblyDebugOnly)
         {
             base.SetReferences(moduleReferences, originatingSourceAssemblyDebugOnly);
 
@@ -238,7 +243,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
 #endif
         }
 
-        internal bool RetargetingDefinitions(AssemblySymbol from, [NotNullWhen(true)] out AssemblySymbol? to)
+        internal bool RetargetingDefinitions(AssemblySymbol from, out AssemblySymbol to)
         {
             DestinationData destination;
 
@@ -299,10 +304,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
 
         internal sealed override CSharpCompilation DeclaringCompilation // perf, not correctness
         {
-            get { return null!; }
+            get { return null; }
         }
 
-        public override ModuleMetadata GetMetadata() => _underlyingModule.GetMetadata()!;
+        public override ModuleMetadata GetMetadata() => _underlyingModule.GetMetadata();
 
         public sealed override bool AreLocalsZeroed
         {
@@ -316,6 +321,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
 
         internal override bool UseUpdatedMemorySafetyRules => _underlyingModule.UseUpdatedMemorySafetyRules;
 
+#nullable enable
         internal sealed override ObsoleteAttributeData? ObsoleteAttributeData
             => _underlyingModule.ObsoleteAttributeData;
     }

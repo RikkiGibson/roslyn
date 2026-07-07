@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -28,7 +30,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             var interfaceSpecifier = syntax.ExplicitInterfaceSpecifier;
             var nameToken = syntax.Identifier;
 
-            TypeSymbol? explicitInterfaceType;
+            TypeSymbol explicitInterfaceType;
             var name = ExplicitInterfaceHelpers.GetMemberNameAndInterfaceSymbol(bodyBinder, syntax.Modifiers, interfaceSpecifier, nameToken.ValueText, diagnostics, out explicitInterfaceType, aliasQualifierOpt: out _);
             var location = new SourceLocation(nameToken);
 
@@ -166,7 +168,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     Binder.CheckFeatureAvailability(
                         syntax.ConstraintClauses[0].WhereKeyword, MessageID.IDS_OverrideWithConstraints, diagnostics);
 
-                    Debug.Assert(syntax.TypeParameterList is not null);
                     declaredConstraints = signatureBinder.WithAdditionalFlags(BinderFlags.GenericConstraintsClause | BinderFlags.SuppressConstraintChecks).
                                               BindTypeParameterConstraintClauses(this, TypeParameters, syntax.TypeParameterList, syntax.ConstraintClauses,
                                                                                  diagnostics, performOnlyCycleSafeValidation: false, isForOverride: true);
@@ -259,7 +260,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             var attributeConstructor = Binder.GetWellKnownTypeMember(compilation, WellKnownMember.System_Runtime_CompilerServices_ExtensionAttribute__ctor, out var useSiteInfo);
 
-            if ((object?)attributeConstructor == null)
+            if ((object)attributeConstructor == null)
             {
                 var memberDescriptor = WellKnownMembers.GetDescriptor(WellKnownMember.System_Runtime_CompilerServices_ExtensionAttribute__ctor);
                 // do not use Binder.ReportUseSiteErrorForAttributeCtor in this case, because we'll need to report a special error id, not a generic use site error.
@@ -282,7 +283,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return (MethodDeclarationSyntax)syntaxReferenceOpt.GetSyntax();
         }
 
-        internal sealed override ExecutableCodeBinder? TryGetBodyBinder(BinderFactory? binderFactoryOpt = null, bool ignoreAccessibility = false)
+        internal sealed override ExecutableCodeBinder TryGetBodyBinder(BinderFactory binderFactoryOpt = null, bool ignoreAccessibility = false)
         {
             return TryGetBodyBinderFromSyntax(binderFactoryOpt, ignoreAccessibility);
         }
@@ -311,7 +312,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// <summary>
         /// If this is a partial implementation part returns the definition part and vice versa.
         /// </summary>
-        internal abstract SourceOrdinaryMethodSymbol? OtherPartOfPartial { get; }
+        internal abstract SourceOrdinaryMethodSymbol OtherPartOfPartial { get; }
 
         /// <summary>
         /// Returns true if this symbol represents a partial method definition (the part that specifies a signature but no body).
@@ -346,7 +347,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        internal SourceOrdinaryMethodSymbol? SourcePartialDefinition
+        internal SourceOrdinaryMethodSymbol SourcePartialDefinition
         {
             get
             {
@@ -354,7 +355,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        internal SourceOrdinaryMethodSymbol? SourcePartialImplementation
+        internal SourceOrdinaryMethodSymbol SourcePartialImplementation
         {
             get
             {
@@ -362,7 +363,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        public sealed override MethodSymbol? PartialDefinitionPart
+        public sealed override MethodSymbol PartialDefinitionPart
         {
             get
             {
@@ -370,7 +371,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        public sealed override MethodSymbol? PartialImplementationPart
+        public sealed override MethodSymbol PartialImplementationPart
         {
             get
             {
@@ -408,13 +409,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        public sealed override string GetDocumentationCommentXml(CultureInfo? preferredCulture = null, bool expandIncludes = false, CancellationToken cancellationToken = default(CancellationToken))
+        public sealed override string GetDocumentationCommentXml(CultureInfo preferredCulture = null, bool expandIncludes = false, CancellationToken cancellationToken = default(CancellationToken))
         {
             ref var lazyDocComment = ref expandIncludes ? ref this.lazyExpandedDocComment : ref this.lazyDocComment;
             return SourceDocumentationCommentUtils.GetAndCacheDocumentationComment(this, expandIncludes, ref lazyDocComment);
         }
 
-        protected sealed override SourceMemberMethodSymbol? BoundAttributesSource
+        protected sealed override SourceMemberMethodSymbol BoundAttributesSource
         {
             get
             {
@@ -428,7 +429,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             // If this symbol has a non-null PartialDefinitionPart, we should have accessed this method through that definition symbol instead
             Debug.Assert(PartialDefinitionPart is null);
 
-            if ((object?)this.SourcePartialImplementation != null)
+            if ((object)this.SourcePartialImplementation != null)
             {
                 return OneOrMany.Create(ImmutableArray.Create(AttributeDeclarationSyntaxList, this.SourcePartialImplementation.AttributeDeclarationSyntaxList));
             }
@@ -443,7 +444,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get
             {
                 var sourceContainer = this.ContainingType as SourceMemberContainerTypeSymbol;
-                if ((object?)sourceContainer != null && sourceContainer.AnyMemberHasAttributes)
+                if ((object)sourceContainer != null && sourceContainer.AnyMemberHasAttributes)
                 {
                     return this.GetSyntax().AttributeLists;
                 }
@@ -458,10 +459,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                                                                     syntax.Modifiers, defaultAccess: DeclarationModifiers.None, allowedModifiers, location, diagnostics, out _, out _);
         }
 
-        internal sealed override void ForceComplete(SourceLocation? locationOpt, Predicate<Symbol>? filter, CancellationToken cancellationToken)
+        internal sealed override void ForceComplete(SourceLocation locationOpt, Predicate<Symbol> filter, CancellationToken cancellationToken)
         {
             var implementingPart = this.SourcePartialImplementation;
-            if ((object?)implementingPart != null)
+            if ((object)implementingPart != null)
             {
                 implementingPart.ForceComplete(locationOpt, filter, cancellationToken);
             }
@@ -487,7 +488,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         protected sealed override void PartialMethodChecks(BindingDiagnosticBag diagnostics)
         {
             var implementingPart = this.SourcePartialImplementation;
-            if ((object?)implementingPart != null)
+            if ((object)implementingPart != null)
             {
                 PartialMethodChecks(this, implementingPart, diagnostics);
             }
@@ -577,7 +578,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 {
                     diagnostics.Add(ErrorCode.ERR_ScopedMismatchInParameterOfPartial, implementingMethod.GetFirstLocation(), new FormattedSymbol(implementingParameter, SymbolDisplayFormat.ShortFormat));
                 },
-                extraArgument: (object?)null,
+                extraArgument: (object)null,
                 allowVariance: false,
                 invokedAsExtensionMethod: false))
             {
@@ -598,7 +599,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 {
                     diagnostics.Add(ErrorCode.WRN_NullabilityMismatchInParameterTypeOnPartial, implementingMethod.GetFirstLocation(), new FormattedSymbol(implementingParameter, SymbolDisplayFormat.ShortFormat));
                 },
-                extraArgument: (object?)null))
+                extraArgument: (object)null))
             {
                 hasTypeDifferences = true;
             }
@@ -654,7 +655,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        internal sealed override bool CallsAreOmitted(SyntaxTree? syntaxTree)
+        internal sealed override bool CallsAreOmitted(SyntaxTree syntaxTree)
         {
             if (this.IsPartialWithoutImplementation)
             {
@@ -683,6 +684,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable enable
         protected override void MethodChecks(BindingDiagnosticBag diagnostics)
         {
             Debug.Assert(this.MethodKind != MethodKind.UserDefinedOperator, "SourceUserDefinedOperatorSymbolBase overrides this");
@@ -743,6 +745,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 Debug.Assert(!available, "Should have been parsed as partial constructor.");
             }
         }
+#nullable disable
 
         internal bool HasExplicitAccessModifier => flags.HasExplicitAccessModifier;
 
@@ -994,13 +997,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             {
             }
 
-            internal sealed override SourceOrdinaryMethodSymbol? OtherPartOfPartial
+            internal sealed override SourceOrdinaryMethodSymbol OtherPartOfPartial
                 => null;
 
-            protected sealed override TypeSymbol? ExplicitInterfaceType
+            protected sealed override TypeSymbol ExplicitInterfaceType
                 => null;
 
-            protected sealed override MethodSymbol? FindExplicitlyImplementedMethod(BindingDiagnosticBag diagnostics)
+            protected sealed override MethodSymbol FindExplicitlyImplementedMethod(BindingDiagnosticBag diagnostics)
                 => null;
 
             public sealed override ImmutableArray<TypeParameterSymbol> TypeParameters
@@ -1028,7 +1031,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// </summary>
         private sealed class SourceOrdinaryMethodSymbolComplex : SourceOrdinaryMethodSymbol
         {
-            private readonly TypeSymbol? _explicitInterfaceType;
+            private readonly TypeSymbol _explicitInterfaceType;
 
             private readonly TypeParameterInfo _typeParameterInfo;
 
@@ -1037,11 +1040,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             /// This should be set, if at all, before this symbol appears among the members of its owner.  
             /// The implementation part is not listed among the "members" of the enclosing type.
             /// </summary>
-            private SourceOrdinaryMethodSymbol? _otherPartOfPartial;
+            private SourceOrdinaryMethodSymbol _otherPartOfPartial;
 
             public SourceOrdinaryMethodSymbolComplex(
                 NamedTypeSymbol containingType,
-                TypeSymbol? explicitInterfaceType,
+                TypeSymbol explicitInterfaceType,
                 string name,
                 Location location,
                 MethodDeclarationSyntax syntax,
@@ -1060,8 +1063,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     : new TypeParameterInfo { LazyTypeParameters = typeParameters };
             }
 
-            protected sealed override TypeSymbol? ExplicitInterfaceType => _explicitInterfaceType;
-            internal sealed override SourceOrdinaryMethodSymbol? OtherPartOfPartial => _otherPartOfPartial;
+            protected sealed override TypeSymbol ExplicitInterfaceType => _explicitInterfaceType;
+            internal sealed override SourceOrdinaryMethodSymbol OtherPartOfPartial => _otherPartOfPartial;
 
             internal static void InitializePartialMethodParts(SourceOrdinaryMethodSymbolComplex definition, SourceOrdinaryMethodSymbolComplex implementation)
             {
@@ -1078,7 +1081,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 Debug.Assert(implementation._otherPartOfPartial == definition);
             }
 
-            protected sealed override MethodSymbol? FindExplicitlyImplementedMethod(BindingDiagnosticBag diagnostics)
+            protected sealed override MethodSymbol FindExplicitlyImplementedMethod(BindingDiagnosticBag diagnostics)
             {
                 var syntax = GetSyntax();
                 return this.FindExplicitlyImplementedMethod(isOperator: false, _explicitInterfaceType, syntax.Identifier.ValueText, syntax.ExplicitInterfaceSpecifier, diagnostics);
@@ -1148,7 +1151,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             protected sealed override void CheckConstraintsForExplicitInterfaceType(ConversionsBase conversions, BindingDiagnosticBag diagnostics)
             {
-                if ((object?)_explicitInterfaceType != null)
+                if ((object)_explicitInterfaceType != null)
                 {
                     var syntax = this.GetSyntax();
                     Debug.Assert(syntax.ExplicitInterfaceSpecifier != null);
@@ -1167,7 +1170,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
                 MessageID.IDS_FeatureGenerics.CheckFeatureAvailability(diagnostics, syntax.TypeParameterList.LessThanToken);
 
-                OverriddenMethodTypeParameterMapBase? typeMap = null;
+                OverriddenMethodTypeParameterMapBase typeMap = null;
                 if (this.IsOverride)
                 {
                     typeMap = new OverriddenMethodTypeParameterMap(this);
@@ -1197,7 +1200,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     var tpEnclosing = ContainingType.FindEnclosingTypeParameter(name);
                     bool checkForDuplicates = true;
 
-                    if ((object?)tpEnclosing != null)
+                    if ((object)tpEnclosing != null)
                     {
                         if (tpEnclosing.ContainingSymbol is NamedTypeSymbol { IsExtension: true })
                         {

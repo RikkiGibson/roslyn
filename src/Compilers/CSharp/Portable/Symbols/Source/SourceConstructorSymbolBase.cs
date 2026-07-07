@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis.Collections;
@@ -31,7 +33,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         protected sealed override void MethodChecks(BindingDiagnosticBag diagnostics)
         {
-            var syntax = (CSharpSyntaxNode)syntaxReferenceOpt!.GetSyntax();
+            var syntax = (CSharpSyntaxNode)syntaxReferenceOpt.GetSyntax();
             var binderFactory = this.DeclaringCompilation.GetBinderFactory(syntax.SyntaxTree);
             ParameterListSyntax parameterList = GetParameterList();
 
@@ -75,9 +77,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable enable
         protected abstract ParameterListSyntax GetParameterList();
 
         protected abstract bool AllowRefOrOut { get; }
+#nullable disable
 
         internal sealed override void AfterAddingTypeMembersChecks(ConversionsBase conversions, BindingDiagnosticBag diagnostics)
         {
@@ -178,7 +182,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             TextSpan span;
 
             // local/lambda/closure defined within the body of the constructor:
-            var ctorSyntax = (CSharpSyntaxNode)syntaxReferenceOpt!.GetSyntax();
+            var ctorSyntax = (CSharpSyntaxNode)syntaxReferenceOpt.GetSyntax();
             if (tree == ctorSyntax.SyntaxTree)
             {
                 if (IsWithinExpressionOrBlockBody(position, out int offset))
@@ -227,10 +231,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal abstract override bool IsNullableAnalysisEnabled();
 
-        protected abstract CSharpSyntaxNode? GetInitializer();
+        protected abstract CSharpSyntaxNode GetInitializer();
 
         protected abstract bool IsWithinExpressionOrBlockBody(int position, out int offset);
 
+#nullable enable
         protected sealed override bool HasSetsRequiredMembersImpl
             => GetEarlyDecodedWellKnownAttributeData()?.HasSetsRequiredMembersAttribute == true;
 

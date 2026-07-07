@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -109,7 +111,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         public abstract bool HasInitializer { get; }
 
-        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
+        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
         {
             base.AddSynthesizedAttributes(moduleBuilder, ref attributes);
 
@@ -154,7 +156,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             base.AfterAddingTypeMembersChecks(conversions, diagnostics);
         }
 
-        internal override void PostDecodeWellKnownAttributes(ImmutableArray<CSharpAttributeData> boundAttributes, ImmutableArray<AttributeSyntax> allAttributeSyntaxNodes, BindingDiagnosticBag diagnostics, AttributeLocation symbolPart, WellKnownAttributeData? decodedData)
+        internal override void PostDecodeWellKnownAttributes(ImmutableArray<CSharpAttributeData> boundAttributes, ImmutableArray<AttributeSyntax> allAttributeSyntaxNodes, BindingDiagnosticBag diagnostics, AttributeLocation symbolPart, WellKnownAttributeData decodedData)
         {
             base.PostDecodeWellKnownAttributes(boundAttributes, allAttributeSyntaxNodes, diagnostics, symbolPart, decodedData);
 
@@ -174,7 +176,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get
             {
-                return null!;
+                return null;
             }
         }
 
@@ -308,6 +310,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable enable
         internal sealed override void ForceComplete(SourceLocation? locationOpt, Predicate<Symbol>? filter, CancellationToken cancellationToken)
         {
             if (filter?.Invoke(this) == false)
@@ -349,11 +352,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 state.SpinWaitComplete(incompletePart, cancellationToken);
             }
         }
+#nullable disable
 
         internal override NamedTypeSymbol FixedImplementationType(PEModuleBuilder emitModule)
         {
             Debug.Assert(!this.IsFixedSizeBuffer, "Subclasses representing fixed fields must override");
-            return null!;
+            return null;
         }
     }
 
@@ -373,7 +377,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        private TypeAndRefKind? _lazyTypeAndRefKind;
+        private TypeAndRefKind _lazyTypeAndRefKind;
 
         // Non-zero if the type of the field has been inferred from the type of its initializer expression
         // and the errors of binding the initializer have been or are being reported to compilation diagnostics.
@@ -445,7 +449,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         private static BaseFieldDeclarationSyntax GetFieldDeclaration(CSharpSyntaxNode declarator)
         {
-            return (BaseFieldDeclarationSyntax)declarator.Parent!.Parent!;
+            return (BaseFieldDeclarationSyntax)declarator.Parent.Parent;
         }
 
         protected override OneOrMany<SyntaxList<AttributeListSyntax>> GetAttributeDeclarations()
@@ -572,7 +576,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                         else
                         {
                             fieldsBeingBound = new ConsList<FieldSymbol>(this, fieldsBeingBound);
-                            var syntaxNode = (EqualsValueClauseSyntax)declarator.Initializer!;
+                            var syntaxNode = (EqualsValueClauseSyntax)declarator.Initializer;
 
                             var initializerBinder = new ImplicitlyTypedFieldBinder(binder, fieldsBeingBound);
                             var executableBinder = new ExecutableCodeBinder(syntaxNode, this, initializerBinder);
@@ -580,7 +584,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
                             if (initializerOpt != null)
                             {
-                                if ((object?)initializerOpt.Type != null && !initializerOpt.Type.IsErrorType())
+                                if ((object)initializerOpt.Type != null && !initializerOpt.Type.IsErrorType())
                                 {
                                     type = TypeWithAnnotations.Create(initializerOpt.Type);
                                 }
@@ -641,7 +645,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             diagnostics.Free();
             diagnosticsForFirstDeclarator.Free();
-            Debug.Assert(_lazyTypeAndRefKind is not null);
             return _lazyTypeAndRefKind;
         }
 
@@ -662,7 +665,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             if (!this.IsConst || VariableDeclaratorNode.Initializer == null)
             {
-                return null!;
+                return null;
             }
 
             return ConstantValueUtils.EvaluateFieldConstant(this, (EqualsValueClauseSyntax)VariableDeclaratorNode.Initializer, dependencies, earlyDecodingWellKnownAttributes, diagnostics);

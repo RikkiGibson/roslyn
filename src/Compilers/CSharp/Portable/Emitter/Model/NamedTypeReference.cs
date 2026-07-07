@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection.Metadata;
@@ -39,6 +41,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Emit
             }
         }
 
+#nullable enable
         string? Cci.INamedTypeReference.AssociatedFileIdentifier
         {
             get
@@ -46,6 +49,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Emit
                 return UnderlyingNamedType.GetFileLocalTypeMetadataNamePrefix();
             }
         }
+#nullable disable
 
         string Cci.INamedEntity.Name
         {
@@ -71,7 +75,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Emit
             }
         }
 
-        Cci.ITypeDefinition? Cci.ITypeReference.GetResolvedType(EmitContext context)
+        Cci.ITypeDefinition Cci.ITypeReference.GetResolvedType(EmitContext context)
         {
             return null;
         }
@@ -92,7 +96,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Emit
             }
         }
 
-        Cci.IGenericMethodParameterReference? Cci.ITypeReference.AsGenericMethodParameterReference
+        Cci.IGenericMethodParameterReference Cci.ITypeReference.AsGenericMethodParameterReference
         {
             get
             {
@@ -105,7 +109,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Emit
             get;
         }
 
-        Cci.IGenericTypeParameterReference? Cci.ITypeReference.AsGenericTypeParameterReference
+        Cci.IGenericTypeParameterReference Cci.ITypeReference.AsGenericTypeParameterReference
         {
             get
             {
@@ -113,7 +117,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Emit
             }
         }
 
-        Cci.INamespaceTypeDefinition? Cci.ITypeReference.AsNamespaceTypeDefinition(EmitContext context)
+        Cci.INamespaceTypeDefinition Cci.ITypeReference.AsNamespaceTypeDefinition(EmitContext context)
         {
             return null;
         }
@@ -123,7 +127,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Emit
             get;
         }
 
-        Cci.INestedTypeDefinition? Cci.ITypeReference.AsNestedTypeDefinition(EmitContext context)
+        Cci.INestedTypeDefinition Cci.ITypeReference.AsNestedTypeDefinition(EmitContext context)
         {
             return null;
         }
@@ -138,7 +142,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Emit
             get;
         }
 
-        Cci.ITypeDefinition? Cci.ITypeReference.AsTypeDefinition(EmitContext context)
+        Cci.ITypeDefinition Cci.ITypeReference.AsTypeDefinition(EmitContext context)
         {
             return null;
         }
@@ -155,14 +159,14 @@ namespace Microsoft.CodeAnalysis.CSharp.Emit
 
         public abstract void Dispatch(Cci.MetadataVisitor visitor);
 
-        Cci.IDefinition? Cci.IReference.AsDefinition(EmitContext context)
+        Cci.IDefinition Cci.IReference.AsDefinition(EmitContext context)
         {
             return null;
         }
 
         CodeAnalysis.Symbols.ISymbolInternal Cci.IReference.GetInternalSymbol() => UnderlyingNamedType;
 
-        public sealed override bool Equals(object? obj)
+        public sealed override bool Equals(object obj)
         {
             // It is not supported to rely on default equality of these Cci objects, an explicit way to compare and hash them should be used.
             throw ExceptionUtilities.Unreachable();

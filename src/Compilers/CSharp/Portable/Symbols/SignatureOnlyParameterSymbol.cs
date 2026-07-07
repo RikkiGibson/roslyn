@@ -112,7 +112,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         #endregion Not used by MethodSignatureComparer
 
-        public override bool Equals(Symbol? obj, TypeCompareKind compareKind)
+        public override bool Equals(Symbol obj, TypeCompareKind compareKind)
         {
             if ((object)this == obj)
             {

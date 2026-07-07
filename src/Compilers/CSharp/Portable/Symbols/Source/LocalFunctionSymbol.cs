@@ -107,7 +107,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         internal override Binder WithTypeParametersBinder
             => _typeParameters.IsEmpty ? _binder : new WithMethodTypeParametersBinder(this, _binder);
 
-        internal LocalFunctionStatementSyntax Syntax => (LocalFunctionStatementSyntax)syntaxReferenceOpt!.GetSyntax();
+        internal LocalFunctionStatementSyntax Syntax => (LocalFunctionStatementSyntax)syntaxReferenceOpt.GetSyntax();
 
         internal void GetDeclarationDiagnostics(BindingDiagnosticBag addTo)
         {
@@ -445,7 +445,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         private void ReportAttributesDisallowed(SyntaxList<AttributeListSyntax> attributes, BindingDiagnosticBag diagnostics)
         {
-            var diagnosticInfo = MessageID.IDS_FeatureLocalFunctionAttributes.GetFeatureAvailabilityDiagnosticInfo((CSharpParseOptions)syntaxReferenceOpt!.SyntaxTree.Options);
+            var diagnosticInfo = MessageID.IDS_FeatureLocalFunctionAttributes.GetFeatureAvailabilityDiagnosticInfo((CSharpParseOptions)syntaxReferenceOpt.SyntaxTree.Options);
             if (diagnosticInfo is object)
             {
                 foreach (var attrList in attributes)
@@ -573,7 +573,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return Syntax.GetHashCode();
         }
 
-        public sealed override bool Equals(Symbol? symbol, TypeCompareKind compareKind)
+        public sealed override bool Equals(Symbol symbol, TypeCompareKind compareKind)
         {
             if ((object)this == symbol) return true;
 

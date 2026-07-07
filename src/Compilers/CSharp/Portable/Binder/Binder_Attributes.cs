@@ -646,7 +646,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         invalidNamedArgument |= propertySymbol.IsReadOnly;
                         var getMethod = propertySymbol.GetMethod;
                         var setMethod = propertySymbol.SetMethod;
-                        invalidNamedArgument = invalidNamedArgument || (object?)getMethod == null || (object?)setMethod == null;
+                        invalidNamedArgument = invalidNamedArgument || (object)getMethod == null || (object)setMethod == null;
                         if (!invalidNamedArgument)
                         {
                             invalidNamedArgument =

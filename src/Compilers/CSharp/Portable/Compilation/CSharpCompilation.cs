@@ -2021,7 +2021,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         return null;
                     }
 
-                    var mainTypeOrNamespace = globalNamespace.GetNamespaceOrTypeByQualifiedName(nameParts)!.OfMinimalArity();
+                    var mainTypeOrNamespace = globalNamespace.GetNamespaceOrTypeByQualifiedName(nameParts).OfMinimalArity();
                     if (mainTypeOrNamespace is null)
                     {
                         diagnostics.Add(ErrorCode.ERR_MainClassNotFound, NoLocation.Singleton, mainTypeName);

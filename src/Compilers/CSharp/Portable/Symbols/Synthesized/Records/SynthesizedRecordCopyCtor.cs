@@ -72,7 +72,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 TextSpan.FromBounds(recordDeclaration.Identifier.Span.Start, recordDeclaration.TypeParameterList.Span.End)));
         }
 
-        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
+        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
         {
             base.AddSynthesizedAttributes(moduleBuilder, ref attributes);
             Debug.Assert(IsImplicitlyDeclared);
@@ -107,7 +107,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
                     if (bestModifierCountSoFar < 0)
                     {
-                        Debug.Assert(bestCandidate is not null);
                         bestModifierCountSoFar = bestCandidate.CustomModifierCount();
                     }
 

@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -32,20 +34,20 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
 
         private ImmutableArray<TypeParameterSymbol> _lazyTypeParameters;
 
-        private NamedTypeSymbol? _lazyBaseType = ErrorTypeSymbol.UnknownResultType;
+        private NamedTypeSymbol _lazyBaseType = ErrorTypeSymbol.UnknownResultType;
         private ImmutableArray<NamedTypeSymbol> _lazyInterfaces = default(ImmutableArray<NamedTypeSymbol>);
 
-        private NamedTypeSymbol? _lazyDeclaredBaseType = ErrorTypeSymbol.UnknownResultType;
+        private NamedTypeSymbol _lazyDeclaredBaseType = ErrorTypeSymbol.UnknownResultType;
         private ImmutableArray<NamedTypeSymbol> _lazyDeclaredInterfaces;
 
         private ImmutableArray<CSharpAttributeData> _lazyCustomAttributes;
 
         private CachedUseSiteInfo<AssemblySymbol> _lazyCachedUseSiteInfo = CachedUseSiteInfo<AssemblySymbol>.Uninitialized;
 
-        private StrongBox<ParameterSymbol?>? _lazyExtensionParameter;
+        private StrongBox<ParameterSymbol> _lazyExtensionParameter;
         private ImmutableArray<(Cci.INestedTypeReference GroupingType, ImmutableArray<Cci.INestedTypeReference> MarkerTypes)> _lazyExtensionGroupingAndMarkerTypesForTypeForwarding;
 
-        public RetargetingNamedTypeSymbol(RetargetingModuleSymbol retargetingModule, NamedTypeSymbol underlyingType, TupleExtraData? tupleData = null)
+        public RetargetingNamedTypeSymbol(RetargetingModuleSymbol retargetingModule, NamedTypeSymbol underlyingType, TupleExtraData tupleData = null)
             : base(underlyingType, tupleData)
         {
             Debug.Assert((object)retargetingModule != null);
@@ -97,21 +99,21 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
             }
         }
 
-        internal sealed override ParameterSymbol? ExtensionParameter
+        internal sealed override ParameterSymbol ExtensionParameter
         {
             get
             {
                 if (_lazyExtensionParameter is null)
                 {
                     var extensionParameter = _underlyingType.ExtensionParameter is { } receiverParameter ? new RetargetingExtensionReceiverParameterSymbol(this, receiverParameter) : null;
-                    Interlocked.CompareExchange(ref _lazyExtensionParameter, new StrongBox<ParameterSymbol?>(extensionParameter), null);
+                    Interlocked.CompareExchange(ref _lazyExtensionParameter, new StrongBox<ParameterSymbol>(extensionParameter), null);
                 }
 
                 return _lazyExtensionParameter.Value;
             }
         }
 
-        public override MethodSymbol? TryGetCorrespondingExtensionImplementationMethod(MethodSymbol method)
+        public override MethodSymbol TryGetCorrespondingExtensionImplementationMethod(MethodSymbol method)
         {
             Debug.Assert(this.IsExtension);
             Debug.Assert(method.IsDefinition);
@@ -135,7 +137,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
             }
         }
 
-        public override NamedTypeSymbol? EnumUnderlyingType
+        public override NamedTypeSymbol EnumUnderlyingType
         {
             get
             {
@@ -194,7 +196,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
                 {
                     do
                     {
-                        yield return null!;
+                        yield return null;
                         gapSize--;
                     }
                     while (gapSize > 0);
@@ -218,8 +220,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
         {
             foreach (EventSymbol e in _underlyingType.GetEventsToEmit())
             {
-                // e is a member of the underlying type itself, so retargeting is guaranteed to find it.
-                yield return this.RetargetingTranslator.Retarget(e)!;
+                yield return this.RetargetingTranslator.Retarget(e);
             }
         }
 
@@ -287,6 +288,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
             }
         }
 
+#nullable enable
+
         internal override NamedTypeSymbol? LookupMetadataType(ref MetadataTypeName typeName)
         {
             NamedTypeSymbol? underlyingResult = _underlyingType.LookupMetadataType(ref typeName);
@@ -302,21 +305,23 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
             return this.RetargetingTranslator.Retarget(underlyingResult, RetargetOptions.RetargetPrimitiveTypesByName);
         }
 
+#nullable disable
+
         private static ExtendedErrorTypeSymbol CyclicInheritanceError(TypeSymbol declaredBase)
         {
             var info = new CSDiagnosticInfo(ErrorCode.ERR_ImportedCircularBase, declaredBase);
             return new ExtendedErrorTypeSymbol(declaredBase, LookupResultKind.NotReferencable, info, true);
         }
 
-        internal override NamedTypeSymbol? BaseTypeNoUseSiteDiagnostics
+        internal override NamedTypeSymbol BaseTypeNoUseSiteDiagnostics
         {
             get
             {
                 if (ReferenceEquals(_lazyBaseType, ErrorTypeSymbol.UnknownResultType))
                 {
-                    NamedTypeSymbol? acyclicBase = GetDeclaredBaseType(null);
+                    NamedTypeSymbol acyclicBase = GetDeclaredBaseType(null);
 
-                    if ((object?)acyclicBase == null)
+                    if ((object)acyclicBase == null)
                     {
                         // if base was not declared, get it from BaseType that should set it to some default
                         var underlyingBase = _underlyingType.BaseTypeNoUseSiteDiagnostics;
@@ -326,7 +331,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
                         }
                     }
 
-                    if ((object?)acyclicBase != null && BaseTypeAnalysis.TypeDependsOn(acyclicBase, this))
+                    if ((object)acyclicBase != null && BaseTypeAnalysis.TypeDependsOn(acyclicBase, this))
                     {
                         return CyclicInheritanceError(acyclicBase);
                     }
@@ -363,7 +368,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
             return this.RetargetingTranslator.Retarget(_underlyingType.GetInterfacesToEmit());
         }
 
-        internal override NamedTypeSymbol? GetDeclaredBaseType(ConsList<TypeSymbol>? basesBeingResolved)
+        internal override NamedTypeSymbol GetDeclaredBaseType(ConsList<TypeSymbol> basesBeingResolved)
         {
             if (ReferenceEquals(_lazyDeclaredBaseType, ErrorTypeSymbol.UnknownResultType))
             {
@@ -391,14 +396,14 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
         {
             if (!_lazyCachedUseSiteInfo.IsInitialized)
             {
-                AssemblySymbol? primaryDependency = PrimaryDependency;
+                AssemblySymbol primaryDependency = PrimaryDependency;
                 _lazyCachedUseSiteInfo.Initialize(primaryDependency, new UseSiteInfo<AssemblySymbol>(primaryDependency).AdjustDiagnosticInfo(CalculateUseSiteDiagnostic()));
             }
 
             return _lazyCachedUseSiteInfo.ToUseSiteInfo(PrimaryDependency);
         }
 
-        internal override NamedTypeSymbol? ComImportCoClass
+        internal override NamedTypeSymbol ComImportCoClass
         {
             get
             {
@@ -412,7 +417,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
             get { return _underlyingType.IsComImport; }
         }
 
-        internal sealed override CSharpCompilation? DeclaringCompilation // perf, not correctness
+        internal sealed override CSharpCompilation DeclaringCompilation // perf, not correctness
         {
             get { return null; }
         }
@@ -423,11 +428,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
         }
 
         internal override bool IsFileLocal => _underlyingType.IsFileLocal;
-        internal override FileIdentifier? AssociatedFileIdentifier => _underlyingType.AssociatedFileIdentifier;
+        internal override FileIdentifier AssociatedFileIdentifier => _underlyingType.AssociatedFileIdentifier;
 
         internal sealed override NamedTypeSymbol AsNativeInteger() => throw ExceptionUtilities.Unreachable();
 
-        internal sealed override NamedTypeSymbol? NativeIntegerUnderlyingType => null;
+        internal sealed override NamedTypeSymbol NativeIntegerUnderlyingType => null;
 
         internal sealed override bool IsRecord => _underlyingType.IsRecord;
         internal sealed override bool IsRecordStruct => _underlyingType.IsRecordStruct;
@@ -452,6 +457,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
             return _underlyingType.HasInlineArrayAttribute(out length);
         }
 
+#nullable enable
         internal sealed override bool HasCollectionBuilderAttribute(out TypeSymbol? builderType, out string? methodName)
         {
             bool result = _underlyingType.HasCollectionBuilderAttribute(out builderType, out methodName);

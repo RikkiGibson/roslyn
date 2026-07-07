@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -27,10 +29,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         private readonly Symbol _containingSymbol;
 
         private readonly SyntaxToken _identifierToken;
-        private readonly TypeSyntax? _typeSyntax;
+        private readonly TypeSyntax _typeSyntax;
         private readonly RefKind _refKind;
         private readonly LocalDeclarationKind _declarationKind;
         private readonly ScopedKind _scope;
+
+#nullable enable
 
         private TypeWithAnnotations.Boxed? _type;
 
@@ -63,13 +67,14 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return Hash.Combine(RuntimeHelpers.GetHashCode(Local), Reference.GetHashCode());
             }
         }
+#nullable disable
 
         private SourceLocalSymbol(
             Symbol containingSymbol,
             Binder scopeBinder,
             bool allowRefKind,
             bool allowScoped,
-            TypeSyntax? typeSyntax,
+            TypeSyntax typeSyntax,
             SyntaxToken identifierToken,
             LocalDeclarationKind declarationKind)
         {
@@ -84,12 +89,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             this._typeSyntax = typeSyntax;
 
-            bool isScoped = false;
-            typeSyntax = typeSyntax?.SkipScoped(out isScoped);
+            bool isScoped;
+            typeSyntax = typeSyntax.SkipScoped(out isScoped);
             isScoped = isScoped && allowScoped;
 
             // Diagnostics for ref-locals is reported by caller in BindDeclarationStatementParts.
-            if (allowRefKind && typeSyntax is not null)
+            if (allowRefKind)
                 typeSyntax.SkipRefInLocalOrReturn(diagnostics: null, out _refKind);
 
             _scope = _refKind != RefKind.None
@@ -107,7 +112,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return _scopeBinder; }
         }
 
-        internal override SyntaxNode? ScopeDesignatorOpt
+        internal override SyntaxNode ScopeDesignatorOpt
         {
             get { return _scopeBinder.ScopeDesignator; }
         }
@@ -175,6 +180,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 : new SourceLocalSymbol(containingSymbol, scopeBinder, allowRefKind: false, allowScoped: true, closestTypeSyntax, identifierToken, kind);
         }
 
+#nullable enable
+
         /// <summary>
         /// Make a local variable symbol whose type can be inferred (if necessary) by binding and enclosing construct.
         /// </summary>
@@ -182,7 +189,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             Symbol containingSymbol,
             Binder scopeBinder,
             Binder nodeBinder,
-            TypeSyntax? typeSyntax,
+            TypeSyntax typeSyntax,
             SyntaxToken identifierToken,
             LocalDeclarationKind kind,
             SyntaxNode nodeToBind)
@@ -204,6 +211,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 ? new LocalSymbolWithEnclosingContext(containingSymbol, scopeBinder, nodeBinder, typeSyntax, identifierToken, kind, nodeToBind)
                 : new SourceLocalSymbol(containingSymbol, scopeBinder, allowRefKind: false, allowScoped: true, typeSyntax, identifierToken, kind);
         }
+
+#nullable disable
 
         /// <summary>
         /// Make a local variable symbol which can be inferred (if necessary) by binding its initializing expression.
@@ -231,7 +240,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             SyntaxToken identifierToken,
             LocalDeclarationKind declarationKind,
             EqualsValueClauseSyntax initializer,
-            Binder? initializerBinderOpt = null)
+            Binder initializerBinderOpt = null)
         {
             Debug.Assert(declarationKind != LocalDeclarationKind.ForEachIterationVariable);
             return (initializer != null)
@@ -259,7 +268,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 #if DEBUG
             ,
             [CallerLineNumber] int createdAtLineNumber = 0,
-            [CallerFilePath] string? createdAtFilePath = null
+            [CallerFilePath] string createdAtFilePath = null
 #endif
             )
         {
@@ -350,6 +359,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable enable
         public override TypeWithAnnotations GetTypeWithAnnotations(SyntaxNode reference, BindingDiagnosticBag diagnostics)
         {
             if (_forbiddenReferences?.Contains(reference) == true)
@@ -461,6 +471,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             return _type.Value;
         }
+#nullable disable
 
         protected virtual TypeWithAnnotations InferTypeOfVarVariable()
         {
@@ -478,7 +489,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             // In the event that we race to set the type of a local, we should
             // always deduce the same type, or deduce that the type is an error.
 
-            Debug.Assert((object?)originalType?.DefaultType == null ||
+            Debug.Assert((object)originalType?.DefaultType == null ||
                 originalType.Value.DefaultType.IsErrorType() && newType.Type.IsErrorType() ||
                 originalType.Value.TypeSymbolEquals(newType, TypeCompareKind.ConsiderEverything));
 
@@ -503,7 +514,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal sealed override SyntaxNode GetDeclaratorSyntax()
         {
-            return _identifierToken.Parent!;
+            return _identifierToken.Parent;
         }
 
         internal override bool HasSourceLocation => true;
@@ -512,7 +523,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get
             {
-                SyntaxNode node = _identifierToken.Parent!;
+                SyntaxNode node = _identifierToken.Parent;
 #if DEBUG
                 switch (_declarationKind)
                 {
@@ -554,7 +565,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return false; }
         }
 
-        internal override ConstantValue? GetConstantValue(SyntaxNode node, LocalSymbol inProgress, BindingDiagnosticBag? diagnostics)
+        internal override ConstantValue GetConstantValue(SyntaxNode node, LocalSymbol inProgress, BindingDiagnosticBag diagnostics)
         {
             return null;
         }
@@ -569,7 +580,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return _refKind; }
         }
 
-        public sealed override bool Equals(Symbol? obj, TypeCompareKind compareKind)
+        public sealed override bool Equals(Symbol obj, TypeCompareKind compareKind)
         {
             if (obj == (object)this)
             {
@@ -606,7 +617,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             /// to avoid having the former set by one thread and the latter set by
             /// another.
             /// </summary>
-            private EvaluatedConstant? _constantTuple;
+            private EvaluatedConstant _constantTuple;
 
             public LocalWithInitializer(
                 Symbol containingSymbol,
@@ -657,7 +668,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             /// </summary>
             /// <param name="inProgress">Null for the initial call, non-null if we are in the process of evaluating a constant.</param>
             /// <param name="boundInitValue">If we already have the bound node for the initial value, pass it in to avoid recomputing it.</param>
-            private void MakeConstantTuple(LocalSymbol? inProgress, BoundExpression? boundInitValue)
+            private void MakeConstantTuple(LocalSymbol inProgress, BoundExpression boundInitValue)
             {
                 if (this.IsConst && _constantTuple == null)
                 {
@@ -675,7 +686,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 }
             }
 
-            internal override ConstantValue? GetConstantValue(SyntaxNode node, LocalSymbol inProgress, BindingDiagnosticBag? diagnostics = null)
+            internal override ConstantValue GetConstantValue(SyntaxNode node, LocalSymbol inProgress, BindingDiagnosticBag diagnostics = null)
             {
                 if (this.IsConst && inProgress == this)
                 {
@@ -754,6 +765,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 _deconstruction = deconstruction;
                 _nodeBinder = nodeBinder;
             }
+
+#nullable enable
 
             protected override TypeWithAnnotations InferTypeOfVarVariable()
             {

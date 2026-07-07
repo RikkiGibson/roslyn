@@ -2,8 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Symbols;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
@@ -19,112 +20,112 @@ namespace Microsoft.CodeAnalysis.CSharp
         {
         }
 
-        public virtual R Visit(BoundNode? node, A arg)
+        public virtual R Visit(BoundNode node, A arg)
         {
             if (node == null)
             {
-                return default(R)!;
+                return default(R);
             }
 
             // this switch contains fewer than 50 of the most common node kinds
             switch (node.Kind)
             {
                 case BoundKind.TypeExpression:
-                    return VisitTypeExpression((BoundTypeExpression)node, arg);
+                    return VisitTypeExpression(node as BoundTypeExpression, arg);
                 case BoundKind.NamespaceExpression:
-                    return VisitNamespaceExpression((BoundNamespaceExpression)node, arg);
+                    return VisitNamespaceExpression(node as BoundNamespaceExpression, arg);
                 case BoundKind.UnaryOperator:
-                    return VisitUnaryOperator((BoundUnaryOperator)node, arg);
+                    return VisitUnaryOperator(node as BoundUnaryOperator, arg);
                 case BoundKind.IncrementOperator:
-                    return VisitIncrementOperator((BoundIncrementOperator)node, arg);
+                    return VisitIncrementOperator(node as BoundIncrementOperator, arg);
                 case BoundKind.BinaryOperator:
-                    return VisitBinaryOperator((BoundBinaryOperator)node, arg);
+                    return VisitBinaryOperator(node as BoundBinaryOperator, arg);
                 case BoundKind.CompoundAssignmentOperator:
-                    return VisitCompoundAssignmentOperator((BoundCompoundAssignmentOperator)node, arg);
+                    return VisitCompoundAssignmentOperator(node as BoundCompoundAssignmentOperator, arg);
                 case BoundKind.AssignmentOperator:
-                    return VisitAssignmentOperator((BoundAssignmentOperator)node, arg);
+                    return VisitAssignmentOperator(node as BoundAssignmentOperator, arg);
                 case BoundKind.NullCoalescingOperator:
-                    return VisitNullCoalescingOperator((BoundNullCoalescingOperator)node, arg);
+                    return VisitNullCoalescingOperator(node as BoundNullCoalescingOperator, arg);
                 case BoundKind.ConditionalOperator:
-                    return VisitConditionalOperator((BoundConditionalOperator)node, arg);
+                    return VisitConditionalOperator(node as BoundConditionalOperator, arg);
                 case BoundKind.ArrayAccess:
-                    return VisitArrayAccess((BoundArrayAccess)node, arg);
+                    return VisitArrayAccess(node as BoundArrayAccess, arg);
                 case BoundKind.TypeOfOperator:
-                    return VisitTypeOfOperator((BoundTypeOfOperator)node, arg);
+                    return VisitTypeOfOperator(node as BoundTypeOfOperator, arg);
                 case BoundKind.DefaultLiteral:
-                    return VisitDefaultLiteral((BoundDefaultLiteral)node, arg);
+                    return VisitDefaultLiteral(node as BoundDefaultLiteral, arg);
                 case BoundKind.DefaultExpression:
-                    return VisitDefaultExpression((BoundDefaultExpression)node, arg);
+                    return VisitDefaultExpression(node as BoundDefaultExpression, arg);
                 case BoundKind.IsOperator:
-                    return VisitIsOperator((BoundIsOperator)node, arg);
+                    return VisitIsOperator(node as BoundIsOperator, arg);
                 case BoundKind.AsOperator:
-                    return VisitAsOperator((BoundAsOperator)node, arg);
+                    return VisitAsOperator(node as BoundAsOperator, arg);
                 case BoundKind.Conversion:
-                    return VisitConversion((BoundConversion)node, arg);
+                    return VisitConversion(node as BoundConversion, arg);
                 case BoundKind.SequencePointExpression:
-                    return VisitSequencePointExpression((BoundSequencePointExpression)node, arg);
+                    return VisitSequencePointExpression(node as BoundSequencePointExpression, arg);
                 case BoundKind.SequencePoint:
-                    return VisitSequencePoint((BoundSequencePoint)node, arg);
+                    return VisitSequencePoint(node as BoundSequencePoint, arg);
                 case BoundKind.SequencePointWithSpan:
-                    return VisitSequencePointWithSpan((BoundSequencePointWithSpan)node, arg);
+                    return VisitSequencePointWithSpan(node as BoundSequencePointWithSpan, arg);
                 case BoundKind.Block:
-                    return VisitBlock((BoundBlock)node, arg);
+                    return VisitBlock(node as BoundBlock, arg);
                 case BoundKind.LocalDeclaration:
-                    return VisitLocalDeclaration((BoundLocalDeclaration)node, arg);
+                    return VisitLocalDeclaration(node as BoundLocalDeclaration, arg);
                 case BoundKind.MultipleLocalDeclarations:
-                    return VisitMultipleLocalDeclarations((BoundMultipleLocalDeclarations)node, arg);
+                    return VisitMultipleLocalDeclarations(node as BoundMultipleLocalDeclarations, arg);
                 case BoundKind.Sequence:
-                    return VisitSequence((BoundSequence)node, arg);
+                    return VisitSequence(node as BoundSequence, arg);
                 case BoundKind.NoOpStatement:
-                    return VisitNoOpStatement((BoundNoOpStatement)node, arg);
+                    return VisitNoOpStatement(node as BoundNoOpStatement, arg);
                 case BoundKind.ReturnStatement:
-                    return VisitReturnStatement((BoundReturnStatement)node, arg);
+                    return VisitReturnStatement(node as BoundReturnStatement, arg);
                 case BoundKind.ThrowStatement:
-                    return VisitThrowStatement((BoundThrowStatement)node, arg);
+                    return VisitThrowStatement(node as BoundThrowStatement, arg);
                 case BoundKind.ExpressionStatement:
-                    return VisitExpressionStatement((BoundExpressionStatement)node, arg);
+                    return VisitExpressionStatement(node as BoundExpressionStatement, arg);
                 case BoundKind.BreakStatement:
-                    return VisitBreakStatement((BoundBreakStatement)node, arg);
+                    return VisitBreakStatement(node as BoundBreakStatement, arg);
                 case BoundKind.ContinueStatement:
-                    return VisitContinueStatement((BoundContinueStatement)node, arg);
+                    return VisitContinueStatement(node as BoundContinueStatement, arg);
                 case BoundKind.IfStatement:
-                    return VisitIfStatement((BoundIfStatement)node, arg);
+                    return VisitIfStatement(node as BoundIfStatement, arg);
                 case BoundKind.ForEachStatement:
-                    return VisitForEachStatement((BoundForEachStatement)node, arg);
+                    return VisitForEachStatement(node as BoundForEachStatement, arg);
                 case BoundKind.TryStatement:
-                    return VisitTryStatement((BoundTryStatement)node, arg);
+                    return VisitTryStatement(node as BoundTryStatement, arg);
                 case BoundKind.Literal:
-                    return VisitLiteral((BoundLiteral)node, arg);
+                    return VisitLiteral(node as BoundLiteral, arg);
                 case BoundKind.ThisReference:
-                    return VisitThisReference((BoundThisReference)node, arg);
+                    return VisitThisReference(node as BoundThisReference, arg);
                 case BoundKind.Local:
-                    return VisitLocal((BoundLocal)node, arg);
+                    return VisitLocal(node as BoundLocal, arg);
                 case BoundKind.Parameter:
-                    return VisitParameter((BoundParameter)node, arg);
+                    return VisitParameter(node as BoundParameter, arg);
                 case BoundKind.LabelStatement:
-                    return VisitLabelStatement((BoundLabelStatement)node, arg);
+                    return VisitLabelStatement(node as BoundLabelStatement, arg);
                 case BoundKind.GotoStatement:
-                    return VisitGotoStatement((BoundGotoStatement)node, arg);
+                    return VisitGotoStatement(node as BoundGotoStatement, arg);
                 case BoundKind.LabeledStatement:
-                    return VisitLabeledStatement((BoundLabeledStatement)node, arg);
+                    return VisitLabeledStatement(node as BoundLabeledStatement, arg);
                 case BoundKind.StatementList:
-                    return VisitStatementList((BoundStatementList)node, arg);
+                    return VisitStatementList(node as BoundStatementList, arg);
                 case BoundKind.ConditionalGoto:
-                    return VisitConditionalGoto((BoundConditionalGoto)node, arg);
+                    return VisitConditionalGoto(node as BoundConditionalGoto, arg);
                 case BoundKind.Call:
-                    return VisitCall((BoundCall)node, arg);
+                    return VisitCall(node as BoundCall, arg);
                 case BoundKind.ObjectCreationExpression:
-                    return VisitObjectCreationExpression((BoundObjectCreationExpression)node, arg);
+                    return VisitObjectCreationExpression(node as BoundObjectCreationExpression, arg);
                 case BoundKind.DelegateCreationExpression:
-                    return VisitDelegateCreationExpression((BoundDelegateCreationExpression)node, arg);
+                    return VisitDelegateCreationExpression(node as BoundDelegateCreationExpression, arg);
                 case BoundKind.FieldAccess:
-                    return VisitFieldAccess((BoundFieldAccess)node, arg);
+                    return VisitFieldAccess(node as BoundFieldAccess, arg);
                 case BoundKind.PropertyAccess:
-                    return VisitPropertyAccess((BoundPropertyAccess)node, arg);
+                    return VisitPropertyAccess(node as BoundPropertyAccess, arg);
                 case BoundKind.Lambda:
-                    return VisitLambda((BoundLambda)node, arg);
+                    return VisitLambda(node as BoundLambda, arg);
                 case BoundKind.NameOfOperator:
-                    return VisitNameOfOperator((BoundNameOfOperator)node, arg);
+                    return VisitNameOfOperator(node as BoundNameOfOperator, arg);
             }
 
             return VisitInternal(node, arg);
@@ -132,7 +133,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         public virtual R DefaultVisit(BoundNode node, A arg)
         {
-            return default(R)!;
+            return default(R);
         }
     }
 
@@ -143,20 +144,18 @@ namespace Microsoft.CodeAnalysis.CSharp
         }
 
         [DebuggerHidden]
-        [return: NotNullIfNotNull(nameof(node))]
-        public virtual BoundNode? Visit(BoundNode? node)
+        public virtual BoundNode Visit(BoundNode node)
         {
             if (node != null)
             {
-                // Rewriters preserve non-nullness (see NotNullIfNotNull); walkers return null but discard the result.
-                return node.Accept(this)!;
+                return node.Accept(this);
             }
 
             return null;
         }
 
         [DebuggerHidden]
-        public virtual BoundNode? DefaultVisit(BoundNode node)
+        public virtual BoundNode DefaultVisit(BoundNode node)
         {
             return null;
         }
@@ -201,7 +200,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         protected BoundNode VisitExpressionOrPatternWithStackGuard(ref int recursionDepth, BoundNode node)
         {
             Debug.Assert(node is BoundExpression or BoundPattern);
-            BoundNode? result;
+            BoundNode result;
             recursionDepth++;
 #if DEBUG
             int saveRecursionDepth = recursionDepth;
@@ -222,7 +221,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             Debug.Assert(saveRecursionDepth == recursionDepth);
 #endif
             recursionDepth--;
-            return result!;
+            return result;
         }
 
         [DebuggerStepThrough]
@@ -236,6 +235,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return true;
         }
 
+#nullable enable
         [DebuggerStepThrough]
         private BoundNode? VisitExpressionOrPatternWithStackGuard(BoundNode node)
         {

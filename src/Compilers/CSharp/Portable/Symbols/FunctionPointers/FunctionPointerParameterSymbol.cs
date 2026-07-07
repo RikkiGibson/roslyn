@@ -37,7 +37,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         internal override bool HasUnscopedRefAttribute => false;
         internal override bool UseUpdatedEscapeRules => _containingSymbol.UseUpdatedEscapeRules;
 
-        public override bool Equals(Symbol? other, TypeCompareKind compareKind)
+        public override bool Equals(Symbol other, TypeCompareKind compareKind)
         {
             if (ReferenceEquals(this, other))
             {

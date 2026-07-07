@@ -3151,7 +3151,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Metadata.PE
 
             CollectionBuilderAttributeData? getCollectionBuilderAttributeData()
             {
-                if (ContainingPEModule.Module.HasCollectionBuilderAttribute(_handle, out string? builderTypeName, out string? methodName))
+                if (ContainingPEModule.Module.HasCollectionBuilderAttribute(_handle, out string builderTypeName, out string methodName))
                 {
                     var decoder = new MetadataDecoder(ContainingPEModule);
                     return new CollectionBuilderAttributeData(decoder.GetTypeSymbolForSerializedType(builderTypeName), methodName);

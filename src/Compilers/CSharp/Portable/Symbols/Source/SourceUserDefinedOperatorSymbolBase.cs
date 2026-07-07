@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -16,11 +18,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         // tomat: ignoreDynamic should be true, but we don't want to introduce breaking change. See bug 605326.
         private const TypeCompareKind ComparisonForUserDefinedOperators = TypeCompareKind.IgnoreTupleNames | TypeCompareKind.IgnoreNullableModifiersForReferenceTypes;
         private readonly string _name;
+#nullable enable
         private readonly TypeSymbol? _explicitInterfaceType;
+#nullable disable
 
         protected SourceUserDefinedOperatorSymbolBase(
             MethodKind methodKind,
-            TypeSymbol? explicitInterfaceType,
+            TypeSymbol explicitInterfaceType,
             string name,
             bool isCompoundAssignmentOrIncrementAssignment,
             SourceMemberContainerTypeSymbol containingType,
@@ -239,7 +243,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                         result &= ~DeclarationModifiers.Sealed;
                     }
 
-                    LanguageVersion availableVersion = ((CSharpParseOptions)location.SourceTree!.Options).LanguageVersion;
+                    LanguageVersion availableVersion = ((CSharpParseOptions)location.SourceTree.Options).LanguageVersion;
                     LanguageVersion requiredVersion = MessageID.IDS_FeatureStaticAbstractMembersInInterfaces.RequiredVersion();
 
                     if (availableVersion < requiredVersion)
@@ -265,7 +269,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 {
                     if (syntax is OperatorDeclarationSyntax { OperatorToken: var opToken } && opToken.Kind() is not (SyntaxKind.EqualsEqualsToken or SyntaxKind.ExclamationEqualsToken))
                     {
-                        Binder.CheckFeatureAvailability(location.SourceTree!, MessageID.IDS_DefaultInterfaceImplementation, diagnostics, location);
+                        Binder.CheckFeatureAvailability(location.SourceTree, MessageID.IDS_DefaultInterfaceImplementation, diagnostics, location);
                     }
                 }
                 else if (!isExplicitInterfaceImplementation && isCompoundAssignmentOrIncrementAssignment)
@@ -428,14 +432,14 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        protected sealed override MethodSymbol? FindExplicitlyImplementedMethod(BindingDiagnosticBag diagnostics)
+        protected sealed override MethodSymbol FindExplicitlyImplementedMethod(BindingDiagnosticBag diagnostics)
         {
             if (_explicitInterfaceType is object)
             {
                 string interfaceMethodName;
-                ExplicitInterfaceSpecifierSyntax? explicitInterfaceSpecifier;
+                ExplicitInterfaceSpecifierSyntax explicitInterfaceSpecifier;
 
-                switch (syntaxReferenceOpt!.GetSyntax())
+                switch (syntaxReferenceOpt.GetSyntax())
                 {
                     case OperatorDeclarationSyntax operatorDeclaration:
                         interfaceMethodName = OperatorFacts.OperatorNameFromDeclaration(operatorDeclaration);
@@ -457,7 +461,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return null;
         }
 
+#nullable enable
         protected sealed override TypeSymbol? ExplicitInterfaceType => _explicitInterfaceType;
+#nullable disable
 
         private void CheckValueParameters(BindingDiagnosticBag diagnostics)
         {
@@ -947,7 +953,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             else if (this.GetParameterType(1).StrippedType().SpecialType != SpecialType.System_Int32)
             {
                 var location = this.GetFirstLocation();
-                Binder.CheckFeatureAvailability(location.SourceTree!, MessageID.IDS_FeatureRelaxedShiftOperator, diagnostics, location);
+                Binder.CheckFeatureAvailability(location.SourceTree, MessageID.IDS_FeatureRelaxedShiftOperator, diagnostics, location);
             }
 
             CheckReturnIsNotVoid(diagnostics);
@@ -1002,11 +1008,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         protected sealed override void CheckConstraintsForExplicitInterfaceType(ConversionsBase conversions, BindingDiagnosticBag diagnostics)
         {
-            if ((object?)_explicitInterfaceType != null)
+            if ((object)_explicitInterfaceType != null)
             {
                 NameSyntax name;
 
-                switch (syntaxReferenceOpt!.GetSyntax())
+                switch (syntaxReferenceOpt.GetSyntax())
                 {
                     case OperatorDeclarationSyntax operatorDeclaration:
                         Debug.Assert(operatorDeclaration.ExplicitInterfaceSpecifier != null);

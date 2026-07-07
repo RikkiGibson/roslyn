@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -22,7 +24,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
     internal abstract class SynthesizedMethodBaseSymbol : SourceMemberMethodSymbol
     {
         protected readonly MethodSymbol BaseMethod;
-        internal TypeMap TypeMap { get; private set; } = null!;
+        internal TypeMap TypeMap { get; private set; }
 
         private readonly string _name;
         private ImmutableArray<TypeParameterSymbol> _typeParameters;
@@ -162,6 +164,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return InheritsBaseMethodAttributes ? BaseMethod.GetReturnTypeAttributes() : ImmutableArray<CSharpAttributeData>.Empty;
         }
 
+#nullable enable
         public sealed override DllImportData? GetDllImportData() => InheritsBaseMethodAttributes ? BaseMethod.GetDllImportData() : null;
 
         internal sealed override MethodImplAttributes ImplementationAttributes => InheritsBaseMethodAttributes ? BaseMethod.ImplementationAttributes : default;
@@ -184,8 +187,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         internal sealed override bool HasDeclarativeSecurity => InheritsBaseMethodAttributes && BaseMethod.HasDeclarativeSecurity;
 
         internal sealed override IEnumerable<SecurityAttribute> GetSecurityInformation() => InheritsBaseMethodAttributes
-                ? BaseMethod.GetSecurityInformation()!
+                ? BaseMethod.GetSecurityInformation()
                 : SpecializedCollections.EmptyEnumerable<SecurityAttribute>();
+
+#nullable disable
 
         public sealed override TypeWithAnnotations ReturnTypeWithAnnotations
         {

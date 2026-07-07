@@ -2,11 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -29,7 +30,7 @@ namespace Microsoft.CodeAnalysis.CSharp
     [DebuggerDisplay("{GetDebuggerDisplay(), nq}")]
     internal abstract partial class Symbol : ISymbolInternal, IFormattable
     {
-        private ISymbol _lazyISymbol = null!;
+        private ISymbol _lazyISymbol;
 
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // Changes to the public interface of this class should remain synchronized with the VB version of Symbol.
@@ -46,11 +47,13 @@ namespace Microsoft.CodeAnalysis.CSharp
             get { return false; }
         }
 
+#nullable enable
         internal virtual void ForceComplete(SourceLocation? locationOpt, Predicate<Symbol>? filter, CancellationToken cancellationToken)
         {
             // must be overridden by source symbols, no-op for other symbols
             Debug.Assert(!this.RequiresCompletion);
         }
+#nullable disable
 
         internal virtual bool HasComplete(CompletionPart part)
         {
@@ -102,10 +105,6 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>
         /// Get the symbol that logically contains this symbol. 
         /// </summary>
-        // TODO2: The 'Containing*' family and 'DeclaringCompilation' are genuinely nullable (top-level/metadata symbols
-        // return null) and heavily used. Truthfully annotating them cascades into many override annotations and consumer
-        // derefs, so they are kept nullable-oblivious here and enabled in a dedicated stage. See nullable-migration/found-bugs.md.
-#nullable disable
         public abstract Symbol ContainingSymbol { get; }
 
         /// <summary>
@@ -224,7 +223,6 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         Compilation ISymbolInternal.DeclaringCompilation
             => DeclaringCompilation;
-#nullable enable
 
         string ISymbolInternal.Name => this.Name;
 
@@ -335,9 +333,6 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// Returns the module containing this symbol. If this symbol is shared across multiple
         /// modules, or doesn't belong to a module, returns null.
         /// </summary>
-        // TODO2: 'ContainingModule' is genuinely nullable and part of the high-usage Containing* cluster deferred to a
-        // dedicated stage. See nullable-migration/found-bugs.md.
-#nullable disable
         internal virtual ModuleSymbol ContainingModule
         {
             get
@@ -348,7 +343,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                 return (object)container != null ? container.ContainingModule : null;
             }
         }
-#nullable enable
 
         /// <summary>
         /// The index of this member in the containing symbol. This is an optional
@@ -421,6 +415,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// </summary>
         public abstract ImmutableArray<Location> Locations { get; }
 
+#nullable enable
+
         public virtual Location? TryGetFirstLocation()
         {
             // Simple (but allocating) impl that can be overridden in subtypes if they show up in traces.
@@ -463,6 +459,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             wasZeroWidthMatch = false;
             return false;
         }
+
+#nullable disable
 
         /// <summary>
         /// <para>
@@ -514,7 +512,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     SyntaxToken token = location.SourceTree.GetRoot().FindToken(location.SourceSpan.Start);
                     if (token.Kind() != SyntaxKind.None)
                     {
-                        CSharpSyntaxNode? node = token.Parent?.FirstAncestorOrSelf<TNode>();
+                        CSharpSyntaxNode node = token.Parent.FirstAncestorOrSelf<TNode>();
                         if (node != null)
                         {
                             builder.Add(node.GetReference());
@@ -528,7 +526,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     // we're looking for.
                     // eg: finding the ParameterSyntax from the empty location of a blank identifier
                     SyntaxNode parent = location.SourceTree.GetRoot();
-                    SyntaxNode? found = null;
+                    SyntaxNode found = null;
                     foreach (var descendant in parent.DescendantNodesAndSelf(c => c.Location.SourceSpan.Contains(location.SourceSpan)))
                     {
                         if (descendant is TNode && descendant.Location.SourceSpan.Contains(location.SourceSpan))
@@ -621,12 +619,14 @@ namespace Microsoft.CodeAnalysis.CSharp
             get { return false; }
         }
 
+#nullable enable
         // https://github.com/dotnet/roslyn/issues/82546: add a public API for this (probably just expose a bool)
         /// <summary>
         /// Whether this member is considered caller-unsafe.
         /// See <see cref="CallerUnsafeMode"/> for more details.
         /// </summary>
         internal abstract CallerUnsafeMode GetCallerUnsafeMode(ConsList<FieldSymbol> fieldsBeingBound);
+#nullable disable
 
         /// <summary>
         /// Returns true if this symbol can be referenced by its name in code. Examples of symbols
@@ -777,7 +777,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// Compare two symbol objects to see if they refer to the same symbol. You should always
         /// use <see cref="operator =="/> and <see cref="operator !="/>, or the <see cref="Equals(object)"/> method, to compare two symbols for equality.
         /// </summary>
-        public static bool operator ==(Symbol? left, Symbol? right)
+        public static bool operator ==(Symbol left, Symbol right)
         {
             //PERF: this function is often called with
             //      1) left referencing same object as the right 
@@ -792,14 +792,14 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
 
             // this part is expected to disappear when inlining "someSymbol == null"
-            return (object?)left == (object)right || right.Equals(left);
+            return (object)left == (object)right || right.Equals(left);
         }
 
         /// <summary>
         /// Compare two symbol objects to see if they refer to the same symbol. You should always
         /// use == and !=, or the Equals method, to compare two symbols for equality.
         /// </summary>
-        public static bool operator !=(Symbol? left, Symbol? right)
+        public static bool operator !=(Symbol left, Symbol right)
         {
             //PERF: this function is often called with
             //      1) left referencing same object as the right 
@@ -817,26 +817,26 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
 
             // this part is expected to disappear when inlining "someSymbol != null"
-            return (object?)left != (object)right && !right.Equals(left);
+            return (object)left != (object)right && !right.Equals(left);
         }
 
-        public sealed override bool Equals(object? obj)
+        public sealed override bool Equals(object obj)
         {
             return this.Equals(obj as Symbol, SymbolEqualityComparer.Default.CompareKind);
         }
 
-        public bool Equals(Symbol? other)
+        public bool Equals(Symbol other)
         {
             return this.Equals(other, SymbolEqualityComparer.Default.CompareKind);
         }
 
-        bool ISymbolInternal.Equals(ISymbolInternal? other, TypeCompareKind compareKind)
+        bool ISymbolInternal.Equals(ISymbolInternal other, TypeCompareKind compareKind)
         {
             return this.Equals(other as Symbol, compareKind);
         }
 
         // By default we don't consider the compareKind, and do reference equality. This can be overridden.
-        public virtual bool Equals(Symbol? other, TypeCompareKind compareKind)
+        public virtual bool Equals(Symbol other, TypeCompareKind compareKind)
         {
             return (object)this == other;
         }
@@ -847,7 +847,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(this);
         }
 
-        public static bool Equals(Symbol? first, Symbol? second, TypeCompareKind compareKind)
+        public static bool Equals(Symbol first, Symbol second, TypeCompareKind compareKind)
         {
             if (first is null)
             {
@@ -887,14 +887,14 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>
         /// Build and add synthesized attributes for this symbol.
         /// </summary>
-        internal virtual void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
+        internal virtual void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
         {
         }
 
         /// <summary>
         /// Convenience helper called by subclasses to add a synthesized attribute to a collection of attributes.
         /// </summary>
-        internal static void AddSynthesizedAttribute(ref ArrayBuilder<CSharpAttributeData>? attributes, CSharpAttributeData? attribute)
+        internal static void AddSynthesizedAttribute(ref ArrayBuilder<CSharpAttributeData> attributes, CSharpAttributeData attribute)
         {
             if (attribute != null)
             {
@@ -971,6 +971,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             => syntaxRef.SyntaxTree == tree &&
                 (!definedWithinSpan.HasValue || syntaxRef.Span.IntersectsWith(definedWithinSpan.Value));
 
+#nullable enable
         internal static void ForceCompleteMemberConditionally(SourceLocation? locationOpt, Predicate<Symbol>? filter, Symbol member, CancellationToken cancellationToken)
         {
             if ((locationOpt == null || member.IsDefinedInSourceTree(locationOpt.SourceTree, locationOpt.SourceSpan, cancellationToken))
@@ -1030,6 +1031,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         {
             return "";
         }
+#nullable disable
 
         private static readonly SymbolDisplayFormat s_debuggerDisplayFormat =
             SymbolDisplayFormat.TestFormat
@@ -1086,7 +1088,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return default;
         }
 
-        protected AssemblySymbol? PrimaryDependency
+        protected AssemblySymbol PrimaryDependency
         {
             get
             {
@@ -1136,7 +1138,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// <summary>
         /// Merges given diagnostic to the existing result diagnostic.
         /// </summary>
-        internal bool MergeUseSiteDiagnostics([NotNullIfNotNull(nameof(info))] ref DiagnosticInfo? result, DiagnosticInfo? info)
+        internal bool MergeUseSiteDiagnostics(ref DiagnosticInfo result, DiagnosticInfo info)
         {
             if (info == null)
             {
@@ -1166,7 +1168,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// </summary>
         internal bool MergeUseSiteInfo(ref UseSiteInfo<AssemblySymbol> result, UseSiteInfo<AssemblySymbol> info)
         {
-            DiagnosticInfo? diagnosticInfo = result.DiagnosticInfo;
+            DiagnosticInfo diagnosticInfo = result.DiagnosticInfo;
 
             bool retVal = MergeUseSiteDiagnostics(ref diagnosticInfo, info.DiagnosticInfo);
 
@@ -1419,6 +1421,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         #endregion
 
+#nullable enable
         /// <summary>
         /// True if this symbol has been marked with the <see cref="ObsoleteAttribute"/> attribute. 
         /// This property returns <see cref="ThreeState.Unknown"/> if the <see cref="ObsoleteAttribute"/> attribute hasn't been cracked yet.
@@ -1475,13 +1478,14 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// This property returns <see cref="Microsoft.CodeAnalysis.ObsoleteAttributeData.Uninitialized"/> if attribute arguments haven't been decoded yet.
         /// </summary>
         internal abstract ObsoleteAttributeData? ObsoleteAttributeData { get; }
+#nullable disable
 
-        public string ToDisplayString(SymbolDisplayFormat? format = null)
+        public string ToDisplayString(SymbolDisplayFormat format = null)
         {
             return SymbolDisplay.ToDisplayString(ISymbol, format);
         }
 
-        public ImmutableArray<SymbolDisplayPart> ToDisplayParts(SymbolDisplayFormat? format = null)
+        public ImmutableArray<SymbolDisplayPart> ToDisplayParts(SymbolDisplayFormat format = null)
         {
             return SymbolDisplay.ToDisplayParts(ISymbol, format);
         }
@@ -1489,7 +1493,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         public string ToMinimalDisplayString(
             SemanticModel semanticModel,
             int position,
-            SymbolDisplayFormat? format = null)
+            SymbolDisplayFormat format = null)
         {
             return SymbolDisplay.ToMinimalDisplayString(ISymbol, semanticModel, position, format);
         }
@@ -1497,7 +1501,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         public ImmutableArray<SymbolDisplayPart> ToMinimalDisplayParts(
             SemanticModel semanticModel,
             int position,
-            SymbolDisplayFormat? format = null)
+            SymbolDisplayFormat format = null)
         {
             return SymbolDisplay.ToMinimalDisplayParts(ISymbol, semanticModel, position, format);
         }
@@ -1514,8 +1518,8 @@ namespace Microsoft.CodeAnalysis.CSharp
         }
 
         internal static void CheckForBlockAndExpressionBody(
-            CSharpSyntaxNode? block,
-            CSharpSyntaxNode? expression,
+            CSharpSyntaxNode block,
+            CSharpSyntaxNode expression,
             CSharpSyntaxNode syntax,
             BindingDiagnosticBag diagnostics)
         {
@@ -1560,7 +1564,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 attribute.IsTargetAttribute(AttributeDescription.DynamicAttribute))
             {
                 // DynamicAttribute should not be set explicitly.
-                diagnostics.Add(ErrorCode.ERR_ExplicitDynamicAttr, arguments.AttributeSyntaxOpt!.Location);
+                diagnostics.Add(ErrorCode.ERR_ExplicitDynamicAttr, arguments.AttributeSyntaxOpt.Location);
             }
             else if ((permitted & ReservedAttributes.IsReadOnlyAttribute) == 0 &&
                 reportExplicitUseOfReservedAttribute(attribute, arguments, AttributeDescription.IsReadOnlyAttribute))
@@ -1581,13 +1585,13 @@ namespace Microsoft.CodeAnalysis.CSharp
             else if ((permitted & ReservedAttributes.TupleElementNamesAttribute) == 0 &&
                 attribute.IsTargetAttribute(AttributeDescription.TupleElementNamesAttribute))
             {
-                diagnostics.Add(ErrorCode.ERR_ExplicitTupleElementNamesAttribute, arguments.AttributeSyntaxOpt!.Location);
+                diagnostics.Add(ErrorCode.ERR_ExplicitTupleElementNamesAttribute, arguments.AttributeSyntaxOpt.Location);
             }
             else if ((permitted & ReservedAttributes.NullableAttribute) == 0 &&
                 attribute.IsTargetAttribute(AttributeDescription.NullableAttribute))
             {
                 // NullableAttribute should not be set explicitly.
-                diagnostics.Add(ErrorCode.ERR_ExplicitNullableAttribute, arguments.AttributeSyntaxOpt!.Location);
+                diagnostics.Add(ErrorCode.ERR_ExplicitNullableAttribute, arguments.AttributeSyntaxOpt.Location);
             }
             else if ((permitted & ReservedAttributes.NullableContextAttribute) == 0 &&
                 reportExplicitUseOfReservedAttribute(attribute, arguments, AttributeDescription.NullableContextAttribute))
@@ -1605,19 +1609,19 @@ namespace Microsoft.CodeAnalysis.CSharp
                 attribute.IsTargetAttribute(AttributeDescription.CaseSensitiveExtensionAttribute))
             {
                 // ExtensionAttribute should not be set explicitly.
-                diagnostics.Add(ErrorCode.ERR_ExplicitExtension, arguments.AttributeSyntaxOpt!.Location);
+                diagnostics.Add(ErrorCode.ERR_ExplicitExtension, arguments.AttributeSyntaxOpt.Location);
             }
             else if ((permitted & ReservedAttributes.RequiredMemberAttribute) == 0 &&
                 attribute.IsTargetAttribute(AttributeDescription.RequiredMemberAttribute))
             {
                 // Do not use 'System.Runtime.CompilerServices.RequiredMemberAttribute'. Use the 'required' keyword on required fields and properties instead.
-                diagnostics.Add(ErrorCode.ERR_ExplicitRequiredMember, arguments.AttributeSyntaxOpt!.Location);
+                diagnostics.Add(ErrorCode.ERR_ExplicitRequiredMember, arguments.AttributeSyntaxOpt.Location);
             }
             else if ((permitted & ReservedAttributes.ScopedRefAttribute) == 0 &&
                 attribute.IsTargetAttribute(AttributeDescription.ScopedRefAttribute))
             {
                 // Do not use 'System.Runtime.CompilerServices.ScopedRefAttribute'. Use the 'scoped' keyword instead.
-                diagnostics.Add(ErrorCode.ERR_ExplicitScopedRef, arguments.AttributeSyntaxOpt!.Location);
+                diagnostics.Add(ErrorCode.ERR_ExplicitScopedRef, arguments.AttributeSyntaxOpt.Location);
             }
             else if ((permitted & ReservedAttributes.RefSafetyRulesAttribute) == 0 &&
                 reportExplicitUseOfReservedAttribute(attribute, arguments, AttributeDescription.RefSafetyRulesAttribute))
@@ -1650,7 +1654,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 if (attribute.IsTargetAttribute(attributeDescription))
                 {
                     // Do not use '{FullName}'. This is reserved for compiler usage.
-                    diagnostics.Add(ErrorCode.ERR_ExplicitReservedAttr, arguments.AttributeSyntaxOpt!.Location, attributeDescription.FullName);
+                    diagnostics.Add(ErrorCode.ERR_ExplicitReservedAttr, arguments.AttributeSyntaxOpt.Location, attributeDescription.FullName);
                     return true;
                 }
                 return false;
@@ -1736,6 +1740,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return value != containingValue;
         }
 
+#nullable enable
         /// <summary>
         /// True if the symbol is declared outside of the scope of the containing
         /// symbol
@@ -1803,6 +1808,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             return true;
         }
+#nullable disable
 
         bool ISymbolInternal.IsStatic
         {
@@ -1842,7 +1848,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         public abstract TResult Accept<TResult>(CSharpSymbolVisitor<TResult> visitor);
 
-        string IFormattable.ToString(string? format, IFormatProvider? formatProvider)
+        string IFormattable.ToString(string format, IFormatProvider formatProvider)
         {
             return ToString();
         }

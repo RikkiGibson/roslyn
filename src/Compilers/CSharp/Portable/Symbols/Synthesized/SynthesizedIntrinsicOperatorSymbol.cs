@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -78,7 +80,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        internal override CSharpCompilation? DeclaringCompilation
+        internal override CSharpCompilation DeclaringCompilation
         {
             get
             {
@@ -86,17 +88,17 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        public override string? GetDocumentationCommentId()
+        public override string GetDocumentationCommentId()
         {
             return null;
         }
 
-        internal override bool IsMetadataNewSlot(ModuleSymbol? context, bool ignoreInterfaceImplementationChanges = false)
+        internal override bool IsMetadataNewSlot(ModuleSymbol context, bool ignoreInterfaceImplementationChanges = false)
         {
             return false;
         }
 
-        internal override bool IsMetadataVirtual(ModuleSymbol? context, bool ignoreInterfaceImplementationChanges = false)
+        internal override bool IsMetadataVirtual(ModuleSymbol context, bool ignoreInterfaceImplementationChanges = false)
         {
             return false;
         }
@@ -149,7 +151,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        public override DllImportData? GetDllImportData()
+        public override DllImportData GetDllImportData()
         {
             return null;
         }
@@ -164,7 +166,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return SpecializedCollections.EmptyEnumerable<Cci.SecurityAttribute>();
         }
 
-        internal override MarshalPseudoCustomAttributeData? ReturnValueMarshallingInformation
+        internal override MarshalPseudoCustomAttributeData ReturnValueMarshallingInformation
         {
             get
             {
@@ -281,7 +283,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        public override Symbol? AssociatedSymbol
+        public override Symbol AssociatedSymbol
         {
             get
             {
@@ -318,7 +320,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        public override NamedTypeSymbol? ContainingType
+        public override NamedTypeSymbol ContainingType
         {
             get
             {
@@ -398,7 +400,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        internal override ObsoleteAttributeData? ObsoleteAttributeData
+        internal override ObsoleteAttributeData ObsoleteAttributeData
         {
             get
             {
@@ -406,7 +408,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        internal sealed override UnmanagedCallersOnlyAttributeData? GetUnmanagedCallersOnlyAttributeData(bool forceComplete) => null;
+        internal sealed override UnmanagedCallersOnlyAttributeData GetUnmanagedCallersOnlyAttributeData(bool forceComplete) => null;
 
         internal sealed override bool HasSpecialNameAttribute => throw ExceptionUtilities.Unreachable();
 
@@ -425,7 +427,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal sealed override CallerUnsafeMode GetCallerUnsafeMode(ConsList<FieldSymbol> fieldsBeingBound) => CallerUnsafeMode.None;
 
-        public override bool Equals(Symbol? obj, TypeCompareKind compareKind)
+        public override bool Equals(Symbol obj, TypeCompareKind compareKind)
         {
             if (obj == (object)this)
             {
@@ -434,7 +436,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             var other = obj as SynthesizedIntrinsicOperatorSymbol;
 
-            if ((object?)other == null)
+            if ((object)other == null)
             {
                 return false;
             }
@@ -478,9 +480,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             internal override bool IsMetadataOut => RefKind == RefKind.Out;
 
+#nullable enable
             internal override ConstantValue? DefaultValueFromAttributes => null;
+#nullable disable
 
-            public override bool Equals(Symbol? obj, TypeCompareKind compareKind)
+            public override bool Equals(Symbol obj, TypeCompareKind compareKind)
             {
                 if (obj == (object)this)
                 {
@@ -489,12 +493,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
                 var other = obj as SynthesizedOperatorParameterSymbol;
 
-                if ((object?)other == null)
+                if ((object)other == null)
                 {
                     return false;
                 }
 
-                Debug.Assert(ContainingSymbol is not null);
                 return Ordinal == other.Ordinal && ContainingSymbol.Equals(other.ContainingSymbol, compareKind);
             }
 
@@ -510,7 +513,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             internal override bool HasEnumeratorCancellationAttribute => false;
 
-            internal override MarshalPseudoCustomAttributeData? MarshallingInformation
+            internal override MarshalPseudoCustomAttributeData MarshallingInformation
             {
                 get { return null; }
             }
@@ -518,7 +521,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             internal override bool HasUnscopedRefAttribute => false;
         }
 
-        internal sealed override bool HasAsyncMethodBuilderAttribute(out TypeSymbol? builderArgument)
+        internal sealed override bool HasAsyncMethodBuilderAttribute(out TypeSymbol builderArgument)
         {
             builderArgument = null;
             return false;

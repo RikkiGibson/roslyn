@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -53,12 +55,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
             }
         }
 
-        bool ISymbol.Equals(ISymbol? other, CodeAnalysis.SymbolEqualityComparer equalityComparer)
+        bool ISymbol.Equals(ISymbol other, CodeAnalysis.SymbolEqualityComparer equalityComparer)
         {
             return this.Equals(other as TypeSymbol, equalityComparer);
         }
 
-        protected bool Equals(TypeSymbol? otherType, CodeAnalysis.SymbolEqualityComparer equalityComparer)
+        protected bool Equals(TypeSymbol otherType, CodeAnalysis.SymbolEqualityComparer equalityComparer)
         {
             if (otherType is null)
             {
@@ -119,7 +121,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
             }
         }
 
-        ISymbol? ITypeSymbol.FindImplementationForInterfaceMember(ISymbol interfaceMember)
+        ISymbol ITypeSymbol.FindImplementationForInterfaceMember(ISymbol interfaceMember)
         {
             return interfaceMember is Symbol symbol
                 ? UnderlyingTypeSymbol.FindImplementationForInterfaceMember(symbol.UnderlyingSymbol).GetPublicSymbol()
@@ -156,6 +158,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
 
         bool ITypeSymbol.IsNativeIntegerType => UnderlyingTypeSymbol.IsNativeIntegerType;
 
+#nullable enable
         bool ITypeSymbol.IsExtension => UnderlyingTypeSymbol is Symbols.NamedTypeSymbol { IsExtension: true };
 
         IParameterSymbol? ITypeSymbol.ExtensionParameter
@@ -167,23 +170,24 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel
                     : null;
             }
         }
+#nullable disable
 
-        string ITypeSymbol.ToDisplayString(CodeAnalysis.NullableFlowState topLevelNullability, SymbolDisplayFormat? format)
+        string ITypeSymbol.ToDisplayString(CodeAnalysis.NullableFlowState topLevelNullability, SymbolDisplayFormat format)
         {
             return SymbolDisplay.ToDisplayString(this, topLevelNullability, format);
         }
 
-        ImmutableArray<SymbolDisplayPart> ITypeSymbol.ToDisplayParts(CodeAnalysis.NullableFlowState topLevelNullability, SymbolDisplayFormat? format)
+        ImmutableArray<SymbolDisplayPart> ITypeSymbol.ToDisplayParts(CodeAnalysis.NullableFlowState topLevelNullability, SymbolDisplayFormat format)
         {
             return SymbolDisplay.ToDisplayParts(this, topLevelNullability, format);
         }
 
-        string ITypeSymbol.ToMinimalDisplayString(SemanticModel semanticModel, CodeAnalysis.NullableFlowState topLevelNullability, int position, SymbolDisplayFormat? format)
+        string ITypeSymbol.ToMinimalDisplayString(SemanticModel semanticModel, CodeAnalysis.NullableFlowState topLevelNullability, int position, SymbolDisplayFormat format)
         {
             return SymbolDisplay.ToMinimalDisplayString(this, topLevelNullability, semanticModel, position, format);
         }
 
-        ImmutableArray<SymbolDisplayPart> ITypeSymbol.ToMinimalDisplayParts(SemanticModel semanticModel, CodeAnalysis.NullableFlowState topLevelNullability, int position, SymbolDisplayFormat? format)
+        ImmutableArray<SymbolDisplayPart> ITypeSymbol.ToMinimalDisplayParts(SemanticModel semanticModel, CodeAnalysis.NullableFlowState topLevelNullability, int position, SymbolDisplayFormat format)
         {
             return SymbolDisplay.ToMinimalDisplayParts(this, topLevelNullability, semanticModel, position, format);
         }

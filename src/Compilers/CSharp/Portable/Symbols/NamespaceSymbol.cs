@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -20,7 +22,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
     {
         // PERF: initialization of the following fields will allocate, so we make them lazy
         private ImmutableArray<NamedTypeSymbol> _lazyTypesMightContainExtensions;
-        private string? _lazyQualifiedName;
+        private string _lazyQualifiedName;
 
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // Changes to the public interface of this class should remain synchronized with the VB version.
@@ -67,7 +69,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// <summary>
         /// The containing compilation for compilation namespaces.
         /// </summary>
-        public CSharpCompilation? ContainingCompilation
+        public CSharpCompilation ContainingCompilation
         {
             get { return this.NamespaceKind == NamespaceKind.Compilation ? this.Extent.Compilation : null; }
         }
@@ -86,7 +88,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        public sealed override NamedTypeSymbol? ContainingType
+        public sealed override NamedTypeSymbol ContainingType
         {
             get
             {
@@ -99,7 +101,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// </summary>
         public abstract override AssemblySymbol ContainingAssembly { get; }
 
-        internal override ModuleSymbol? ContainingModule
+        internal override ModuleSymbol ContainingModule
         {
             get
             {
@@ -211,7 +213,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// Returns data decoded from Obsolete attribute or null if there is no Obsolete attribute.
         /// This property returns ObsoleteAttributeData.Uninitialized if attribute arguments haven't been decoded yet.
         /// </summary>
-        internal sealed override ObsoleteAttributeData? ObsoleteAttributeData
+        internal sealed override ObsoleteAttributeData ObsoleteAttributeData
         {
             get { return null; }
         }
@@ -222,7 +224,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// Returns an implicit type symbol for this namespace or null if there is none. This type
         /// wraps misplaced global code.
         /// </summary>
-        internal NamedTypeSymbol? ImplicitType
+        internal NamedTypeSymbol ImplicitType
         {
             get
             {
@@ -236,6 +238,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return types[0];
             }
         }
+
+#nullable enable
 
         /// <summary>
         /// Lookup a nested namespace.
@@ -276,12 +280,14 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return null;
         }
 
+#nullable disable
+
         public abstract ImmutableArray<Symbol> GetMembers(ReadOnlyMemory<char> name);
 
         public sealed override ImmutableArray<Symbol> GetMembers(string name)
             => GetMembers(name.AsMemory());
 
-        internal NamespaceSymbol? GetNestedNamespace(NameSyntax name)
+        internal NamespaceSymbol GetNestedNamespace(NameSyntax name)
         {
             switch (name.Kind())
             {
@@ -292,7 +298,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 case SyntaxKind.QualifiedName:
                     var qn = (QualifiedNameSyntax)name;
                     var leftNs = this.GetNestedNamespace(qn.Left);
-                    if ((object?)leftNs != null)
+                    if ((object)leftNs != null)
                     {
                         return leftNs.GetNestedNamespace(qn.Right);
                     }
@@ -323,6 +329,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable enable
         /// <summary>
         /// Add all extension members and methods in this namespace to the given list. If name or arity
         /// or both are provided, only those extension methods that match are included.
@@ -348,6 +355,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 type.GetAllExtensionMembers(members, name, alternativeName, arity, options, fieldsBeingBound);
             }
         }
+#nullable disable
 
         internal string QualifiedName
         {

@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -77,6 +79,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable enable
         internal static bool IsExtensionBlockMember(this Symbol member)
         {
             switch (member.Kind)
@@ -312,6 +315,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return symbol.CheckConstraints(constraintArgs);
             }
         }
+#nullable disable
 
         /// <summary>
         /// Get the ref kinds of the parameters of a member symbol.  Should be a method, property, or event.
@@ -383,15 +387,15 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             return false;
 
-            bool isImplementableAndNotPublic(MethodSymbol? accessor)
+            bool isImplementableAndNotPublic(MethodSymbol accessor)
             {
                 return accessor.IsImplementable() && accessor.DeclaredAccessibility != Accessibility.Public;
             }
         }
 
-        public static bool IsImplementable([NotNullWhen(true)] this MethodSymbol? methodOpt)
+        public static bool IsImplementable(this MethodSymbol methodOpt)
         {
-            return (object?)methodOpt != null && !methodOpt.IsSealed && (methodOpt.IsAbstract || methodOpt.IsVirtual);
+            return (object)methodOpt != null && !methodOpt.IsSealed && (methodOpt.IsAbstract || methodOpt.IsVirtual);
         }
 
         public static bool IsAccessor(this MethodSymbol methodSymbol)
@@ -544,9 +548,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        internal static NamespaceOrTypeSymbol? OfMinimalArity(this IEnumerable<NamespaceOrTypeSymbol> symbols)
+        internal static NamespaceOrTypeSymbol OfMinimalArity(this IEnumerable<NamespaceOrTypeSymbol> symbols)
         {
-            NamespaceOrTypeSymbol? minAritySymbol = null;
+            NamespaceOrTypeSymbol minAritySymbol = null;
             int minArity = Int32.MaxValue;
             foreach (var symbol in symbols)
             {
@@ -612,14 +616,14 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// <summary>
         /// Returns true if the method is a constructor and has a this() constructor initializer.
         /// </summary>
-        internal static bool HasThisConstructorInitializer(this MethodSymbol method, [NotNullWhen(true)] out ConstructorInitializerSyntax? initializerSyntax)
+        internal static bool HasThisConstructorInitializer(this MethodSymbol method, out ConstructorInitializerSyntax initializerSyntax)
         {
             if ((object)method != null && method.MethodKind == MethodKind.Constructor)
             {
-                SourceMemberMethodSymbol? sourceMethod = method as SourceMemberMethodSymbol;
-                if ((object?)sourceMethod != null)
+                SourceMemberMethodSymbol sourceMethod = method as SourceMemberMethodSymbol;
+                if ((object)sourceMethod != null)
                 {
-                    ConstructorDeclarationSyntax? constructorSyntax = sourceMethod.SyntaxNode as ConstructorDeclarationSyntax;
+                    ConstructorDeclarationSyntax constructorSyntax = sourceMethod.SyntaxNode as ConstructorDeclarationSyntax;
                     if (constructorSyntax?.Initializer?.Kind() == SyntaxKind.ThisConstructorInitializer)
                     {
                         initializerSyntax = constructorSyntax.Initializer;
@@ -682,6 +686,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return method.MethodKind == MethodKind.Constructor && method.ParameterCount == 0;
         }
 
+#nullable enable
         /// <summary>
         /// Returns true if the method is the default constructor synthesized for struct types.
         /// If the containing struct type is from metadata, the default constructor is synthesized when there
@@ -696,6 +701,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 method.ContainingType?.IsValueType == true &&
                 method.IsParameterlessConstructor();
         }
+#nullable disable
 
         /// <summary>
         /// Indicates whether the method should be emitted.
@@ -730,12 +736,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// This method exists to mimic the behavior of GetOwnOrInheritedGetMethod, but it
         /// should only ever look at the overridden event in error scenarios.
         /// </remarks>
-        internal static MethodSymbol? GetOwnOrInheritedAddMethod(this EventSymbol? @event)
+        internal static MethodSymbol GetOwnOrInheritedAddMethod(this EventSymbol @event)
         {
-            while ((object?)@event != null)
+            while ((object)@event != null)
             {
-                MethodSymbol? addMethod = @event.AddMethod;
-                if ((object?)addMethod != null)
+                MethodSymbol addMethod = @event.AddMethod;
+                if ((object)addMethod != null)
                 {
                     return addMethod;
                 }
@@ -754,12 +760,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// This method exists to mimic the behavior of GetOwnOrInheritedSetMethod, but it
         /// should only ever look at the overridden event in error scenarios.
         /// </remarks>
-        internal static MethodSymbol? GetOwnOrInheritedRemoveMethod(this EventSymbol? @event)
+        internal static MethodSymbol GetOwnOrInheritedRemoveMethod(this EventSymbol @event)
         {
-            while ((object?)@event != null)
+            while ((object)@event != null)
             {
-                MethodSymbol? removeMethod = @event.RemoveMethod;
-                if ((object?)removeMethod != null)
+                MethodSymbol removeMethod = @event.RemoveMethod;
+                if ((object)removeMethod != null)
                 {
                     return removeMethod;
                 }
@@ -821,6 +827,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 or SourceEventAccessorSymbol { IsPartialDefinition: true };
         }
 
+#nullable enable
         internal static Symbol? GetPartialImplementationPart(this Symbol member)
         {
             Debug.Assert(member.IsDefinition);
@@ -844,6 +851,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 _ => null,
             };
         }
+#nullable disable
 
         internal static bool ContainsTupleNames(this Symbol member)
         {
@@ -877,7 +885,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        internal static Symbol? GetOverriddenMember(this Symbol member)
+        internal static Symbol GetOverriddenMember(this Symbol member)
         {
             switch (member.Kind)
             {
@@ -892,7 +900,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        internal static Symbol GetLeastOverriddenMember(this Symbol member, NamedTypeSymbol? accessingTypeOpt)
+        internal static Symbol GetLeastOverriddenMember(this Symbol member, NamedTypeSymbol accessingTypeOpt)
         {
             switch (member.Kind)
             {
@@ -913,7 +921,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        internal static bool IsFieldOrFieldLikeEvent(this Symbol member, [NotNullWhen(true)] out FieldSymbol? field)
+        internal static bool IsFieldOrFieldLikeEvent(this Symbol member, out FieldSymbol field)
         {
             switch (member.Kind)
             {
@@ -922,7 +930,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     return true;
                 case SymbolKind.Event:
                     field = ((EventSymbol)member).AssociatedField;
-                    return (object?)field != null;
+                    return (object)field != null;
                 default:
                     field = null;
                     return false;

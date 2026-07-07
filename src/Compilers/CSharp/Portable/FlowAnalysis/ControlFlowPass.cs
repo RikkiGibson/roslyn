@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Immutable;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,7 +20,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         protected bool _convertInsufficientExecutionStackExceptionToCancelledByStackGuardException = false; // By default, just let the original exception to bubble up.
 
         private readonly ArrayBuilder<(LocalSymbol symbol, BoundBlock block)> _usingDeclarations = ArrayBuilder<(LocalSymbol, BoundBlock)>.GetInstance();
-        private BoundBlock? _currentBlock = null;
+        private BoundBlock _currentBlock = null;
 
         protected override void Free()
         {
@@ -114,7 +116,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return result;
         }
 
-        public override BoundNode? Visit(BoundNode? node)
+        public override BoundNode Visit(BoundNode node)
         {
             // there is no need to scan the contents of an expression, as expressions
             // do not contribute to reachability analysis (except for constants, which
@@ -148,7 +150,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// Perform control flow analysis, reporting all necessary diagnostics.  Returns true if the end of
         /// the body might be reachable...
         /// </summary>
-        public static bool Analyze(CSharpCompilation compilation, Symbol member, BoundBlock block, DiagnosticBag? diagnostics)
+        public static bool Analyze(CSharpCompilation compilation, Symbol member, BoundBlock block, DiagnosticBag diagnostics)
         {
             var walker = new ControlFlowPass(compilation, member, block);
 
@@ -185,7 +187,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// body might be reachable.
         /// </summary>
         /// <returns></returns>
-        protected bool Analyze(ref bool badRegion, DiagnosticBag? diagnostics)
+        protected bool Analyze(ref bool badRegion, DiagnosticBag diagnostics)
         {
             ImmutableArray<PendingBranch> returns = Analyze(ref badRegion);
 
@@ -286,7 +288,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             RestorePending(oldPending);
         }
 
-        public override BoundNode? VisitCatchBlock(BoundCatchBlock catchBlock)
+        public override BoundNode VisitCatchBlock(BoundCatchBlock catchBlock)
         {
             var oldPending = SavePending(); // we do not support branches into a catch block
             base.VisitCatchBlock(catchBlock);
@@ -324,12 +326,11 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         protected override void VisitLabel(BoundLabeledStatement node)
         {
-            Debug.Assert(_currentBlock is not null);
             _labelsDefined[node.Label] = _currentBlock;
             base.VisitLabel(node);
         }
 
-        public override BoundNode? VisitLabeledStatement(BoundLabeledStatement node)
+        public override BoundNode VisitLabeledStatement(BoundLabeledStatement node)
         {
             VisitLabel(node);
             CheckReachable(node);
@@ -362,7 +363,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     // target to branch to.
 
                     // Error if label and using are part of the same block
-                    if (_labelsDefined.TryGetValue(node.Label, out BoundNode? target) && target == usingDecl.block)
+                    if (_labelsDefined.TryGetValue(node.Label, out BoundNode target) && target == usingDecl.block)
                     {
                         Diagnostics.Add(ErrorCode.ERR_GoToBackwardJumpOverUsingVar, sourceLocation);
                         break;
@@ -373,6 +374,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             return base.VisitGotoStatement(node);
         }
 
+#nullable enable
         public override BoundNode? VisitBreakStatement(BoundBreakStatement node)
         {
             _labelsUsed.AddIfNotNull(node.LabelExpressionOpt?.Label);
@@ -384,6 +386,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             _labelsUsed.AddIfNotNull(node.LabelExpressionOpt?.Label);
             return base.VisitContinueStatement(node);
         }
+#nullable disable
 
         protected override void VisitSwitchSection(BoundSwitchSection node, bool isLastSection)
         {

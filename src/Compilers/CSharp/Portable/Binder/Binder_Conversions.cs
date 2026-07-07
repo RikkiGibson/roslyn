@@ -1992,9 +1992,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                     }
                     else
                     {
-                        Debug.Assert(resolution.MethodGroup is not null);
-                        Debug.Assert(resolution.OverloadResolutionResult is not null);
-                        Debug.Assert(resolution.AnalyzedArguments is not null);
                         Debug.Assert(resolution.AnalyzedArguments.HasDynamicArgument);
 
                         // If overload resolution found one or more applicable methods and at least one argument

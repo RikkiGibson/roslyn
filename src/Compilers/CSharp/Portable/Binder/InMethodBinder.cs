@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -20,9 +22,9 @@ namespace Microsoft.CodeAnalysis.CSharp
     /// </summary>
     internal sealed class InMethodBinder : LocalScopeBinder
     {
-        private MultiDictionary<string, ParameterSymbol>? _lazyParameterMap;
+        private MultiDictionary<string, ParameterSymbol> _lazyParameterMap;
         private readonly MethodSymbol _methodSymbol;
-        private SmallDictionary<string, Symbol>? _lazyDefinitionMap;
+        private SmallDictionary<string, Symbol> _lazyDefinitionMap;
 
 #if DEBUG
         /// <summary>
@@ -33,7 +35,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         /// MethodCompiler.BindMethodBody adds keys with flag == 1 before binding a method body.
         /// Binder.BindIdentifier adds or updates keys with flag == 2.
         /// </summary>
-        public ConcurrentDictionary<IdentifierNameSyntax, int>? IdentifierMap;
+        public ConcurrentDictionary<IdentifierNameSyntax, int> IdentifierMap;
 #endif
 
         public InMethodBinder(MethodSymbol owner, Binder enclosing)
@@ -55,12 +57,12 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        protected override SourceLocalSymbol? LookupLocal(SyntaxToken nameToken)
+        protected override SourceLocalSymbol LookupLocal(SyntaxToken nameToken)
         {
             return null;
         }
 
-        protected override LocalFunctionSymbol? LookupLocalFunction(SyntaxToken nameToken)
+        protected override LocalFunctionSymbol LookupLocalFunction(SyntaxToken nameToken)
         {
             return null;
         }
@@ -101,9 +103,11 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
+#nullable enable
         internal override GeneratedLabelSymbol? GetBreakLabel(string? labelName) => null;
 
         internal override GeneratedLabelSymbol? GetContinueLabel(string? labelName) => null;
+#nullable disable
 
         protected override void ValidateYield(YieldStatementSyntax node, BindingDiagnosticBag diagnostics)
         {
@@ -130,7 +134,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         }
 
         internal static TypeWithAnnotations GetIteratorElementTypeFromReturnType(CSharpCompilation compilation,
-            RefKind refKind, TypeSymbol returnType, Location? errorLocation, BindingDiagnosticBag? diagnostics)
+            RefKind refKind, TypeSymbol returnType, Location errorLocation, BindingDiagnosticBag diagnostics)
         {
             if (refKind == RefKind.None && returnType.Kind == SymbolKind.NamedType)
             {
@@ -226,7 +230,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        private static bool ReportConflictWithParameter(Symbol parameter, Symbol? newSymbol, string name, Location newLocation, BindingDiagnosticBag diagnostics)
+        private static bool ReportConflictWithParameter(Symbol parameter, Symbol newSymbol, string name, Location newLocation, BindingDiagnosticBag diagnostics)
         {
 #if DEBUG
             var locations = parameter.Locations;
@@ -238,7 +242,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             SymbolKind parameterKind = parameter.Kind;
 
             // Quirk of the way we represent lambda parameters.                
-            SymbolKind newSymbolKind = (object?)newSymbol == null ? SymbolKind.Parameter : newSymbol.Kind;
+            SymbolKind newSymbolKind = (object)newSymbol == null ? SymbolKind.Parameter : newSymbol.Kind;
 
             if (newSymbolKind == SymbolKind.ErrorType)
             {
@@ -256,7 +260,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         return true;
 
                     case SymbolKind.Method:
-                        if (((MethodSymbol)newSymbol!).MethodKind == MethodKind.LocalFunction)
+                        if (((MethodSymbol)newSymbol).MethodKind == MethodKind.LocalFunction)
                         {
                             goto case SymbolKind.Parameter;
                         }
@@ -292,7 +296,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         return true;
 
                     case SymbolKind.Method:
-                        if (((MethodSymbol)newSymbol!).MethodKind == MethodKind.LocalFunction)
+                        if (((MethodSymbol)newSymbol).MethodKind == MethodKind.LocalFunction)
                         {
                             goto case SymbolKind.Parameter;
                         }
@@ -345,7 +349,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 _lazyDefinitionMap = map;
             }
 
-            Symbol? existingDeclaration;
+            Symbol existingDeclaration;
             if (map.TryGetValue(name, out existingDeclaration))
             {
                 return ReportConflictWithParameter(existingDeclaration, symbol, name, location, diagnostics);

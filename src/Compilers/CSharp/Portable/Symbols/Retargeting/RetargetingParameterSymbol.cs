@@ -105,7 +105,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
             }
         }
 
-        internal override MarshalPseudoCustomAttributeData? MarshallingInformation
+        internal override MarshalPseudoCustomAttributeData MarshallingInformation
         {
             get
             {
@@ -161,7 +161,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting
             get { return _underlyingParameter.CallerArgumentExpressionParameterIndex; }
         }
 
-        internal sealed override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
+        internal sealed override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
             => throw ExceptionUtilities.Unreachable();
     }
 

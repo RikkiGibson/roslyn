@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -213,14 +215,13 @@ namespace Microsoft.CodeAnalysis.CSharp.CodeGen
 
         private static ConstantValue AsConstOrDefault(BoundExpression init)
         {
-            ConstantValue? initConstantValueOpt = init.ConstantValueOpt;
+            ConstantValue initConstantValueOpt = init.ConstantValueOpt;
 
             if (initConstantValueOpt != null)
             {
                 return initConstantValueOpt;
             }
 
-            Debug.Assert(init.Type is not null);
             TypeSymbol type = init.Type.EnumUnderlyingTypeOrSelf();
             return ConstantValue.Default(type.SpecialType);
         }
@@ -371,6 +372,8 @@ namespace Microsoft.CodeAnalysis.CSharp.CodeGen
 
             return inits.Length != 0 && inits[0].Kind == BoundKind.ArrayInitialization;
         }
+
+#nullable enable
 
         /// <summary>Tries to emit a ReadOnlySpan construction as a wrapper for a blob rather than as a wrapper for an array construction.</summary>
         /// <param name="spanType">The type of the span being constructed.</param>

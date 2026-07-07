@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -46,7 +48,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get
             {
-                return null!;
+                return null;
             }
         }
 
@@ -240,7 +242,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// </summary>
         internal abstract ImmutableArray<AssemblySymbol> GetReferencedAssemblySymbols(); // TODO: Remove this method and make ReferencedAssemblySymbols property abstract instead.
 
-        internal AssemblySymbol? GetReferencedAssemblySymbol(int referencedAssemblyIndex)
+        internal AssemblySymbol GetReferencedAssemblySymbol(int referencedAssemblyIndex)
         {
             var referencedAssemblies = GetReferencedAssemblySymbols();
             if (referencedAssemblyIndex < referencedAssemblies.Length)
@@ -270,7 +272,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// this module symbol because the module can be shared across multiple source 
         /// assemblies. This method will only be called for the first one.
         /// </param>
-        internal abstract void SetReferences(ModuleReferences<AssemblySymbol> moduleReferences, SourceAssemblySymbol? originatingSourceAssemblyDebugOnly = null);
+        internal abstract void SetReferences(ModuleReferences<AssemblySymbol> moduleReferences, SourceAssemblySymbol originatingSourceAssemblyDebugOnly = null);
 
         /// <summary>
         /// True if this module has any unified references.
@@ -288,6 +290,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// </remarks>
         internal abstract bool GetUnificationUseSiteDiagnostic(ref DiagnosticInfo result, TypeSymbol dependentType);
 
+#nullable enable
         /// <summary>
         /// Lookup a top level type referenced from metadata, names should be
         /// compared case-sensitively.
@@ -300,6 +303,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// </returns>
         /// <remarks></remarks>
         internal abstract NamedTypeSymbol? LookupTopLevelMetadataType(ref MetadataTypeName emittedName);
+#nullable disable
 
         internal abstract ICollection<string> TypeNames { get; }
 
@@ -335,7 +339,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// <summary>
         /// Given a namespace symbol, returns the corresponding module specific namespace symbol
         /// </summary>
-        public NamespaceSymbol? GetModuleNamespace(INamespaceSymbol namespaceSymbol)
+        public NamespaceSymbol GetModuleNamespace(INamespaceSymbol namespaceSymbol)
         {
             if (namespaceSymbol == null)
             {
@@ -345,7 +349,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             if (namespaceSymbol.NamespaceKind == NamespaceKind.Module)
             {
                 var moduleNs = (namespaceSymbol as PublicModel.NamespaceSymbol)?.UnderlyingNamespaceSymbol;
-                if ((object?)moduleNs != null && moduleNs.ContainingModule == this)
+                if ((object)moduleNs != null && moduleNs.ContainingModule == this)
                 {
                     // this is already the correct module namespace
                     return moduleNs;
@@ -359,7 +363,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             else
             {
                 var cns = GetModuleNamespace(namespaceSymbol.ContainingNamespace);
-                if ((object?)cns != null)
+                if ((object)cns != null)
                 {
                     return cns.GetNestedNamespace(namespaceSymbol.Name);
                 }
@@ -370,7 +374,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// <summary>
         /// Given a namespace symbol, returns the corresponding module specific namespace symbol
         /// </summary>
-        public NamespaceSymbol? GetModuleNamespace(NamespaceSymbol namespaceSymbol)
+        public NamespaceSymbol GetModuleNamespace(NamespaceSymbol namespaceSymbol)
         {
             if (namespaceSymbol == null)
             {
@@ -390,7 +394,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             else
             {
                 var cns = GetModuleNamespace(namespaceSymbol.ContainingNamespace);
-                if ((object?)cns != null)
+                if ((object)cns != null)
                 {
                     return cns.GetNestedNamespace(namespaceSymbol.Name);
                 }
@@ -405,7 +409,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// 
         /// Otherwise, this returns <see langword="null"/>.
         /// </summary>
-        public abstract ModuleMetadata? GetMetadata();
+        public abstract ModuleMetadata GetMetadata();
 
         protected override ISymbol CreateISymbol()
         {

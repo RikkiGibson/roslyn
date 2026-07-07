@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -23,16 +25,17 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
     /// </summary>
     internal abstract partial class SourceMethodSymbol : IAttributeTargetSymbol
     {
-        private CustomAttributesBag<CSharpAttributeData>? _lazyCustomAttributesBag;
-        private CustomAttributesBag<CSharpAttributeData>? _lazyReturnTypeCustomAttributesBag;
+        private CustomAttributesBag<CSharpAttributeData> _lazyCustomAttributesBag;
+        private CustomAttributesBag<CSharpAttributeData> _lazyReturnTypeCustomAttributesBag;
 
         // some symbols may not have a syntax (e.g. lambdas, synthesized event accessors)
-        protected readonly SyntaxReference? syntaxReferenceOpt;
-        protected SourceMethodSymbol(SyntaxReference? syntaxReferenceOpt)
+        protected readonly SyntaxReference syntaxReferenceOpt;
+        protected SourceMethodSymbol(SyntaxReference syntaxReferenceOpt)
         {
             this.syntaxReferenceOpt = syntaxReferenceOpt;
         }
 
+#nullable enable
         /// <summary>
         /// Gets the syntax node used for the in-method binder.
         /// </summary>
@@ -68,11 +71,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal virtual Binder? WithTypeParametersBinder => null;
 
+#nullable disable
+
         internal SyntaxReference SyntaxRef
         {
             get
             {
-                return this.syntaxReferenceOpt!;
+                return this.syntaxReferenceOpt;
             }
         }
 
@@ -80,7 +85,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get
             {
-                return (this.syntaxReferenceOpt == null) ? null! : (CSharpSyntaxNode)this.syntaxReferenceOpt.GetSyntax();
+                return (this.syntaxReferenceOpt == null) ? null : (CSharpSyntaxNode)this.syntaxReferenceOpt.GetSyntax();
             }
         }
 
@@ -88,7 +93,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             get
             {
-                return this.syntaxReferenceOpt == null ? null! : this.syntaxReferenceOpt.SyntaxTree;
+                return this.syntaxReferenceOpt == null ? null : this.syntaxReferenceOpt.SyntaxTree;
             }
         }
 
@@ -113,7 +118,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// Used for example for event accessors. The "remove" method delegates attribute binding to the "add" method.
         /// The bound attribute data are then applied to both accessors.
         /// </remarks>
-        protected virtual SourceMemberMethodSymbol? BoundAttributesSource
+        protected virtual SourceMemberMethodSymbol BoundAttributesSource
         {
             get
             {
@@ -266,7 +271,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return GetAttributesBag(ref _lazyReturnTypeCustomAttributesBag, forReturnType: true);
         }
 
-        private CustomAttributesBag<CSharpAttributeData> GetAttributesBag(ref CustomAttributesBag<CSharpAttributeData>? lazyCustomAttributesBag, bool forReturnType)
+        private CustomAttributesBag<CSharpAttributeData> GetAttributesBag(ref CustomAttributesBag<CSharpAttributeData> lazyCustomAttributesBag, bool forReturnType)
         {
             var copyFrom = this.BoundAttributesSource;
 
@@ -274,7 +279,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             Debug.Assert(!ReferenceEquals(copyFrom, this));
 
             bool bagCreatedOnThisThread;
-            if (copyFrom is object)
+            if ((object)copyFrom != null)
             {
                 var attributesBag = forReturnType ? copyFrom.GetReturnTypeAttributesBag() : copyFrom.GetAttributesBag();
                 bagCreatedOnThisThread = Interlocked.CompareExchange(ref lazyCustomAttributesBag, attributesBag, null) == null;
@@ -296,7 +301,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 NoteAttributesComplete(forReturnType);
             }
 
-            Debug.Assert(lazyCustomAttributesBag is not null);
             return lazyCustomAttributesBag;
         }
 
@@ -323,6 +327,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return this.GetReturnTypeAttributesBag().Attributes;
         }
 
+#nullable enable
         internal override (CSharpAttributeData?, BoundAttribute?) EarlyDecodeWellKnownAttribute(ref EarlyDecodeWellKnownAttributeArguments<EarlyWellKnownAttributeBinder, NamedTypeSymbol, AttributeSyntax, AttributeLocation> arguments)
         {
             Debug.Assert(arguments.SymbolPart == AttributeLocation.None || arguments.SymbolPart == AttributeLocation.Return);
@@ -397,6 +402,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             return BindAttributes(GetAttributeDeclarations(), OuterBinder);
         }
+#nullable disable
 
         public override bool AreLocalsZeroed
         {
@@ -411,7 +417,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         /// Returns data decoded from Obsolete attribute or null if there is no Obsolete attribute.
         /// This property returns ObsoleteAttributeData.Uninitialized if attribute arguments haven't been decoded yet.
         /// </summary>
-        internal sealed override ObsoleteAttributeData? ObsoleteAttributeData
+        internal sealed override ObsoleteAttributeData ObsoleteAttributeData
         {
             get
             {
@@ -437,6 +443,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable enable
         internal sealed override UnmanagedCallersOnlyAttributeData? GetUnmanagedCallersOnlyAttributeData(bool forceComplete)
         {
             if (syntaxReferenceOpt is null)
@@ -491,11 +498,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
 #endif
         }
+#nullable disable
 
         internal sealed override ImmutableArray<string> GetAppliedConditionalSymbols()
         {
             MethodEarlyWellKnownAttributeData data = this.GetEarlyDecodedWellKnownAttributeData();
-            return data != null ? data.ConditionalSymbols! : ImmutableArray<string>.Empty;
+            return data != null ? data.ConditionalSymbols : ImmutableArray<string>.Empty;
         }
 
         protected override void DecodeWellKnownAttributeImpl(ref DecodeWellKnownAttributeArguments<AttributeSyntax, CSharpAttributeData, AttributeLocation> arguments)
@@ -515,8 +523,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         private void DecodeWellKnownAttributeAppliedToMethod(ref DecodeWellKnownAttributeArguments<AttributeSyntax, CSharpAttributeData, AttributeLocation> arguments)
         {
-            Debug.Assert(arguments.AttributeSyntaxOpt is object);
-            var attributeSyntax = arguments.AttributeSyntaxOpt;
+            Debug.Assert((object)arguments.AttributeSyntaxOpt != null);
 
             var attribute = arguments.Attribute;
             var diagnostics = (BindingDiagnosticBag)arguments.Diagnostics;
@@ -544,7 +551,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
             else if (attribute.IsTargetAttribute(AttributeDescription.ConditionalAttribute))
             {
-                ValidateConditionalAttribute(attribute, attributeSyntax, diagnostics);
+                ValidateConditionalAttribute(attribute, arguments.AttributeSyntaxOpt, diagnostics);
             }
             else if (attribute.IsTargetAttribute(AttributeDescription.SuppressUnmanagedCodeSecurityAttribute))
             {
@@ -562,7 +569,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
             else if (attribute.IsTargetAttribute(AttributeDescription.RequiresUnsafeAttribute))
             {
-                diagnostics.Add(ErrorCode.ERR_RequiresUnsafeAttributeInSource, attributeSyntax.Location);
+                diagnostics.Add(ErrorCode.ERR_RequiresUnsafeAttributeInSource, arguments.AttributeSyntaxOpt.Location);
             }
             else if (ReportExplicitUseOfReservedAttributes(
                 in arguments,
@@ -581,7 +588,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             {
                 if (IsAsync)
                 {
-                    diagnostics.Add(ErrorCode.ERR_SecurityCriticalOrSecuritySafeCriticalOnAsync, attributeSyntax.Location, attributeSyntax.GetErrorDisplayName());
+                    diagnostics.Add(ErrorCode.ERR_SecurityCriticalOrSecuritySafeCriticalOnAsync, arguments.AttributeSyntaxOpt.Location, arguments.AttributeSyntaxOpt.GetErrorDisplayName());
                 }
             }
             else if (attribute.IsTargetAttribute(AttributeDescription.SkipLocalsInitAttribute))
@@ -594,17 +601,17 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
             else if (attribute.IsTargetAttribute(AttributeDescription.MemberNotNullAttribute))
             {
-                MessageID.IDS_FeatureMemberNotNull.CheckFeatureAvailability(diagnostics, attributeSyntax);
+                MessageID.IDS_FeatureMemberNotNull.CheckFeatureAvailability(diagnostics, arguments.AttributeSyntaxOpt);
                 CSharpAttributeData.DecodeMemberNotNullAttribute<MethodWellKnownAttributeData>(ContainingType, ref arguments);
             }
             else if (attribute.IsTargetAttribute(AttributeDescription.MemberNotNullWhenAttribute))
             {
-                MessageID.IDS_FeatureMemberNotNull.CheckFeatureAvailability(diagnostics, attributeSyntax);
+                MessageID.IDS_FeatureMemberNotNull.CheckFeatureAvailability(diagnostics, arguments.AttributeSyntaxOpt);
                 CSharpAttributeData.DecodeMemberNotNullWhenAttribute<MethodWellKnownAttributeData>(ContainingType, ref arguments);
             }
             else if (attribute.IsTargetAttribute(AttributeDescription.ModuleInitializerAttribute))
             {
-                MessageID.IDS_FeatureModuleInitializers.CheckFeatureAvailability(diagnostics, attributeSyntax);
+                MessageID.IDS_FeatureModuleInitializers.CheckFeatureAvailability(diagnostics, arguments.AttributeSyntaxOpt);
                 DecodeModuleInitializerAttribute(arguments);
             }
             else if (attribute.IsTargetAttribute(AttributeDescription.UnmanagedCallersOnlyAttribute))
@@ -615,7 +622,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             {
                 if (!this.UseUpdatedEscapeRules)
                 {
-                    diagnostics.Add(ErrorCode.WRN_UnscopedRefAttributeOldRules, attributeSyntax.Location);
+                    diagnostics.Add(ErrorCode.WRN_UnscopedRefAttributeOldRules, arguments.AttributeSyntaxOpt.Location);
                 }
 
                 if (this.IsValidUnscopedRefAttributeTarget())
@@ -624,12 +631,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
                     if (ContainingType.IsInterface || IsExplicitInterfaceImplementation)
                     {
-                        MessageID.IDS_FeatureRefStructInterfaces.CheckFeatureAvailability(diagnostics, attributeSyntax);
+                        MessageID.IDS_FeatureRefStructInterfaces.CheckFeatureAvailability(diagnostics, arguments.AttributeSyntaxOpt);
                     }
                 }
                 else
                 {
-                    diagnostics.Add(ErrorCode.ERR_UnscopedRefAttributeUnsupportedMemberTarget, attributeSyntax.Location);
+                    diagnostics.Add(ErrorCode.ERR_UnscopedRefAttributeUnsupportedMemberTarget, arguments.AttributeSyntaxOpt.Location);
                 }
             }
             else if (attribute.IsTargetAttribute(AttributeDescription.InterceptsLocationAttribute))
@@ -638,7 +645,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
             else if (attribute.IsTargetAttribute(AttributeDescription.OverloadResolutionPriorityAttribute))
             {
-                MessageID.IDS_FeatureOverloadResolutionPriority.CheckFeatureAvailability(diagnostics, attributeSyntax);
+                MessageID.IDS_FeatureOverloadResolutionPriority.CheckFeatureAvailability(diagnostics, arguments.AttributeSyntaxOpt);
 
                 if (!CanHaveOverloadResolutionPriority)
                 {
@@ -647,7 +654,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                             ? ErrorCode.ERR_CannotApplyOverloadResolutionPriorityToOverride
                             // Cannot use 'OverloadResolutionPriorityAttribute' on this member.
                             : ErrorCode.ERR_CannotApplyOverloadResolutionPriorityToMember,
-                        attributeSyntax);
+                        arguments.AttributeSyntaxOpt);
                 }
             }
             else if (attribute.IsTargetAttribute(AttributeDescription.RuntimeAsyncMethodGenerationAttribute))
@@ -700,13 +707,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             {
                 if (this.IsAccessor())
                 {
-                    Debug.Assert(arguments.AttributeSyntaxOpt is object);
                     var diagnostics = (BindingDiagnosticBag)arguments.Diagnostics;
 
                     if (this is SourceEventAccessorSymbol)
                     {
                         // CS1667: Attribute '{0}' is not valid on event accessors. It is only valid on '{1}' declarations.
-                        AttributeUsageInfo attributeUsage = arguments.Attribute.AttributeClass!.GetAttributeUsageInfo();
+                        AttributeUsageInfo attributeUsage = arguments.Attribute.AttributeClass.GetAttributeUsageInfo();
                         diagnostics.Add(ErrorCode.ERR_AttributeNotOnEventAccessor, arguments.AttributeSyntaxOpt.Name.Location, description.FullName, attributeUsage.GetValidTargetsErrorArgument());
                     }
                     else
@@ -728,7 +734,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             if (this.IsAccessor())
             {
                 // CS1667: Attribute '{0}' is not valid on property or event accessors. It is only valid on '{1}' declarations.
-                AttributeUsageInfo attributeUsage = attribute.AttributeClass!.GetAttributeUsageInfo();
+                AttributeUsageInfo attributeUsage = attribute.AttributeClass.GetAttributeUsageInfo();
                 diagnostics.Add(ErrorCode.ERR_AttributeNotOnAccessor, node.Name.Location, node.GetErrorDisplayName(), attributeUsage.GetValidTargetsErrorArgument());
             }
             else if (this.ContainingType.IsInterfaceType())
@@ -762,7 +768,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
             else
             {
-                string? name = attribute.GetConstructorArgument<string>(0, SpecialType.System_String);
+                string name = attribute.GetConstructorArgument<string>(0, SpecialType.System_String);
 
                 if (name == null || !SyntaxFacts.IsValidIdentifier(name))
                 {
@@ -787,7 +793,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         private void DecodeWellKnownAttributeAppliedToReturnValue(ref DecodeWellKnownAttributeArguments<AttributeSyntax, CSharpAttributeData, AttributeLocation> arguments)
         {
-            Debug.Assert(arguments.AttributeSyntaxOpt is object);
+            Debug.Assert((object)arguments.AttributeSyntaxOpt != null);
 
             var attribute = arguments.Attribute;
             var diagnostics = (BindingDiagnosticBag)arguments.Diagnostics;
@@ -822,6 +828,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable enable
         private void DecodeDllImportAttribute(ref DecodeWellKnownAttributeArguments<AttributeSyntax, CSharpAttributeData, AttributeLocation> arguments)
         {
             RoslynDebug.Assert(arguments.AttributeSyntaxOpt?.ArgumentList is object);
@@ -984,7 +991,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             // If this is an UnmanagedCallersOnly method, it means that this cannot be called by managed code, including the attempt by the CLR
             // to run the module initializer.
-            Debug.Assert(_lazyCustomAttributesBag is not null);
             if (_lazyCustomAttributesBag.EarlyDecodedWellKnownAttributeData is MethodEarlyWellKnownAttributeData { UnmanagedCallersOnlyAttributePresent: true })
             {
                 diagnostics.Add(ErrorCode.ERR_ModuleInitializerCannotBeUnmanagedCallersOnly, arguments.AttributeSyntaxOpt.Location);
@@ -1369,7 +1375,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return true;
             }
 
-            Debug.Assert(_lazyCustomAttributesBag is { IsEarlyDecodedWellKnownAttributeDataComputed: true });
+            Debug.Assert(_lazyCustomAttributesBag.IsEarlyDecodedWellKnownAttributeDataComputed);
             var unmanagedCallersOnly = this.GetUnmanagedCallersOnlyAttributeData(forceComplete: false);
             if (unmanagedCallersOnly != null)
             {
@@ -1466,7 +1472,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        internal override void PostDecodeWellKnownAttributes(ImmutableArray<CSharpAttributeData> boundAttributes, ImmutableArray<AttributeSyntax> allAttributeSyntaxNodes, BindingDiagnosticBag diagnostics, AttributeLocation symbolPart, WellKnownAttributeData? decodedData)
+        internal override void PostDecodeWellKnownAttributes(ImmutableArray<CSharpAttributeData> boundAttributes, ImmutableArray<AttributeSyntax> allAttributeSyntaxNodes, BindingDiagnosticBag diagnostics, AttributeLocation symbolPart, WellKnownAttributeData decodedData)
         {
             Debug.Assert(!boundAttributes.IsDefault);
             Debug.Assert(!allAttributeSyntaxNodes.IsDefault);

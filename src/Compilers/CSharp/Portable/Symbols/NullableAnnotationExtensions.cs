@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp.Symbols;
@@ -103,17 +105,10 @@ namespace Microsoft.CodeAnalysis.CSharp
             return new NullabilityInfo(ToPublicAnnotation(type, annotation), flowState.ToPublicFlowState());
         }
 
-#nullable disable
-        // TODO2: When 'type.Type' is null this returns null, but the return type is non-nullable. Callers feed the
-        // result into non-null public 'Type' properties, so the contract appears to be non-null; the '?.' is likely
-        // intentional though. Resolving this properly likely requires the caller to state whether a type is expected
-        // (e.g. GetPublicSymbol vs GetRequiredPublicSymbol, as in the IDE layer), which changes API surface. Keep this
-        // one method nullable-disabled until that's done.
         internal static ITypeSymbol GetPublicSymbol(this TypeWithAnnotations type)
         {
             return type.Type?.GetITypeSymbol(type.ToPublicAnnotation());
         }
-#nullable enable
 
         internal static ImmutableArray<ITypeSymbol> GetPublicSymbols(this ImmutableArray<TypeWithAnnotations> types)
         {
@@ -125,6 +120,8 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         internal static ImmutableArray<CodeAnalysis.NullableAnnotation> ToPublicAnnotations(this ImmutableArray<TypeWithAnnotations> types) =>
             types.SelectAsArray(t => t.ToPublicAnnotation());
+
+#nullable enable
 
         internal static CodeAnalysis.NullableAnnotation ToPublicAnnotation(TypeSymbol? type, NullableAnnotation annotation)
         {
@@ -145,6 +142,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                 _ => throw ExceptionUtilities.UnexpectedValue(annotation)
             };
         }
+
+#nullable disable
 
         internal static CSharp.NullableAnnotation ToInternalAnnotation(this CodeAnalysis.NullableAnnotation annotation) =>
             annotation switch

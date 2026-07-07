@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -29,20 +31,22 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             DefaultParameter = 0x08,
         }
 
-        private readonly SyntaxReference? _syntaxRef;
+        private readonly SyntaxReference _syntaxRef;
         private readonly ParameterFlags _parameterSyntaxKind;
 
         private ThreeState _lazyHasOptionalAttribute;
-        private CustomAttributesBag<CSharpAttributeData>? _lazyCustomAttributesBag;
+        private CustomAttributesBag<CSharpAttributeData> _lazyCustomAttributesBag;
+#nullable enable
         protected ConstantValue? _lazyDefaultSyntaxValue;
+#nullable disable
 
         protected SourceComplexParameterSymbolBase(
             Symbol owner,
             int ordinal,
             RefKind refKind,
             string name,
-            Location? location,
-            SyntaxReference? syntaxRef,
+            Location location,
+            SyntaxReference syntaxRef,
             bool hasParamsModifier,
             bool isParams,
             bool isExtensionMethodThis,
@@ -78,14 +82,15 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             _lazyDefaultSyntaxValue = ConstantValue.Unset;
         }
 
-        private Binder? WithTypeParametersBinderOpt => (ContainingSymbol as SourceMethodSymbol)?.WithTypeParametersBinder;
+        private Binder WithTypeParametersBinderOpt => (ContainingSymbol as SourceMethodSymbol)?.WithTypeParametersBinder;
 
-        internal sealed override SyntaxReference? SyntaxReference => _syntaxRef;
+        internal sealed override SyntaxReference SyntaxReference => _syntaxRef;
 
-        private ParameterSyntax? ParameterSyntax => (ParameterSyntax?)_syntaxRef?.GetSyntax();
+        private ParameterSyntax ParameterSyntax => (ParameterSyntax)_syntaxRef?.GetSyntax();
 
         public override bool IsDiscard => false;
 
+#nullable enable
         internal sealed override ConstantValue? ExplicitDefaultConstantValue
         {
             get
@@ -112,6 +117,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return (data != null && data.DefaultParameterValue != ConstantValue.Unset) ? data.DefaultParameterValue : null;
             }
         }
+#nullable disable
 
         internal sealed override bool IsIDispatchConstant
             => GetDecodedWellKnownAttributeData()?.HasIDispatchConstantAttribute == true;
@@ -200,6 +206,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return attributeData?.HasEnumeratorCancellationAttribute == true;
             }
         }
+
+#nullable enable
 
         internal sealed override ScopedKind EffectiveScope
         {
@@ -411,6 +419,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return value;
         }
 
+#nullable disable
+
         public override string MetadataName
         {
             get
@@ -418,13 +428,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 // The metadata parameter name should be the name used in the partial definition.
 
                 var sourceMethod = this.ContainingSymbol as SourceOrdinaryMethodSymbol;
-                if ((object?)sourceMethod == null)
+                if ((object)sourceMethod == null)
                 {
                     return base.MetadataName;
                 }
 
                 var definition = sourceMethod.SourcePartialDefinition;
-                if ((object?)definition == null)
+                if ((object)definition == null)
                 {
                     return base.MetadataName;
                 }
@@ -452,6 +462,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable enable
         /// <summary>
         /// Symbol to copy bound attributes from, or null if the attributes are not shared among multiple source parameter symbols.
         /// </summary>
@@ -524,6 +535,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 return OneOrMany.Create(AttributeDeclarationList);
             }
         }
+#nullable disable
 
         /// <summary>
         /// Returns data decoded from well-known attributes applied to the symbol or null if there are no applied attributes.
@@ -569,13 +581,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             if (_lazyCustomAttributesBag == null || !_lazyCustomAttributesBag.IsSealed)
             {
-                SourceParameterSymbol? copyFrom = this.BoundAttributesSource;
+                SourceParameterSymbol copyFrom = this.BoundAttributesSource;
 
                 // prevent infinite recursion:
                 Debug.Assert(!ReferenceEquals(copyFrom, this));
 
                 bool bagCreatedOnThisThread;
-                if ((object?)copyFrom != null)
+                if ((object)copyFrom != null)
                 {
                     var attributesBag = copyFrom.GetAttributesBag();
                     bagCreatedOnThisThread = Interlocked.CompareExchange(ref _lazyCustomAttributesBag, attributesBag, null) == null;
@@ -593,7 +605,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 }
             }
 
-            Debug.Assert(_lazyCustomAttributesBag is not null);
             return _lazyCustomAttributesBag;
         }
 
@@ -627,6 +638,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             base.PostEarlyDecodeWellKnownAttributeTypes();
         }
 
+#nullable enable
         internal override (CSharpAttributeData?, BoundAttribute?) EarlyDecodeWellKnownAttribute(ref EarlyDecodeWellKnownAttributeArguments<EarlyWellKnownAttributeBinder, NamedTypeSymbol, AttributeSyntax, AttributeLocation> arguments)
         {
             if (CSharpAttributeData.IsTargetEarlyAttribute(arguments.AttributeType, arguments.AttributeSyntax, AttributeDescription.DefaultParameterValueAttribute))
@@ -743,10 +755,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             return !hasAnyDiagnostics ? (attributeData, boundAttribute) : (null, null);
         }
+#nullable disable
 
         protected override void DecodeWellKnownAttributeImpl(ref DecodeWellKnownAttributeArguments<AttributeSyntax, CSharpAttributeData, AttributeLocation> arguments)
         {
-            Debug.Assert((object?)arguments.AttributeSyntaxOpt != null);
+            Debug.Assert((object)arguments.AttributeSyntaxOpt != null);
 
             var attribute = arguments.Attribute;
             Debug.Assert(!attribute.HasErrors);
@@ -914,7 +927,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             {
                 VerifyParamDefaultValueMatchesAttributeIfAny(value, syntax, diagnostics);
 
-                Debug.Assert(ParameterSyntax is not null);
                 if (this.RefKind == RefKind.RefReadOnlyParameter && this.IsOptional && this.ParameterSyntax.Default is null)
                 {
                     // A default value is specified for 'ref readonly' parameter '{0}', but 'ref readonly' should be used only for references. Consider declaring the parameter as 'in'.
@@ -943,7 +955,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        private ConstantValue DecodeDefaultParameterValueAttribute(AttributeDescription description, CSharpAttributeData attribute, AttributeSyntax node, bool diagnose, BindingDiagnosticBag? diagnosticsOpt)
+        private ConstantValue DecodeDefaultParameterValueAttribute(AttributeDescription description, CSharpAttributeData attribute, AttributeSyntax node, bool diagnose, BindingDiagnosticBag diagnosticsOpt)
         {
             Debug.Assert(!attribute.HasErrors);
 
@@ -962,7 +974,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        private ConstantValue DecodeDefaultParameterValueAttribute(CSharpAttributeData attribute, AttributeSyntax node, bool diagnose, BindingDiagnosticBag? diagnosticsOpt)
+        private ConstantValue DecodeDefaultParameterValueAttribute(CSharpAttributeData attribute, AttributeSyntax node, bool diagnose, BindingDiagnosticBag diagnosticsOpt)
         {
             Debug.Assert(!diagnose || diagnosticsOpt != null);
 
@@ -971,7 +983,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 // error CS1745: Cannot specify default parameter value in conjunction with DefaultParameterAttribute or OptionalAttribute
                 if (diagnose)
                 {
-                    diagnosticsOpt!.Add(ErrorCode.ERR_DefaultValueUsedWithAttributes, node.Name.Location);
+                    diagnosticsOpt.Add(ErrorCode.ERR_DefaultValueUsedWithAttributes, node.Name.Location);
                 }
                 return ConstantValue.Bad;
             }
@@ -989,7 +1001,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             // the type of the value is the type of the expression in the attribute:
             var arg = attribute.CommonConstructorArguments[0];
 
-            Debug.Assert(arg.TypeInternal is not null);
             SpecialType specialType = arg.Kind == TypedConstantKind.Enum ?
                 ((NamedTypeSymbol)arg.TypeInternal).EnumUnderlyingType.SpecialType :
                 arg.TypeInternal.SpecialType;
@@ -1010,7 +1021,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                         // error CS1908: The type of the argument to the DefaultParameterValue attribute must match the parameter type
                         if (diagnose)
                         {
-                            diagnosticsOpt!.Add(ErrorCode.ERR_DefaultValueTypeMustMatch, node.Name.Location);
+                            diagnosticsOpt.Add(ErrorCode.ERR_DefaultValueTypeMustMatch, node.Name.Location);
                         }
                         return ConstantValue.Bad;
                     }
@@ -1020,7 +1031,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                     // error CS1910: Argument of type '{0}' is not applicable for the DefaultParameterValue attribute
                     if (diagnose)
                     {
-                        diagnosticsOpt!.Add(ErrorCode.ERR_DefaultValueBadValueType, node.Name.Location, arg.TypeInternal);
+                        diagnosticsOpt.Add(ErrorCode.ERR_DefaultValueBadValueType, node.Name.Location, arg.TypeInternal);
                     }
                     return ConstantValue.Bad;
                 }
@@ -1030,24 +1041,25 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 // error CS1908: The type of the argument to the DefaultParameterValue attribute must match the parameter type
                 if (diagnose)
                 {
-                    diagnosticsOpt!.Add(ErrorCode.ERR_DefaultValueTypeMustMatch, node.Name.Location);
-                    diagnosticsOpt!.Add(node.Name, useSiteInfo);
+                    diagnosticsOpt.Add(ErrorCode.ERR_DefaultValueTypeMustMatch, node.Name.Location);
+                    diagnosticsOpt.Add(node.Name, useSiteInfo);
                 }
                 return ConstantValue.Bad;
             }
 
             if (diagnose)
             {
-                diagnosticsOpt!.Add(node.Name, useSiteInfo);
+                diagnosticsOpt.Add(node.Name, useSiteInfo);
             }
 
-            return ConstantValue.Create(arg.ValueInternal!, constantValueDiscriminator);
+            return ConstantValue.Create(arg.ValueInternal, constantValueDiscriminator);
         }
 
         private bool IsValidCallerInfoContext(AttributeSyntax node) => !ContainingSymbol.IsExplicitInterfaceImplementation()
                                                                     && !ContainingSymbol.IsOperator()
                                                                     && !IsOnPartialImplementation(node);
 
+#nullable enable
         /// <summary>
         /// Is the attribute syntax appearing on a parameter of a partial method implementation part?
         /// Since attributes are merged between the parts of a partial, we need to look at the syntax where the
@@ -1066,10 +1078,10 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
             return implParameterAttributeList.Any(attrList => attrList.Attributes.Contains(node));
         }
+#nullable disable
 
         private void ValidateCallerLineNumberAttribute(AttributeSyntax node, BindingDiagnosticBag diagnostics)
         {
-            Debug.Assert(ParameterSyntax is not null);
             CSharpCompilation compilation = this.DeclaringCompilation;
             var useSiteInfo = new CompoundUseSiteInfo<AssemblySymbol>(diagnostics, ContainingAssembly);
 
@@ -1098,7 +1110,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         private void ValidateCallerFilePathAttribute(AttributeSyntax node, BindingDiagnosticBag diagnostics)
         {
-            Debug.Assert(ParameterSyntax is not null);
             CSharpCompilation compilation = this.DeclaringCompilation;
             var useSiteInfo = new CompoundUseSiteInfo<AssemblySymbol>(diagnostics, ContainingAssembly);
 
@@ -1132,7 +1143,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         private void ValidateCallerMemberNameAttribute(AttributeSyntax node, BindingDiagnosticBag diagnostics)
         {
-            Debug.Assert(ParameterSyntax is not null);
             CSharpCompilation compilation = this.DeclaringCompilation;
             var useSiteInfo = new CompoundUseSiteInfo<AssemblySymbol>(diagnostics, ContainingAssembly);
 
@@ -1177,7 +1187,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             CSharpCompilation compilation = this.DeclaringCompilation;
             var useSiteInfo = new CompoundUseSiteInfo<AssemblySymbol>(diagnostics, ContainingAssembly);
 
-            Debug.Assert(ParameterSyntax is not null);
             if (!IsValidCallerInfoContext(node))
             {
                 // CS8966: The CallerArgumentExpressionAttribute applied to parameter '{0}' will have no effect because it applies to a
@@ -1245,7 +1254,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         private void ValidateCancellationTokenAttribute(AttributeSyntax node, BindingDiagnosticBag diagnostics)
         {
-            Debug.Assert(ParameterSyntax is not null);
             if (needsReporting())
             {
                 diagnostics.Add(ErrorCode.WRN_UnconsumedEnumeratorCancellationAttributeUsage, node.Name.Location, ParameterSyntax.Identifier.ValueText);
@@ -1269,6 +1277,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable enable
         private void DecodeInterpolatedStringHandlerArgumentAttribute(ref DecodeWellKnownAttributeArguments<AttributeSyntax, CSharpAttributeData, AttributeLocation> arguments, BindingDiagnosticBag diagnostics, int attributeIndex)
         {
             Debug.Assert(attributeIndex is 0 or 1);
@@ -1431,8 +1440,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                 arguments.GetOrCreateData<ParameterWellKnownAttributeData>().InterpolatedStringHandlerArguments = default;
             }
         }
+#nullable disable
 
-        internal override void PostDecodeWellKnownAttributes(ImmutableArray<CSharpAttributeData> boundAttributes, ImmutableArray<AttributeSyntax> allAttributeSyntaxNodes, BindingDiagnosticBag diagnostics, AttributeLocation symbolPart, WellKnownAttributeData? decodedData)
+        internal override void PostDecodeWellKnownAttributes(ImmutableArray<CSharpAttributeData> boundAttributes, ImmutableArray<AttributeSyntax> allAttributeSyntaxNodes, BindingDiagnosticBag diagnostics, AttributeLocation symbolPart, WellKnownAttributeData decodedData)
         {
             Debug.Assert(!boundAttributes.IsDefault);
             Debug.Assert(!allAttributeSyntaxNodes.IsDefault);
@@ -1441,7 +1451,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             Debug.Assert(_lazyCustomAttributesBag.IsDecodedWellKnownAttributeDataComputed);
             Debug.Assert(symbolPart == AttributeLocation.None);
 
-            var data = (ParameterWellKnownAttributeData?)decodedData;
+            var data = (ParameterWellKnownAttributeData)decodedData;
             if (data != null)
             {
                 switch (RefKind)
@@ -1500,12 +1510,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             {
                 if (_lazyHasOptionalAttribute == ThreeState.Unknown)
                 {
-                    SourceParameterSymbol? copyFrom = this.BoundAttributesSource;
+                    SourceParameterSymbol copyFrom = this.BoundAttributesSource;
 
                     // prevent infinite recursion:
                     Debug.Assert(!ReferenceEquals(copyFrom, this));
 
-                    if ((object?)copyFrom != null)
+                    if ((object)copyFrom != null)
                     {
                         // Parameter of partial implementation.
                         // We bind the attributes only on the definition part and copy them over to the implementation.
@@ -1548,7 +1558,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         internal sealed override bool IsMetadataOut
             => base.IsMetadataOut || GetDecodedWellKnownAttributeData()?.HasOutAttribute == true;
 
-        internal sealed override MarshalPseudoCustomAttributeData? MarshallingInformation
+        internal sealed override MarshalPseudoCustomAttributeData MarshallingInformation
             => GetDecodedWellKnownAttributeData()?.MarshallingInformation;
 
         protected sealed override bool HasParamsModifier => (_parameterSyntaxKind & ParameterFlags.HasParamsModifier) != 0;
@@ -1561,7 +1571,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         public abstract override ImmutableArray<CustomModifier> RefCustomModifiers { get; }
 
-        internal override void ForceComplete(SourceLocation? locationOpt, Predicate<Symbol>? filter, CancellationToken cancellationToken)
+        internal override void ForceComplete(SourceLocation locationOpt, Predicate<Symbol> filter, CancellationToken cancellationToken)
         {
             Debug.Assert(filter == null);
             _ = this.GetAttributes();
@@ -1569,6 +1579,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             DoMiscValidation();
             state.SpinWaitComplete(CompletionPart.ComplexParameterSymbolAll, cancellationToken);
         }
+
+#nullable enable
 
         private void DoMiscValidation()
         {
@@ -1736,6 +1748,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable disable
     }
 
     internal sealed class SourceComplexParameterSymbol : SourceComplexParameterSymbolBase
@@ -1748,8 +1761,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             TypeWithAnnotations parameterType,
             RefKind refKind,
             string name,
-            Location? location,
-            SyntaxReference? syntaxRef,
+            Location location,
+            SyntaxReference syntaxRef,
             bool hasParamsModifier,
             bool isParams,
             bool isExtensionMethodThis,
@@ -1775,8 +1788,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             RefKind refKind,
             ImmutableArray<CustomModifier> refCustomModifiers,
             string name,
-            Location? location,
-            SyntaxReference? syntaxRef,
+            Location location,
+            SyntaxReference syntaxRef,
             bool hasParamsModifier,
             bool isParams,
             bool isExtensionMethodThis,

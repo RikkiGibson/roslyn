@@ -365,7 +365,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 visitor.Visit(block);
             }
 
-            public override BoundNode? Visit(BoundNode? node)
+            public override BoundNode? Visit(BoundNode node)
             {
                 if (!(node is BoundExpression))
                 {

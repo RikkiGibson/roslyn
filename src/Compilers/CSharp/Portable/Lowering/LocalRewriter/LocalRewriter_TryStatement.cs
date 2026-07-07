@@ -75,11 +75,11 @@ namespace Microsoft.CodeAnalysis.CSharp
             }
         }
 
-        public override BoundNode VisitCatchBlock(BoundCatchBlock node)
+        public override BoundNode? VisitCatchBlock(BoundCatchBlock node)
         {
             if (node.ExceptionFilterOpt?.ConstantValueOpt?.BooleanValue == false)
             {
-                return null!;
+                return null;
             }
 
             BoundExpression? rewrittenExceptionSourceOpt = (BoundExpression?)this.Visit(node.ExceptionSourceOpt);

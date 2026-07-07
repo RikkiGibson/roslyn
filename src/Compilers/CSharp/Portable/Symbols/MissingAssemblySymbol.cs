@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -50,7 +52,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        internal override Symbol? GetDeclaredSpecialTypeMember(SpecialMember member)
+        internal override Symbol GetDeclaredSpecialTypeMember(SpecialMember member)
         {
             return null;
         }
@@ -63,7 +65,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
-        public override Version? AssemblyVersionPattern => null;
+        public override Version AssemblyVersionPattern => null;
 
         internal override ImmutableArray<byte> PublicKey
         {
@@ -92,14 +94,14 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             return identity.GetHashCode();
         }
 
-        public override bool Equals(Symbol? obj, TypeCompareKind compareKind)
+        public override bool Equals(Symbol obj, TypeCompareKind compareKind)
         {
             return Equals(obj as MissingAssemblySymbol);
         }
 
-        public bool Equals(MissingAssemblySymbol? other)
+        public bool Equals(MissingAssemblySymbol other)
         {
-            if ((object?)other == null)
+            if ((object)other == null)
             {
                 return false;
             }
@@ -164,6 +166,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             }
         }
 
+#nullable enable
+
         internal override NamedTypeSymbol LookupDeclaredOrForwardedTopLevelMetadataType(ref MetadataTypeName emittedName, ConsList<AssemblySymbol>? visitedAssemblies)
         {
             return new MissingMetadataTypeSymbol.TopLevel(this.moduleSymbol, ref emittedName);
@@ -173,6 +177,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             return null;
         }
+
+#nullable disable
 
         internal override NamedTypeSymbol GetDeclaredSpecialType(ExtendedSpecialType type)
         {
@@ -204,13 +210,14 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
 
         internal override TypeConversions TypeConversions => CorLibrary.TypeConversions;
 
-        public override AssemblyMetadata? GetMetadata() => null;
+        public override AssemblyMetadata GetMetadata() => null;
 
         internal sealed override IEnumerable<NamedTypeSymbol> GetAllTopLevelForwardedTypes()
         {
             return SpecializedCollections.EmptyEnumerable<NamedTypeSymbol>();
         }
 
+#nullable enable
         internal sealed override ObsoleteAttributeData? ObsoleteAttributeData => null;
 
         internal override bool GetGuidString(out string? guidString)

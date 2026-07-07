@@ -849,7 +849,7 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             void makeNotNullMembersMaybeNull()
             {
-                if (_symbol is MethodSymbol and var method)
+                if (_symbol is MethodSymbol method)
                 {
                     if (method.IsConstructor())
                     {
@@ -1017,7 +1017,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                                 // will have already set the abstract member to non-null, and there isn't a separate slot for that abstract member.
                                 if (requiredMember is PropertySymbol { IsAbstract: true } abstractProperty)
                                 {
-                                    if (members.FirstOrDefault(static (thisMember, baseMember) => thisMember.IsOverride && (object?)thisMember.GetOverriddenMember() == baseMember, requiredMember) is { } overridingMember
+                                    if (members.FirstOrDefault(static (thisMember, baseMember) => thisMember.IsOverride && (object)thisMember.GetOverriddenMember() == baseMember, requiredMember) is { } overridingMember
                                         && isFilterableOverrideOfAbstractProperty((PropertySymbol)overridingMember))
                                     {
                                         continue;
@@ -7185,8 +7185,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 }
 
                 // check whether 'method', when called on this receiver, is an implementation of 'constructedMethod'.
-                MethodSymbol? currentMethod = method;
-                for (var baseType = receiverType; baseType is object && currentMethod is object; baseType = baseType.BaseTypeNoUseSiteDiagnostics)
+                for (var baseType = receiverType; baseType is object && method is object; baseType = baseType.BaseTypeNoUseSiteDiagnostics)
                 {
                     var implementationMethod = baseType.FindImplementationForInterfaceMember(constructedMethod);
                     if (implementationMethod is null)
@@ -7202,7 +7201,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     }
 
                     // could be calling an override of a method that implements the interface method
-                    for (var overriddenMethod = currentMethod; overriddenMethod is object; overriddenMethod = overriddenMethod.OverriddenMethod)
+                    for (var overriddenMethod = method; overriddenMethod is object; overriddenMethod = overriddenMethod.OverriddenMethod)
                     {
                         if (overriddenMethod.Equals(implementationMethod))
                         {
@@ -7226,13 +7225,13 @@ namespace Microsoft.CodeAnalysis.CSharp
                     // we know that implementationMethod.ContainingType is the same type or a base type of 'baseType',
                     // and that the implementation method will be the same between 'baseType' and 'implementationMethod.ContainingType'.
                     // we step through the intermediate bases in order to skip unnecessary override methods.
-                    while (!baseType.Equals(implementationMethod.ContainingType) && currentMethod is object)
+                    while (!baseType.Equals(implementationMethod.ContainingType) && method is object)
                     {
-                        if (baseType.Equals(currentMethod.ContainingType))
+                        if (baseType.Equals(method.ContainingType))
                         {
                             // since we're about to move on to the base of 'method.ContainingType',
                             // we know the implementation could only be an overridden method of 'method'.
-                            currentMethod = currentMethod.OverriddenMethod;
+                            method = method.OverriddenMethod;
                         }
 
                         baseType = baseType.BaseTypeNoUseSiteDiagnostics;
@@ -7242,9 +7241,9 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                     // now 'baseType == implementationMethod.ContainingType', so if 'method' is
                     // contained in that same type we should advance 'method' one more time.
-                    if (currentMethod is object && baseType.Equals(currentMethod.ContainingType))
+                    if (method is object && baseType.Equals(method.ContainingType))
                     {
-                        currentMethod = currentMethod.OverriddenMethod;
+                        method = method.OverriddenMethod;
                     }
                 }
 
@@ -7997,13 +7996,12 @@ namespace Microsoft.CodeAnalysis.CSharp
                 return;
             }
 
-            MethodSymbol? current = method;
             do
             {
-                var type = current.ContainingType;
-                var notNullMembers = current.NotNullMembers;
-                var notNullWhenTrueMembers = current.NotNullWhenTrueMembers;
-                var notNullWhenFalseMembers = current.NotNullWhenFalseMembers;
+                var type = method.ContainingType;
+                var notNullMembers = method.NotNullMembers;
+                var notNullWhenTrueMembers = method.NotNullWhenTrueMembers;
+                var notNullWhenFalseMembers = method.NotNullWhenFalseMembers;
 
                 if (IsConditionalState)
                 {
@@ -8015,7 +8013,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     applyMemberPostConditions(receiverSlot, type, notNullMembers, ref State);
                 }
 
-                if (current.ReturnType.SpecialType == SpecialType.System_Boolean)
+                if (method.ReturnType.SpecialType == SpecialType.System_Boolean)
                 {
                     if (!(notNullWhenTrueMembers.IsEmpty && notNullWhenFalseMembers.IsEmpty))
                     {
@@ -8024,9 +8022,9 @@ namespace Microsoft.CodeAnalysis.CSharp
                         applyMemberPostConditions(receiverSlot, type, notNullWhenFalseMembers, ref StateWhenFalse);
                     }
 
-                    if (Binder.HasTryGetValueSignature(current) &&
+                    if (Binder.HasTryGetValueSignature(method) &&
                         receiverType is NamedTypeSymbol { IsUnionType: true } unionType &&
-                        Binder.IsUnionTypeTryGetValueMethod(unionType, current) &&
+                        Binder.IsUnionTypeTryGetValueMethod(unionType, method) &&
                         Binder.GetUnionTypeValuePropertyNoUseSiteDiagnostics(unionType) is { } unionValue)
                     {
                         Split();
@@ -8034,9 +8032,9 @@ namespace Microsoft.CodeAnalysis.CSharp
                     }
                 }
 
-                current = current.OverriddenMethod;
+                method = method.OverriddenMethod;
             }
-            while (current != null);
+            while (method != null);
 
             void applyMemberPostConditions(int receiverSlot, TypeSymbol type, ImmutableArray<string> members, ref LocalState state)
             {
@@ -9517,7 +9515,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             BoundExpression convertedNode,
             Conversion conversion,
             TypeSymbol targetType,
-            TypeSymbol? operandType,
+            TypeSymbol operandType,
             bool fromExplicitCast,
             int slot,
             int valueSlot,
@@ -9886,6 +9884,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 reportRemainingWarnings = false;
                 isSuppressed = true;
             }
+#nullable disable
 
             TypeSymbol targetType = targetTypeWithNullability.Type;
             switch (conversion.Kind)
@@ -9895,10 +9894,9 @@ namespace Microsoft.CodeAnalysis.CSharp
                         var group = conversionOperand as BoundMethodGroup;
                         var (invokeSignature, parameters) = getDelegateOrFunctionPointerInfo(targetType);
                         var method = conversion.Method;
-                        Debug.Assert(method is not null);
                         if (group != null)
                         {
-                            if (method.OriginalDefinition is LocalFunctionSymbol localFunc)
+                            if (method?.OriginalDefinition is LocalFunctionSymbol localFunc)
                             {
                                 VisitLocalFunctionUse(localFunc);
                             }
@@ -9912,7 +9910,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                     resultState = NullableFlowState.NotNull;
                     break;
 
-                    static (MethodSymbol? invokeSignature, ImmutableArray<ParameterSymbol>) getDelegateOrFunctionPointerInfo(TypeSymbol targetType)
+                    static (MethodSymbol invokeSignature, ImmutableArray<ParameterSymbol>) getDelegateOrFunctionPointerInfo(TypeSymbol targetType)
                         => targetType switch
                         {
                             NamedTypeSymbol { TypeKind: TypeKind.Delegate, DelegateInvokeMethod: { Parameters: { } parameters } signature } => (signature, parameters),
@@ -9920,6 +9918,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                             _ => (null, ImmutableArray<ParameterSymbol>.Empty),
                         };
 
+#nullable enable
                 case ConversionKind.AnonymousFunction:
                     Debug.Assert(targetInstanceSlotOpt < 0);
                     if (conversionOperand is BoundLambda lambda)
@@ -9936,6 +9935,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         return TypeWithState.Create(targetType, NullableFlowState.NotNull);
                     }
                     break;
+#nullable disable
 
                 case ConversionKind.FunctionType:
                     resultState = NullableFlowState.NotNull;
@@ -10132,7 +10132,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                                     int valueSlot = MakeSlot(conversionOperand);
                                     if (valueSlot > 0)
                                     {
-                                        Debug.Assert(conversionOpt is not null);
                                         int slot = GetOrCreatePlaceholderSlot(conversionOpt);
                                         if (slot > 0)
                                         {
@@ -10149,7 +10148,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                         // https://github.com/dotnet/roslyn/issues/29699: Report warnings for user-defined conversions on tuple elements.
                         canConvertNestedNullability = GenerateConversion(_conversions, conversionOperand, operandType.Type, targetType, fromExplicitCast, extensionMethodThisArgument, isChecked: conversionOpt?.Checked ?? false).Exists;
 
-                        if (canConvertNestedNullability && trackMembers && conversionOpt is { } && conversionOperand.Type!.Equals(conversionOpt.Type, TypeCompareKind.AllIgnoreOptions))
+                        if (canConvertNestedNullability && trackMembers && conversionOpt is { } && conversionOperand.Type.Equals(conversionOpt.Type, TypeCompareKind.AllIgnoreOptions))
                         {
                             Debug.Assert(conversionOperand != null);
                             switch (conversion.Kind)
@@ -10207,7 +10206,6 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             TypeWithState resultType = calculateResultType(targetTypeWithNullability, fromExplicitCast, resultState, isSuppressed, targetType);
 
-            Debug.Assert(conversionOperand is not null);
             if (!conversionOperand.HasErrors && !targetType.IsErrorType())
             {
                 // Need to report all warnings that apply since the warnings can be suppressed individually.
@@ -10219,7 +10217,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 {
                     if (assignmentKind == AssignmentKind.Argument)
                     {
-                        ReportNullabilityMismatchInArgument(getDiagnosticLocation(), operandType.Type!, parameterOpt, targetType, forOutput: false);
+                        ReportNullabilityMismatchInArgument(getDiagnosticLocation(), operandType.Type, parameterOpt, targetType, forOutput: false);
                     }
                     else
                     {
@@ -10239,6 +10237,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                 return diagnosticLocation;
             }
 
+#nullable enable
             static TypeWithState calculateResultType(TypeWithAnnotations targetTypeWithNullability, bool fromExplicitCast, NullableFlowState resultState, bool isSuppressed, TypeSymbol targetType)
             {
                 if (isSuppressed)
@@ -12382,7 +12381,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             if (member.Kind == SymbolKind.Property)
             {
                 var getMethod = ((PropertySymbol)member.OriginalDefinition).GetMethod;
-                if ((object?)getMethod != null && getMethod.ContainingType.SpecialType == SpecialType.System_Nullable_T)
+                if ((object)getMethod != null && getMethod.ContainingType.SpecialType == SpecialType.System_Nullable_T)
                 {
                     if (getMethod == compilation.GetSpecialTypeMember(SpecialMember.System_Nullable_T_get_Value))
                     {

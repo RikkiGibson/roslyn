@@ -26,7 +26,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             _containingSymbol = containingSymbol;
         }
 
-        public sealed override bool Equals(Symbol? obj, TypeCompareKind compareKind)
+        public sealed override bool Equals(Symbol obj, TypeCompareKind compareKind)
         {
             if (obj == (object)this)
             {
@@ -64,13 +64,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
             get { return _containingSymbol.ContainingAssembly; }
         }
 
-        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
+        internal override void AddSynthesizedAttributes(PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
         {
             base.AddSynthesizedAttributes(moduleBuilder, ref attributes);
             AddSynthesizedAttributes(this, moduleBuilder, ref attributes);
         }
 
-        internal static void AddSynthesizedAttributes(ParameterSymbol parameter, PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData>? attributes)
+        internal static void AddSynthesizedAttributes(ParameterSymbol parameter, PEModuleBuilder moduleBuilder, ref ArrayBuilder<CSharpAttributeData> attributes)
         {
             var compilation = parameter.DeclaringCompilation;
 

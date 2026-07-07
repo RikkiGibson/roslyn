@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable disable
+
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -64,6 +66,8 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             UnaryOperatorOverloadResolution(operand, result, ref useSiteInfo);
         }
+
+#nullable enable 
 
         public bool UnaryOperatorExtensionOverloadResolutionInSingleScope(
             ArrayBuilder<Symbol> extensionCandidatesInSingleScope,
@@ -296,6 +300,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                 return result;
             }
         }
+
+#nullable disable
 
         // Takes a list of candidates and mutates the list to throw out the ones that are worse than
         // another applicable candidate.
@@ -545,7 +551,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             Debug.Assert(operand != null);
 
             var enumType = operand.Type;
-            if ((object?)enumType == null)
+            if ((object)enumType == null)
             {
                 return;
             }
@@ -576,7 +582,7 @@ namespace Microsoft.CodeAnalysis.CSharp
             Debug.Assert(operand != null);
 
             var pointerType = operand.Type as PointerTypeSymbol;
-            if ((object?)pointerType == null)
+            if ((object)pointerType == null)
             {
                 return null;
             }
@@ -606,7 +612,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         {
             Debug.Assert(operand != null);
 
-            if ((object?)operand.Type == null)
+            if ((object)operand.Type == null)
             {
                 // If the operand has no type -- because it is a null reference or a lambda or a method group --
                 // there is no way we can determine what type to search for user-defined operators.
@@ -645,12 +651,12 @@ namespace Microsoft.CodeAnalysis.CSharp
             UnaryOperatorKind kind,
             bool isChecked,
             string name1,
-            string? name2Opt,
+            string name2Opt,
             BoundExpression operand,
             ArrayBuilder<UnaryOperatorAnalysisResult> results,
             ref CompoundUseSiteInfo<AssemblySymbol> useSiteInfo)
         {
-            TypeSymbol? constrainedToTypeOpt = declaringTypeOrTypeParameter as TypeParameterSymbol;
+            TypeSymbol constrainedToTypeOpt = declaringTypeOrTypeParameter as TypeParameterSymbol;
 
             // Searching for user-defined operators is expensive; let's take an early out if we can.
             if (OperatorFacts.DefinitelyHasNoUserDefinedOperators(declaringTypeOrTypeParameter))
@@ -661,18 +667,18 @@ namespace Microsoft.CodeAnalysis.CSharp
             var operators = ArrayBuilder<UnaryOperatorSignature>.GetInstance();
             bool hadApplicableCandidates = false;
 
-            NamedTypeSymbol? current = declaringTypeOrTypeParameter as NamedTypeSymbol;
-            if ((object?)current == null)
+            NamedTypeSymbol current = declaringTypeOrTypeParameter as NamedTypeSymbol;
+            if ((object)current == null)
             {
                 current = declaringTypeOrTypeParameter.BaseTypeWithDefinitionUseSiteDiagnostics(ref useSiteInfo);
             }
 
-            if ((object?)current == null && declaringTypeOrTypeParameter.IsTypeParameter())
+            if ((object)current == null && declaringTypeOrTypeParameter.IsTypeParameter())
             {
                 current = ((TypeParameterSymbol)declaringTypeOrTypeParameter).EffectiveBaseClass(ref useSiteInfo);
             }
 
-            for (; (object?)current != null; current = current.BaseTypeWithDefinitionUseSiteDiagnostics(ref useSiteInfo))
+            for (; (object)current != null; current = current.BaseTypeWithDefinitionUseSiteDiagnostics(ref useSiteInfo))
             {
                 operators.Clear();
 
@@ -742,6 +748,8 @@ namespace Microsoft.CodeAnalysis.CSharp
             return hadApplicableCandidates;
         }
 
+#nullable enable
+
         internal static void GetStaticUserDefinedUnaryOperatorMethodNames(UnaryOperatorKind kind, bool isChecked, out string name1, out string? name2Opt)
         {
             name1 = OperatorFacts.UnaryOperatorNameFromOperatorKind(kind, isChecked);
@@ -757,7 +765,7 @@ namespace Microsoft.CodeAnalysis.CSharp
         }
 
         private void GetUserDefinedUnaryOperatorsFromType(
-            TypeSymbol? constrainedToTypeOpt,
+            TypeSymbol constrainedToTypeOpt,
             NamedTypeSymbol type,
             UnaryOperatorKind kind,
             string name1,
