@@ -52,9 +52,9 @@
       "directives": 2,
       "toggles": 1,
       "totalLines": 684,
-      "disabledLines": 29,
-      "status": "deferred",
-      "note": "Language names can be null (0xFF NULL-string marker in metadata); proper typing requires propagating ImmutableArray<string?> through ReadLanguagesFromAttribute -> GetSupportedLanguages -> AttributeLanguagesFunc (internal cross-file ripple). Tracked by dotnet/roslyn#53994.",
+      "disabledLines": 0,
+      "status": "done",
+      "note": "Language names can be null (0xFF NULL-string marker in metadata). Rather than threading ImmutableArray<string?> through the whole call chain, kept AttributeLanguagesFunc/GetSupportedLanguages/GetDiagnosticsAnalyzerSupportedLanguages/GetGeneratorSupportedLanguages all non-nullable ImmutableArray<string>, and instead added an explicit null check inside the innermost ReadLanguagesFromAttribute (right where PEModule's string-cracking helpers can produce a null) that throws BadImageFormatException -- already a documented failure mode for this method -- instead of letting a null silently reach a Dictionary<string,...> key lookup several calls up (which previously threw a cryptic unrelated ArgumentNullException). No public API shape change was needed; entire call chain is private/private static except the internal no-arg GetAnalyzerTypeNameMap(). See found-bugs.md for details. CompilerConsumers.slnf verification matches baseline (3 pre-existing EE errors only).",
       "order": 5
     },
     {

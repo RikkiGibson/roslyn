@@ -309,8 +309,6 @@ namespace Microsoft.CodeAnalysis.Diagnostics
             }
         }
 
-        // https://github.com/dotnet/roslyn/issues/53994 tracks re-enabling nullable and fixing this method
-#nullable disable
         private static ImmutableArray<string> ReadLanguagesFromAttribute(ref BlobReader argsReader)
         {
             if (argsReader.Length > 4)
@@ -318,28 +316,51 @@ namespace Microsoft.CodeAnalysis.Diagnostics
                 // Arguments are present--check prologue.
                 if (argsReader.ReadByte() == 1 && argsReader.ReadByte() == 0)
                 {
-                    string firstLanguageName;
+                    string? firstLanguageName;
                     if (!PEModule.CrackStringInAttributeValue(out firstLanguageName, ref argsReader))
                     {
                         return [];
                     }
 
-                    ImmutableArray<string> additionalLanguageNames;
+                    ImmutableArray<string?> additionalLanguageNames;
                     if (PEModule.CrackStringArrayInAttributeValue(out additionalLanguageNames, ref argsReader))
                     {
+                        // A null language name (the metadata's 0xFF NULL-string marker) is malformed input for
+                        // this attribute's language-name arguments. Previously this null flowed unchecked into a
+                        // Dictionary<string, ...> key lookup/insert several calls up the stack, producing a
+                        // cryptic ArgumentNullException ("Parameter 'key'") with no indication of the real cause.
+                        // Fail fast here instead, with a clear, documented exception (GetAnalyzerTypeNameMap
+                        // already documents BadImageFormatException as an expected failure for invalid metadata),
+                        // so every caller of this method can keep assuming non-null language names.
+                        if (firstLanguageName is null)
+                        {
+                            throw new BadImageFormatException("Attribute has a null language name.");
+                        }
+
                         if (additionalLanguageNames.Length == 0)
                         {
                             return [firstLanguageName];
                         }
 
-                        return additionalLanguageNames.Insert(0, firstLanguageName);
+                        var builder = ArrayBuilder<string>.GetInstance(additionalLanguageNames.Length + 1);
+                        builder.Add(firstLanguageName);
+                        foreach (var additionalLanguageName in additionalLanguageNames)
+                        {
+                            if (additionalLanguageName is null)
+                            {
+                                builder.Free();
+                                throw new BadImageFormatException("Attribute has a null language name.");
+                            }
+
+                            builder.Add(additionalLanguageName);
+                        }
+
+                        return builder.ToImmutableAndFree();
                     }
                 }
             }
             return [];
         }
-
-#nullable enable
 
         private static ISourceGenerator? CoerceGeneratorType(object? generator)
         {

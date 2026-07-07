@@ -92,6 +92,73 @@ namespace Microsoft.CodeAnalysis.UnitTests
             Assert.False(refA.Equals(new TestAnalyzerReference(path2)));
         }
 
+        [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/53994")]
+        public void TestNullLanguageNameThrowsBadImageFormatException()
+        {
+            string source = @"
+using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
+
+[DiagnosticAnalyzer(null)]
+public class NullLanguageAnalyzer : DiagnosticAnalyzer
+{
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray<DiagnosticDescriptor>.Empty;
+    public override void Initialize(AnalysisContext context) { }
+}
+";
+            var directory = Temp.CreateDirectory();
+            var dllPath = Path.Combine(directory.Path, "NullLanguageAnalyzer.dll");
+            var compilation = CSharpCompilation.Create(
+                "NullLanguageAnalyzer",
+                new[] { CSharpTestSource.Parse(source) },
+                TargetFrameworkUtil.GetReferences(TargetFramework.Standard, new[] { MetadataReference.CreateFromAssemblyInternal(typeof(DiagnosticAnalyzer).Assembly), MetadataReference.CreateFromAssemblyInternal(typeof(ImmutableArray<int>).Assembly) }),
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            compilation.VerifyDiagnostics();
+            var result = compilation.Emit(dllPath);
+            Assert.True(result.Success);
+
+            // A null language name (encoded via the metadata 0xFF NULL-string marker) previously caused a
+            // cryptic ArgumentNullException from Dictionary<string, ...>; it should now surface as a clear
+            // BadImageFormatException, which GetAnalyzerTypeNameMap already documents as a possible failure.
+            AnalyzerFileReference reference = CreateAnalyzerFileReference(dllPath);
+            var ex = Assert.Throws<BadImageFormatException>(() => reference.GetAnalyzerTypeNameMap());
+            Assert.Contains("language name", ex.Message);
+        }
+
+        [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/53994")]
+        public void TestNullAdditionalLanguageNameThrowsBadImageFormatException()
+        {
+            string source = @"
+using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
+
+[DiagnosticAnalyzer(LanguageNames.CSharp, LanguageNames.VisualBasic, null)]
+public class NullAdditionalLanguageAnalyzer : DiagnosticAnalyzer
+{
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray<DiagnosticDescriptor>.Empty;
+    public override void Initialize(AnalysisContext context) { }
+}
+";
+            var directory = Temp.CreateDirectory();
+            var dllPath = Path.Combine(directory.Path, "NullAdditionalLanguageAnalyzer.dll");
+            var compilation = CSharpCompilation.Create(
+                "NullAdditionalLanguageAnalyzer",
+                new[] { CSharpTestSource.Parse(source) },
+                TargetFrameworkUtil.GetReferences(TargetFramework.Standard, new[] { MetadataReference.CreateFromAssemblyInternal(typeof(DiagnosticAnalyzer).Assembly), MetadataReference.CreateFromAssemblyInternal(typeof(ImmutableArray<int>).Assembly) }),
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            compilation.VerifyDiagnostics();
+            var result = compilation.Emit(dllPath);
+            Assert.True(result.Success);
+
+            // Same as TestNullLanguageNameThrowsBadImageFormatException, but the null shows up in the
+            // "additional languages" params array instead of the first language name argument.
+            AnalyzerFileReference reference = CreateAnalyzerFileReference(dllPath);
+            var ex = Assert.Throws<BadImageFormatException>(() => reference.GetAnalyzerTypeNameMap());
+            Assert.Contains("language name", ex.Message);
+        }
+
         [Fact]
         public void TestMetadataParse()
         {
