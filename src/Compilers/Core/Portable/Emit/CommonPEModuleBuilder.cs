@@ -456,15 +456,10 @@ namespace Microsoft.CodeAnalysis.Emit
             return Translate(CommonCorLibrary, context.Diagnostics);
         }
 
-#nullable disable
-        // TODO2: Cci.IModuleReference.GetContainingAssembly is declared non-null in the nullable-oblivious
-        // Cci layer, but this legitimately returns null for netmodules (callers null-check the result).
-        // See nullable-migration/found-bugs.md.
-        public Cci.IAssemblyReference GetContainingAssembly(EmitContext context)
+        public Cci.IAssemblyReference? GetContainingAssembly(EmitContext context)
         {
             return OutputKind == OutputKind.NetModule ? null : (Cci.IAssemblyReference)this;
         }
-#nullable enable
 
         /// <summary>
         /// Returns copy of User Strings referenced from the IL in the module.

@@ -1084,7 +1084,6 @@ namespace Microsoft.CodeAnalysis
         }
 #nullable enable
 
-
         internal bool HasRequiredAttributeAttribute(EntityHandle token)
         {
             return FindTargetAttribute(token, AttributeDescription.RequiredAttributeAttribute).HasValue;
@@ -2108,7 +2107,6 @@ namespace Microsoft.CodeAnalysis
             return false;
         }
 #nullable enable
-
 
         internal bool IsNoPiaLocalType(
             TypeDefinitionHandle typeDef,

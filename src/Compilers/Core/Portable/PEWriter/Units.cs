@@ -74,7 +74,7 @@ namespace Microsoft.Cci
         /// <summary>
         /// The Assembly that contains this module. May be null if the module is not part of an assembly.
         /// </summary>
-        IAssemblyReference GetContainingAssembly(EmitContext context);
+        IAssemblyReference? GetContainingAssembly(EmitContext context);
     }
 
     /// <summary>

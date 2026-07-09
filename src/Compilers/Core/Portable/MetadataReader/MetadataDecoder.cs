@@ -494,9 +494,9 @@ namespace Microsoft.CodeAnalysis
             // This is a cache similar to one used by native compiler in MetaImport::GetTypeOfTypeRef.
             // TypeRef tokens are unique only within a Module
             ConcurrentDictionary<TypeReferenceHandle, TypeSymbol> cache = GetTypeRefHandleToTypeMap();
-            TypeSymbol result;
+            TypeSymbol? result;
 
-            if (cache != null && cache.TryGetValue(typeRef, out result!))
+            if (cache != null && cache.TryGetValue(typeRef, out result))
             {
                 isNoPiaLocalType = false; // We do not cache otherwise.
                 return result;
@@ -612,9 +612,9 @@ namespace Microsoft.CodeAnalysis
 
                 ConcurrentDictionary<TypeDefinitionHandle, TypeSymbol> cache = GetTypeHandleToTypeMap();
 
-                TypeSymbol result;
+                TypeSymbol? result;
 
-                if (cache != null && cache.TryGetValue(typeDef, out result!))
+                if (cache != null && cache.TryGetValue(typeDef, out result))
                 {
                     if (!Module.IsNestedTypeDefOrThrow(typeDef) && Module.IsNoPiaLocalType(typeDef))
                     {
@@ -1358,7 +1358,6 @@ tryAgain:
                         throw new UnsupportedSignatureContent();
                     }
 
-                    Debug.Assert(enumTypeName is not null);
                     type = GetTypeSymbolForSerializedType(enumTypeName);
                     var underlyingType = GetEnumUnderlyingType(type);
                     if ((object)underlyingType == null)
@@ -1573,16 +1572,10 @@ tryAgain:
                 throw new UnsupportedSignatureContent();
             }
 
-            TypedConstant value;
-            if (typeCode == SerializationTypeCode.SZArray)
-            {
-                Debug.Assert(elementType is not null);
-                value = DecodeCustomAttributeElementArrayOrThrow(ref argReader, elementTypeCode, elementType, type);
-            }
-            else
-            {
-                value = DecodeCustomAttributeElementOrThrow(ref argReader, typeCode, type);
-            }
+            Debug.Assert(typeCode != SerializationTypeCode.SZArray || elementType != null);
+            TypedConstant value = typeCode == SerializationTypeCode.SZArray
+                ? DecodeCustomAttributeElementArrayOrThrow(ref argReader, elementTypeCode, elementType!, type)
+                : DecodeCustomAttributeElementOrThrow(ref argReader, typeCode, type);
 
             return (new KeyValuePair<string, TypedConstant>(name!, value), kind == CustomAttributeNamedArgumentKind.Property, typeCode, elementTypeCode);
         }
