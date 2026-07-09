@@ -262,7 +262,8 @@ namespace Microsoft.CodeAnalysis.Diagnostics
             ImmutableArray<string> result = [];
             foreach (CustomAttributeHandle customAttrHandle in typeDef.GetCustomAttributes())
             {
-                if (peModule.IsTargetAttribute(customAttrHandle, attributeType.Namespace!, attributeType.Name, ctor: out _))
+                Debug.Assert(attributeType.Namespace is not null); // attributeType is a type we control such as DiagnosticAnalyzerAttribute
+                if (peModule.IsTargetAttribute(customAttrHandle, attributeType.Namespace, attributeType.Name, ctor: out _))
                 {
                     if (languagesFunc(peModule, customAttrHandle) is { } attributeSupportedLanguages)
                     {
