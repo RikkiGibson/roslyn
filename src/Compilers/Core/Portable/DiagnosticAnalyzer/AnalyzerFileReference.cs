@@ -310,7 +310,7 @@ namespace Microsoft.CodeAnalysis.Diagnostics
         }
 
         // https://github.com/dotnet/roslyn/issues/53994 tracks re-enabling nullable and fixing this method
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         private static ImmutableArray<string> ReadLanguagesFromAttribute(ref BlobReader argsReader)
         {
             if (argsReader.Length > 4)
@@ -339,7 +339,7 @@ namespace Microsoft.CodeAnalysis.Diagnostics
             return [];
         }
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         private static ISourceGenerator? CoerceGeneratorType(object? generator)
         {

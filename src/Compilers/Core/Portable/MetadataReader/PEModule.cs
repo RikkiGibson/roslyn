@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
 using System;
 using System.Collections.Concurrent;
@@ -95,7 +95,7 @@ namespace Microsoft.CodeAnalysis
         // algorithm.
         private readonly CryptographicHashProvider _hashesOpt;
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         private delegate bool AttributeValueExtractor<T>(out T value, ref BlobReader sigReader);
         private static readonly AttributeValueExtractor<string?> s_attributeStringValueExtractor = CrackStringInAttributeValue;
         private static readonly AttributeValueExtractor<(int, int)> s_attributeIntAndIntValueExtractor = CrackIntAndIntInAttributeValue;
@@ -138,7 +138,7 @@ namespace Microsoft.CodeAnalysis
             public readonly bool Sense;
             public readonly string? String;
         }
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         // 'ignoreAssemblyRefs' is used by the EE only, when debugging
         // .NET Native, where the corlib may have assembly references
@@ -646,7 +646,7 @@ namespace Microsoft.CodeAnalysis
             }
         }
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         /// <summary>
         /// The function groups types defined in the module by their fully-qualified namespace name.
@@ -846,7 +846,7 @@ namespace Microsoft.CodeAnalysis
             }
         }
 
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         private IdentifierCollection ComputeTypeNameCollection()
         {
@@ -1291,7 +1291,7 @@ namespace Microsoft.CodeAnalysis
             return null;
         }
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         /// <summary>
         /// Indicates whether the first attribute should be prioritized over the second one.
         /// Same order of priority as
@@ -1511,7 +1511,7 @@ namespace Microsoft.CodeAnalysis
 
             return (default, true);
         }
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         internal bool HasMaybeNullWhenOrNotNullWhenOrDoesNotReturnIfAttribute(EntityHandle token, AttributeDescription description, out bool when)
         {
@@ -1794,7 +1794,7 @@ namespace Microsoft.CodeAnalysis
             return result;
         }
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         private ObsoleteAttributeData? TryExtractObsoleteDataFromAttribute(AttributeInfo attributeInfo, IAttributeNamedArgumentDecoder decoder)
         {
             Debug.Assert(attributeInfo.HasValue);
@@ -1860,7 +1860,7 @@ namespace Microsoft.CodeAnalysis
             blobReader = default;
             return false;
         }
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         private ObsoleteAttributeData TryExtractDeprecatedDataFromAttribute(AttributeInfo attributeInfo)
         {
@@ -1980,7 +1980,7 @@ namespace Microsoft.CodeAnalysis
             return false;
         }
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         internal bool TryExtractStringValueFromAttribute(CustomAttributeHandle handle, out string? value)
         {
             return TryExtractValueFromAttribute(handle, out value, s_attributeStringValueExtractor);
@@ -2072,7 +2072,7 @@ namespace Microsoft.CodeAnalysis
             value = default(T);
             return false;
         }
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         internal bool HasStateMachineAttribute(MethodDefinitionHandle handle, out string stateMachineTypeName)
             => HasStringValuedAttribute(handle, AttributeDescription.AsyncStateMachineAttribute, out stateMachineTypeName) ||
@@ -2177,7 +2177,7 @@ namespace Microsoft.CodeAnalysis
             }
         }
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         /// <summary>
         /// Gets the well-known optional named properties on ObsoleteAttribute, if present.
         /// Both 'diagnosticId' and 'urlFormat' may be present, or only one, or neither.
@@ -2505,7 +2505,7 @@ namespace Microsoft.CodeAnalysis
             value = default(ImmutableArray<byte>);
             return false;
         }
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         internal readonly struct AttributeInfo
         {
@@ -2525,7 +2525,7 @@ namespace Microsoft.CodeAnalysis
             }
         }
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         internal List<AttributeInfo>? FindTargetAttributes(EntityHandle hasAttribute, AttributeDescription description)
         {
             List<AttributeInfo>? result = null;
@@ -2552,7 +2552,7 @@ namespace Microsoft.CodeAnalysis
 
             return result;
         }
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         internal AttributeInfo FindTargetAttribute(EntityHandle hasAttribute, AttributeDescription description)
         {
@@ -3849,7 +3849,7 @@ namespace Microsoft.CodeAnalysis
             return _lazyForwardedTypesToAssemblyIndexMap;
         }
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         [MemberNotNull(nameof(_lazyForwardedTypesToAssemblyIndexMap))]
         private void EnsureForwardTypeToAssemblyMap()
         {
@@ -3934,7 +3934,7 @@ namespace Microsoft.CodeAnalysis
                 }
             }
         }
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         internal IdentifierCollection TypeNames
         {

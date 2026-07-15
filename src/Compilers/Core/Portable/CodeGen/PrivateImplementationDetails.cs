@@ -445,9 +445,9 @@ namespace Microsoft.CodeAnalysis.CodeGen
         internal bool TryAddSynthesizedMethod(Cci.IMethodDefinition method)
         {
             Debug.Assert(!IsFrozen);
-#nullable disable // Can 'method.Name' be null? https://github.com/dotnet/roslyn/issues/39166
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             return _synthesizedMethods.TryAdd(method.Name, method);
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         }
 
         public override IEnumerable<Cci.IFieldDefinition> GetFields(EmitContext context)

@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
 using System;
 using System.Collections.Generic;
@@ -55,7 +55,7 @@ namespace Microsoft.CodeAnalysis
         /// Creates and loads the rule set from a file
         /// </summary>
         /// <param name="filePath">The file path to load the rule set</param>
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         public static RuleSet LoadFromFile(string filePath)
         {
             // First read the file without doing any validation
@@ -139,7 +139,7 @@ namespace Microsoft.CodeAnalysis
 
             return new RuleSet(filePath, generalOption, specificOptions.ToImmutable(), includes.ToImmutable());
         }
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         /// <summary>
         /// Load the rules from the XML node

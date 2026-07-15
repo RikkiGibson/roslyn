@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
 using System;
 using System.Collections.Concurrent;
@@ -102,7 +102,7 @@ namespace Microsoft.CodeAnalysis
         public bool IsPinned => (Constraints & LocalSlotConstraints.Pinned) != 0;
     }
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
     internal interface IAttributeNamedArgumentDecoder
     {
         (KeyValuePair<string, TypedConstant> nameValuePair, bool isProperty, SerializationTypeCode typeCode, SerializationTypeCode elementTypeCode) DecodeCustomAttributeNamedArgumentOrThrow(ref BlobReader argReader);
@@ -116,7 +116,7 @@ namespace Microsoft.CodeAnalysis
         where MethodSymbol : class, Symbol, IMethodSymbolInternal
         where FieldSymbol : class, Symbol, IFieldSymbolInternal
         where Symbol : class, ISymbolInternal
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
     {
         public readonly PEModule Module;
 
@@ -1678,7 +1678,7 @@ tryAgain:
             return false;
         }
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         internal bool GetCustomAttribute(CustomAttributeHandle handle, [NotNullWhen(true)] out TypeSymbol? attributeClass, [NotNullWhen(true)] out MethodSymbol? attributeCtor)
         {
             EntityHandle attributeType;
@@ -1704,7 +1704,7 @@ tryAgain:
             attributeCtor = GetMethodSymbolForMethodDefOrMemberRef(ctor, attributeClass);
             return true;
         }
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         internal bool GetCustomAttributeWellKnownType(CustomAttributeHandle handle, out WellKnownType wellKnownAttribute)
         {

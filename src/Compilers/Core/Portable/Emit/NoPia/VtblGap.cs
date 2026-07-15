@@ -110,7 +110,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
         {
             get { return ImmutableArray<Cci.IParameterDefinition>.Empty; }
         }
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         Cci.IPlatformInvokeInformation Cci.IMethodDefinition.PlatformInvokeData
         {
             get { return null; }

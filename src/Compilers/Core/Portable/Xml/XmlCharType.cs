@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
 // turns on tables that are stored as literals in this file
 // to generate new literals undef this constant and examine 

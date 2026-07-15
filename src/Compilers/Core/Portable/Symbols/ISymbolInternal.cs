@@ -42,9 +42,9 @@ namespace Microsoft.CodeAnalysis.Symbols
         /// </summary>
         Cci.TypeMemberVisibility MetadataVisibility { get; }
 
-#nullable disable // Skipped for now https://github.com/dotnet/roslyn/issues/39166
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         Compilation DeclaringCompilation { get; }
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         /// <summary>
         /// Allows a symbol to support comparisons that involve child type symbols

@@ -189,9 +189,9 @@ namespace Microsoft.CodeAnalysis
                 if (this.HasUniqueSymbol)
                 {
                     arities = null;
-#nullable disable // Can '_uniqueSymbolOrArities' be null? https://github.com/dotnet/roslyn/issues/39166
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                     uniqueSymbol = (TSymbol)_uniqueSymbolOrArities;
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 }
                 else
                 {

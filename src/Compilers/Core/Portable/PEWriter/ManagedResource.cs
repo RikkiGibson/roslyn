@@ -43,9 +43,9 @@ namespace Microsoft.Cci
             {
                 try
                 {
-#nullable disable // Can '_streamProvider' be null? https://github.com/dotnet/roslyn/issues/39166
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                     using (Stream stream = _streamProvider())
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                     {
                         if (stream == null)
                         {

@@ -149,7 +149,7 @@ namespace Microsoft.CodeAnalysis.Emit
             return _encDeletedMemberDefinitions ?? SpecializedCollections.EmptyReadOnlyDictionary<Cci.ITypeDefinition, ArrayBuilder<Cci.ITypeDefinitionMember>>();
         }
 
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         /// <summary>
         /// If this module represents an assembly, name of the assembly used in AssemblyDef table. Otherwise name of the module same as <see cref="ModuleName"/>.
@@ -185,9 +185,9 @@ namespace Microsoft.CodeAnalysis.Emit
         public abstract IEnumerable<Cci.ICustomAttribute> GetSourceAssemblyAttributes(bool isRefAssembly);
         public abstract IEnumerable<Cci.SecurityAttribute> GetSourceAssemblySecurityAttributes();
         public abstract IEnumerable<Cci.ICustomAttribute> GetSourceModuleAttributes();
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         internal abstract Cci.ICustomAttribute? SynthesizeAttribute(WellKnownMember attributeConstructor);
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         public abstract Cci.IMethodReference GetInitArrayHelper();
 
         public abstract Cci.IFieldReference GetFieldForData(ImmutableArray<byte> data, ushort alignment, SyntaxNode syntaxNode, DiagnosticBag diagnostics);
@@ -235,7 +235,7 @@ namespace Microsoft.CodeAnalysis.Emit
         public abstract Cci.ITypeReference GetPlatformType(Cci.PlatformType platformType, EmitContext context);
         public abstract bool IsPlatformType(Cci.ITypeReference typeRef, Cci.PlatformType platformType);
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         public ArrayMethods ArrayMethods
         {
             get
@@ -374,7 +374,7 @@ namespace Microsoft.CodeAnalysis.Emit
         /// <returns></returns>
         public abstract IEnumerable<(Cci.ITypeDefinition, ImmutableArray<Cci.DebugSourceDocument>)> GetTypeToDebugDocumentMap(EmitContext context);
 
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         bool Cci.IDefinition.IsEncDeleted => false;
 
@@ -409,7 +409,7 @@ namespace Microsoft.CodeAnalysis.Emit
             // a healthy amount of room based on compiling Roslyn.
             => (int)(_methodBodyMap.Count * 1.5);
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         internal Cci.IMethodBody? GetMethodBody(IMethodSymbolInternal methodSymbol)
         {
             Debug.Assert(methodSymbol.ContainingModule == CommonSourceModule);
@@ -425,7 +425,7 @@ namespace Microsoft.CodeAnalysis.Emit
 
             return null;
         }
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         public void SetMethodBody(IMethodSymbolInternal methodSymbol, Cci.IMethodBody body)
         {
@@ -1132,7 +1132,7 @@ namespace Microsoft.CodeAnalysis.Emit
 
         #region Private Implementation Details Type
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         internal PrivateImplementationDetails GetPrivateImplClass(TSyntaxNode? syntaxNodeOpt, DiagnosticBag diagnostics)
         {
@@ -1178,7 +1178,7 @@ namespace Microsoft.CodeAnalysis.Emit
             return _lazyPrivateImplementationDetails;
         }
 
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         #endregion
 

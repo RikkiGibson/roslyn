@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -93,7 +93,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
 
                 return null;
             }
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             public bool HasBody
                 => Cci.DefaultImplementations.HasBody(this);
 
@@ -109,7 +109,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
 
                 return null;
             }
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             private sealed class EmptyBody : Cci.IMethodBody
             {
                 private readonly CommonEmbeddedMethod _method;

@@ -65,7 +65,7 @@ internal abstract class MethodDefinitionBase : IMethodDefinition, IMethodBody
 
     public virtual ImmutableArray<IParameterDefinition> Parameters => ImmutableArray<IParameterDefinition>.Empty;
 
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
     public IPlatformInvokeInformation PlatformInvokeData => null;
 
     public bool RequiresSecurityObject => false;

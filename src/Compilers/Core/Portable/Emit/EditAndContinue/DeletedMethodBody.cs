@@ -17,7 +17,7 @@ namespace Microsoft.CodeAnalysis.Emit.EditAndContinue
 
         public ImmutableArray<byte> IL { get; } = il;
 
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         public ImmutableArray<Cci.ExceptionHandlerRegion> ExceptionRegions => ImmutableArray<Cci.ExceptionHandlerRegion>.Empty;
 
@@ -63,7 +63,7 @@ namespace Microsoft.CodeAnalysis.Emit.EditAndContinue
 
         public bool IsPrimaryConstructor => false;
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         public static ImmutableArray<byte> GetIL(EmitContext context, RuntimeRudeEdit? rudeEdit, bool isLambdaOrLocalFunction)
         {
             var hotReloadExceptionCtorDef = context.Module.GetOrCreateHotReloadExceptionConstructorDefinition();

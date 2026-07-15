@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
 // We're not actually doing formatter-based serialization in this file.
 // We're simply propagating along the attributes of symbols we are emitting to metadata.
@@ -1690,7 +1690,7 @@ namespace Microsoft.Cci
             };
         }
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         public void WriteMetadataAndIL(PdbWriter? nativePdbWriterOpt, Stream metadataStream, Stream ilStream, Stream? portablePdbStreamOpt, out MetadataSizes metadataSizes)
         {
             Debug.Assert(nativePdbWriterOpt == null ^ portablePdbStreamOpt == null);
@@ -1864,7 +1864,7 @@ namespace Microsoft.Cci
             PopulateTypeSystemTables(methodBodyOffsets, mappedFieldDataStartOffset, out mappedFieldDataBuilder, out managedResourceDataBuilder, dynamicAnalysisData, out mvidFixup);
             dynamicAnalysisData?.Free();
         }
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         public virtual void PopulateEncTables(ImmutableArray<int> typeSystemRowCounts)
         {
@@ -1923,7 +1923,7 @@ namespace Microsoft.Cci
             }).ToImmutableArray();
         }
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         private void PopulateTypeSystemTables(int[] methodBodyOffsets, int mappedFieldDataStartOffset, out PooledBlobBuilder? mappedFieldDataWriter, out PooledBlobBuilder? resourceWriter, BlobBuilder? dynamicAnalysisData, out Blob mvidFixup)
         {
             var sortedGenericParameters = GetSortedGenericParameters();
@@ -1964,7 +1964,7 @@ namespace Microsoft.Cci
             // This table is populated after the others because it depends on the order of the entries of the generic parameter table.
             this.PopulateCustomAttributeTableRows(sortedGenericParameters);
         }
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         private void PopulateAssemblyRefTableRows()
         {
@@ -2339,7 +2339,7 @@ namespace Microsoft.Cci
             }
         }
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         private void PopulateFieldRvaTableRows(int mappedFieldDataStartOffset, out PooledBlobBuilder? mappedFieldDataBuilder)
         {
             mappedFieldDataBuilder = null;
@@ -2377,7 +2377,7 @@ namespace Microsoft.Cci
                     offset: offset);
             }
         }
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         private void PopulateFieldTableRows()
         {
@@ -2523,7 +2523,7 @@ namespace Microsoft.Cci
             }
         }
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         private void PopulateManifestResourceTableRows(out PooledBlobBuilder? resourceDataWriter, BlobBuilder? dynamicAnalysisData)
         {
             resourceDataWriter = null;
@@ -2596,7 +2596,7 @@ namespace Microsoft.Cci
                 return (uint)result;
             }
         }
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         private void PopulateMemberRefTableRows()
         {

@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
 using System;
 using System.Collections.Generic;
@@ -62,14 +62,14 @@ namespace Microsoft.Cci
             _blobHeapSize = 1;
         }
 
-#nullable enable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         internal void SerializeMethodCodeCoverageData(IMethodBody? body)
         {
             var spans = body?.CodeCoverageSpans ?? ImmutableArray<SourceSpan>.Empty;
             BlobHandle spanBlob = SerializeSpans(spans, _documentIndex);
             _methodTable.Add(new MethodRow { Spans = spanBlob });
         }
-#nullable disable
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 
         #region Heaps
 
