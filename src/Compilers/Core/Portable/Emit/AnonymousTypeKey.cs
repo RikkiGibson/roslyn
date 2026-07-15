@@ -46,9 +46,9 @@ namespace Microsoft.CodeAnalysis.Emit
                    (IgnoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal).Equals(Name, other.Name);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            return Equals((AnonymousTypeKeyField)obj);
+            return Equals((AnonymousTypeKeyField)obj!);
         }
 
         public override int GetHashCode()
@@ -76,9 +76,9 @@ namespace Microsoft.CodeAnalysis.Emit
             return (this.IsDelegate == other.IsDelegate) && this.Fields.SequenceEqual(other.Fields);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            return this.Equals((AnonymousTypeKey)obj);
+            return this.Equals((AnonymousTypeKey)obj!);
         }
 
         public override int GetHashCode()

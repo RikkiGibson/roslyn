@@ -156,8 +156,8 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
                 ImmutableArray<EncHoistedLocalInfo> Cci.IMethodBody.StateMachineHoistedLocalSlots =>
                     default(ImmutableArray<EncHoistedLocalInfo>);
 
-                ImmutableArray<Cci.ITypeReference> Cci.IMethodBody.StateMachineAwaiterSlots =>
-                    default(ImmutableArray<Cci.ITypeReference>);
+                ImmutableArray<Cci.ITypeReference?> Cci.IMethodBody.StateMachineAwaiterSlots =>
+                    default(ImmutableArray<Cci.ITypeReference?>);
 
                 ImmutableArray<EncClosureInfo> Cci.IMethodBody.ClosureDebugInfo =>
                     default(ImmutableArray<EncClosureInfo>);

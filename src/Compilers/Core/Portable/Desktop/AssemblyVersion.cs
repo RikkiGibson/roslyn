@@ -60,7 +60,7 @@ namespace Microsoft.CodeAnalysis
             return ToInteger() == other.ToInteger();
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is AssemblyVersion && Equals((AssemblyVersion)obj);
         }

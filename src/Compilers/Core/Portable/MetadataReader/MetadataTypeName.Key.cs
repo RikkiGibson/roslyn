@@ -89,7 +89,7 @@ namespace Microsoft.CodeAnalysis
                 return false;
             }
 
-            public override bool Equals(object obj)
+            public override bool Equals(object? obj)
             {
                 return obj is Key && this.Equals((Key)obj);
             }

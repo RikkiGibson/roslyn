@@ -29,7 +29,7 @@ namespace Microsoft.CodeAnalysis.Emit.EditAndContinue
 
         public Cci.IMethodDefinition MethodDefinition => _methodDef;
 
-        public StateMachineMoveNextBodyDebugInfo MoveNextBodyInfo => null;
+        public StateMachineMoveNextBodyDebugInfo? MoveNextBodyInfo => null;
 
         public ushort MaxStack => 8;
 
@@ -39,17 +39,17 @@ namespace Microsoft.CodeAnalysis.Emit.EditAndContinue
 
         public ImmutableArray<Cci.LocalScope> LocalScopes => ImmutableArray<Cci.LocalScope>.Empty;
 
-        public Cci.IImportScope ImportScope => null;
+        public Cci.IImportScope? ImportScope => null;
 
         public DebugId MethodId => default;
 
         public ImmutableArray<StateMachineHoistedLocalScope> StateMachineHoistedLocalScopes => default;
 
-        public string StateMachineTypeName => null;
+        public string? StateMachineTypeName => null;
 
         public ImmutableArray<EncHoistedLocalInfo> StateMachineHoistedLocalSlots => default;
 
-        public ImmutableArray<Cci.ITypeReference> StateMachineAwaiterSlots => default;
+        public ImmutableArray<Cci.ITypeReference?> StateMachineAwaiterSlots => default;
 
         public ImmutableArray<EncClosureInfo> ClosureDebugInfo => ImmutableArray<EncClosureInfo>.Empty;
 

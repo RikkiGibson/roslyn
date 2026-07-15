@@ -23,7 +23,7 @@ namespace Microsoft.CodeAnalysis.CodeGen
         {
             private readonly LocalScopeInfo _rootScope;
             private readonly Stack<ScopeInfo> _scopes;
-            private ExceptionHandlerScope _enclosingExceptionHandler;
+            private ExceptionHandlerScope? _enclosingExceptionHandler;
 
             internal LocalScopeManager()
             {
@@ -34,7 +34,7 @@ namespace Microsoft.CodeAnalysis.CodeGen
 
             private ScopeInfo CurrentScope => _scopes.Peek();
 
-            internal ScopeInfo OpenScope(ScopeType scopeType, Cci.ITypeReference exceptionType)
+            internal ScopeInfo OpenScope(ScopeType scopeType, Cci.ITypeReference? exceptionType)
             {
                 var scope = CurrentScope.OpenScope(scopeType, exceptionType, _enclosingExceptionHandler);
                 _scopes.Push(scope);
@@ -71,9 +71,9 @@ namespace Microsoft.CodeAnalysis.CodeGen
                 Debug.Assert(_enclosingExceptionHandler == GetEnclosingExceptionHandler());
             }
 
-            internal ExceptionHandlerScope EnclosingExceptionHandler => _enclosingExceptionHandler;
+            internal ExceptionHandlerScope? EnclosingExceptionHandler => _enclosingExceptionHandler;
 
-            private ExceptionHandlerScope GetEnclosingExceptionHandler()
+            private ExceptionHandlerScope? GetEnclosingExceptionHandler()
             {
                 foreach (var scope in _scopes)
                 {
@@ -202,7 +202,7 @@ namespace Microsoft.CodeAnalysis.CodeGen
             public abstract ScopeType Type { get; }
 
             public virtual ScopeInfo OpenScope(ScopeType scopeType,
-                Microsoft.Cci.ITypeReference exceptionType,
+                Microsoft.Cci.ITypeReference? exceptionType,
                 ExceptionHandlerScope currentHandler)
             {
                 if (scopeType == ScopeType.TryCatchFinally)
@@ -311,20 +311,20 @@ namespace Microsoft.CodeAnalysis.CodeGen
         /// </summary>
         internal class LocalScopeInfo : ScopeInfo
         {
-            private ImmutableArray<LocalDefinition>.Builder _localVariables;
-            private ImmutableArray<LocalConstantDefinition>.Builder _localConstants;
-            private ImmutableArray<int>.Builder _stateMachineUserHoistedLocalSlotIndices;
+            private ImmutableArray<LocalDefinition>.Builder? _localVariables;
+            private ImmutableArray<LocalConstantDefinition>.Builder? _localConstants;
+            private ImmutableArray<int>.Builder? _stateMachineUserHoistedLocalSlotIndices;
 
             // Nested scopes and blocks are not relevant for PDB. 
             // We need these only to figure scope bounds.
-            private ImmutableArray<ScopeInfo>.Builder _nestedScopes;
-            protected ImmutableArray<BasicBlock>.Builder Blocks;
+            private ImmutableArray<ScopeInfo>.Builder? _nestedScopes;
+            protected ImmutableArray<BasicBlock>.Builder? Blocks;
 
             public override ScopeType Type => ScopeType.Variable;
 
             public override ScopeInfo OpenScope(
                 ScopeType scopeType,
-                Cci.ITypeReference exceptionType,
+                Cci.ITypeReference? exceptionType,
                 ExceptionHandlerScope currentExceptionHandler)
             {
                 var scope = base.OpenScope(scopeType, exceptionType, currentExceptionHandler);
@@ -545,18 +545,18 @@ namespace Microsoft.CodeAnalysis.CodeGen
         {
             private readonly ExceptionHandlerContainerScope _containingScope;
             private readonly ScopeType _type;
-            private readonly Microsoft.Cci.ITypeReference _exceptionType;
+            private readonly Microsoft.Cci.ITypeReference? _exceptionType;
 
-            private BasicBlock _lastFilterConditionBlock;
+            private BasicBlock? _lastFilterConditionBlock;
 
             // branches may become "blocked by finally" if finally does not terminate (throws or contains infinite loop)
             // we cannot guarantee that the original label will be emitted (it might be unreachable).
             // on the other hand, it does not matter what blocked branches target as long as it is still blocked by same finally
             // so we provide this "special" block that is located right after finally that any blocked branch can safely target
             // We do guarantee that special block will be emitted as long as something uses it as a target of a branch.
-            private object _blockedByFinallyDestination;
+            private object? _blockedByFinallyDestination;
 
-            public ExceptionHandlerScope(ExceptionHandlerContainerScope containingScope, ScopeType type, Microsoft.Cci.ITypeReference exceptionType)
+            public ExceptionHandlerScope(ExceptionHandlerContainerScope containingScope, ScopeType type, Microsoft.Cci.ITypeReference? exceptionType)
             {
                 Debug.Assert((type == ScopeType.Try) || (type == ScopeType.Catch) || (type == ScopeType.Filter) || (type == ScopeType.Finally) || (type == ScopeType.Fault));
                 Debug.Assert((type == ScopeType.Catch) == (exceptionType != null));
@@ -570,7 +570,7 @@ namespace Microsoft.CodeAnalysis.CodeGen
 
             public override ScopeType Type => _type;
 
-            public Microsoft.Cci.ITypeReference ExceptionType => _exceptionType;
+            public Microsoft.Cci.ITypeReference? ExceptionType => _exceptionType;
 
             // pessimistically sets destination for blocked branches.
             // called when finally block is inserted in the outer TryFinally scope.
@@ -584,7 +584,7 @@ namespace Microsoft.CodeAnalysis.CodeGen
             // if current finally does not terminate, this is where 
             // branches going through it should be retargeted.
             // Otherwise returns null.
-            public object BlockedByFinallyDestination => _blockedByFinallyDestination;
+            public object? BlockedByFinallyDestination => _blockedByFinallyDestination;
 
             // Called when finally is determined to be non-blocking
             public void UnblockFinally()
@@ -603,7 +603,7 @@ namespace Microsoft.CodeAnalysis.CodeGen
                 _lastFilterConditionBlock = builder.FinishFilterCondition();
             }
 
-            public BasicBlock LastFilterConditionBlock => _lastFilterConditionBlock;
+            public BasicBlock? LastFilterConditionBlock => _lastFilterConditionBlock;
 
             public override void ClosingScope(ILBuilder builder)
             {
@@ -693,7 +693,7 @@ namespace Microsoft.CodeAnalysis.CodeGen
             public override ScopeType Type => ScopeType.TryCatchFinally;
 
             public override ScopeInfo OpenScope(ScopeType scopeType,
-                Microsoft.Cci.ITypeReference exceptionType,
+                Microsoft.Cci.ITypeReference? exceptionType,
                 ExceptionHandlerScope currentExceptionHandler)
             {
                 Debug.Assert(((_handlers.Count == 0) && (scopeType == ScopeType.Try)) ||

@@ -20,8 +20,8 @@ namespace Microsoft.CodeAnalysis
         where T : AttributeData
     {
         private ImmutableArray<T> _customAttributes;
-        private WellKnownAttributeData _decodedWellKnownAttributeData;
-        private EarlyWellKnownAttributeData _earlyDecodedWellKnownAttributeData;
+        private WellKnownAttributeData? _decodedWellKnownAttributeData;
+        private EarlyWellKnownAttributeData? _earlyDecodedWellKnownAttributeData;
         private int _state;
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace Microsoft.CodeAnalysis
             get
             {
                 Debug.Assert(IsPartComplete(CustomAttributeBagCompletionPart.DecodedWellKnownAttributeData));
-                return _decodedWellKnownAttributeData;
+                return _decodedWellKnownAttributeData!;
             }
         }
 
@@ -139,7 +139,7 @@ namespace Microsoft.CodeAnalysis
             get
             {
                 Debug.Assert(IsPartComplete(CustomAttributeBagCompletionPart.EarlyDecodedWellKnownAttributeData));
-                return _earlyDecodedWellKnownAttributeData;
+                return _earlyDecodedWellKnownAttributeData!;
             }
         }
 

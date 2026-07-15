@@ -66,19 +66,19 @@ internal abstract class MethodDefinitionBase : IMethodDefinition, IMethodBody
     public virtual ImmutableArray<IParameterDefinition> Parameters => ImmutableArray<IParameterDefinition>.Empty;
 
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-    public IPlatformInvokeInformation PlatformInvokeData => null;
+    public IPlatformInvokeInformation? PlatformInvokeData => null;
 
     public bool RequiresSecurityObject => false;
 
     public bool ReturnValueIsMarshalledExplicitly => false;
 
-    public IMarshallingInformation ReturnValueMarshallingInformation => null;
+    public IMarshallingInformation? ReturnValueMarshallingInformation => null;
 
     public ImmutableArray<byte> ReturnValueMarshallingDescriptor => default;
 
-    public IEnumerable<SecurityAttribute> SecurityAttributes => null;
+    public IEnumerable<SecurityAttribute>? SecurityAttributes => null;
 
-    public INamespace ContainingNamespace => null;
+    public INamespace? ContainingNamespace => null;
 
     public abstract TypeMemberVisibility Visibility { get; }
 
@@ -88,9 +88,9 @@ internal abstract class MethodDefinitionBase : IMethodDefinition, IMethodBody
 
     public ImmutableArray<IParameterTypeInformation> ExtraParameters => ImmutableArray<IParameterTypeInformation>.Empty;
 
-    public IGenericMethodInstanceReference AsGenericMethodInstanceReference => null;
+    public IGenericMethodInstanceReference? AsGenericMethodInstanceReference => null;
 
-    public ISpecializedMethodReference AsSpecializedMethodReference => null;
+    public ISpecializedMethodReference? AsSpecializedMethodReference => null;
 
     public CallingConvention CallingConvention => CallingConvention.Default;
 
@@ -138,7 +138,7 @@ internal abstract class MethodDefinitionBase : IMethodDefinition, IMethodBody
 
     public ImmutableArray<ILocalDefinition> LocalVariables => ImmutableArray<ILocalDefinition>.Empty;
 
-    public StateMachineMoveNextBodyDebugInfo MoveNextBodyInfo => null;
+    public StateMachineMoveNextBodyDebugInfo? MoveNextBodyInfo => null;
 
     public ImmutableArray<SequencePoint> SequencePoints => ImmutableArray<SequencePoint>.Empty;
 
@@ -146,17 +146,17 @@ internal abstract class MethodDefinitionBase : IMethodDefinition, IMethodBody
 
     public ImmutableArray<LocalScope> LocalScopes => ImmutableArray<LocalScope>.Empty;
 
-    public IImportScope ImportScope => null;
+    public IImportScope? ImportScope => null;
 
     public DebugId MethodId => default;
 
     public ImmutableArray<StateMachineHoistedLocalScope> StateMachineHoistedLocalScopes => default;
 
-    public string StateMachineTypeName => null;
+    public string? StateMachineTypeName => null;
 
     public ImmutableArray<EncHoistedLocalInfo> StateMachineHoistedLocalSlots => default;
 
-    public ImmutableArray<ITypeReference> StateMachineAwaiterSlots => default;
+    public ImmutableArray<ITypeReference?> StateMachineAwaiterSlots => default;
 
     public ImmutableArray<EncClosureInfo> ClosureDebugInfo => ImmutableArray<EncClosureInfo>.Empty;
 
@@ -170,7 +170,7 @@ internal abstract class MethodDefinitionBase : IMethodDefinition, IMethodBody
 
     public bool IsPrimaryConstructor => false;
 
-    public sealed override bool Equals(object obj)
+    public sealed override bool Equals(object? obj)
     {
         // It is not supported to rely on default equality of these Cci objects, an explicit way to compare and hash them should be used.
         throw ExceptionUtilities.Unreachable();

@@ -99,7 +99,7 @@ namespace Microsoft.CodeAnalysis
         private static UnmanagedType DecodeMarshalAsType(AttributeData attribute)
         {
             UnmanagedType unmanagedType;
-            if (attribute.AttributeConstructor.Parameters[0].Type.SpecialType == SpecialType.System_Int16)
+            if (attribute.AttributeConstructor!.Parameters[0].Type.SpecialType == SpecialType.System_Int16)
             {
                 unmanagedType = (UnmanagedType)attribute.CommonConstructorArguments[0].DecodeValue<short>(SpecialType.System_Int16);
             }

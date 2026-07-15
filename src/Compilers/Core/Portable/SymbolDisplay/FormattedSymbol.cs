@@ -35,7 +35,7 @@ namespace Microsoft.CodeAnalysis
             return _symbol.GetISymbol().ToDisplayString(_symbolDisplayFormat);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             var other = obj as FormattedSymbol;
             return other != null &&
@@ -50,7 +50,7 @@ namespace Microsoft.CodeAnalysis
                 _symbolDisplayFormat.GetHashCode());
         }
 
-        string IFormattable.ToString(string format, IFormatProvider formatProvider)
+        string IFormattable.ToString(string? format, IFormatProvider? formatProvider)
         {
             return ToString();
         }

@@ -16,9 +16,9 @@ namespace Microsoft.CodeAnalysis
     internal sealed class FormattedSymbolList : IFormattable
     {
         private readonly IEnumerable<ISymbol> _symbols;
-        private readonly SymbolDisplayFormat _symbolDisplayFormat;
+        private readonly SymbolDisplayFormat? _symbolDisplayFormat;
 
-        internal FormattedSymbolList(IEnumerable<ISymbol> symbols, SymbolDisplayFormat symbolDisplayFormat = null)
+        internal FormattedSymbolList(IEnumerable<ISymbol> symbols, SymbolDisplayFormat? symbolDisplayFormat = null)
         {
             Debug.Assert(symbols != null);
 
@@ -49,7 +49,7 @@ namespace Microsoft.CodeAnalysis
             return pooled.ToStringAndFree();
         }
 
-        string IFormattable.ToString(string format, IFormatProvider formatProvider)
+        string IFormattable.ToString(string? format, IFormatProvider? formatProvider)
         {
             return ToString();
         }

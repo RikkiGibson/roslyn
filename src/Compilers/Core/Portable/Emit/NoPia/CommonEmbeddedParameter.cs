@@ -271,7 +271,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
                 return ((ISymbol)UnderlyingParameter).ToDisplayString(SymbolDisplayFormat.ILVisualizationFormat);
             }
 
-            public sealed override bool Equals(object obj)
+            public sealed override bool Equals(object? obj)
             {
                 // It is not supported to rely on default equality of these Cci objects, an explicit way to compare and hash them should be used.
                 throw ExceptionUtilities.Unreachable();

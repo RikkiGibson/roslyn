@@ -173,7 +173,7 @@ namespace Microsoft.CodeAnalysis.Emit.NoPia
             {
             }
 
-            public int Compare(TEmbeddedType x, TEmbeddedType y)
+            public int Compare(TEmbeddedType? x, TEmbeddedType? y)
             {
                 Cci.INamespaceTypeDefinition dx = x;
                 Cci.INamespaceTypeDefinition dy = y;

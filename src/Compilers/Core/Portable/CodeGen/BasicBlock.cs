@@ -76,9 +76,9 @@ namespace Microsoft.CodeAnalysis.CodeGen
             }
 
             //parent builder
-            internal ILBuilder builder;
+            internal ILBuilder builder = null!;
 
-            private Cci.PooledBlobBuilder _lazyRegularInstructions;
+            private Cci.PooledBlobBuilder? _lazyRegularInstructions;
             public Cci.PooledBlobBuilder Writer
             {
                 get
@@ -132,10 +132,10 @@ namespace Microsoft.CodeAnalysis.CodeGen
             }
 
             //next block in the block sequence. Note that it is not necessarily reachable from current block.
-            public BasicBlock NextBlock;
+            public BasicBlock? NextBlock;
 
             //destination of the exit branch. null if branch code is nop or ret.
-            private object _branchLabel;
+            private object? _branchLabel;
 
             //block start relative to the method body.
             public int Start;
@@ -150,7 +150,7 @@ namespace Microsoft.CodeAnalysis.CodeGen
             internal Reachability Reachability;
 
             //nearest enclosing exception handler if any
-            public virtual ExceptionHandlerScope EnclosingHandler => null;
+            public virtual ExceptionHandlerScope? EnclosingHandler => null;
 
             internal virtual void Free()
             {
@@ -161,7 +161,7 @@ namespace Microsoft.CodeAnalysis.CodeGen
                 }
             }
 
-            public object BranchLabel => _branchLabel;
+            public object? BranchLabel => _branchLabel;
 
             public ILOpCode BranchCode
             {
@@ -190,11 +190,11 @@ namespace Microsoft.CodeAnalysis.CodeGen
 
             //destination of the branch. 
             //null if branch code is nop or ret or if label is not yet marked.
-            public BasicBlock BranchBlock
+            public BasicBlock? BranchBlock
             {
                 get
                 {
-                    BasicBlock result = null;
+                    BasicBlock? result = null;
 
                     if (BranchLabel != null)
                     {
@@ -213,13 +213,13 @@ namespace Microsoft.CodeAnalysis.CodeGen
                 this.BranchCode = newBranchCode;
             }
 
-            public void SetBranch(object newLabel, ILOpCode branchCode, ILOpCode revBranchCode)
+            public void SetBranch(object? newLabel, ILOpCode branchCode, ILOpCode revBranchCode)
             {
                 this.SetBranch(newLabel, branchCode);
                 this.RevBranchCode = revBranchCode;
             }
 
-            public void SetBranch(object newLabel, ILOpCode branchCode)
+            public void SetBranch(object? newLabel, ILOpCode branchCode)
             {
                 this.BranchCode = branchCode;
 
@@ -698,7 +698,7 @@ namespace Microsoft.CodeAnalysis.CodeGen
 
             // The next exception handler clause (catch or finally)
             // in the same exception handler.
-            public ExceptionHandlerLeaderBlock NextExceptionHandler;
+            public ExceptionHandlerLeaderBlock? NextExceptionHandler;
 
             public override BlockType Type => _type;
 
@@ -721,7 +721,7 @@ namespace Microsoft.CodeAnalysis.CodeGen
             public override BlockType Type => BlockType.Switch;
 
             // destination labels for switch block
-            public object[] BranchLabels;
+            public object[]? BranchLabels;
 
             public uint BranchesCount
             {

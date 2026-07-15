@@ -22,10 +22,10 @@ namespace Microsoft.CodeAnalysis
     {
         // data from Security attributes:
         // Array of decoded security actions corresponding to source security attributes, null if there are no security attributes in source.
-        private byte[] _lazySecurityActions;
+        private byte[]? _lazySecurityActions;
         // Array of resolved file paths corresponding to source PermissionSet security attributes needing fixup, null if there are no security attributes in source.
         // Fixup involves reading the file contents of the resolved file and emitting it in the permission set.
-        private string[] _lazyPathsForPermissionSetFixup;
+        private string[]? _lazyPathsForPermissionSetFixup;
 
         public void SetSecurityAttribute(int attributeIndex, DeclarativeSecurityAction action, int totalSourceAttributes)
         {

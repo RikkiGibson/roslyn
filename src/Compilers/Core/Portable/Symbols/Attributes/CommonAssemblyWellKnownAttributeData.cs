@@ -18,8 +18,8 @@ namespace Microsoft.CodeAnalysis
     internal class CommonAssemblyWellKnownAttributeData<TNamedTypeSymbol> : WellKnownAttributeData, ISecurityAttributeTarget
     {
         #region AssemblySignatureKeyAttributeSetting
-        private string _assemblySignatureKeyAttributeSetting;
-        public string AssemblySignatureKeyAttributeSetting
+        private string? _assemblySignatureKeyAttributeSetting;
+        public string? AssemblySignatureKeyAttributeSetting
         {
             get
             {
@@ -90,13 +90,13 @@ namespace Microsoft.CodeAnalysis
         #endregion
 
         #region AssemblyVersionAttributeSetting
-        private Version _assemblyVersionAttributeSetting;
+        private Version? _assemblyVersionAttributeSetting;
 
         /// <summary>
         /// Raw assembly version as specified in the AssemblyVersionAttribute, or Nothing if none specified.
         /// If the string passed to AssemblyVersionAttribute contains * the version build and/or revision numbers are set to <see cref="ushort.MaxValue"/>.
         /// </summary>
-        public Version AssemblyVersionAttributeSetting
+        public Version? AssemblyVersionAttributeSetting
         {
             get
             {
@@ -113,8 +113,8 @@ namespace Microsoft.CodeAnalysis
         #endregion
 
         #region AssemblyFileVersionAttributeSetting
-        private string _assemblyFileVersionAttributeSetting;
-        public string AssemblyFileVersionAttributeSetting
+        private string? _assemblyFileVersionAttributeSetting;
+        public string? AssemblyFileVersionAttributeSetting
         {
             get
             {
@@ -131,8 +131,8 @@ namespace Microsoft.CodeAnalysis
         #endregion
 
         #region AssemblyTitleAttributeSetting
-        private string _assemblyTitleAttributeSetting;
-        public string AssemblyTitleAttributeSetting
+        private string? _assemblyTitleAttributeSetting;
+        public string? AssemblyTitleAttributeSetting
         {
             get
             {
@@ -149,8 +149,8 @@ namespace Microsoft.CodeAnalysis
         #endregion
 
         #region AssemblyDescriptionAttributeSetting
-        private string _assemblyDescriptionAttributeSetting;
-        public string AssemblyDescriptionAttributeSetting
+        private string? _assemblyDescriptionAttributeSetting;
+        public string? AssemblyDescriptionAttributeSetting
         {
             get
             {
@@ -167,8 +167,8 @@ namespace Microsoft.CodeAnalysis
         #endregion
 
         #region AssemblyCultureAttributeSetting
-        private string _assemblyCultureAttributeSetting;
-        public string AssemblyCultureAttributeSetting
+        private string? _assemblyCultureAttributeSetting;
+        public string? AssemblyCultureAttributeSetting
         {
             get
             {
@@ -185,8 +185,8 @@ namespace Microsoft.CodeAnalysis
         #endregion
 
         #region AssemblyCompanyAttributeSetting
-        private string _assemblyCompanyAttributeSetting;
-        public string AssemblyCompanyAttributeSetting
+        private string? _assemblyCompanyAttributeSetting;
+        public string? AssemblyCompanyAttributeSetting
         {
             get
             {
@@ -203,8 +203,8 @@ namespace Microsoft.CodeAnalysis
         #endregion
 
         #region AssemblyProductAttributeSetting
-        private string _assemblyProductAttributeSetting;
-        public string AssemblyProductAttributeSetting
+        private string? _assemblyProductAttributeSetting;
+        public string? AssemblyProductAttributeSetting
         {
             get
             {
@@ -221,8 +221,8 @@ namespace Microsoft.CodeAnalysis
         #endregion
 
         #region AssemblyInformationalVersionAttributeSetting
-        private string _assemblyInformationalVersionAttributeSetting;
-        public string AssemblyInformationalVersionAttributeSetting
+        private string? _assemblyInformationalVersionAttributeSetting;
+        public string? AssemblyInformationalVersionAttributeSetting
         {
             get
             {
@@ -239,8 +239,8 @@ namespace Microsoft.CodeAnalysis
         #endregion
 
         #region AssemblyCopyrightAttributeSetting
-        private string _assemblyCopyrightAttributeSetting;
-        public string AssemblyCopyrightAttributeSetting
+        private string? _assemblyCopyrightAttributeSetting;
+        public string? AssemblyCopyrightAttributeSetting
         {
             get
             {
@@ -257,8 +257,8 @@ namespace Microsoft.CodeAnalysis
         #endregion
 
         #region AssemblyTrademarkAttributeSetting
-        private string _assemblyTrademarkAttributeSetting;
-        public string AssemblyTrademarkAttributeSetting
+        private string? _assemblyTrademarkAttributeSetting;
+        public string? AssemblyTrademarkAttributeSetting
         {
             get
             {
@@ -399,7 +399,7 @@ namespace Microsoft.CodeAnalysis
         #endregion
 
         #region Security Attributes
-        private SecurityWellKnownAttributeData _lazySecurityAttributeData;
+        private SecurityWellKnownAttributeData? _lazySecurityAttributeData;
 
         SecurityWellKnownAttributeData ISecurityAttributeTarget.GetOrCreateData()
         {
@@ -417,7 +417,7 @@ namespace Microsoft.CodeAnalysis
         /// <summary>
         /// Returns data decoded from security attributes or null if there are no security attributes.
         /// </summary>
-        public SecurityWellKnownAttributeData SecurityInformation
+        public SecurityWellKnownAttributeData? SecurityInformation
         {
             get
             {
@@ -429,8 +429,8 @@ namespace Microsoft.CodeAnalysis
 
         #region ForwardedTypes
 
-        private HashSet<TNamedTypeSymbol> _forwardedTypes;
-        public HashSet<TNamedTypeSymbol> ForwardedTypes
+        private HashSet<TNamedTypeSymbol>? _forwardedTypes;
+        public HashSet<TNamedTypeSymbol>? ForwardedTypes
         {
             get
             {
@@ -447,7 +447,7 @@ namespace Microsoft.CodeAnalysis
 
         #region ExperimentalAttribute
         private ObsoleteAttributeData _experimentalAttributeData = ObsoleteAttributeData.Uninitialized;
-        public ObsoleteAttributeData ExperimentalAttributeData
+        public ObsoleteAttributeData? ExperimentalAttributeData
         {
             get
             {
@@ -468,8 +468,8 @@ namespace Microsoft.CodeAnalysis
         #endregion
 
         #region GuidAttribute
-        private string _guidAttribute;
-        public string GuidAttribute
+        private string? _guidAttribute;
+        public string? GuidAttribute
         {
             get
             {

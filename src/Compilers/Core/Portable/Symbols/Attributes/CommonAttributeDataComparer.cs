@@ -28,7 +28,7 @@ namespace Microsoft.CodeAnalysis
             this._considerNamedArgumentsOrder = considerNamedArgumentsOrder;
         }
 
-        public bool Equals(AttributeData attr1, AttributeData attr2)
+        public bool Equals(AttributeData? attr1, AttributeData? attr2)
         {
             Debug.Assert(attr1 != null);
             Debug.Assert(attr2 != null);

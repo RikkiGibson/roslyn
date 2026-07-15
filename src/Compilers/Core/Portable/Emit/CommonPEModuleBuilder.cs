@@ -162,7 +162,7 @@ namespace Microsoft.CodeAnalysis.Emit
         internal abstract string ModuleName { get; }
 
         internal abstract Cci.IAssemblyReference Translate(IAssemblySymbolInternal symbol, DiagnosticBag diagnostics);
-        internal abstract Cci.ITypeReference Translate(ITypeSymbolInternal symbol, SyntaxNode syntaxOpt, DiagnosticBag diagnostics);
+        internal abstract Cci.ITypeReference Translate(ITypeSymbolInternal symbol, SyntaxNode? syntaxOpt, DiagnosticBag diagnostics);
         internal abstract Cci.IMethodReference Translate(IMethodSymbolInternal symbol, DiagnosticBag diagnostics, bool needDeclaration);
         internal abstract Compilation CommonCompilation { get; }
         internal abstract IModuleSymbolInternal CommonSourceModule { get; }
@@ -478,7 +478,7 @@ namespace Microsoft.CodeAnalysis.Emit
             return _stringsInILMap.Value.CopyValues();
         }
 
-        public uint GetFakeSymbolTokenForIL(Cci.IReference symbol, SyntaxNode syntaxNode, DiagnosticBag diagnostics)
+        public uint GetFakeSymbolTokenForIL(Cci.IReference symbol, SyntaxNode? syntaxNode, DiagnosticBag diagnostics)
         {
             uint token = _referencesInILMap.GetOrAddTokenFor(symbol, out bool added);
             if (added)
@@ -488,7 +488,7 @@ namespace Microsoft.CodeAnalysis.Emit
             return token;
         }
 
-        public uint GetFakeSymbolTokenForIL(Cci.ISignature symbol, SyntaxNode syntaxNode, DiagnosticBag diagnostics)
+        public uint GetFakeSymbolTokenForIL(Cci.ISignature symbol, SyntaxNode? syntaxNode, DiagnosticBag diagnostics)
         {
             uint token = _referencesInILMap.GetOrAddTokenFor(symbol, out bool added);
             if (added)
@@ -808,9 +808,9 @@ namespace Microsoft.CodeAnalysis.Emit
             return Translate((TAssemblySymbol)symbol, diagnostics);
         }
 
-        internal sealed override Cci.ITypeReference Translate(ITypeSymbolInternal symbol, SyntaxNode syntaxNodeOpt, DiagnosticBag diagnostics)
+        internal sealed override Cci.ITypeReference Translate(ITypeSymbolInternal symbol, SyntaxNode? syntaxNodeOpt, DiagnosticBag diagnostics)
         {
-            return Translate((TTypeSymbol)symbol, (TSyntaxNode)syntaxNodeOpt, diagnostics);
+            return Translate((TTypeSymbol)symbol, (TSyntaxNode)syntaxNodeOpt!, diagnostics);
         }
 
         internal sealed override Cci.IMethodReference Translate(IMethodSymbolInternal symbol, DiagnosticBag diagnostics, bool needDeclaration)

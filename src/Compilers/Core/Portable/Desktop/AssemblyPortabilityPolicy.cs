@@ -29,7 +29,7 @@ namespace Microsoft.CodeAnalysis
             this.SuppressSilverlightPlatformAssembliesPortability = suppressSilverlightPlatformAssembliesPortability;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is AssemblyPortabilityPolicy && Equals((AssemblyPortabilityPolicy)obj);
         }

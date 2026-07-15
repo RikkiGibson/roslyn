@@ -619,7 +619,7 @@ namespace Microsoft.Cci
         /// <summary>
         /// Detailed information about the PInvoke stub. Identifies which method to call, which module has the method and the calling convention among other things.
         /// </summary>
-        IPlatformInvokeInformation PlatformInvokeData
+        IPlatformInvokeInformation? PlatformInvokeData
         {
             get;
             // ^ requires this.IsPlatformInvoke;
@@ -644,7 +644,7 @@ namespace Microsoft.Cci
         /// <summary>
         /// Specifies how the return value is marshalled when the method is called from unmanaged code.
         /// </summary>
-        IMarshallingInformation ReturnValueMarshallingInformation
+        IMarshallingInformation? ReturnValueMarshallingInformation
         {
             get;
             // ^ requires this.ReturnValueIsMarshalledExplicitly;
@@ -662,13 +662,13 @@ namespace Microsoft.Cci
         /// <summary>
         /// Declarative security actions for this method.
         /// </summary>
-        IEnumerable<SecurityAttribute> SecurityAttributes { get; }
+        IEnumerable<SecurityAttribute>? SecurityAttributes { get; }
 
         /// <summary>
         /// Namespace containing this method.
         /// TODO: Ideally we would expose INamespace on INamespaceTypeDefinition. Right now we can only get the qualified namespace name.
         /// </summary>
-        INamespace ContainingNamespace { get; }
+        INamespace? ContainingNamespace { get; }
     }
 
     /// <summary>
