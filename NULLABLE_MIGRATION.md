@@ -18,6 +18,19 @@ Note: the user may have already done this step when you are invoked.
 Remember this command to build: `dotnet build CompilerConsumers.slnx`.  
 You may want to redirect output to file for ease of reference.
 
+Note: when redirecting output to a log file, MSBuild's console logger (used whenever the new terminal
+logger is off, e.g. via `-tl:off`) prints every diagnostic twice: once inline as it streams during the
+build, and again in a full recap section right after the `Build succeeded.`/`Build FAILED.` line, before
+the final `N Warning(s)`/`N Error(s)` trailer. This is just a logging artifact (the project still only
+compiles once) — flags like `-consoleLoggerParameters:NoSummary`, `/clp:NoSummary`, and
+`-verbosity:quiet` do *not* suppress it. To get the exact, non-duplicated list, post-process the log to
+keep only the lines after the `Build succeeded.`/`Build FAILED.` marker:
+```bash
+awk '/^Build succeeded\.$|^Build FAILED\.$/{found=1; next} found' build.log > deduped.log
+```
+Then grep/filter `deduped.log` as usual — don't just divide the raw line count by 2, since that's an
+approximation and can be thrown off if a build has mixed errors/warnings across multiple projects.
+
 Avoid using `dotnet build` except as a final backstop after this point.
 
 Instead, *before and after* you change a member, do the following:
