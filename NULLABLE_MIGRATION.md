@@ -1,6 +1,6 @@
 # nullable migration process
 
-Note: during this process we temporarily pare-down the projects listed in `CompilerConsumers.slnf`, to only have net10.0 or similar TFM. The human will restore this to the original configuration afterwards.
+Note: during this process we temporarily pare-down the projects listed in `CompilerConsumers.slnx`, to only have net10.0 or similar TFM. The human will restore this to the original configuration afterwards.
 
 ## 1: Replace directives
 
@@ -15,7 +15,7 @@ Note: the user may have already done this step when you are invoked.
 
 ## 2: Build
 
-Remember this command to build: `dotnet build CompilerConsumers.slnf`.  
+Remember this command to build: `dotnet build CompilerConsumers.slnx`.  
 You may want to redirect output to file for ease of reference.
 
 Avoid using `dotnet build` except as a final backstop after this point.
