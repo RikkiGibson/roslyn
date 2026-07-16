@@ -4,7 +4,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.CodeAnalysis.CSharp.Scripting</RootNamespace>
-    <TargetFrameworks>$(NetRoslynSourceBuild);netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(NetRoslynSourceBuild)</TargetFrameworks>
 
     <!-- NuGet -->
     <IsPackable>true</IsPackable>

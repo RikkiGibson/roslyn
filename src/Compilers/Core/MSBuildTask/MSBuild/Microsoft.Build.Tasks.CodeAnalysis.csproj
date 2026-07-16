@@ -4,7 +4,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.CodeAnalysis.BuildTasks</RootNamespace>
-    <TargetFrameworks>$(NetRoslynSourceBuild);net472</TargetFrameworks>
+    <TargetFrameworks>$(NetRoslynSourceBuild)</TargetFrameworks>
     <DefineConstants>$(DefineConstants);MICROSOFT_CODEANALYSIS_CONTRACTS_NO_VALUE_TASK</DefineConstants>
     <!--
       A .NET copy of this task assembly is included in the .NET SDK's Native AOT CLI, so it must be

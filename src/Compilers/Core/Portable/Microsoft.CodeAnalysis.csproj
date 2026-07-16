@@ -5,7 +5,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.CodeAnalysis</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <TargetFrameworks>$(NetRoslynSourceBuild);netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(NetRoslynSourceBuild)</TargetFrameworks>
     <DefineConstants>$(DefineConstants);COMPILERCORE;MICROSOFT_CODEANALYSIS_CONTRACTS_NO_CONTRACT</DefineConstants>
 
     <NoStdLib>true</NoStdLib>
@@ -32,6 +32,10 @@
       will import everything but content files from Microsoft.CodeAnalysis.Analyzers, specifically, analyzers.
     -->
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Condition="'$(DotNetBuildSourceOnly)' != 'true'" PrivateAssets="ContentFiles" />
+    <ProjectReference Include="..\..\..\..\nullable-migration\ObliviousNullabilityAnalyzer\ObliviousNullabilityAnalyzer.csproj">
+      <OutputItemType>Analyzer</OutputItemType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Memory" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
     <PackageReference Include="System.Reflection.Metadata" />

@@ -1,0 +1,19 @@
+<Solution>
+    <Project Path="src/Compilers/Core/Portable/Microsoft.CodeAnalysis.csproj" />
+    <Project Path="src/Compilers/CSharp/Portable/Microsoft.CodeAnalysis.CSharp.csproj" />
+    <Project Path="src/Compilers/Core/Rebuild/Microsoft.CodeAnalysis.Rebuild.csproj" />
+    <Folder Name="/src/" />
+    <Folder Name="/src/Compilers/" />
+    <Folder Name="/src/Compilers/Core/">
+        <Project Path="nullable-migration/ObliviousNullabilityAnalyzer/ObliviousNullabilityAnalyzer.csproj" />
+    </Folder>
+    <Project Path="src/Compilers/Core/MSBuildTask/MSBuild/Microsoft.Build.Tasks.CodeAnalysis.csproj" />
+    <Project Path="src/Compilers/CSharp/csc/AnyCpu/csc.csproj" />
+    <Project Path="src/Compilers/VisualBasic/vbc/AnyCpu/vbc.csproj" />
+    <Project Path="src/Compilers/Server/VBCSCompiler/AnyCpu/VBCSCompiler.csproj" />
+    <Project Path="src/Scripting/Core/Microsoft.CodeAnalysis.Scripting.csproj" />
+    <Project Path="src/Scripting/CSharp/Microsoft.CodeAnalysis.CSharp.Scripting.csproj" />
+    <Project Path="src/Interactive/csi/csi.csproj" />
+    <Project Path="src/Tools/BuildValidator/BuildValidator.csproj" />
+    <Project Path="src/Tools/ExternalAccess/RazorCompiler/Microsoft.CodeAnalysis.ExternalAccess.RazorCompiler.csproj" />
+</Solution>
