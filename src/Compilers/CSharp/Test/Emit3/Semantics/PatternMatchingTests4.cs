@@ -4847,6 +4847,40 @@ class D : A { }
             Assert.Equal("A? x", model.GetDeclaredSymbol(x).ToTestDisplayString());
         }
 
+        [Fact]
+        public void TestSimpleOr1()
+        {
+            var source = """
+                class Program
+                {
+                    void M(int i)
+                    {
+                        bool b = i is 1 or 1;
+                        b = i is 1 or 2;
+                        b = i is 1 and 1;
+                        b = i is 1 and 2;
+                    }
+                }
+                """;
+            var comp = CreateCompilation(source);
+            comp.VerifyDiagnostics(
+                // (5,28): hidden CS9335: The pattern is redundant.
+                //         bool b = i is 1 or 1;
+                Diagnostic(ErrorCode.HDN_RedundantPattern, "1").WithLocation(5, 28),
+                // (5,28): warning CS9336: The pattern is redundant.
+                //         bool b = i is 1 or 1;
+                Diagnostic(ErrorCode.WRN_RedundantPattern, "1").WithLocation(5, 28),
+                // (7,24): hidden CS9335: The pattern is redundant.
+                //         b = i is 1 and 1;
+                Diagnostic(ErrorCode.HDN_RedundantPattern, "1").WithLocation(7, 24),
+                // (7,24): warning CS9336: The pattern is redundant.
+                //         b = i is 1 and 1;
+                Diagnostic(ErrorCode.WRN_RedundantPattern, "1").WithLocation(7, 24),
+                // (8,13): error CS8518: An expression of type 'int' can never match the provided pattern.
+                //         b = i is 1 and 2;
+                Diagnostic(ErrorCode.ERR_IsPatternImpossible, "i is 1 and 2").WithArguments("int").WithLocation(8, 13));
+        }
+
         [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/75506")]
         public void RedundantPattern_BinaryPattern_NotAOrBPattern()
         {

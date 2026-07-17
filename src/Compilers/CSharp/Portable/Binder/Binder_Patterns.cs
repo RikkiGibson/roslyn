@@ -649,6 +649,9 @@ namespace Microsoft.CodeAnalysis.CSharp
             if (!wasReported && diagnostics.AccumulatesDiagnostics && DecisionDagBuilder.EnableRedundantPatternsCheck(this.Compilation))
             {
                 DecisionDagBuilder.CheckRedundantPatternsForIsPattern(this.Compilation, pattern.Syntax, expression, pattern, hasUnionMatching, diagnostics);
+
+                var checker = new RedundantPatternVisitor(diagnostics, expression, pattern);
+                checker.Analyze();
             }
 
             // decisionDag, whenTrueLabel, and whenFalseLabel represent the decision DAG for the inner pattern,
