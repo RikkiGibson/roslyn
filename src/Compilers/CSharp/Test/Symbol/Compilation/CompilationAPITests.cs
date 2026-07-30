@@ -1682,6 +1682,42 @@ class A
         }
 
         [Fact]
+        public void GetEntryPoint_DoesNotBindReferences_NonApplicationOutputKind()
+        {
+            var metadata = AssemblyMetadata.CreateFromImage(CreateCompilation("public class ReferencedType { }").EmitToArray());
+
+            verify(TestOptions.ReleaseDll, "class C { static void Main() { } }", expectedCount: 0);
+            verify(TestOptions.ReleaseDll, "class C { }", expectedCount: 0);
+            verify(TestOptions.ReleaseExe, "class C { }", expectedCount: 1);
+            verify(TestOptions.ReleaseExe, "class C { static void Main() { } }", expectedCount: 1);
+
+            void verify(CSharpCompilationOptions options, string source, int expectedCount)
+            {
+                var reference = new EvolvingTestReference(new[] { metadata });
+                var compilation = CreateEmptyCompilation(source, new[] { reference }, options);
+
+                Assert.Null(((Compilation)compilation).GetEntryPoint(default));
+                Assert.Equal(expectedCount, reference.QueryCount);
+            }
+        }
+
+        [Fact]
+        public void GetEntryPoint_DoesBindReferences_NonApplicationOutputKind_Script()
+        {
+            var metadata = AssemblyMetadata.CreateFromImage(CreateCompilation("public class ReferencedType { }").EmitToArray());
+
+            var parseOptions = CSharpParseOptions.Default.WithKind(SourceCodeKind.Script);
+            var reference = new EvolvingTestReference(new[] { metadata });
+            var compilation = CSharpCompilation.CreateScriptCompilation("Test",
+                CSharpSyntaxTree.ParseText("var x = new Script();", parseOptions),
+                [NetStandard20Ref, reference]);
+
+            Assert.Equal("<Factory>", ((Compilation)compilation).GetEntryPoint(default).MetadataName);
+            Assert.Equal(OutputKind.DynamicallyLinkedLibrary, compilation.Options.OutputKind);
+            Assert.Equal(1, reference.QueryCount);
+        }
+
+        [Fact]
         public void CreateCompilationForModule()
         {
             var source = @"
