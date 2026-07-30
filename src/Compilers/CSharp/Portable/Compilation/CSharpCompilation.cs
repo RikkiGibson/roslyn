@@ -1942,8 +1942,14 @@ namespace Microsoft.CodeAnalysis.CSharp
 
         internal new MethodSymbol? GetEntryPoint(CancellationToken cancellationToken)
         {
-            EntryPoint entryPoint = GetEntryPointAndDiagnostics(cancellationToken);
-            return entryPoint.MethodSymbol;
+            if (_lazyEntryPoint is { } entryPoint)
+                return entryPoint.MethodSymbol;
+
+            // Easy-out in case the compilation options disallow an entry point.
+            if (!Options.OutputKind.IsApplication() && !SyntaxTrees.Any(static tree => tree.Options.Kind == SourceCodeKind.Script))
+                return null;
+
+            return GetEntryPointAndDiagnostics(cancellationToken).MethodSymbol;
         }
 
         internal EntryPoint GetEntryPointAndDiagnostics(CancellationToken cancellationToken)
