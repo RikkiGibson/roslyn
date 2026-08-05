@@ -177,8 +177,26 @@ Then layer in nuance the heuristic can't capture:
 
 ### How to Retry
 
-- **AzDO builds**: Comment `/azp run {pipeline-name}` on the PR (e.g., `/azp run dotnet-sdk-public`)
-- **All pipelines**: Comment `/azp run` to retry all failing pipelines
+- **Failed AzDO jobs only (preferred)**: Link the user to the failed top-level GitHub check:
+  `https://github.com/{owner}/{repo}/pull/{pr}/checks?check_run_id={check_run_id}`.
+  Tell them to select **Re-run → Re-run failed checks**. Discover `check_run_id` from
+  `GET /repos/{owner}/{repo}/commits/{sha}/check-runs`; select the failed top-level pipeline check
+  (for example, `roslyn-CI`), not an individual job check. This preserves successful jobs and reruns
+  only failed or canceled jobs from that build.
+- **Do not use `/azp run {pipeline-name}` for a failed-jobs-only request**: It queues a fresh run of
+  the entire pipeline, including jobs that already passed.
+- **No supported CLI/API retry for Azure Pipelines checks**: The documented Checks API endpoint,
+  `POST /repos/{owner}/{repo}/check-runs/{check_run_id}/rerequest`, requires authentication as the
+  Azure Pipelines GitHub App that owns the check run. A normal user/OAuth token used by `gh` cannot
+  invoke it. The website's internal `PUT /{owner}/{repo}/runs/{id}/rerequest` form requires a browser
+  login cookie and CSRF token; do not scrape or replay it.
+- **Do not use `gh run rerun` for Azure Pipelines checks**: `gh run` only operates on GitHub Actions
+  workflow-run IDs under `/actions/runs/{id}`. Azure Pipelines check URLs contain Checks API check-run
+  IDs, which return 404 when passed to `gh run`.
+- **Whole pipeline**: Comment `/azp run {pipeline-name}` only when the user explicitly requests a
+  fresh run of the entire pipeline (for example, `/azp run dotnet-sdk-public`).
+- **All pipelines**: Comment `/azp run` only when the user explicitly requests fresh runs of all
+  pipelines.
 - **Helix work items**: Cannot be individually retried — must re-run the entire AzDO build
 
 ### Tone and output format
@@ -186,7 +204,9 @@ Then layer in nuance the heuristic can't capture:
 Be direct. Lead with the most important finding. Structure your response as:
 1. **Summary verdict** (1-2 sentences) — Is CI green? Failures PR-related? Known issues?
 2. **Failure details** (2-4 bullets) — what failed, why, evidence
-3. **Recommended actions** (numbered) — retry, fix, investigate. Include `/azp run` commands.
+3. **Recommended actions** (numbered) — retry, fix, investigate. For failed-job retries, include the
+   top-level GitHub check link; include `/azp run` commands only for explicitly requested whole-pipeline
+   retries.
 
 Synthesize from: JSON summary (structured facts) + human-readable output (details/logs) + Step 0 context (PR type, author intent).
 
