@@ -8,12 +8,16 @@ using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis.Collections;
 using Microsoft.CodeAnalysis.Shared.Extensions;
+using Microsoft.CodeAnalysis.Text;
 using Roslyn.Utilities;
 
 namespace Microsoft.CodeAnalysis.Navigation;
 
 internal static partial class NavigableItemFactory
 {
+    public static INavigableItem GetItemFromDocument(Document document, TextSpan sourceSpan)
+        => new DocumentNavigableItem(document, sourceSpan);
+
     public static INavigableItem GetItemFromSymbolLocation(
         Solution solution, ISymbol symbol, Location location,
         ImmutableArray<TaggedText>? displayTaggedParts)

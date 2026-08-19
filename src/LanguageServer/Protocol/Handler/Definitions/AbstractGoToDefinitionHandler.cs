@@ -49,13 +49,13 @@ internal abstract class AbstractGoToDefinitionHandler : ILspServiceDocumentReque
 
     internal static async Task<LSP.Location[]?> GetDefinitionsAsync(IGlobalOptionService globalOptions, IMetadataAsSourceFileService? metadataAsSourceFileService, Workspace workspace, Document document, bool forSymbolType, LinePosition linePosition, CancellationToken cancellationToken)
     {
-        var locations = ArrayBuilder<LSP.Location>.GetInstance();
         var position = await document.GetPositionFromLinePositionAsync(linePosition, cancellationToken).ConfigureAwait(false);
 
         var service = document.GetLanguageService<INavigableItemsService>();
         if (service is null)
             return null;
 
+        var locations = ArrayBuilder<LSP.Location>.GetInstance();
         var definitions = await service.GetNavigableItemsAsync(document, position, forSymbolType, cancellationToken).ConfigureAwait(false);
         if (definitions.Length > 0)
         {

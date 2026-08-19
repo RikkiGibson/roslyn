@@ -23,6 +23,12 @@ internal abstract class AbstractNavigableItemsService : INavigableItemsService
     public async Task<ImmutableArray<INavigableItem>> GetNavigableItemsAsync(
         Document document, int position, bool forSymbolType, CancellationToken cancellationToken)
     {
+        if (!forSymbolType &&
+            await GetAdditionalNavigableItemsAsync(document, position, cancellationToken).ConfigureAwait(false) is { IsDefaultOrEmpty: false } additionalItems)
+        {
+            return additionalItems;
+        }
+
         var symbolService = document.GetRequiredLanguageService<IGoToDefinitionSymbolService>();
 
         // First try with frozen partial semantics.  For the common case where no symbols referenced though skeleton
@@ -73,4 +79,8 @@ internal abstract class AbstractNavigableItemsService : INavigableItemsService
             return (symbol, solution);
         }
     }
+
+    protected virtual ValueTask<ImmutableArray<INavigableItem>> GetAdditionalNavigableItemsAsync(
+        Document document, int position, CancellationToken cancellationToken)
+        => ValueTask.FromResult(ImmutableArray<INavigableItem>.Empty);
 }

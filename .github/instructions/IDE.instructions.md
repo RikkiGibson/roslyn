@@ -26,6 +26,13 @@ var csharpService = workspace.Services.GetLanguageServices(LanguageNames.CSharp)
     .GetRequiredService<IMyCSharpService>();
 ```
 
+### File-Based Program Navigation
+
+- Keep directive parsing and solution-model target resolution in the Workspaces file-based program services. The C# Features `INavigableItemsService` converts loaded target documents into standard `INavigableItem` results, and protocol layers such as LSP only convert those results for their clients.
+- `#:include` and `#:ref` navigation only returns loaded `Document` targets. `#:project` navigation is unsupported because `INavigableItem` requires a document.
+- Treat include-glob expansion as an optional host capability through `IFilePathMatcherService`. The standalone Language Server exports the `Microsoft.Extensions.FileSystemGlobbing` implementation; hosts without that service do not expand globs.
+- Match globs against loaded `Document` paths. Do not enumerate or probe the filesystem from the navigation service.
+
 ### MEF Export Patterns
 ```csharp
 // Workspace service (language-agnostic)

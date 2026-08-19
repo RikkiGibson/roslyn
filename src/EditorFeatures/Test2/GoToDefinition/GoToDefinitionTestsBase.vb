@@ -15,7 +15,7 @@ Namespace Microsoft.CodeAnalysis.Editor.UnitTests.GoToDefinition
     Public MustInherit Class GoToDefinitionTestsBase
         Public Shared Async Function TestAsync(
                 workspaceDefinition As XElement,
-                Optional expectedResult As Boolean = True) As Task
+            Optional expectedResult As Boolean = True) As Task
             Using workspace = EditorTestWorkspace.Create(workspaceDefinition, composition:=GoToTestHelpers.Composition)
                 Dim solution = workspace.CurrentSolution
                 Dim cursorDocument = workspace.Documents.First(Function(d) d.CursorPosition.HasValue)

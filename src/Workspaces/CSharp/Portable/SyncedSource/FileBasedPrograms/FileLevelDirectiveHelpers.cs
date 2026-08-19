@@ -116,6 +116,7 @@ internal static class FileLevelDirectiveHelpers
                 {
                     SourceFile = sourceFile,
                     Span = span,
+                    ValueSpan = default,
                     LeadingWhiteSpace = whiteSpace.Leading,
                     TrailingWhiteSpace = whiteSpace.Trailing,
                 };
@@ -125,13 +126,30 @@ internal static class FileLevelDirectiveHelpers
             {
                 TextSpan span = GetFullSpan(previousWhiteSpaceSpan, trivia);
 
-                var message = trivia.GetStructure() is IgnoredDirectiveTriviaSyntax { Content: { RawKind: (int)SyntaxKind.StringLiteralToken } content }
+                var content = trivia.GetStructure() is IgnoredDirectiveTriviaSyntax directiveSyntax
+                    ? directiveSyntax.Content
+                    : default;
+                var message = content.RawKind == (int)SyntaxKind.StringLiteralToken
                     ? content.Text.AsSpan().Trim()
                     : "";
                 var parts = Patterns.Whitespace.Split(message.ToString(), 2);
                 var name = parts.Length > 0 ? parts[0] : "";
                 var value = parts.Length > 1 ? parts[1] : "";
                 Debug.Assert(!(parts.Length > 2));
+
+                var valueOffset = message.Length;
+                if (value.Length > 0)
+                {
+                    valueOffset = name.Length;
+                    while (char.IsWhiteSpace(message[valueOffset]))
+                    {
+                        valueOffset++;
+                    }
+                }
+
+                var messageOffset = content.RawKind == (int)SyntaxKind.StringLiteralToken
+                    ? content.SpanStart + (content.Text.Length - content.Text.AsSpan().TrimStart().Length)
+                    : trivia.SpanStart;
 
                 var whiteSpace = GetWhiteSpaceInfo(triviaList, index, span);
                 var context = new CSharpDirective.ParseContext
@@ -140,6 +158,7 @@ internal static class FileLevelDirectiveHelpers
                     {
                         SourceFile = sourceFile,
                         Span = span,
+                        ValueSpan = new TextSpan(messageOffset + valueOffset, value.Length),
                         LeadingWhiteSpace = whiteSpace.Leading,
                         TrailingWhiteSpace = whiteSpace.Trailing,
                     },
@@ -283,6 +302,11 @@ internal abstract class CSharpDirective(in CSharpDirective.ParseInfo info)
         /// Span of the full line including the trailing line break.
         /// </summary>
         public required TextSpan Span { get; init; }
+
+        /// <summary>
+        /// Span of the directive value, excluding surrounding whitespace.
+        /// </summary>
+        public required TextSpan ValueSpan { get; init; }
 
         /// <summary>
         /// Additional leading whitespace not included in <see cref="Span"/>.

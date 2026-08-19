@@ -29,6 +29,12 @@ This file is a **top-level map only**. For per-area directory detail, read the m
 | `RoslynAnalyzers/` | — | Shipping `Microsoft.CodeAnalysis.*` analyzer packages. |
 | `Deployment/`, `NuGet/`, `Setup/`, `Test/` | — | Deployment/VSIX, packaging, shared test infrastructure. |
 
+## Cross-Layer Features
+
+| Feature | Ownership |
+|---------|-----------|
+| File-based program directive navigation | Neutral contracts are in `Workspaces/Core/Portable/FileBasedPrograms`; C# parsing and solution-model resolution are in `Workspaces/CSharp/Portable/FileBasedPrograms`; `Features/CSharp/Portable/Navigation` produces document-backed `INavigableItem` results; LSP performs standard protocol conversion in `LanguageServer/Protocol/Handler/Definitions`; standalone-server glob matching is in `LanguageServer/Microsoft.CodeAnalysis.LanguageServer/HostWorkspace`. |
+
 ## Non-source Roots
 
 | Path | Status | Purpose |

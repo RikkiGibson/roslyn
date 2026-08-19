@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Test.Utilities;
 using Microsoft.CodeAnalysis.Host;
-using Microsoft.CodeAnalysis.LanguageServer.Handler;
 using Microsoft.CodeAnalysis.Test.Utilities;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Text;
@@ -31,7 +30,9 @@ public sealed class GoToDefinitionTests : AbstractLanguageServerProtocolTests
     {
     }
 
-    protected override TestComposition Composition => base.Composition.AddParts(typeof(TestSourceGeneratedDocumentSpanMappingService));
+    protected override TestComposition Composition => base.Composition.AddParts(
+        typeof(TestSourceGeneratedDocumentSpanMappingService),
+        typeof(TestFilePathMatcherService));
 
     [Theory, CombinatorialData]
     public async Task TestGotoDefinitionAsync(bool mutatingLspWorkspace)
@@ -131,33 +132,6 @@ public sealed class GoToDefinitionTests : AbstractLanguageServerProtocolTests
     }
 
     [Theory, CombinatorialData]
-    public async Task TestGotoDefinitionAsync_FileBasedProgramRefDirective(bool mutatingLspWorkspace)
-    {
-        using var tempRoot = new TempRoot();
-        var referencedFile = tempRoot.CreateFile(extension: ".cs", directory: TestWorkspace.RootDirectory);
-        var referencedFileName = Path.GetFileName(referencedFile.Path);
-        var markup =
-            $$"""
-            #:ref {{referencedFileName}}{|caret:|}
-            System.Console.WriteLine();
-            """;
-        await using var testLspServer = await CreateTestLspServerAsync(
-            markup,
-            mutatingLspWorkspace,
-            new InitializationOptions
-            {
-                ParseOptions = CSharpParseOptions.Default.WithFeatures([new("FileBasedProgram", "true")]),
-            });
-
-        var results = await RunGotoDefinitionAsync(testLspServer, testLspServer.GetLocations("caret").Single());
-
-        var result = Assert.Single(results);
-        Assert.Equal(ProtocolConversions.CreateAbsoluteDocumentUri(referencedFile.Path), result.DocumentUri);
-        Assert.Equal(new LSP.Position(), result.Range.Start);
-        Assert.Equal(new LSP.Position(), result.Range.End);
-    }
-
-    [Theory, CombinatorialData]
     public async Task TestGotoDefinitionAsync_FileBasedProgramIncludeDirective(bool mutatingLspWorkspace)
     {
         using var tempRoot = new TempRoot();
@@ -175,11 +149,79 @@ public sealed class GoToDefinitionTests : AbstractLanguageServerProtocolTests
             {
                 ParseOptions = CSharpParseOptions.Default.WithFeatures([new("FileBasedProgram", "true")]),
             });
+        var solution = testLspServer.TestWorkspace.CurrentSolution;
+        var project = solution.Projects.Single();
+        solution = solution.AddDocument(
+            DocumentId.CreateNewId(project.Id), includedFileName, SourceText.From(""), filePath: includedFile.Path);
+        await testLspServer.TestWorkspace.ChangeSolutionAsync(solution);
 
         var results = await RunGotoDefinitionAsync(testLspServer, testLspServer.GetLocations("caret").Single());
 
         var result = Assert.Single(results);
         Assert.Equal(ProtocolConversions.CreateAbsoluteDocumentUri(includedFile.Path), result.DocumentUri);
+        Assert.Equal(new LSP.Range { Start = new(), End = new() }, result.Range);
+    }
+
+    [Theory, CombinatorialData]
+    public async Task TestGotoDefinitionAsync_FileBasedProgramRefDirective(bool mutatingLspWorkspace)
+    {
+        var referencedFilePath = Path.Combine(TestWorkspace.RootDirectory, "Referenced.cs");
+        var markup =
+            """
+            #:ref Referenced.cs{|caret:|}
+            System.Console.WriteLine();
+            """;
+        await using var testLspServer = await CreateTestLspServerAsync(
+            markup,
+            mutatingLspWorkspace,
+            new InitializationOptions
+            {
+                ParseOptions = CSharpParseOptions.Default.WithFeatures([new("FileBasedProgram", "true")]),
+            });
+        var solution = testLspServer.TestWorkspace.CurrentSolution;
+        var project = solution.Projects.Single();
+        var referencedProjectId = ProjectId.CreateNewId();
+        solution = solution.AddProject(referencedProjectId, "ReferencedProject", "ReferencedProject", LanguageNames.CSharp)
+            .AddDocument(DocumentId.CreateNewId(referencedProjectId), "Referenced.cs", SourceText.From(""), filePath: referencedFilePath)
+            .AddProjectReference(project.Id, new ProjectReference(referencedProjectId));
+        await testLspServer.TestWorkspace.ChangeSolutionAsync(solution);
+
+        var results = await RunGotoDefinitionAsync(testLspServer, testLspServer.GetLocations("caret").Single());
+
+        var result = Assert.Single(results);
+        Assert.Equal(ProtocolConversions.CreateAbsoluteDocumentUri(referencedFilePath), result.DocumentUri);
+        Assert.Equal(new LSP.Range { Start = new(), End = new() }, result.Range);
+    }
+
+    [Theory, CombinatorialData]
+    public async Task TestGotoDefinitionAsync_FileBasedProgramIncludeDirectiveGlob(bool mutatingLspWorkspace)
+    {
+        var markup =
+            """
+            #:include included/**/*.cs{|caret:|}
+            System.Console.WriteLine();
+            """;
+        await using var testLspServer = await CreateTestLspServerAsync(
+            markup,
+            mutatingLspWorkspace,
+            new InitializationOptions
+            {
+                ParseOptions = CSharpParseOptions.Default.WithFeatures([new("FileBasedProgram", "true")]),
+            });
+        var solution = testLspServer.TestWorkspace.CurrentSolution;
+        var project = solution.Projects.Single();
+        var firstPath = Path.Combine(TestWorkspace.RootDirectory, "included", "First.cs");
+        var secondPath = Path.Combine(TestWorkspace.RootDirectory, "included", "nested", "Second.cs");
+        solution = solution.AddDocument(DocumentId.CreateNewId(project.Id), "First.cs", SourceText.From(""), filePath: firstPath);
+        solution = solution.AddDocument(DocumentId.CreateNewId(project.Id), "Second.cs", SourceText.From(""), filePath: secondPath);
+        await testLspServer.TestWorkspace.ChangeSolutionAsync(solution);
+
+        var results = await RunGotoDefinitionAsync(testLspServer, testLspServer.GetLocations("caret").Single());
+
+        Assert.Equal(
+            [ProtocolConversions.CreateAbsoluteDocumentUri(firstPath), ProtocolConversions.CreateAbsoluteDocumentUri(secondPath)],
+            results.Select(static result => result.DocumentUri).OrderBy(static uri => uri.ToString()));
+        Assert.All(results, static result => Assert.Equal(new LSP.Range { Start = new(), End = new() }, result.Range));
     }
 
     [Theory, CombinatorialData]
@@ -207,32 +249,6 @@ public sealed class GoToDefinitionTests : AbstractLanguageServerProtocolTests
     }
 
     [Theory, CombinatorialData]
-    public async Task TestGotoDefinitionAsync_FileBasedProgramProjectDirectiveDirectory(bool mutatingLspWorkspace)
-    {
-        using var tempRoot = new TempRoot();
-        var projectDirectory = tempRoot.CreateDirectory();
-        var projectDirectoryName = Path.GetFileName(projectDirectory.Path);
-        var projectFile = tempRoot.CreateFile(extension: ".csproj", directory: projectDirectory.Path);
-        var markup =
-            $$"""
-            #:project {|caret:|}{{projectDirectoryName}}
-            System.Console.WriteLine();
-            """;
-        await using var testLspServer = await CreateTestLspServerAsync(
-            markup,
-            mutatingLspWorkspace,
-            new InitializationOptions
-            {
-                ParseOptions = CSharpParseOptions.Default.WithFeatures([new("FileBasedProgram", "true")]),
-            });
-
-        var results = await RunGotoDefinitionAsync(testLspServer, testLspServer.GetLocations("caret").Single());
-
-        var result = Assert.Single(results);
-        Assert.Equal(ProtocolConversions.CreateAbsoluteDocumentUri(projectFile.Path), result.DocumentUri);
-    }
-
-    [Theory, CombinatorialData]
     public async Task TestGotoDefinitionAsync_FileBasedProgramProjectDirectiveDirectoryWithMultipleProjects(bool mutatingLspWorkspace)
     {
         using var tempRoot = new TempRoot();
@@ -256,114 +272,6 @@ public sealed class GoToDefinitionTests : AbstractLanguageServerProtocolTests
         var results = await RunGotoDefinitionAsync(testLspServer, testLspServer.GetLocations("caret").Single());
 
         Assert.Empty(results);
-    }
-
-    [Theory, CombinatorialData]
-    public async Task TestGotoDefinitionAsync_FileBasedProgramProjectDirectiveFile(bool mutatingLspWorkspace)
-    {
-        using var tempRoot = new TempRoot();
-        var projectFile = tempRoot.CreateFile(extension: ".csproj", directory: TestWorkspace.RootDirectory);
-        var projectFileName = Path.GetFileName(projectFile.Path);
-        var markup =
-            $$"""
-            #:project {|caret:|}{{projectFileName}}
-            System.Console.WriteLine();
-            """;
-        await using var testLspServer = await CreateTestLspServerAsync(
-            markup,
-            mutatingLspWorkspace,
-            new InitializationOptions
-            {
-                ParseOptions = CSharpParseOptions.Default.WithFeatures([new("FileBasedProgram", "true")]),
-            });
-
-        var results = await RunGotoDefinitionAsync(testLspServer, testLspServer.GetLocations("caret").Single());
-
-        var result = Assert.Single(results);
-        Assert.Equal(ProtocolConversions.CreateAbsoluteDocumentUri(projectFile.Path), result.DocumentUri);
-    }
-
-    [Theory, CombinatorialData]
-    public async Task TestGotoDefinitionAsync_FileBasedProgramDirectiveRelativeToSourceDirectory(
-        [CombinatorialValues("project", "ref", "include")] string directiveName,
-        [CombinatorialValues("/", "\\")] string directorySeparator,
-        bool mutatingLspWorkspace)
-    {
-        using var tempRoot = new TempRoot();
-        var rootDirectory = tempRoot.CreateDirectory();
-        var sourceDirectory = Directory.CreateDirectory(Path.Combine(rootDirectory.Path, "App")).FullName;
-        var targetDirectory = Directory.CreateDirectory(Path.Combine(rootDirectory.Path, "Lib")).FullName;
-        var targetFile = tempRoot.CreateFile(
-            extension: directiveName == "project" ? ".csproj" : ".cs",
-            directory: targetDirectory);
-        var directivePath = directiveName == "project"
-            ? $"..{directorySeparator}Lib"
-            : $"..{directorySeparator}Lib{directorySeparator}{Path.GetFileName(targetFile.Path)}";
-        var directiveText = $"#:{directiveName} {directivePath}";
-        var sourceText = SourceText.From($"{directiveText}{Environment.NewLine}System.Console.WriteLine();");
-
-        await using var testLspServer = await CreateTestLspServerAsync(
-            "",
-            mutatingLspWorkspace,
-            new InitializationOptions
-            {
-                ParseOptions = CSharpParseOptions.Default.WithFeatures([new("FileBasedProgram", "true")]),
-            });
-
-        var document = testLspServer.GetCurrentSolution().Projects.Single().Documents.Single()
-            .WithFilePath(Path.Combine(sourceDirectory, "Program.cs"))
-            .WithText(sourceText);
-        var position = ProtocolConversions.LinePositionToPosition(
-            sourceText.Lines.GetLinePosition(directiveText.Length));
-
-        var location = await GoToDefinitionHandler.TryGetFileLevelDirectiveLocationAsync(
-            document, position, CancellationToken.None);
-
-        Assert.NotNull(location);
-        Assert.Equal(ProtocolConversions.CreateAbsoluteDocumentUri(targetFile.Path), location.DocumentUri);
-    }
-
-    [Theory, CombinatorialData]
-    public async Task TestGotoDefinitionAsync_FileBasedProgramDirectiveWithDynamicPath(
-        [CombinatorialValues("project", "ref", "include")] string directiveName,
-        bool mutatingLspWorkspace)
-    {
-        // Currently do not support navigating to path which includes an msbuild variable.
-        using var tempRoot = new TempRoot();
-        var rootDirectory = tempRoot.CreateDirectory();
-        var sourceDirectory = Directory.CreateDirectory(Path.Combine(rootDirectory.Path, "App")).FullName;
-        var targetDirectory = Directory.CreateDirectory(Path.Combine(rootDirectory.Path, "Lib")).FullName;
-        var targetFile = tempRoot.CreateFile(
-            extension: directiveName == "project" ? ".csproj" : ".cs",
-            directory: directiveName == "include" ? sourceDirectory : targetDirectory);
-        var directivePath = directiveName switch
-        {
-            "project" => "$(MSBuildProjectDirectory)/../Lib",
-            "ref" => $"$(MSBuildProjectDirectory)/../Lib/{Path.GetFileName(targetFile.Path)}",
-            "include" => "*.cs",
-            _ => throw ExceptionUtilities.Unreachable(),
-        };
-        var directiveText = $"#:{directiveName} {directivePath}";
-        var sourceText = SourceText.From($"{directiveText}{Environment.NewLine}System.Console.WriteLine();");
-
-        await using var testLspServer = await CreateTestLspServerAsync(
-            "",
-            mutatingLspWorkspace,
-            new InitializationOptions
-            {
-                ParseOptions = CSharpParseOptions.Default.WithFeatures([new("FileBasedProgram", "true")]),
-            });
-
-        var document = testLspServer.GetCurrentSolution().Projects.Single().Documents.Single()
-            .WithFilePath(Path.Combine(sourceDirectory, "Program.cs"))
-            .WithText(sourceText);
-        var position = ProtocolConversions.LinePositionToPosition(
-            sourceText.Lines.GetLinePosition(directiveText.Length));
-
-        var location = await GoToDefinitionHandler.TryGetFileLevelDirectiveLocationAsync(
-            document, position, CancellationToken.None);
-
-        Assert.Null(location);
     }
 
     [Theory, CombinatorialData]
@@ -426,89 +334,6 @@ public sealed class GoToDefinitionTests : AbstractLanguageServerProtocolTests
         var results = await RunGotoDefinitionAsync(testLspServer, testLspServer.GetLocations("caret").Single());
 
         Assert.Empty(results);
-    }
-
-    [Theory, CombinatorialData]
-    public async Task TestGotoDefinitionAsync_FileBasedProgramWithRelativeDocumentPath(bool mutatingLspWorkspace)
-    {
-        // Cannot navigate when the resolved path referenced by a directive is relative.
-        var markup =
-            """
-            #:ref {|caret:|}Util.cs
-            System.Console.WriteLine();
-            """;
-        await using var testLspServer = await CreateTestLspServerAsync(
-            markup,
-            mutatingLspWorkspace,
-            new InitializationOptions
-            {
-                ParseOptions = CSharpParseOptions.Default.WithFeatures([new("FileBasedProgram", "true")]),
-            });
-
-        var document = testLspServer.GetCurrentSolution().Projects.Single().Documents.Single()
-            .WithFilePath(Path.Combine("relative", "Program.cs"));
-        var location = await GoToDefinitionHandler.TryGetFileLevelDirectiveLocationAsync(
-            document, testLspServer.GetLocations("caret").Single().Range.Start, CancellationToken.None);
-
-        Assert.Null(location);
-    }
-
-    [Theory, CombinatorialData]
-    public async Task TestGotoDefinitionAsync_FileBasedProgramWithRelativeDocumentPathAndAbsoluteDirectivePath(
-        [CombinatorialValues("project", "ref", "include")] string directiveName,
-        bool mutatingLspWorkspace)
-    {
-        using var tempRoot = new TempRoot();
-        var targetDirectory = tempRoot.CreateDirectory();
-        var targetFile = tempRoot.CreateFile(
-            extension: directiveName == "project" ? ".csproj" : ".cs",
-            directory: targetDirectory.Path);
-        var directivePath = directiveName == "project" ? targetDirectory.Path : targetFile.Path;
-        var markup = $"#:{directiveName} {{|caret:|}}{directivePath}{Environment.NewLine}System.Console.WriteLine();";
-
-        await using var testLspServer = await CreateTestLspServerAsync(
-            markup,
-            mutatingLspWorkspace,
-            new InitializationOptions
-            {
-                ParseOptions = CSharpParseOptions.Default.WithFeatures([new("FileBasedProgram", "true")]),
-            });
-
-        var document = testLspServer.GetCurrentSolution().Projects.Single().Documents.Single()
-            .WithFilePath(Path.Combine("relative", "Program.cs"));
-        var location = await GoToDefinitionHandler.TryGetFileLevelDirectiveLocationAsync(
-            document, testLspServer.GetLocations("caret").Single().Range.Start, CancellationToken.None);
-
-        Assert.NotNull(location);
-        Assert.Equal(ProtocolConversions.CreateAbsoluteDocumentUri(targetFile.Path), location.DocumentUri);
-    }
-
-    [ConditionalTheory(typeof(WindowsOnly)), CombinatorialData]
-    public async Task TestGotoDefinitionAsync_FileBasedProgramWithCurrentDriveRootedDirectivePath(bool mutatingLspWorkspace)
-    {
-        // Test a Windows path case where a path is rooted but not absolute, e.g. `\Path\To\File.cs`.
-        using var tempRoot = new TempRoot();
-        await using var testLspServer = await CreateTestLspServerAsync(
-            "",
-            mutatingLspWorkspace,
-            new InitializationOptions
-            {
-                ParseOptions = CSharpParseOptions.Default.WithFeatures([new("FileBasedProgram", "true")]),
-            });
-
-        var document = testLspServer.GetCurrentSolution().Projects.Single().Documents.Single();
-        var referencedFile = tempRoot.CreateFile(extension: ".cs", directory: TestWorkspace.RootDirectory);
-
-        var currentDriveRootedPath = referencedFile.Path[2..];
-        var sourceText = SourceText.From($"#:ref {currentDriveRootedPath}");
-        document = document.WithText(sourceText);
-        var position = ProtocolConversions.LinePositionToPosition(
-            sourceText.Lines.GetLinePosition(sourceText.Length));
-
-        var location = await GoToDefinitionHandler.TryGetFileLevelDirectiveLocationAsync(
-            document, position, CancellationToken.None);
-
-        Assert.Null(location);
     }
 
     [Theory, CombinatorialData, WorkItem("https://devdiv.visualstudio.com/DevDiv/_workitems/edit/1264627")]
