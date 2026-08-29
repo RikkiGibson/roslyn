@@ -538,7 +538,7 @@ namespace Roslyn.Utilities
             // Basic heuristic. Assume each element in the source adds one item to the result.
             var builder = ArrayBuilder<TResult>.GetInstance(source.Count);
             foreach (var item in source)
-                builder.AddRange(selector(item, arg));
+                selector(item, arg).AddRangeTo(builder);
 
             return builder.ToImmutableAndFree();
         }
