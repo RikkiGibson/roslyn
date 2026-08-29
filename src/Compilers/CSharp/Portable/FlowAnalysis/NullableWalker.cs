@@ -757,6 +757,10 @@ namespace Microsoft.CodeAnalysis.CSharp
 
             void checkMemberStateOnConstructorExit(MethodSymbol constructor, Symbol member, LocalState state, int thisSlot, Location? exitLocation, ImmutableArray<string> membersWithStateEnforcedByRequiredMembers, bool forcePropertyAnalysis)
             {
+#if DEBUG
+                var discardedUseSiteInfo = CompoundUseSiteInfo<AssemblySymbol>.Discarded;
+                Debug.Assert(AccessCheck.IsSymbolAccessible(member, within: constructor.ContainingType, ref discardedUseSiteInfo));
+#endif
                 var isStatic = !constructor.RequiresInstanceReceiver();
                 if (member.IsStatic != isStatic)
                 {
@@ -855,6 +859,10 @@ namespace Microsoft.CodeAnalysis.CSharp
                     {
                         foreach (var member in getMembersNeedingDefaultInitialState())
                         {
+#if DEBUG
+                            var discardedUseSiteInfo = CompoundUseSiteInfo<AssemblySymbol>.Discarded;
+                            Debug.Assert(AccessCheck.IsSymbolAccessible(member, within: method.ContainingType, ref discardedUseSiteInfo));
+#endif
                             if (member.IsStatic != method.IsStatic)
                             {
                                 continue;
@@ -863,7 +871,9 @@ namespace Microsoft.CodeAnalysis.CSharp
                             var memberToInitialize = member;
                             switch (member)
                             {
-                                case PropertySymbol { IsRequired: true } and not SourcePropertySymbolBase { BackingField: { } }:
+                                case PropertySymbol { IsRequired: true } requiredProperty when GetRelevantBackingField(requiredProperty, method.ContainingType) is null:
+                                    // Visit required properties, unless they have a backing field in this same type,
+                                    // in which case ordinary visiting of the field in this loop will handle it.
                                     break;
                                 case PropertySymbol:
                                     // skip any manually implemented non-required properties.
@@ -970,19 +980,20 @@ namespace Microsoft.CodeAnalysis.CSharp
 
                             (includeAllMembers: false, includeCurrentTypeRequiredMembers: true, includeBaseRequiredMembers: false)
                                 => containingType.GetMembersUnordered().SelectManyAsArray(
-                                    predicate: SymbolExtensions.IsRequired,
-                                    selector: symbol => getAllMembersToBeDefaulted(symbol, filterOverridingProperties: true)),
+                                    predicate: static (symbol, _) => symbol.IsRequired(),
+                                    selector: static (symbol, containingType) => getAllMembersToBeDefaulted(containingType, symbol, filterOverridingProperties: true),
+                                    containingType),
 
                             (includeAllMembers: false, includeCurrentTypeRequiredMembers: true, includeBaseRequiredMembers: true)
-                                => containingType.AllRequiredMembers.SelectManyAsArray(static kvp => getAllMembersToBeDefaulted(kvp.Value, filterOverridingProperties: true)),
+                                => containingType.AllRequiredMembers.SelectManyAsArray(static (kvp, containingType) => getAllMembersToBeDefaulted(containingType, kvp.Value, filterOverridingProperties: true), arg: containingType),
 
                             (includeAllMembers: true, includeCurrentTypeRequiredMembers: _, includeBaseRequiredMembers: false)
                                 => containingType.GetMembersUnordered().SelectManyAsArray(
-                                    selector: symbol =>
+                                    selector: static (symbol, containingType) =>
                                     {
-                                        var symbolToInitialize = getFieldSymbolToBeInitialized(symbol);
+                                        var symbolToInitialize = getFieldSymbolToBeInitialized(containingType, symbol);
                                         var prop = symbolToInitialize as PropertySymbol ?? (symbolToInitialize as FieldSymbol)?.AssociatedSymbol as PropertySymbol;
-                                        if (prop is not null && isFilterableOverrideOfAbstractProperty(prop))
+                                        if (prop is not null && isFilterableOverrideOfAbstractProperty(containingType, prop))
                                         {
                                             return OneOrMany<Symbol>.Empty;
                                         }
@@ -990,7 +1001,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                                         {
                                             return OneOrMany.Create(symbolToInitialize);
                                         }
-                                    }),
+                                    },
+                                    arg: containingType),
 
                             (includeAllMembers: true, includeCurrentTypeRequiredMembers: true, includeBaseRequiredMembers: true)
                                 => getAllTypeAndRequiredMembers(containingType),
@@ -1021,19 +1033,19 @@ namespace Microsoft.CodeAnalysis.CSharp
                                 if (requiredMember is PropertySymbol { IsAbstract: true } abstractProperty)
                                 {
                                     if (members.FirstOrDefault(static (thisMember, baseMember) => thisMember.IsOverride && (object)thisMember.GetOverriddenMember() == baseMember, requiredMember) is { } overridingMember
-                                        && isFilterableOverrideOfAbstractProperty((PropertySymbol)overridingMember))
+                                        && isFilterableOverrideOfAbstractProperty(containingType, (PropertySymbol)overridingMember))
                                     {
                                         continue;
                                     }
                                 }
 
-                                builder.AddRange(getAllMembersToBeDefaulted(requiredMember, filterOverridingProperties: false));
+                                builder.AddRange(getAllMembersToBeDefaulted(containingType, requiredMember, filterOverridingProperties: false));
                             }
 
                             return builder.ToImmutableAndFree();
                         }
 
-                        static OneOrMany<Symbol> getAllMembersToBeDefaulted(Symbol requiredMember, bool filterOverridingProperties)
+                        static OneOrMany<Symbol> getAllMembersToBeDefaulted(TypeSymbol containingType, Symbol requiredMember, bool filterOverridingProperties)
                         {
                             Debug.Assert(requiredMember.IsRequired());
 
@@ -1045,19 +1057,19 @@ namespace Microsoft.CodeAnalysis.CSharp
                             {
                                 var property = (PropertySymbol)requiredMember;
 
-                                if (filterOverridingProperties && isFilterableOverrideOfAbstractProperty(property))
+                                if (filterOverridingProperties && isFilterableOverrideOfAbstractProperty(containingType, property))
                                 {
                                     return OneOrMany<Symbol>.Empty;
                                 }
 
-                                var @return = OneOrMany.Create(getFieldSymbolToBeInitialized(property));
+                                var @return = OneOrMany.Create(getFieldSymbolToBeInitialized(containingType, property));
 
                                 // If the set method is null (ie missing), that's an error, but we'll recover as best we can
                                 foreach (var notNullMemberName in (property.SetMethod?.NotNullMembers ?? property.NotNullMembers))
                                 {
                                     foreach (var member in property.ContainingType.GetMembers(notNullMemberName))
                                     {
-                                        @return = @return.Add(getFieldSymbolToBeInitialized(member));
+                                        @return = @return.Add(getFieldSymbolToBeInitialized(containingType, member));
                                     }
                                 }
 
@@ -1065,10 +1077,10 @@ namespace Microsoft.CodeAnalysis.CSharp
                             }
                         }
 
-                        static Symbol getFieldSymbolToBeInitialized(Symbol requiredMember)
-                            => requiredMember is SourcePropertySymbolBase { BackingField: { } backingField } ? backingField : requiredMember;
+                        static Symbol getFieldSymbolToBeInitialized(TypeSymbol containingType, Symbol requiredMember)
+                            => requiredMember is PropertySymbol property && GetRelevantBackingField(property, containingType) is { } backingField ? backingField : requiredMember;
 
-                        static bool isFilterableOverrideOfAbstractProperty(PropertySymbol property)
+                        static bool isFilterableOverrideOfAbstractProperty(TypeSymbol containingType, PropertySymbol property)
                         {
                             // If this is an override of an abstract property, and the overridden property has the same nullable
                             // annotation as us, we can skip default-initializing the property because the chained constructor
@@ -1078,8 +1090,8 @@ namespace Microsoft.CodeAnalysis.CSharp
                                 return false;
                             }
 
-                            var symbolAnnotations = property is SourcePropertySymbolBase { UsesFieldKeyword: true, BackingField: { } field }
-                                ? field!.FlowAnalysisAnnotations
+                            var symbolAnnotations = GetRelevantBackingField(property, containingType) is { } field
+                                ? field.FlowAnalysisAnnotations
                                 : property.GetFlowAnalysisAnnotations();
                             var symbolType = ApplyUnconditionalAnnotations(property.TypeWithAnnotations, symbolAnnotations);
                             if (!symbolType.NullableAnnotation.IsNotAnnotated())
@@ -1094,6 +1106,22 @@ namespace Microsoft.CodeAnalysis.CSharp
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the backing field of a property, if the field should be considered for nullable analysis.
+        /// For example, when analyzing state/usage of a property of a base type, the backing field should be ignored.
+        /// This avoids a behavior dependency on the private members of the base type.
+        /// </summary>
+        private static SynthesizedBackingFieldSymbol? GetRelevantBackingField(PropertySymbol property, TypeSymbol containingType)
+        {
+            if (property is SourcePropertySymbolBase { BackingField: { } } sourceProperty
+                && sourceProperty.ContainingType.Equals(containingType, TypeCompareKind.AllIgnoreOptions))
+            {
+                return sourceProperty.BackingField;
+            }
+
+            return null;
         }
 
         private void EnforceMemberNotNullOnMember(SyntaxNode? syntaxOpt, LocalState state, MethodSymbol method, string memberName)
@@ -2297,14 +2325,14 @@ namespace Microsoft.CodeAnalysis.CSharp
             if (this._symbol is MethodSymbol constructor
                 && constructor.IsConstructor()
                 && constructor.IsStatic == symbol.IsStatic
-                && constructor.DeclaringCompilation == symbol.DeclaringCompilation)
+                && constructor.ContainingType.Equals(symbol.ContainingType, TypeCompareKind.ConsiderEverything))
             {
-                if ((constructor.IsStatic && containingSlot == 0 && constructor.ContainingType.Equals(symbol.ContainingType))
+                if (constructor.IsStatic && containingSlot == 0
                     || (!constructor.IsStatic && containingSlot > 0 && _variables[containingSlot].Symbol is ThisParameterSymbol))
                 {
                     // General principle for properties in constructors:
                     // - Either the property or field symbol "owns" the slot. The owning symbol's type/attributes determines initial flow state.
-                    // - We implement the principle, by detecting cases where the "non-owning" symbol is flowing in, and replacing it with the "owning" symbol.
+                    // We implement the principle, by detecting cases where the "non-owning" symbol is flowing in, and replacing it with the "owning" symbol.
                     // Example scenarios impacted by this replacement:
                     // - property initializer on normal auto-property (assigns to the synthesized field)
                     // - property assignment on getter-only auto-property (assigns to the synthesized field)
@@ -2315,7 +2343,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                     // - FieldKeywordTests.Nullable_Resilient_InitialStateInConstructor_
                     switch (symbol)
                     {
-                        // When field keyword is not used, or the property is null-resilient, then the property owns the slot.
                         case SynthesizedBackingFieldSymbol { AssociatedSymbol: SourcePropertySymbolBase { UsesFieldKeyword: false } property }:
                             symbol = property;
                             break;
@@ -2326,14 +2353,12 @@ namespace Microsoft.CodeAnalysis.CSharp
                             symbol = property;
                             break;
 
-                        // When field keyword is used, and the property is not null-resilient, then the field owns the slot.
                         case SourcePropertySymbolBase { UsesFieldKeyword: true, BackingField: { } backingField }
                             when !IsAssociatedPropertyNullResilient(backingField):
 
                             symbol = backingField;
                             break;
 
-                        // Event symbol always owns the slot shared with the associated field.
                         case SourceEventFieldSymbol eventField:
                             symbol = eventField.AssociatedSymbol;
                             break;
