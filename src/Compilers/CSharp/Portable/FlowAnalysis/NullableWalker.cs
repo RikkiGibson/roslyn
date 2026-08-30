@@ -1011,7 +1011,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                                 => throw ExceptionUtilities.Unreachable(),
                         };
 
-                        static ImmutableArray<Symbol> getAllTypeAndRequiredMembers(TypeSymbol containingType)
+                        static ImmutableArray<Symbol> getAllTypeAndRequiredMembers(NamedTypeSymbol containingType)
                         {
                             var members = containingType.GetMembersUnordered();
                             var baseRequiredMembers = containingType.BaseTypeNoUseSiteDiagnostics?.AllRequiredMembers ?? ImmutableSegmentedDictionary<string, Symbol>.Empty;
@@ -1045,7 +1045,7 @@ namespace Microsoft.CodeAnalysis.CSharp
                             return builder.ToImmutableAndFree();
                         }
 
-                        static OneOrMany<Symbol> getAllMembersToBeDefaulted(TypeSymbol containingType, Symbol requiredMember, bool filterOverridingProperties)
+                        static OneOrMany<Symbol> getAllMembersToBeDefaulted(NamedTypeSymbol containingType, Symbol requiredMember, bool filterOverridingProperties)
                         {
                             Debug.Assert(requiredMember.IsRequired());
 
@@ -1065,11 +1065,15 @@ namespace Microsoft.CodeAnalysis.CSharp
                                 var @return = OneOrMany.Create(getFieldSymbolToBeInitialized(containingType, property));
 
                                 // If the set method is null (ie missing), that's an error, but we'll recover as best we can
+                                var discardedUseSiteInfo = CompoundUseSiteInfo<AssemblySymbol>.Discarded;
                                 foreach (var notNullMemberName in (property.SetMethod?.NotNullMembers ?? property.NotNullMembers))
                                 {
                                     foreach (var member in property.ContainingType.GetMembers(notNullMemberName))
                                     {
-                                        @return = @return.Add(getFieldSymbolToBeInitialized(containingType, member));
+                                        // TODO2: Consider a 'string' private field, and 'string?' required prop with MemberNotNull setting the field
+                                        // If we do this filtering, are we going to miss initializing that field in '[SetsRequiredMembers]' derived ctor?
+                                        if (AccessCheck.IsSymbolAccessible(member, containingType, ref discardedUseSiteInfo))
+                                            @return = @return.Add(getFieldSymbolToBeInitialized(containingType, member));
                                     }
                                 }
 
