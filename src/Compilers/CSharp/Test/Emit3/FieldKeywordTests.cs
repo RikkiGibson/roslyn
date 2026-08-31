@@ -13391,21 +13391,25 @@ class C<T>
                 """;
 
             var comp = CreateCompilation([source1, source2], targetFramework: TargetFramework.Net100);
-            comp.VerifyEmitDiagnostics();
+            comp.VerifyEmitDiagnostics(
+                // (6,12): warning CS8618: Non-nullable property 'Bar' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable.
+                //     public FooDerivative() {
+                Diagnostic(ErrorCode.WRN_UninitializedNonNullableField, "FooDerivative").WithArguments("property", "Bar").WithLocation(6, 12));
 
             var comp1 = CreateCompilation(source1, targetFramework: TargetFramework.Net100);
             comp1.VerifyEmitDiagnostics();
 
-            var comp2 = CreateCompilation(source2, references: [comp1.ToMetadataReference()], targetFramework: TargetFramework.Net100);
-            comp2.VerifyEmitDiagnostics();
+            verify2(comp1.ToMetadataReference());
+            verify2(comp1.EmitToImageReference());
 
-            // When 'Bar' is imported from metadata, the knowledge of its backing field and null resilience is lost.
-            // Therefore we warn the derived constructor to initialize 'Bar'.
-            comp2 = CreateCompilation(source2, references: [comp1.EmitToImageReference()], targetFramework: TargetFramework.Net100);
-            comp2.VerifyEmitDiagnostics(
-                // (6,12): warning CS8618: Non-nullable property 'Bar' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable.
-                //     public FooDerivative() {
-                Diagnostic(ErrorCode.WRN_UninitializedNonNullableField, "FooDerivative").WithArguments("property", "Bar").WithLocation(6, 12));
+            void verify2(MetadataReference reference)
+            {
+                var comp2 = CreateCompilation(source2, references: [reference], targetFramework: TargetFramework.Net100);
+                comp2.VerifyEmitDiagnostics(
+                    // (6,12): warning CS8618: Non-nullable property 'Bar' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable.
+                    //     public FooDerivative() {
+                    Diagnostic(ErrorCode.WRN_UninitializedNonNullableField, "FooDerivative").WithArguments("property", "Bar").WithLocation(6, 12));
+            }
         }
 
         [Fact, WorkItem("https://github.com/dotnet/roslyn/issues/80504")]
