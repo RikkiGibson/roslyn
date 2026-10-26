@@ -6684,7 +6684,7 @@ public class Derived : Base
                 {
                     this.Str = str;
                 }
-    
+
                 public required abstract string? Str { get; set; }
             }
 
@@ -6695,6 +6695,12 @@ public class Derived : Base
                 {
                 }
 
+                [SetsRequiredMembers]
+                public Derived(string str, bool ignored) : base(str)
+                {
+                    Str.ToString(); // 1
+                }
+
                 [AllowNull]
                 public override required string Str { get; set; }
             }
@@ -6702,7 +6708,10 @@ public class Derived : Base
 
         var comp = CreateCompilationWithRequiredMembers([code, AllowNullAttributeDefinition]);
         comp.VerifyDiagnostics(
-        );
+            // (25,9): warning CS8602: Dereference of a possibly null reference.
+            //         Str.ToString();
+            Diagnostic(ErrorCode.WRN_NullReferenceReceiver, "Str").WithLocation(25, 9)
+            );
     }
 
     [Fact]

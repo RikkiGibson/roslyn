@@ -886,14 +886,6 @@ namespace Microsoft.CodeAnalysis.CSharp
                                 case FieldSymbol { IsConst: true }:
                                     continue;
                                 case FieldSymbol { AssociatedSymbol: SourcePropertySymbolBase { UsesFieldKeyword: false } prop }:
-                                    // this is a property where assigning 'default' causes us to simply update
-                                    // the state to the output state of the property
-                                    // thus we skip setting an initial state for it here
-                                    if (IsPropertyOutputMoreStrictThanInput(prop))
-                                    {
-                                        continue;
-                                    }
-
                                     // We want to initialize auto-property state to the default state, but not computed properties.
                                     memberToInitialize = prop;
                                     break;
