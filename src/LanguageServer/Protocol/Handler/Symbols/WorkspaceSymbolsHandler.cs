@@ -82,10 +82,8 @@ internal sealed class WorkspaceSymbolsHandler(IAsynchronousOperationListenerProv
 
             foreach (var result in results)
             {
-                var document = await result.NavigableItem.Document.GetRequiredDocumentAsync(solution, cancellationToken).ConfigureAwait(false);
-
-                var location = await ProtocolConversions.TextSpanToLocationAsync(
-                    document, result.NavigableItem.SourceSpan, result.NavigableItem.IsStale, context, cancellationToken).ConfigureAwait(false);
+                var location = await ProtocolConversions.NavigableItemToLocationAsync(
+                    result.NavigableItem, solution, context, cancellationToken).ConfigureAwait(false);
                 if (location == null)
                     return;
 

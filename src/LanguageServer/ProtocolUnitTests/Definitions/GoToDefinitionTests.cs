@@ -14,6 +14,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Test.Utilities;
 using Microsoft.CodeAnalysis.FileBasedPrograms;
 using Microsoft.CodeAnalysis.Host;
+using Microsoft.CodeAnalysis.Navigation;
+using Microsoft.CodeAnalysis.Shared.Extensions;
 using Microsoft.CodeAnalysis.Test.Utilities;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Text;
@@ -129,6 +131,80 @@ public sealed class GoToDefinitionTests : AbstractLanguageServerProtocolTests
 
         var results = await RunGotoDefinitionAsync(testLspServer, testLspServer.GetLocations("caret").Single());
         Assert.Empty(results);
+    }
+
+    [Theory, CombinatorialData]
+    public async Task TestNavigableItemsAsync_FileBasedProgramDirective(
+        bool mutatingLspWorkspace,
+        bool forSymbolType,
+        [CombinatorialValues("include", "additional", "project", "ref")] string targetKind)
+    {
+        var targetFile = targetKind switch
+        {
+            "project" => "Target.csproj",
+            "additional" => "Target.txt",
+            _ => "Target.cs",
+        };
+        var directive = targetKind == "additional" ? "include" : targetKind;
+        var markup =
+            $$"""
+            <Workspace>
+                <Project Language="C#" CommonReferences="true" Features="FileBasedProgram=true">
+                    <Document FilePath="App.cs">
+                        #:{{directive}} {|caret:|}{{targetFile}}
+                        System.Console.WriteLine();
+                    </Document>
+                    {{(targetKind == "include" ? """<Document FilePath="Target.cs">class Target;</Document>""" : "")}}
+                    {{(targetKind == "additional" ? """<AdditionalDocument FilePath="Target.txt">content</AdditionalDocument>""" : "")}}
+                    {{(targetKind is "project" or "ref" ? "<ProjectReference>Target</ProjectReference>" : "")}}
+                </Project>
+                <Project FilePath="{{targetFile}}" AssemblyName="Target" Language="C#" CommonReferences="true" />
+            </Workspace>
+            """;
+        await using var testLspServer = await CreateXmlTestLspServerAsync(markup, mutatingLspWorkspace);
+        var document = testLspServer.TestWorkspace.CurrentSolution.Projects.First().Documents.Single(d => d.Name == "App.cs");
+        var text = await document.GetTextAsync(CancellationToken.None);
+        var position = text.ToString().IndexOf(targetFile, StringComparison.Ordinal);
+
+        var service = document.GetRequiredLanguageService<INavigableItemsService>();
+        var items = await service.GetNavigableItemsAsync(document, position, forSymbolType, CancellationToken.None);
+
+        if (forSymbolType)
+        {
+            Assert.Empty(items);
+        }
+        else
+        {
+            var item = Assert.Single(items);
+            Assert.Null(item.Document.Id);
+            Assert.Equal(Path.Combine(TestWorkspace.RootDirectory, targetFile), item.Document.FilePath);
+            Assert.Equal(
+                new FileLinePositionSpan(item.Document.FilePath, default, default),
+                await item.Document.GetFileLocationAsync(document.Project.Solution, item.SourceSpan, CancellationToken.None));
+            Assert.Null(item.Document.TryGetTextSynchronously(document.Project.Solution, CancellationToken.None));
+            Assert.Equal(default, item.SourceSpan);
+            Assert.Equal(targetFile, item.DisplayTaggedParts.JoinText());
+        }
+    }
+
+    [Theory, CombinatorialData]
+    public async Task TestNavigableItemToLocationAsync_FileOnly(bool mutatingLspWorkspace)
+    {
+        await using var testLspServer = await CreateTestLspServerAsync("class C;", mutatingLspWorkspace);
+        var solution = testLspServer.TestWorkspace.CurrentSolution;
+        var fileLocation = new FileLinePositionSpan(
+            Path.Combine(TestWorkspace.RootDirectory, "Target.csproj"),
+            new LinePosition(3, 5),
+            new LinePosition(4, 7));
+        var item = NavigableItemFactory.GetItemFromFileLocation(solution.Projects.Single(), fileLocation);
+
+        var result = await ProtocolConversions.NavigableItemToLocationAsync(item, solution, context: null, CancellationToken.None);
+
+        Assert.Equal(ProtocolConversions.CreateAbsoluteDocumentUri(fileLocation.Path), result.DocumentUri);
+        Assert.Equal(3, result.Range.Start.Line);
+        Assert.Equal(5, result.Range.Start.Character);
+        Assert.Equal(4, result.Range.End.Line);
+        Assert.Equal(7, result.Range.End.Character);
     }
 
     [Theory, CombinatorialData]

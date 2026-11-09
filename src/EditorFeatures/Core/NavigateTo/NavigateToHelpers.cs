@@ -37,6 +37,7 @@ internal static class NavigateToHelpers
 
         var workspace = document.Workspace;
         Contract.ThrowIfNull(workspace, "Workspace is null, which should only happen in OOP where navigation is not possible anyway.");
+        Contract.ThrowIfNull(document.Id, "Navigate To search results must be document-backed.");
         var navigationService = workspace.Services.GetRequiredService<IDocumentNavigationService>();
 
         // Document tabs opened by NavigateTo are carefully created as preview or regular tabs

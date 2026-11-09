@@ -81,7 +81,7 @@ internal sealed partial class RoslynSearchItemsSourceProvider
             async ValueTask<string?> GetFilePathAsync(INavigateToSearchResult result)
             {
                 var document = result.NavigableItem.Document;
-                if (document.Id.IsSourceGenerated)
+                if (document.Id?.IsSourceGenerated == true)
                 {
                     var foundDocument = await document.GetRequiredDocumentAsync(_solution, cancellationToken).ConfigureAwait(false);
                     if (foundDocument is SourceGeneratedDocument sourceGeneratedDocument)

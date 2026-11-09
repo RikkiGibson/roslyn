@@ -8,12 +8,28 @@ using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis.Collections;
 using Microsoft.CodeAnalysis.Shared.Extensions;
+using Microsoft.CodeAnalysis.Text;
 using Roslyn.Utilities;
 
 namespace Microsoft.CodeAnalysis.Navigation;
 
 internal static partial class NavigableItemFactory
 {
+    public static INavigableItem GetItemFromFileLocation(Project project, FileLinePositionSpan fileLocation)
+        => new FileLocationNavigableItem(INavigableItem.NavigableDocument.FromFileLocation(project, fileLocation));
+
+    private sealed class FileLocationNavigableItem(INavigableItem.NavigableDocument document) : INavigableItem
+    {
+        public Glyph Glyph => Glyph.Reference;
+        public ImmutableArray<TaggedText> DisplayTaggedParts => [new(TextTags.Text, document.Name)];
+        public bool DisplayFileLocation => true;
+        public bool IsImplicitlyDeclared => false;
+        public INavigableItem.NavigableDocument Document => document;
+        public TextSpan SourceSpan => default;
+        public bool IsStale => false;
+        public ImmutableArray<INavigableItem> ChildItems => [];
+    }
+
     public static INavigableItem GetItemFromSymbolLocation(
         Solution solution, ISymbol symbol, Location location,
         ImmutableArray<TaggedText>? displayTaggedParts)

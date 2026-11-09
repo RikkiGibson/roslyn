@@ -129,15 +129,14 @@ internal sealed class PeekableItemSource : IPeekableItemSource
             foreach (var item in navigableItems)
             {
                 var document = item.Document;
-                if (await navigationService.CanNavigateToPositionAsync(
-                        workspace, document.Id, item.SourceSpan.Start, cancellationToken).ConfigureAwait(false))
+                if (document.Id is not { } documentId ||
+                    await navigationService.CanNavigateToPositionAsync(
+                        workspace, documentId, item.SourceSpan.Start, cancellationToken).ConfigureAwait(false))
                 {
-                    var text = await document.GetTextAsync(project.Solution, cancellationToken).ConfigureAwait(false);
-                    var linePositionSpan = text.Lines.GetLinePositionSpan(item.SourceSpan);
-                    if (document.FilePath != null)
+                    if (await document.GetFileLocationAsync(project.Solution, item.SourceSpan, cancellationToken).ConfigureAwait(false) is { } fileLocation)
                     {
                         yield return new ExternalFilePeekableItem(
-                            new FileLinePositionSpan(document.FilePath, linePositionSpan),
+                            fileLocation,
                             PredefinedPeekRelationships.Definitions, peekResultFactory);
                     }
                 }

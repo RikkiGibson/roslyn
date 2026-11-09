@@ -151,13 +151,11 @@ internal sealed class DefinitionContextTracker : ITextViewConnectionListener, ID
 
             foreach (var item in navigableItems)
             {
-                if (await navigationService.CanNavigateToSpanAsync(workspace, item.Document.Id, item.SourceSpan, cancellationToken).ConfigureAwait(false))
+                if (item.Document.Id is not { } documentId ||
+                    await navigationService.CanNavigateToSpanAsync(workspace, documentId, item.SourceSpan, cancellationToken).ConfigureAwait(false))
                 {
-                    var text = await item.Document.GetTextAsync(document.Project.Solution, cancellationToken).ConfigureAwait(false);
-                    var linePositionSpan = text.Lines.GetLinePositionSpan(item.SourceSpan);
-
-                    if (item.Document.FilePath != null)
-                        locations.Add(new CodeDefinitionWindowLocation(item.DisplayTaggedParts.JoinText(), item.Document.FilePath, linePositionSpan.Start));
+                    if (await item.Document.GetFileLocationAsync(document.Project.Solution, item.SourceSpan, cancellationToken).ConfigureAwait(false) is { } fileLocation)
+                        locations.Add(new CodeDefinitionWindowLocation(item.DisplayTaggedParts.JoinText(), fileLocation.Path, fileLocation.StartLinePosition));
                 }
             }
         }

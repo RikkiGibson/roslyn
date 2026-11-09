@@ -5,6 +5,7 @@
 using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.FileBasedPrograms;
 using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.CodeAnalysis.FindUsages;
 using Microsoft.CodeAnalysis.GoToDefinition;
@@ -23,6 +24,16 @@ internal abstract class AbstractNavigableItemsService : INavigableItemsService
     public async Task<ImmutableArray<INavigableItem>> GetNavigableItemsAsync(
         Document document, int position, bool forSymbolType, CancellationToken cancellationToken)
     {
+        if (!forSymbolType && document.Project.Solution.Services.GetService<IFileBasedProgramService>() is { } fileBasedProgramService)
+        {
+            var paths = await fileBasedProgramService.GetFileLevelDirectiveTargetPathsAsync(document, position, cancellationToken).ConfigureAwait(false);
+            if (!paths.IsEmpty)
+            {
+                return paths.SelectAsArray(path => NavigableItemFactory.GetItemFromFileLocation(
+                    document.Project, new FileLinePositionSpan(path, default, default)));
+            }
+        }
+
         var symbolService = document.GetRequiredLanguageService<IGoToDefinitionSymbolService>();
 
         // First try with frozen partial semantics.  For the common case where no symbols referenced though skeleton

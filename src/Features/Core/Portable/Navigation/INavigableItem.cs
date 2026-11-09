@@ -4,10 +4,12 @@
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Shared.Extensions;
 using Microsoft.CodeAnalysis.Text;
+using Roslyn.Utilities;
 
 namespace Microsoft.CodeAnalysis.Navigation;
 
@@ -48,7 +50,11 @@ internal interface INavigableItem
 
     ImmutableArray<INavigableItem> ChildItems { get; }
 
-    sealed record NavigableDocument(NavigableProject Project, string Name, string? FilePath, IReadOnlyList<string> Folders, DocumentId Id, SourceGeneratedDocumentIdentity? SourceGeneratedDocumentIdentity, Workspace? Workspace)
+    /// <summary>
+    /// A document-backed target, or a file-only target with a null <see cref="Id"/> and a
+    /// <see cref="FileLocation"/> that can be used without loading document text.
+    /// </summary>
+    sealed record NavigableDocument(NavigableProject Project, string Name, string? FilePath, IReadOnlyList<string> Folders, DocumentId? Id, SourceGeneratedDocumentIdentity? SourceGeneratedDocumentIdentity, Workspace? Workspace, FileLinePositionSpan? FileLocation = null)
     {
         public static NavigableDocument FromDocument(Document document)
             => new(
@@ -60,13 +66,46 @@ internal interface INavigableItem
                 SourceGeneratedDocumentIdentity: (document as SourceGeneratedDocument)?.Identity,
                 document.Project.Solution.TryGetWorkspace());
 
+        public static NavigableDocument FromFileLocation(Project project, FileLinePositionSpan fileLocation)
+        {
+            Contract.ThrowIfFalse(fileLocation.IsValid && PathUtilities.IsAbsolute(fileLocation.Path));
+            return new(
+                NavigableProject.FromProject(project),
+                Path.GetFileName(fileLocation.Path),
+                fileLocation.Path,
+                Folders: [],
+                Id: null,
+                SourceGeneratedDocumentIdentity: null,
+                project.Solution.TryGetWorkspace(),
+                fileLocation);
+        }
+
         /// <summary>
         /// Get the <see cref="CodeAnalysis.Document"/> within <paramref name="solution"/> which is referenced by
         /// this navigable item. The document is required to exist within the solution, e.g. a case where the
         /// navigable item was constructed during a Find Symbols operation on the same solution instance.
+        /// File-only targets must use <see cref="FileLocation"/> instead.
         /// </summary>
         internal ValueTask<Document> GetRequiredDocumentAsync(Solution solution, CancellationToken cancellationToken)
-            => solution.GetRequiredDocumentAsync(Id, includeSourceGenerated: SourceGeneratedDocumentIdentity is not null, cancellationToken);
+        {
+            Contract.ThrowIfNull(Id, "File-only navigation targets do not have a document.");
+            return solution.GetRequiredDocumentAsync(Id, includeSourceGenerated: SourceGeneratedDocumentIdentity is not null, cancellationToken);
+        }
+
+        internal async ValueTask<FileLinePositionSpan?> GetFileLocationAsync(Solution solution, TextSpan sourceSpan, CancellationToken cancellationToken)
+        {
+            if (Id is null)
+            {
+                Contract.ThrowIfNull(FileLocation, "File-only navigation targets must have a file location.");
+                return FileLocation;
+            }
+
+            if (FilePath is null)
+                return null;
+
+            var text = await GetTextAsync(solution, cancellationToken).ConfigureAwait(false);
+            return new FileLinePositionSpan(FilePath, text.Lines.GetLinePositionSpan(sourceSpan));
+        }
 
         /// <summary>
         /// Get the <see cref="SourceText"/> of the <see cref="CodeAnalysis.Document"/> within
@@ -82,7 +121,7 @@ internal interface INavigableItem
 
         internal SourceText? TryGetTextSynchronously(Solution solution, CancellationToken cancellationToken)
         {
-            var document = solution.GetDocument(Id);
+            var document = Id is null ? null : solution.GetDocument(Id);
             return document?.GetTextSynchronously(cancellationToken);
         }
     }

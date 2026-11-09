@@ -19,6 +19,7 @@ using Microsoft.CodeAnalysis.Host;
 using Microsoft.CodeAnalysis.Internal.Log;
 using Microsoft.CodeAnalysis.LanguageServer.Handler;
 using Microsoft.CodeAnalysis.NavigateTo;
+using Microsoft.CodeAnalysis.Navigation;
 using Microsoft.CodeAnalysis.PooledObjects;
 using Microsoft.CodeAnalysis.Shared.Extensions;
 using Microsoft.CodeAnalysis.SpellCheck;
@@ -532,6 +533,24 @@ internal static partial class ProtocolConversions
         }).ToArray();
 
         return documentEdits;
+    }
+
+    public static async Task<LSP.Location?> NavigableItemToLocationAsync(
+        INavigableItem item, Solution solution, RequestContext? context, CancellationToken cancellationToken)
+    {
+        if (item.Document.Id is null)
+        {
+            var fileLocation = await item.Document.GetFileLocationAsync(solution, item.SourceSpan, cancellationToken).ConfigureAwait(false);
+            Contract.ThrowIfNull(fileLocation);
+            return new LSP.Location
+            {
+                DocumentUri = CreateAbsoluteDocumentUri(fileLocation.Value.Path),
+                Range = LinePositionToRange(fileLocation.Value.Span),
+            };
+        }
+
+        var document = await item.Document.GetRequiredDocumentAsync(solution, cancellationToken).ConfigureAwait(false);
+        return await TextSpanToLocationAsync(document, item.SourceSpan, item.IsStale, context, cancellationToken).ConfigureAwait(false);
     }
 
     public static Task<LSP.Location?> TextSpanToLocationAsync(
